@@ -1,7 +1,10 @@
 package com.kalsym.product.service.controller;
 
-import com.kalsym.product.service.model.HttpResponse;
+import com.kalsym.product.service.Main;
+import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.model.Product;
+import com.kalsym.product.service.model.Store;
+import com.kalsym.product.service.model.repository.StoreRepository;
 import com.kalsym.product.service.model.repository.ProductRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,22 +48,58 @@ public class ProductController {
     @Autowired
     ProductRepository productRepository;
 
-    @GetMapping(path = {""}, name = "products-get")
-    @PreAuthorize("hasAnyAuthority('products-get', 'all')")
+    @Autowired
+    StoreRepository storeRepository;
+
+    @GetMapping(path = {""}, name = "product-get", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('product-get', 'all')")
     //@RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json", params = {"storeId", "name", "featured"})
     public ResponseEntity<HttpResponse> getProductsByStoreId(HttpServletRequest request,
             @RequestParam(required = false) String storeId,
             @RequestParam(required = false) String name,
-            @RequestParam(defaultValue = "true") boolean featured) {
+            @RequestParam(required = false, defaultValue = "true") boolean featured,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int pageSize) {
 
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
-        logger.info("products-get, storeId: {}", storeId);
-        response.setSuccessStatus(HttpStatus.OK);
-        response.setData(productRepository.findByStoreId(storeId));
-
-        logger.info("role found", "");
+        Pageable pageable = PageRequest.of(page, pageSize);
+        if (storeId != null && name != null) {
+            logger.info("products-get, storeId: {}, name: {}", storeId, name);
+            response.setSuccessStatus(HttpStatus.OK);
+            response.setData(productRepository.findByStoreIdAndName(storeId, name));
+        } else if (storeId != null && featured) {
+            logger.info("products-get, storeId: {}", storeId);
+            response.setSuccessStatus(HttpStatus.OK);
+            response.setData(productRepository.findByStoreId(storeId));
+        }
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PutMapping(path = {"/{id}"}, name = "product-put-by-store-id", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('product-put-by-store-id', 'all')")
+    public ResponseEntity<HttpResponse> putProductByStoreId(HttpServletRequest request, @PathVariable String storeId, @RequestBody Product bodyProduct) {
+        String logprefix = request.getRequestURI() + " ";
+        String location = Thread.currentThread().getStackTrace()[1].getMethodName();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        logger.info(Main.VERSION, logprefix, "", "");
+        logger.info(Main.VERSION, bodyProduct.toString(), "");
+
+        Optional<Store> storeOpt = storeRepository.findById(storeId);
+
+        if (!storeOpt.isPresent()) {
+            logger.info(Main.VERSION, logprefix, "store not found", "");
+            response.setErrorStatus(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+
+        logger.info(Main.VERSION, logprefix, "store found", "");
+  
+        logger.info(Main.VERSION, logprefix, "product updated for storeId: " + storeId);
+        response.setSuccessStatus(HttpStatus.ACCEPTED);
+        response.setData(productRepository.save(bodyProduct));
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
     }
 
 }

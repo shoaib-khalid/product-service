@@ -13,8 +13,13 @@ import lombok.ToString;
  * @author 7cu
  */
 @Entity
+@Getter
+@Setter
+@ToString
 public class Category {
 
     @Id
-    private Long id;
+    private String id;
+    
+    private String name;
 }

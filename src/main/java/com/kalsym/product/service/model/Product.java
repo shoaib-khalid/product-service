@@ -28,9 +28,9 @@ import org.hibernate.annotations.GenericGenerator;
 public class Product implements Serializable {
 
     @Id
-    //@GeneratedValue(generator = "uuid2")
-    //@GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
-    private Long id;
+    @GeneratedValue(generator = "uuid2")
+    @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
+    private String id;
 
     private String name;
 

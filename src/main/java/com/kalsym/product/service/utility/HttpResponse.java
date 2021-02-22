@@ -1,7 +1,8 @@
-package com.kalsym.product.service.model;
+package com.kalsym.product.service.utility;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.kalsym.product.service.model.DateTimeUtil;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.http.HttpStatus;
