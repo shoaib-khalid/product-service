@@ -1,5 +1,6 @@
-package com.kalsym.product.service.model;
+package com.kalsym.product.service.model.repository;
 
+import com.kalsym.product.service.model.Product;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.CrudRepository;

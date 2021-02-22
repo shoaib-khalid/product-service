@@ -2,7 +2,7 @@ package com.kalsym.product.service.controller;
 
 import com.kalsym.product.service.model.HttpResponse;
 import com.kalsym.product.service.model.Product;
-import com.kalsym.product.service.model.ProductRepository;
+import com.kalsym.product.service.model.repository.ProductRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -18,7 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-//import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -45,14 +45,17 @@ public class ProductController {
     @Autowired
     ProductRepository productRepository;
 
-    //@GetMapping(path = {"/{id}"}, name = "products-get-by-storeId")
-    //@PreAuthorize("hasAnyAuthority('products-get-by-storeId', 'all')")
-    @RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json", params = {"storeId"})
-    public ResponseEntity<HttpResponse> getProductsByStoreId(HttpServletRequest request, @RequestParam("storeId") String storeId) {
+    @GetMapping(path = {""}, name = "products-get")
+    @PreAuthorize("hasAnyAuthority('products-get', 'all')")
+    //@RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json", params = {"storeId", "name", "featured"})
+    public ResponseEntity<HttpResponse> getProductsByStoreId(HttpServletRequest request,
+            @RequestParam(required = false) String storeId,
+            @RequestParam(required = false) String name,
+            @RequestParam(defaultValue = "true") boolean featured) {
 
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
-        logger.info("products-get-by-storeId, storeId: {}", storeId);
+        logger.info("products-get, storeId: {}", storeId);
         response.setSuccessStatus(HttpStatus.OK);
         response.setData(productRepository.findByStoreId(storeId));
 
