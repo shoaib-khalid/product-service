@@ -76,13 +76,15 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @PutMapping(path = {"/{id}"}, name = "product-put-by-store-id", produces = "application/json")
+    @PutMapping(path = {"/{storeId}"}, name = "product-put-by-store-id", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('product-put-by-store-id', 'all')")
     public ResponseEntity<HttpResponse> putProductByStoreId(HttpServletRequest request, @PathVariable String storeId, @RequestBody Product bodyProduct) {
         String logprefix = request.getRequestURI() + " ";
         String location = Thread.currentThread().getStackTrace()[1].getMethodName();
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
+        logger.info("products-put, storeId: {}", storeId);
+        
         logger.info(Main.VERSION, logprefix, "", "");
         logger.info(Main.VERSION, bodyProduct.toString(), "");
 
