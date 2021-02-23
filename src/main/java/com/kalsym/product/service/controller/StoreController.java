@@ -58,7 +58,7 @@ public class StoreController {
         Product productMatch = new Product();
         productMatch.setId(name);
         productMatch.setStoreId(storeId);
-        org.springframework.data.domain.ExampleMatcher matcher = ExampleMatcher
+        ExampleMatcher matcher = ExampleMatcher
                 .matchingAll()
                 .withIgnoreCase()
                 .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
@@ -102,16 +102,31 @@ public class StoreController {
 
         Pageable pageable = PageRequest.of(page, pageSize);
 
-        if (storeId != null && productId != null) {
-            logger.info("products-get, storeId: {}, productId: {}", storeId, productId);
-            response.setSuccessStatus(HttpStatus.OK);
-            response.setData(productRepository.findByStoreId(storeId));
-        } else if (productId != null) {
-            logger.info("products-get, storeId: {}, productId: {}", storeId, productId);
-            response.setSuccessStatus(HttpStatus.OK);
-            response.setData(productRepository.findById(storeId));
-        }
+        logger.info("product-get-by-store, storeId: {}, productId: {}", storeId, productId);
+        Product productMatch = new Product();
+        productMatch.setId(productId);
+        productMatch.setStoreId(storeId);
+        ExampleMatcher matcher = ExampleMatcher
+                .matchingAll()
+                .withIgnoreCase()
+                .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
+        Example<Product> example = Example.of(productMatch, matcher);
+
+        response.setSuccessStatus(HttpStatus.OK);
+        response.setData(productRepository.findAll(example, pageable));
         return ResponseEntity.status(HttpStatus.OK).body(response);
+        
+        
+//        if (storeId != null && productId != null) {
+//            logger.info("products-get, storeId: {}, productId: {}", storeId, productId);
+//            response.setSuccessStatus(HttpStatus.OK);
+//            response.setData(productRepository.findByStoreId(storeId));
+//        } else if (productId != null) {
+//            logger.info("products-get, storeId: {}, productId: {}", storeId, productId);
+//            response.setSuccessStatus(HttpStatus.OK);
+//            response.setData(productRepository.findById(storeId));
+//        }
+//        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PostMapping(path = {""}, name = "store-post")
