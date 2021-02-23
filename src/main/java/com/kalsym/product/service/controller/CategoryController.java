@@ -59,24 +59,24 @@ public class CategoryController {
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
         Pageable pageable = PageRequest.of(page, pageSize);
-        if (storeId != null && userId != null) {
-            logger.info("products-get, storeId: {}, userId: {}", storeId, userId);
-            response.setSuccessStatus(HttpStatus.OK);
-            response.setData(storeRepository.findByStoreIdAndName(storeId, name));
-        }
-        if (storeId == null && name == null) {
-            logger.info("products-get, storeId: {}, name: {}", storeId, name);
-            response.setSuccessStatus(HttpStatus.OK);
-            response.setData(storeRepository.findAll(pageable));
-        } else if (storeId != null && name != null) {
-            logger.info("products-get, storeId: {}, name: {}", storeId, name);
-            response.setSuccessStatus(HttpStatus.OK);
-            response.setData(storeRepository.findByStoreIdAndName(storeId, name));
-        } else if (storeId != null) {
-            logger.info("products-get, storeId: {}", storeId);
-            response.setSuccessStatus(HttpStatus.OK);
-            response.setData(storeRepository.findByStoreId(storeId));
-        }
+//        if (storeId != null && userId != null) {
+//            logger.info("products-get, storeId: {}, userId: {}", storeId, userId);
+//            response.setSuccessStatus(HttpStatus.OK);
+//            response.setData(storeRepository.findByStoreIdAndName(storeId, name));
+//        }
+//        if (storeId == null && name == null) {
+//            logger.info("products-get, storeId: {}, name: {}", storeId, name);
+//            response.setSuccessStatus(HttpStatus.OK);
+//            response.setData(storeRepository.findAll(pageable));
+//        } else if (storeId != null && name != null) {
+//            logger.info("products-get, storeId: {}, name: {}", storeId, name);
+//            response.setSuccessStatus(HttpStatus.OK);
+//            response.setData(storeRepository.findByStoreIdAndName(storeId, name));
+//        } else if (storeId != null) {
+//            logger.info("products-get, storeId: {}", storeId);
+//            response.setSuccessStatus(HttpStatus.OK);
+//            response.setData(storeRepository.findByStoreId(storeId));
+//        }
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
