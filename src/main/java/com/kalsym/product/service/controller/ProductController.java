@@ -54,7 +54,7 @@ public class ProductController {
     @GetMapping(path = {""}, name = "product-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('product-get', 'all')")
     //@RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json", params = {"storeId", "name", "featured"})
-    public ResponseEntity<HttpResponse> getProductsByStoreId(HttpServletRequest request,
+    public ResponseEntity<HttpResponse> getProduct(HttpServletRequest request,
             @RequestParam(required = false) String storeId,
             @RequestParam(required = false) String name,
             @RequestParam(required = false, defaultValue = "true") boolean featured,
@@ -63,9 +63,11 @@ public class ProductController {
 
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
+  
+
         Pageable pageable = PageRequest.of(page, pageSize);
         if (storeId != null && name != null) {
-            logger.info("products-get, storeId: {}, name: {}", storeId, name);
+            logger.info("product-get, storeId: {}, name: {}", storeId, name);
             response.setSuccessStatus(HttpStatus.OK);
             response.setData(productRepository.findByStoreIdAndName(storeId, name));
         } else if (storeId != null && featured) {
@@ -84,7 +86,7 @@ public class ProductController {
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
         logger.info("products-put, storeId: {}", storeId);
-        
+
         logger.info(Main.VERSION, logprefix, "", "");
         logger.info(Main.VERSION, bodyProduct.toString(), "");
 
@@ -97,7 +99,7 @@ public class ProductController {
         }
 
         logger.info(Main.VERSION, logprefix, "store found", "");
-  
+
         logger.info(Main.VERSION, logprefix, "product updated for storeId: " + storeId);
         response.setSuccessStatus(HttpStatus.ACCEPTED);
         response.setData(productRepository.save(bodyProduct));

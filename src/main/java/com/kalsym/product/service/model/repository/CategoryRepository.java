@@ -2,7 +2,6 @@ package com.kalsym.product.service.model.repository;
 
 import com.kalsym.product.service.model.Category;
 import java.util.List;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
