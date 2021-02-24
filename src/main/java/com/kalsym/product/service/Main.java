@@ -6,29 +6,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
+import org.springframework.web.client.RestTemplate;
 
 /**
  *
  * @author 7cu
  */
-@SpringBootApplication(exclude = {SecurityAutoConfiguration.class })
-//@SpringBootApplication()
-public class Main implements CommandLineRunner {
-
-    private static Logger logger = LoggerFactory.getLogger("application");
+@SpringBootApplication()
+public class Main {
 
     public static String VERSION;
-    @Autowired
-    private Environment env;
 
-    public static void main(String... args){
+    public static void main(String... args) {
         SpringApplication.run(Main.class, args);
     }
-    
-    @Override
-    public void run(String... args) throws Exception {
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+
+    @Bean
+    public RestTemplate getRestTemplate() {
+        return new RestTemplate();
     }
+
 }
