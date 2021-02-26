@@ -19,6 +19,10 @@ public class Main {
 
     public static String VERSION;
 
+    static {
+        System.setProperty("spring.jpa.hibernate.naming.physical-strategy", "org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl");
+    }
+
     public static void main(String... args) {
         SpringApplication.run(Main.class, args);
     }

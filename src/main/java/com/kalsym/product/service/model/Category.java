@@ -23,6 +23,8 @@ public class Category {
     @GeneratedValue(generator = "uuid2")
     @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
     private String id;
+    
+    private String storeId;
 
     private String name;
 }

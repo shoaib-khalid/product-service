@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.util.Objects;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -40,5 +41,31 @@ public class Product implements Serializable {
 
     @Column(name = "categoryId")
     private String categoryId;
+
+    public void update(Product product) {
+        if (null != product.getName()) {
+            name = product.getName();
+        }
+
+        if (null != product.getStock()) {
+            stock = product.getStock();
+        }
+
+        if (null != product.getCategoryId()) {
+            categoryId = product.getCategoryId();
+        }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Product other = (Product) obj;
+        return Objects.equals(this.id, other.getId());
+    }
 
 }

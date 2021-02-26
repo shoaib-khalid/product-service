@@ -31,5 +31,5 @@ public class Store implements Serializable {
 
     private String address;
 
-    private String userId;
+    private String clientId;
 }
