@@ -15,7 +15,7 @@ import org.springframework.web.client.RestTemplate;
  * @author 7cu
  */
 @SpringBootApplication()
-public class Main {
+public class ProductServiceApplication {
 
     public static String VERSION;
 
@@ -24,7 +24,7 @@ public class Main {
     }
 
     public static void main(String... args) {
-        SpringApplication.run(Main.class, args);
+        SpringApplication.run(ProductServiceApplication.class, args);
     }
 
     @Bean

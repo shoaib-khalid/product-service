@@ -1,6 +1,6 @@
 package com.kalsym.product.service.controller;
 
-import com.kalsym.product.service.Main;
+import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.model.Product;
 import com.kalsym.product.service.model.Store;
@@ -130,18 +130,18 @@ public class ProductController {
 
         logger.info("products-put, storeId: {}", storeId);
 
-        logger.info(Main.VERSION, logprefix, "", "");
-        logger.info(Main.VERSION, bodyProduct.toString(), "");
+        logger.info(ProductServiceApplication.VERSION, logprefix, "", "");
+        logger.info(ProductServiceApplication.VERSION, bodyProduct.toString(), "");
 
         Optional<Store> storeOpt = storeRepository.findById(storeId);
 
         if (!storeOpt.isPresent()) {
-            logger.info(Main.VERSION, logprefix, "store not found, for id: {}", storeId);
+            logger.info(ProductServiceApplication.VERSION, logprefix, "store not found, for id: {}", storeId);
             response.setErrorStatus(HttpStatus.NOT_FOUND);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
 
-        logger.info(Main.VERSION, logprefix, "store found for id: {}", storeId);
+        logger.info(ProductServiceApplication.VERSION, logprefix, "store found for id: {}", storeId);
 
         //TODO: add product details, options and features as well
         productRepository.save(bodyProduct);
@@ -197,20 +197,20 @@ public class ProductController {
         String location = Thread.currentThread().getStackTrace()[1].getMethodName();
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
-        logger.info(Main.VERSION, "product-delete-by-id, productId: {}", productId);
+        logger.info(ProductServiceApplication.VERSION, "product-delete-by-id, productId: {}", productId);
 
         Optional<Product> optProduct = productRepository.findById(productId);
 
         if (!optProduct.isPresent()) {
-            logger.info(Main.VERSION, logprefix, "product not found", "");
+            logger.info(ProductServiceApplication.VERSION, logprefix, "product not found", "");
             response.setErrorStatus(HttpStatus.NOT_FOUND);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
 
-        logger.info(Main.VERSION, logprefix, "product found", "");
+        logger.info(ProductServiceApplication.VERSION, logprefix, "product found", "");
         productRepository.delete(optProduct.get());
 
-        logger.info(Main.VERSION, logprefix, "product deleted, with id: {}", productId);
+        logger.info(ProductServiceApplication.VERSION, logprefix, "product deleted, with id: {}", productId);
         response.setSuccessStatus(HttpStatus.OK);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -222,24 +222,24 @@ public class ProductController {
         String location = Thread.currentThread().getStackTrace()[1].getMethodName();
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
-        logger.info(Main.VERSION, logprefix, "", "");
-        logger.info(Main.VERSION, logprefix, bodyProduct.toString(), "");
+        logger.info(ProductServiceApplication.VERSION, logprefix, "", "");
+        logger.info(ProductServiceApplication.VERSION, logprefix, bodyProduct.toString(), "");
 
         Optional<Product> optProduct = productRepository.findById(id);
 
         if (!optProduct.isPresent()) {
-            logger.info(Main.VERSION, logprefix, "product not found with productId: {}", id);
+            logger.info(ProductServiceApplication.VERSION, logprefix, "product not found with productId: {}", id);
             response.setErrorStatus(HttpStatus.NOT_FOUND);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
 
-        logger.info(Main.VERSION, logprefix, "product found with productId: {}", id);
+        logger.info(ProductServiceApplication.VERSION, logprefix, "product found with productId: {}", id);
         Product product = optProduct.get();
         List<String> errors = new ArrayList<>();
 
         product.update(bodyProduct);
 
-        logger.info(Main.VERSION, logprefix, "product updated for productId: " + id, "");
+        logger.info(ProductServiceApplication.VERSION, logprefix, "product updated for productId: " + id, "");
         response.setSuccessStatus(HttpStatus.ACCEPTED);
         response.setData(productRepository.save(product));
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);

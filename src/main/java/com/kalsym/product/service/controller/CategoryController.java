@@ -1,6 +1,6 @@
 package com.kalsym.product.service.controller;
 
-import com.kalsym.product.service.Main;
+import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.model.repository.CategoryRepository;
 import com.kalsym.product.service.model.repository.ProductRepository;
 import com.kalsym.product.service.model.repository.StoreRepository;
@@ -131,7 +131,7 @@ public class CategoryController {
 
         categoryRepository.save(bodyCategory);
 
-        logger.info(Main.VERSION, "category created with id: {}", bodyCategory.getId());
+        logger.info(ProductServiceApplication.VERSION, "category created with id: {}", bodyCategory.getId());
         response.setSuccessStatus(HttpStatus.CREATED);
         response.setData(categoryRepository.save(bodyCategory));
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -144,20 +144,20 @@ public class CategoryController {
         String location = Thread.currentThread().getStackTrace()[1].getMethodName();
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
-        logger.info(Main.VERSION, "category-delete-by-id, categoryId: {}", categoryId);
+        logger.info(ProductServiceApplication.VERSION, "category-delete-by-id, categoryId: {}", categoryId);
 
         Optional<Category> optCategory = categoryRepository.findById(categoryId);
 
         if (!optCategory.isPresent()) {
-            logger.info(Main.VERSION, logprefix, "category not found", "");
+            logger.info(ProductServiceApplication.VERSION, logprefix, "category not found", "");
             response.setErrorStatus(HttpStatus.NOT_FOUND);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
 
-        logger.info(Main.VERSION, logprefix, "category found", "");
+        logger.info(ProductServiceApplication.VERSION, logprefix, "category found", "");
         categoryRepository.delete(optCategory.get());
 
-        logger.info(Main.VERSION, logprefix, "category deleted, with id: {}", categoryId);
+        logger.info(ProductServiceApplication.VERSION, logprefix, "category deleted, with id: {}", categoryId);
         response.setSuccessStatus(HttpStatus.OK);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }

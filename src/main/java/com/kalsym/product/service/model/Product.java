@@ -41,6 +41,9 @@ public class Product implements Serializable {
 
     @Column(name = "categoryId")
     private String categoryId;
+    
+    
+    private String status;
 
     public void update(Product product) {
         if (null != product.getName()) {

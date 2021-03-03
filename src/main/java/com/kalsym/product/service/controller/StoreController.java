@@ -1,6 +1,6 @@
 package com.kalsym.product.service.controller;
 
-import com.kalsym.product.service.Main;
+import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.model.Product;
 import com.kalsym.product.service.model.repository.ProductRepository;
 import com.kalsym.product.service.model.repository.StoreRepository;
@@ -108,12 +108,12 @@ public class StoreController {
         String location = Thread.currentThread().getStackTrace()[1].getMethodName();
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
-        logger.info(Main.VERSION, logprefix, "", "");
-        logger.info(Main.VERSION, logprefix, bodyStore.toString(), "");
+        logger.info(ProductServiceApplication.VERSION, logprefix, "", "");
+        logger.info(ProductServiceApplication.VERSION, logprefix, bodyStore.toString(), "");
 
         response.setSuccessStatus(HttpStatus.CREATED);
         Store savedStore = storeRepository.save(bodyStore);
-        logger.info(Main.VERSION, logprefix, "store created with id: " + savedStore.getId());
+        logger.info(ProductServiceApplication.VERSION, logprefix, "store created with id: " + savedStore.getId());
         response.setData(savedStore);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
