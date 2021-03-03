@@ -3,9 +3,19 @@ package com.kalsym.product.service.controller;
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.model.Product;
+import com.kalsym.product.service.model.ProductReview;
+import com.kalsym.product.service.model.ProductInventory;
+import com.kalsym.product.service.model.ProductInventoryItem;
+import com.kalsym.product.service.model.ProductVariant;
+import com.kalsym.product.service.model.ProductVariantAvailable;
 import com.kalsym.product.service.model.Store;
+import com.kalsym.product.service.model.repository.ProductInventoryRepository;
+import com.kalsym.product.service.model.repository.ProductInventoryItemRepository;
 import com.kalsym.product.service.model.repository.StoreRepository;
 import com.kalsym.product.service.model.repository.ProductRepository;
+import com.kalsym.product.service.model.repository.ProductVariantRepository;
+import com.kalsym.product.service.model.repository.ProductVariantAvailableRepository;
+import com.kalsym.product.service.model.repository.ProductReviewRepository;
 import com.kalsym.product.service.utility.DateTimeUtil;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +58,21 @@ public class ProductController {
 
     @Autowired
     ProductRepository productRepository;
+
+    @Autowired
+    ProductInventoryRepository productInventoryRepository;
+    
+    @Autowired
+    ProductInventoryItemRepository productInventoryItemRepository;
+
+    @Autowired
+    ProductVariantRepository productVariantRepository;
+    
+    @Autowired
+    ProductVariantAvailableRepository productVariantAvailableRepository;
+    
+    @Autowired
+    ProductReviewRepository productReviewRepository;
 
     @Autowired
     StoreRepository storeRepository;
@@ -120,7 +145,6 @@ public class ProductController {
 //        response.setData(productRepository.findAll(example, pageable));
 //        return ResponseEntity.status(HttpStatus.OK).body(response);
 //    }
-
     @PutMapping(path = {"/{storeId}"}, name = "product-put-by-store-id", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('product-put-by-store-id', 'all')")
     public ResponseEntity<HttpResponse> putProductByStoreId(HttpServletRequest request, @PathVariable String storeId, @RequestBody Product bodyProduct) {
@@ -244,5 +268,96 @@ public class ProductController {
         response.setData(productRepository.save(product));
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
     }
+
+    @PostMapping(path = {"/{productId}/inventory"}, name = "product-inventory-post-by-product")
+    @PreAuthorize("hasAnyAuthority('product-inventory-post-by-product', 'all')")
+    public ResponseEntity<HttpResponse> postProductInventoryByProduct(HttpServletRequest request, @PathVariable String productId,
+            @Valid @RequestBody ProductInventory bodyProductInventory) throws Exception {
+        String logprefix = request.getRequestURI() + " ";
+        String location = Thread.currentThread().getStackTrace()[1].getMethodName();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        logger.info(ProductServiceApplication.VERSION, logprefix, "", "");
+        logger.info(ProductServiceApplication.VERSION, logprefix, bodyProductInventory.toString(), "");
+
+        response.setSuccessStatus(HttpStatus.CREATED);
+        ProductInventory savedProduct = productInventoryRepository.save(bodyProductInventory);
+        logger.info(ProductServiceApplication.VERSION, logprefix, "Product Inventory added to product with productId: {}" + productId);
+        response.setData(savedProduct);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping(path = {"/{productId}/variant"}, name = "product-variant-post-by-product")
+    @PreAuthorize("hasAnyAuthority('product-variant-post-by-product', 'all')")
+    public ResponseEntity<HttpResponse> postProductVariantByProduct(HttpServletRequest request, @PathVariable String productId,
+            @Valid @RequestBody ProductVariant bodyProductVariant) throws Exception {
+        String logprefix = request.getRequestURI() + " ";
+        String location = Thread.currentThread().getStackTrace()[1].getMethodName();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        logger.info(ProductServiceApplication.VERSION, logprefix, "", "");
+        logger.info(ProductServiceApplication.VERSION, logprefix, bodyProductVariant.toString(), "");
+
+        response.setSuccessStatus(HttpStatus.CREATED);
+        ProductVariant savedProduct = productVariantRepository.save(bodyProductVariant);
+        logger.info(ProductServiceApplication.VERSION, logprefix, "Product Variant added to product with productId: {}" + productId);
+        response.setData(savedProduct);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping(path = {"/{productId}/review"}, name = "product-review-post-by-product")
+    @PreAuthorize("hasAnyAuthority('product-review-post-by-product', 'all')")
+    public ResponseEntity<HttpResponse> postProductReviewByProduct(HttpServletRequest request, @PathVariable String productId,
+            @Valid @RequestBody ProductReview bodyProductReview) throws Exception {
+        String logprefix = request.getRequestURI() + " ";
+        String location = Thread.currentThread().getStackTrace()[1].getMethodName();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        logger.info(ProductServiceApplication.VERSION, logprefix, "", "");
+        logger.info(ProductServiceApplication.VERSION, logprefix, bodyProductReview.toString(), "");
+
+        response.setSuccessStatus(HttpStatus.CREATED);
+        ProductReview savedProduct = productReviewRepository.save(bodyProductReview);
+        logger.info(ProductServiceApplication.VERSION, logprefix, "Product Variant added to product with productId: {}" + productId);
+        response.setData(savedProduct);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+    
+    @PostMapping(path = {"/{productId}/variant-available"}, name = "product-variant-available-post")
+    @PreAuthorize("hasAnyAuthority('product-variant-available-post', 'all')")
+    public ResponseEntity<HttpResponse> postProductVariantAvailable(HttpServletRequest request, @PathVariable String productId,
+            @Valid @RequestBody ProductVariantAvailable bodyProductVariantAvailable) throws Exception {
+        String logprefix = request.getRequestURI() + " ";
+        String location = Thread.currentThread().getStackTrace()[1].getMethodName();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        logger.info(ProductServiceApplication.VERSION, logprefix, "", "");
+        logger.info(ProductServiceApplication.VERSION, logprefix, bodyProductVariantAvailable.toString(), "");
+
+        response.setSuccessStatus(HttpStatus.CREATED);
+        ProductVariantAvailable savedProduct = productVariantAvailableRepository.save(bodyProductVariantAvailable);
+        logger.info(ProductServiceApplication.VERSION, logprefix, "Product Variant added to product with productId: {}" + productId);
+        response.setData(savedProduct);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+    
+    @PostMapping(path = {"/{productId}/inventory-item"}, name = "product-inventory-item-post")
+    @PreAuthorize("hasAnyAuthority('product-inventory-item-post', 'all')")
+    public ResponseEntity<HttpResponse> postProductInventoryItem(HttpServletRequest request, @PathVariable String productId,
+            @Valid @RequestBody ProductInventoryItem bodyProductInventoryItem) throws Exception {
+        String logprefix = request.getRequestURI() + " ";
+        String location = Thread.currentThread().getStackTrace()[1].getMethodName();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        logger.info(ProductServiceApplication.VERSION, logprefix, "", "");
+        logger.info(ProductServiceApplication.VERSION, logprefix, bodyProductInventoryItem.toString(), "");
+
+        response.setSuccessStatus(HttpStatus.CREATED);
+        ProductInventoryItem savedProduct = productInventoryItemRepository.save(bodyProductInventoryItem);
+        logger.info(ProductServiceApplication.VERSION, logprefix, "Product Inventory Item added to product with productId: {}" + productId);
+        response.setData(savedProduct);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+    
 
 }

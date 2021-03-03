@@ -117,4 +117,22 @@ public class StoreController {
         response.setData(savedStore);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @PostMapping(path = {"/{storeId}/product"}, name = "product-post-by-store")
+    @PreAuthorize("hasAnyAuthority('product-post-by-store', 'all')")
+    public ResponseEntity<HttpResponse> postProductByStore(HttpServletRequest request, @PathVariable String storeId, @Valid @RequestBody Product bodyProduct) throws Exception {
+        String logprefix = request.getRequestURI() + " ";
+        String location = Thread.currentThread().getStackTrace()[1].getMethodName();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        logger.info(ProductServiceApplication.VERSION, logprefix, "", "");
+        logger.info(ProductServiceApplication.VERSION, logprefix, bodyProduct.toString(), "");
+
+        response.setSuccessStatus(HttpStatus.CREATED);
+        Product savedProduct = productRepository.save(bodyProduct);
+        logger.info(ProductServiceApplication.VERSION, logprefix, "product added to store with storeId: {}, productId: {}" + storeId, savedProduct.getId());
+        response.setData(savedProduct);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
 }
