@@ -1,5 +1,6 @@
 package com.kalsym.product.service.model;
 
+import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -17,7 +18,7 @@ import org.hibernate.annotations.GenericGenerator;
 @Getter
 @Setter
 @ToString
-public class Category {
+public class Category implements Serializable {
 
     @Id
     @GeneratedValue(generator = "uuid2")

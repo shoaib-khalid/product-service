@@ -9,6 +9,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.io.Serializable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import org.hibernate.annotations.GenericGenerator;
@@ -26,7 +27,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @Table(name = "product_variant")
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ProductVariant {
+public class ProductVariant implements Serializable {
 
     @Id
     private String id;

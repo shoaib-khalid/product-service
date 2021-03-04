@@ -2,6 +2,7 @@ package com.kalsym.product.service.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
@@ -26,7 +27,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @Table(name = "product_inventory")
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ProductInventory {
+public class ProductInventory implements Serializable {
 
     @Id
     private String itemCode;

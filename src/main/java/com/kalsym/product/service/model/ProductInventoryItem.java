@@ -2,9 +2,12 @@ package com.kalsym.product.service.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.io.Serializable;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.IdClass;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -26,18 +29,27 @@ import org.hibernate.annotations.OnDeleteAction;
 @Table(name = "product_inventory_item")
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ProductInventoryItem {
+//Using IdClass annotation to resolve the composite PK problem in hibernate
+//@IdClass(ProductInventoryItemId.class)
+public class ProductInventoryItem implements Serializable {
 
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "itemCode", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonIgnore
-    private ProductInventory productInventory;
+//    @OneToOne(fetch = FetchType.LAZY, optional = false)
+//    @JoinColumn(name = "itemCode", nullable = false)
+//    @OnDelete(action = OnDeleteAction.CASCADE)
+//    @JsonIgnore
+//    private ProductInventory productInventory;
     
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "variantAvailableId", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonIgnore
-    private ProductVariantAvailable productVariantAvailable;
+     @EmbeddedId
+    private EProductInventoryItemId productInventoryItemId;
     
+    //private String itemCode;
+
+//    @OneToOne(fetch = FetchType.LAZY, optional = false)
+//    @JoinColumn(name = "variantAvailableId", nullable = false)
+//    @OnDelete(action = OnDeleteAction.CASCADE)
+//    @JsonIgnore
+//    private ProductVariantAvailable productVariantAvailable;
+    
+    //private String variantAvailableId;
+
 }

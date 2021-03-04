@@ -1,6 +1,7 @@
 package com.kalsym.product.service.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -20,7 +21,7 @@ import lombok.ToString;
 @Table(name = "product_option")
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ProductOption {
+public class ProductOption implements Serializable {
 
     @Id
     private String id;

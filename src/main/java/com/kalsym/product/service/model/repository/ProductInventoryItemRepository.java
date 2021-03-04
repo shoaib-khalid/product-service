@@ -14,5 +14,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ProductInventoryItemRepository extends PagingAndSortingRepository<ProductInventoryItem, String>, JpaRepository<ProductInventoryItem, String> {
 
-    List<ProductInventoryItem> findByItemCode(@Param("itemCode") String itemCode);
+    //List<ProductInventoryItem> findByItemCode(@Param("itemCode") String itemCode);
 }

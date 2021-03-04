@@ -1,5 +1,6 @@
 package com.kalsym.product.service.model;
 
+import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -18,7 +19,7 @@ import lombok.ToString;
 @Entity
 @Table(name = "product_feature")
 @NoArgsConstructor
-public class ProductFeature {
+public class ProductFeature implements Serializable {
 
     @Id
     private String id;

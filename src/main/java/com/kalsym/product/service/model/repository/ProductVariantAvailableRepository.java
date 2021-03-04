@@ -14,5 +14,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ProductVariantAvailableRepository extends PagingAndSortingRepository<ProductVariantAvailable, String>, JpaRepository<ProductVariantAvailable, String> {
 
-    List<ProductVariantAvailable> findByVariantId(@Param("variantId") String variantId);
+    //List<ProductVariantAvailable> findByVariantId(@Param("variantId") String variantId);
 }

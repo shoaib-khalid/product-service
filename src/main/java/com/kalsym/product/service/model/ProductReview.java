@@ -1,18 +1,14 @@
 package com.kalsym.product.service.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.io.Serializable;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.IdClass;
 import javax.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 /**
  *
@@ -24,14 +20,21 @@ import org.hibernate.annotations.OnDeleteAction;
 @Entity
 @Table(name = "product_review")
 @NoArgsConstructor
-public class ProductReview {
+//Using IdClass annotation to resolve the composite PK problem in hibernate
+@IdClass(ProductReviewId.class)
+public class ProductReview implements Serializable {
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "productId", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonIgnore
-    private Product product;
+//    @Id
+//    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+//    @JoinColumn(name = "productId", nullable = false)
+//    @OnDelete(action = OnDeleteAction.CASCADE)
+//    @JsonIgnore
+//    private Product product;
+    
+    @Id 
+    private String productId;
 
+    @Id
     private String customerId;
 
     private int rating;
