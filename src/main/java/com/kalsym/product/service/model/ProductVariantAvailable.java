@@ -6,6 +6,7 @@ import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.IdClass;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -27,19 +28,20 @@ import org.hibernate.annotations.OnDeleteAction;
 @Table(name = "product_variant_available")
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@IdClass(ProductVariantAvailableId.class)
 public class ProductVariantAvailable implements Serializable {
 
     @Id
     private String id;
 
     @Id
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "variantId", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonIgnore
-    private ProductVariant productVariant;
+//    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+//    @JoinColumn(name = "variantId", nullable = false)
+//    @OnDelete(action = OnDeleteAction.CASCADE)
+//    @JsonIgnore
+//    private ProductVariant productVariant;
 
-    //private String variantId;
+    private String variantId;
     
     @Id
     private String variantValue;

@@ -30,7 +30,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 //Using IdClass annotation to resolve the composite PK problem in hibernate
-//@IdClass(ProductInventoryItemId.class)
+@IdClass(ProductInventoryItemId.class)
 public class ProductInventoryItem implements Serializable {
 
 //    @OneToOne(fetch = FetchType.LAZY, optional = false)
@@ -39,17 +39,17 @@ public class ProductInventoryItem implements Serializable {
 //    @JsonIgnore
 //    private ProductInventory productInventory;
     
-     @EmbeddedId
-    private EProductInventoryItemId productInventoryItemId;
-    
-    //private String itemCode;
+//     @EmbeddedId
+//    private EProductInventoryItemId productInventoryItemId;
+    @Id
+    private String itemCode;
 
 //    @OneToOne(fetch = FetchType.LAZY, optional = false)
 //    @JoinColumn(name = "variantAvailableId", nullable = false)
 //    @OnDelete(action = OnDeleteAction.CASCADE)
 //    @JsonIgnore
 //    private ProductVariantAvailable productVariantAvailable;
-    
-    //private String variantAvailableId;
+    @Id
+    private String variantAvailableId;
 
 }
