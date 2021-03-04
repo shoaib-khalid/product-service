@@ -2,6 +2,7 @@ package com.kalsym.product.service.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.io.Serializable;
+import java.util.HashSet;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -9,6 +10,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.util.Objects;
+import java.util.Set;
+import javax.persistence.CascadeType;
+import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -41,9 +46,23 @@ public class Product implements Serializable {
 
     @Column(name = "categoryId")
     private String categoryId;
-    
-    
+
     private String status;
+
+    @OneToMany(cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY,
+            mappedBy = "product")
+    private Set<ProductVariant> productVariants = new HashSet<>();
+
+    @OneToMany(cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY,
+            mappedBy = "product")
+    private Set<ProductInventory> productInventories = new HashSet<>();
+    
+    @OneToMany(cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY,
+            mappedBy = "product")
+    private Set<ProductReview> productReviews = new HashSet<>();
 
     public void update(Product product) {
         if (null != product.getName()) {

@@ -22,9 +22,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.kalsym.product.service.model.Store;
+import java.util.Optional;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -72,7 +74,7 @@ public class StoreController {
      * @param page
      * @param pageSize
      * @return
-     * @deprecated use ProductController.getProduct instead
+     * @deprecated use ProductController.getProduct instead (GET: product?storeId=xyz)
      */
     @GetMapping(path = {"/{storeId}/product"}, name = "product-get-by-store", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('product-get-by-store','all')")
@@ -133,6 +135,35 @@ public class StoreController {
         logger.info(ProductServiceApplication.VERSION, logprefix, "product added to store with storeId: {}, productId: {}" + storeId, savedProduct.getId());
         response.setData(savedProduct);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+    
+    @PutMapping(path = {"/{storeId}"}, name = "product-put-by-store-id", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('product-put-by-store-id', 'all')")
+    public ResponseEntity<HttpResponse> putProductByStoreId(HttpServletRequest request, @PathVariable String storeId, @RequestBody Product bodyProduct) {
+        String logprefix = request.getRequestURI() + " ";
+        String location = Thread.currentThread().getStackTrace()[1].getMethodName();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        logger.info("products-put, storeId: {}", storeId);
+
+        logger.info(ProductServiceApplication.VERSION, logprefix, "", "");
+        logger.info(ProductServiceApplication.VERSION, bodyProduct.toString(), "");
+
+        Optional<Store> storeOpt = storeRepository.findById(storeId);
+
+        if (!storeOpt.isPresent()) {
+            logger.info(ProductServiceApplication.VERSION, logprefix, "store not found, for id: {}", storeId);
+            response.setErrorStatus(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+
+        logger.info(ProductServiceApplication.VERSION, logprefix, "store found for id: {}", storeId);
+
+        //TODO: add product details, options and features as well
+        productRepository.save(bodyProduct);
+        response.setSuccessStatus(HttpStatus.ACCEPTED);
+        response.setData(productRepository.save(bodyProduct));
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
     }
 
 }

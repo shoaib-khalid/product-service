@@ -16,11 +16,9 @@ import com.kalsym.product.service.model.repository.ProductRepository;
 import com.kalsym.product.service.model.repository.ProductVariantRepository;
 import com.kalsym.product.service.model.repository.ProductVariantAvailableRepository;
 import com.kalsym.product.service.model.repository.ProductReviewRepository;
-import com.kalsym.product.service.utility.DateTimeUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import org.slf4j.Logger;
@@ -33,16 +31,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -61,25 +56,37 @@ public class ProductController {
 
     @Autowired
     ProductInventoryRepository productInventoryRepository;
-    
+
     @Autowired
     ProductInventoryItemRepository productInventoryItemRepository;
 
     @Autowired
     ProductVariantRepository productVariantRepository;
-    
+
     @Autowired
     ProductVariantAvailableRepository productVariantAvailableRepository;
-    
+
     @Autowired
     ProductReviewRepository productReviewRepository;
 
     @Autowired
     StoreRepository storeRepository;
 
+    /**
+     * Get product by store or category or productId
+     *
+     * @param request
+     * @param productId
+     * @param storeId
+     * @param categoryId
+     * @param name
+     * @param featured
+     * @param page
+     * @param pageSize
+     * @return
+     */
     @GetMapping(path = {"", "/{productId}"}, name = "product-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('product-get', 'all')")
-    //@RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json", params = {"storeId", "name", "featured"})
     public ResponseEntity<HttpResponse> getProduct(HttpServletRequest request,
             @PathVariable(required = false) String productId,
             @RequestParam(required = false) String storeId,
@@ -114,64 +121,6 @@ public class ProductController {
         response.setSuccessStatus(HttpStatus.OK);
         response.setData(productRepository.findAll(example, pageable));
         return ResponseEntity.status(HttpStatus.OK).body(response);
-    }
-
-//    @GetMapping(path = {"/{productId}"}, name = "product-get", produces = "application/json", params = {"storeId", "categoryId", "featured"})
-//    @PreAuthorize("hasAnyAuthority('product-get', 'all')")
-//    //@RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json", params = {"storeId", "name", "featured"})
-//    public ResponseEntity<HttpResponse> getProductById(HttpServletRequest request,
-//            @RequestParam(required = false) String storeId,
-//            @RequestParam(required = false) String categoryId,
-//            @RequestParam(required = false) String name,
-//            @RequestParam(required = false, defaultValue = "true") boolean featured,
-//            @RequestParam(defaultValue = "0") int page,
-//            @RequestParam(defaultValue = "20") int pageSize) {
-//
-//        logger.info("product-get, storeId: {}", storeId);
-//        HttpResponse response = new HttpResponse(request.getRequestURI());
-//
-//        Product productMatch = new Product();
-//
-//        Pageable pageable = PageRequest.of(page, pageSize);
-//        productMatch.setStoreId(storeId);
-//        productMatch.setName(name);
-//        ExampleMatcher matcher = ExampleMatcher
-//                .matchingAll()
-//                .withIgnoreCase()
-//                .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
-//        Example<Product> example = Example.of(productMatch, matcher);
-//
-//        response.setSuccessStatus(HttpStatus.OK);
-//        response.setData(productRepository.findAll(example, pageable));
-//        return ResponseEntity.status(HttpStatus.OK).body(response);
-//    }
-    @PutMapping(path = {"/{storeId}"}, name = "product-put-by-store-id", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('product-put-by-store-id', 'all')")
-    public ResponseEntity<HttpResponse> putProductByStoreId(HttpServletRequest request, @PathVariable String storeId, @RequestBody Product bodyProduct) {
-        String logprefix = request.getRequestURI() + " ";
-        String location = Thread.currentThread().getStackTrace()[1].getMethodName();
-        HttpResponse response = new HttpResponse(request.getRequestURI());
-
-        logger.info("products-put, storeId: {}", storeId);
-
-        logger.info(ProductServiceApplication.VERSION, logprefix, "", "");
-        logger.info(ProductServiceApplication.VERSION, bodyProduct.toString(), "");
-
-        Optional<Store> storeOpt = storeRepository.findById(storeId);
-
-        if (!storeOpt.isPresent()) {
-            logger.info(ProductServiceApplication.VERSION, logprefix, "store not found, for id: {}", storeId);
-            response.setErrorStatus(HttpStatus.NOT_FOUND);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-        }
-
-        logger.info(ProductServiceApplication.VERSION, logprefix, "store found for id: {}", storeId);
-
-        //TODO: add product details, options and features as well
-        productRepository.save(bodyProduct);
-        response.setSuccessStatus(HttpStatus.ACCEPTED);
-        response.setData(productRepository.save(bodyProduct));
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
     }
 
     /**
@@ -239,6 +188,14 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    /**
+     *
+     * @param request
+     * @param id
+     * @param bodyProduct
+     * @return
+     * @deprecated use StoreController.postProductByStore instead
+     */
     @PutMapping(path = {"/{id}"}, name = "product-put-by-id")
     @PreAuthorize("hasAnyAuthority('product-put-by-id', 'all')")
     public ResponseEntity<HttpResponse> putProductById(HttpServletRequest request, @PathVariable String id, @RequestBody Product bodyProduct) {
@@ -269,6 +226,26 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
     }
 
+    @GetMapping(path = {"/{productId}/inventory"}, name = "product-inventory-get-by-product", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('product-inventory-get-by-product', 'all')")
+    //@RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json", params = {"storeId", "name", "featured"})
+    public ResponseEntity<HttpResponse> getProductInventoryByProduct(HttpServletRequest request,
+            @PathVariable(required = false) String productId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int pageSize) {
+
+        logger.info("product-inventory-get-by-product, productId: {}", productId);
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Pageable pageable = PageRequest.of(page, pageSize);
+
+        Object matchedProductInventory = productInventoryRepository.findByProductId(productId, pageable);
+        response.setSuccessStatus(HttpStatus.OK);
+        response.setData(matchedProductInventory);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+
+    }
+
     @PostMapping(path = {"/{productId}/inventory"}, name = "product-inventory-post-by-product")
     @PreAuthorize("hasAnyAuthority('product-inventory-post-by-product', 'all')")
     public ResponseEntity<HttpResponse> postProductInventoryByProduct(HttpServletRequest request, @PathVariable String productId,
@@ -285,6 +262,34 @@ public class ProductController {
         logger.info(ProductServiceApplication.VERSION, logprefix, "Product Inventory added to product with productId: {}" + productId);
         response.setData(savedProduct);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    public ResponseEntity<HttpResponse> deleteProductInventoryByProduct() {
+        return null;
+    }
+
+    public ResponseEntity<HttpResponse> putProductInventoryByProduct() {
+        return null;
+    }
+
+    @GetMapping(path = {"/{productId}/variant"}, name = "product-variant-get-by-product", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('product-variant-get-by-product', 'all')")
+    //@RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json", params = {"storeId", "name", "featured"})
+    public ResponseEntity<HttpResponse> getProductVariantByProduct(HttpServletRequest request,
+            @PathVariable(required = false) String productId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int pageSize) {
+
+        logger.info("product-variant-get-by-product, productId: {}", productId);
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Pageable pageable = PageRequest.of(page, pageSize);
+
+        Object matchedProductVariant = productVariantRepository.findByProductId(productId, pageable);
+        response.setSuccessStatus(HttpStatus.OK);
+        response.setData(matchedProductVariant);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+
     }
 
     @PostMapping(path = {"/{productId}/variant"}, name = "product-variant-post-by-product")
@@ -305,6 +310,33 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    public ResponseEntity<HttpResponse> deleteProductVariantByProduct() {
+        return null;
+    }
+
+    public ResponseEntity<HttpResponse> putProductVariantByProduct() {
+        return null;
+    }
+
+    @GetMapping(path = {"/{productId}/review"}, name = "product-review-get-by-product", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('product-review-get-by-product', 'all')")
+    //@RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json", params = {"storeId", "name", "featured"})
+    public ResponseEntity<HttpResponse> getProductReviewByProduct(HttpServletRequest request,
+            @PathVariable(required = false) String productId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int pageSize) {
+
+        logger.info("product-review-get-by-product, productId: {}", productId);
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Pageable pageable = PageRequest.of(page, pageSize);
+
+        Object matchedProductVariant = productReviewRepository.findByProductId(productId, pageable);
+        response.setSuccessStatus(HttpStatus.OK);
+        response.setData(matchedProductVariant);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
     @PostMapping(path = {"/{productId}/review"}, name = "product-review-post-by-product")
     @PreAuthorize("hasAnyAuthority('product-review-post-by-product', 'all')")
     public ResponseEntity<HttpResponse> postProductReviewByProduct(HttpServletRequest request, @PathVariable String productId,
@@ -323,6 +355,15 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
     
+    
+    public ResponseEntity<HttpResponse> deleteProductReviewByProduct() {
+        return null;
+    }
+
+    public ResponseEntity<HttpResponse> putProductReviewByProduct() {
+        return null;
+    }
+
     @PostMapping(path = {"/{productId}/variant-available"}, name = "product-variant-available-post")
     @PreAuthorize("hasAnyAuthority('product-variant-available-post', 'all')")
     public ResponseEntity<HttpResponse> postProductVariantAvailable(HttpServletRequest request, @PathVariable String productId,
@@ -340,7 +381,7 @@ public class ProductController {
         response.setData(savedProduct);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-    
+
     @PostMapping(path = {"/{productId}/inventory-item"}, name = "product-inventory-item-post")
     @PreAuthorize("hasAnyAuthority('product-inventory-item-post', 'all')")
     public ResponseEntity<HttpResponse> postProductInventoryItem(HttpServletRequest request, @PathVariable String productId,
@@ -358,6 +399,5 @@ public class ProductController {
         response.setData(savedProduct);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-    
 
 }
