@@ -74,7 +74,8 @@ public class StoreController {
      * @param page
      * @param pageSize
      * @return
-     * @deprecated use ProductController.getProduct instead (GET: product?storeId=xyz)
+     * @deprecated use ProductController.getProduct instead (GET:
+     * product?storeId=xyz)
      */
     @GetMapping(path = {"/{storeId}/product"}, name = "product-get-by-store", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('product-get-by-store','all')")
@@ -114,7 +115,14 @@ public class StoreController {
         logger.info(ProductServiceApplication.VERSION, logprefix, bodyStore.toString(), "");
 
         response.setSuccessStatus(HttpStatus.CREATED);
-        Store savedStore = storeRepository.save(bodyStore);
+        Store savedStore = null;
+        try {
+            savedStore = storeRepository.save(bodyStore);
+        } catch (Exception exp) {
+            logger.error("Error in creating sotre", exp);
+            response.setMessage(exp.getMessage());
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(response);
+        }
         logger.info(ProductServiceApplication.VERSION, logprefix, "store created with id: " + savedStore.getId());
         response.setData(savedStore);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -136,7 +144,7 @@ public class StoreController {
         response.setData(savedProduct);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-    
+
     @PutMapping(path = {"/{storeId}"}, name = "product-put-by-store-id", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('product-put-by-store-id', 'all')")
     public ResponseEntity<HttpResponse> putProductByStoreId(HttpServletRequest request, @PathVariable String storeId, @RequestBody Product bodyProduct) {

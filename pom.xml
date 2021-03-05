@@ -140,7 +140,7 @@
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>libs/</classpathPrefix>
                             <mainClass>
-                                com.kalsym.product.service.Main
+                                com.kalsym.product.service.ProductServiceApplication
                             </mainClass>
                         </manifest>
                     </archive>
