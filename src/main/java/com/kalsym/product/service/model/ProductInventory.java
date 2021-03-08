@@ -37,7 +37,7 @@ public class ProductInventory implements Serializable {
 
     private String SKU;
 
-    private String name;
+    //private String name;
 
     private int quantity;
 
