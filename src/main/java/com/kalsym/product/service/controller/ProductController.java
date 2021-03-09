@@ -4,11 +4,13 @@ import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.model.Product;
 import com.kalsym.product.service.model.ProductReview;
+import com.kalsym.product.service.model.ProductAsset;
 import com.kalsym.product.service.model.ProductInventory;
 import com.kalsym.product.service.model.ProductInventoryItem;
 import com.kalsym.product.service.model.ProductVariant;
 import com.kalsym.product.service.model.ProductVariantAvailable;
 import com.kalsym.product.service.model.Store;
+import com.kalsym.product.service.model.repository.ProductAssetRepository;
 import com.kalsym.product.service.model.repository.ProductInventoryRepository;
 import com.kalsym.product.service.model.repository.ProductInventoryItemRepository;
 import com.kalsym.product.service.model.repository.StoreRepository;
@@ -68,6 +70,9 @@ public class ProductController {
 
     @Autowired
     ProductReviewRepository productReviewRepository;
+
+    @Autowired
+    ProductAssetRepository productAssetRepository;
 
     @Autowired
     StoreRepository storeRepository;
@@ -399,4 +404,105 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    /**
+     * Get product assets by productId and/or itemCode
+     *
+     * @param itemCode
+     * @param productId
+     * @param page
+     * @param pageSize
+     * @return
+     */
+    @GetMapping(path = {"/{productId}/assets"}, name = "products-assets-get", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('products-assets-get', 'all')")
+    public ResponseEntity<HttpResponse> getProductAssets(HttpServletRequest request,
+            @PathVariable(required = true) String productId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int pageSize) {
+
+        logger.info("products-assets-get, productId: {} ", productId);
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        ProductAsset productAssetMatch = new ProductAsset();
+
+        Pageable pageable = PageRequest.of(page, pageSize);
+        productAssetMatch.setProductId(productId);
+        ExampleMatcher matcher = ExampleMatcher
+                .matchingAll()
+                .withIgnoreCase()
+                .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
+        Example<ProductAsset> example = Example.of(productAssetMatch, matcher);
+
+        response.setSuccessStatus(HttpStatus.OK);
+        response.setData(productAssetRepository.findAll(example, pageable));
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+    
+    /**
+     * Get product assets by productId and/or itemCode
+     *
+     * @param itemCode
+     * @param productId
+     * @param page
+     * @param pageSize
+     * @return
+     */
+    @GetMapping(path = {"/{productId}/assets/{itemCode}"}, name = "products-assets-get-by-item", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('products-assets-get-by-item', 'all')")
+    public ResponseEntity<HttpResponse> getProductAssetsByItemCode(HttpServletRequest request,
+            @PathVariable(required = true) String productId,
+            @PathVariable(required = true) String itemCode,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int pageSize) {
+
+        logger.info("products-assets-get-by-item, productId: {}, itemCode: {}", productId, itemCode);
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        ProductAsset productAssetMatch = new ProductAsset();
+
+        Pageable pageable = PageRequest.of(page, pageSize);
+        productAssetMatch.setProductId(productId);
+        productAssetMatch.setItemCode(itemCode);
+        ExampleMatcher matcher = ExampleMatcher
+                .matchingAll()
+                .withIgnoreCase()
+                .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
+        Example<ProductAsset> example = Example.of(productAssetMatch, matcher);
+
+        response.setSuccessStatus(HttpStatus.OK);
+        response.setData(productAssetRepository.findAll(example, pageable));
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+    
+
+    @PostMapping(path = {"/{productId}/inventory/assets"}, name = "products-assets-post")
+    @PreAuthorize("hasAnyAuthority('products-assets-post', 'all')")
+    public ResponseEntity<HttpResponse> postProductAssets(HttpServletRequest request, @PathVariable String productId,
+            @Valid @RequestBody ProductAsset bodyProductAsset) throws Exception {
+
+        logger.info("products-assets-post, productId: {}", productId);
+
+        String logprefix = request.getRequestURI() + " ";
+        String location = Thread.currentThread().getStackTrace()[1].getMethodName();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        logger.info(ProductServiceApplication.VERSION, logprefix, "", "");
+        logger.info(ProductServiceApplication.VERSION, logprefix, bodyProductAsset.toString(), "");
+
+        response.setSuccessStatus(HttpStatus.CREATED);
+        ProductAsset savedProductAsset = productAssetRepository.save(bodyProductAsset);
+        logger.info(ProductServiceApplication.VERSION, logprefix, "Product Asset added to product with productId: {}" + productId);
+        response.setData(savedProductAsset);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    public ResponseEntity<HttpResponse> deleteProductAssetById(@PathVariable String productAssetId) {
+        logger.info("products-assets-delete, productId: {}", productAssetId);
+        return null;
+    }
+
+    public ResponseEntity<HttpResponse> putProductAssetById(HttpServletRequest request, @PathVariable String productAssetId) {
+        logger.info("products-assets-put, productId: {}", productAssetId);
+        return null;
+    }
 }

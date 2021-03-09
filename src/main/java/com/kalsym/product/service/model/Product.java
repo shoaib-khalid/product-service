@@ -48,6 +48,8 @@ public class Product implements Serializable {
     private String categoryId;
 
     private String status;
+    
+    private String thumbnailUrl;
 
     @OneToMany(cascade = CascadeType.ALL,
             fetch = FetchType.LAZY,

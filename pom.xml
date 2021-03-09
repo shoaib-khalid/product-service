@@ -10,9 +10,9 @@
     </parent>
     <groupId>com.kalsym</groupId>
     <artifactId>product-service</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
     <name>product-service</name>
-    <description>Users authentication service</description>
+    <description>Product service</description>
     
     <properties>
         <java.version>1.8</java.version>
@@ -132,7 +132,6 @@
                     </archive>
                     <include resource="logback.xml"/>
                 </configuration>
-                
             </plugin>
         </plugins>
         <resources>
@@ -146,5 +145,4 @@
             </resource>
         </resources>
     </build>
- 
 </project>
