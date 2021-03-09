@@ -36,7 +36,7 @@ import org.springframework.web.bind.annotation.PathVariable;
  * @author 7cu
  */
 @RestController()
-@RequestMapping("/category")
+@RequestMapping("/categories")
 public class CategoryController {
 
     private static Logger logger = LoggerFactory.getLogger("application");
@@ -50,14 +50,14 @@ public class CategoryController {
     @Autowired
     CategoryRepository categoryRepository;
 
-    @GetMapping(path = {""}, name = "category-get", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('category-get', 'all')")
+    @GetMapping(path = {""}, name = "categories-get", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('categories-get', 'all')")
     //@RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json", params = {"storeId", "name", "featured"})
     public ResponseEntity<HttpResponse> getCategory(HttpServletRequest request,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int pageSize) {
 
-        logger.info("category-get");
+        logger.info("categories-get");
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
         Pageable pageable = PageRequest.of(page, pageSize);
@@ -67,8 +67,8 @@ public class CategoryController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @GetMapping(path = {""}, name = "category-get-by-store-id", produces = "application/json", params={"storeId"})
-    @PreAuthorize("hasAnyAuthority('category-get-by-store-id', 'all')")
+    @GetMapping(path = {""}, name = "categories-get-by-store-id", produces = "application/json", params={"storeId"})
+    @PreAuthorize("hasAnyAuthority('categories-get-by-store-id', 'all')")
     public ResponseEntity<HttpResponse> getCategoryByStoreId(HttpServletRequest request,
             @RequestParam(required = true) String storeId,
             @RequestParam(defaultValue = "0") int page,
@@ -78,7 +78,7 @@ public class CategoryController {
 
         Pageable pageable = PageRequest.of(page, pageSize);
 
-        logger.info("category-get-by-store-id, storeId: {}", storeId);
+        logger.info("categories-get-by-store-id, storeId: {}", storeId);
 
         Category categoryMatch = new Category();
 
@@ -95,7 +95,7 @@ public class CategoryController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @GetMapping(path = {"/{categoryId}/product/{productId}", "/{categoryId}/product"}, name = "product-get-by-category", produces = "application/json")
+    @GetMapping(path = {"/{categoryId}/products/{productId}", "/{categoryId}/products"}, name = "product-get-by-category", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('product-get-by-category','all')")
     public ResponseEntity<HttpResponse> getProductByCategoryId(HttpServletRequest request,
             @PathVariable(required = true) String categoryId,
@@ -121,8 +121,8 @@ public class CategoryController {
 
     }
 
-    @PostMapping(path = {""}, name = "category-post-by-store", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('category-post-by-store','all')")
+    @PostMapping(path = {""}, name = "categories-post-by-store", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('categories-post-by-store','all')")
     public ResponseEntity<HttpResponse> postCategoryByStoreId(HttpServletRequest request, @Valid @RequestBody Category bodyCategory) throws Exception {
         //List<Store> stores = storeRepository.findAll();
         List<String> errors = new ArrayList<>();
@@ -137,14 +137,14 @@ public class CategoryController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
     
-    @DeleteMapping(path = {"/{categoryId}"}, name = "category-delete-by-id")
-    @PreAuthorize("hasAnyAuthority('category-delete-by-id', 'all')")
+    @DeleteMapping(path = {"/{categoryId}"}, name = "categories-delete-by-id")
+    @PreAuthorize("hasAnyAuthority('categories-delete-by-id', 'all')")
     public ResponseEntity<HttpResponse> deleteCategoryById(HttpServletRequest request, @PathVariable String categoryId) {
         String logprefix = request.getRequestURI() + " ";
         String location = Thread.currentThread().getStackTrace()[1].getMethodName();
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
-        logger.info(ProductServiceApplication.VERSION, "category-delete-by-id, categoryId: {}", categoryId);
+        logger.info(ProductServiceApplication.VERSION, "categories-delete-by-id, categoryId: {}", categoryId);
 
         Optional<Category> optCategory = categoryRepository.findById(categoryId);
 
