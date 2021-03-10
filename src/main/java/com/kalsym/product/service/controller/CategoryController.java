@@ -21,11 +21,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.kalsym.product.service.model.Category;
 import com.kalsym.product.service.model.Product;
+import com.kalsym.product.service.utility.Logger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -39,8 +38,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 @RequestMapping("/categories")
 public class CategoryController {
 
-    private static Logger logger = LoggerFactory.getLogger("application");
-
     @Autowired
     ProductRepository productRepository;
 
@@ -52,48 +49,62 @@ public class CategoryController {
 
     @GetMapping(path = {""}, name = "categories-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('categories-get', 'all')")
-    //@RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json", params = {"storeId", "name", "featured"})
     public ResponseEntity<HttpResponse> getCategory(HttpServletRequest request,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String storeId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int pageSize) {
 
-        logger.info("categories-get");
+        String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
-        Pageable pageable = PageRequest.of(page, pageSize);
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "", "");
 
-        response.setSuccessStatus(HttpStatus.OK);
-        response.setData(productRepository.findAll(pageable));
-        return ResponseEntity.status(HttpStatus.OK).body(response);
-    }
+        Category category = new Category();
 
-    @GetMapping(path = {""}, name = "categories-get-by-store-id", produces = "application/json", params={"storeId"})
-    @PreAuthorize("hasAnyAuthority('categories-get-by-store-id', 'all')")
-    public ResponseEntity<HttpResponse> getCategoryByStoreId(HttpServletRequest request,
-            @RequestParam(required = true) String storeId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int pageSize) {
-
-        HttpResponse response = new HttpResponse(request.getRequestURI());
-
-        Pageable pageable = PageRequest.of(page, pageSize);
-
-        logger.info("categories-get-by-store-id, storeId: {}", storeId);
-
-        Category categoryMatch = new Category();
-
-        categoryMatch.setStoreId(storeId);
+        category.setName(name);
+        category.setStoreId(storeId);
 
         ExampleMatcher matcher = ExampleMatcher
                 .matchingAll()
                 .withIgnoreCase()
-                .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
-        Example<Category> exampleCategory = Example.of(categoryMatch, matcher);
+                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
+        Example<Category> example = Example.of(category, matcher);
+
+        Pageable pageable = PageRequest.of(page, pageSize);
 
         response.setSuccessStatus(HttpStatus.OK);
-        response.setData(categoryRepository.findAll(exampleCategory, pageable));
+        response.setData(categoryRepository.findAll(example, pageable));
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
+
+//    @GetMapping(path = {""}, name = "categories-get-by-store-id", produces = "application/json", params = {"storeId"})
+//    @PreAuthorize("hasAnyAuthority('categories-get-by-store-id', 'all')")
+//    public ResponseEntity<HttpResponse> getCategoryByStoreId(HttpServletRequest request,
+//            @RequestParam(required = true) String storeId,
+//            @RequestParam(defaultValue = "0") int page,
+//            @RequestParam(defaultValue = "20") int pageSize) {
+//
+//        HttpResponse response = new HttpResponse(request.getRequestURI());
+//
+//        Pageable pageable = PageRequest.of(page, pageSize);
+//
+//        Logger.application.info("categories-get-by-store-id, storeId: {}", storeId);
+//
+//        Category categoryMatch = new Category();
+//
+//        categoryMatch.setStoreId(storeId);
+//
+//        ExampleMatcher matcher = ExampleMatcher
+//                .matchingAll()
+//                .withIgnoreCase()
+//                .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
+//        Example<Category> exampleCategory = Example.of(categoryMatch, matcher);
+//
+//        response.setSuccessStatus(HttpStatus.OK);
+//        response.setData(categoryRepository.findAll(exampleCategory, pageable));
+//        return ResponseEntity.status(HttpStatus.OK).body(response);
+//    }
 
     @GetMapping(path = {"/{categoryId}/products/{productId}", "/{categoryId}/products"}, name = "product-get-by-category", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('product-get-by-category','all')")
@@ -131,12 +142,12 @@ public class CategoryController {
 
         categoryRepository.save(bodyCategory);
 
-        logger.info(ProductServiceApplication.VERSION, "category created with id: {}", bodyCategory.getId());
+        Logger.application.info(ProductServiceApplication.VERSION, "category created with id: {}", bodyCategory.getId());
         response.setSuccessStatus(HttpStatus.CREATED);
         response.setData(categoryRepository.save(bodyCategory));
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-    
+
     @DeleteMapping(path = {"/{categoryId}"}, name = "categories-delete-by-id")
     @PreAuthorize("hasAnyAuthority('categories-delete-by-id', 'all')")
     public ResponseEntity<HttpResponse> deleteCategoryById(HttpServletRequest request, @PathVariable String categoryId) {
@@ -144,23 +155,22 @@ public class CategoryController {
         String location = Thread.currentThread().getStackTrace()[1].getMethodName();
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
-        logger.info(ProductServiceApplication.VERSION, "categories-delete-by-id, categoryId: {}", categoryId);
+        Logger.application.info(ProductServiceApplication.VERSION, "categories-delete-by-id, categoryId: {}", categoryId);
 
         Optional<Category> optCategory = categoryRepository.findById(categoryId);
 
         if (!optCategory.isPresent()) {
-            logger.info(ProductServiceApplication.VERSION, logprefix, "category not found", "");
+            Logger.application.info(ProductServiceApplication.VERSION, logprefix, "category not found", "");
             response.setErrorStatus(HttpStatus.NOT_FOUND);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
 
-        logger.info(ProductServiceApplication.VERSION, logprefix, "category found", "");
+        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "category found", "");
         categoryRepository.delete(optCategory.get());
 
-        logger.info(ProductServiceApplication.VERSION, logprefix, "category deleted, with id: {}", categoryId);
+        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "category deleted, with id: {}", categoryId);
         response.setSuccessStatus(HttpStatus.OK);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
-    
 
 }
