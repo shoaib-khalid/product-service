@@ -16,11 +16,11 @@ import org.hibernate.annotations.GenericGenerator;
  * @author 7cu
  */
 @Entity
-@Table(name = "category")
+@Table(name = "store_category")
 @Getter
 @Setter
 @ToString
-public class Category implements Serializable {
+public class StoreCategory implements Serializable {
 
     @Id
     @GeneratedValue(generator = "uuid2")
@@ -28,6 +28,10 @@ public class Category implements Serializable {
     private String id;
     
     private String storeId;
+    
+//    private StoreCategory parentCategory;
+    
+    private String parentCategoryId;
 
     private String name;
 }

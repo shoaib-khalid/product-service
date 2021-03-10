@@ -74,44 +74,44 @@ public class StoreController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    /**
-     *
-     * @param request
-     * @param storeId
-     * @param productId
-     * @param page
-     * @param pageSize
-     * @return
-     * @deprecated use ProductController.getProduct instead (GET:
-     * product?storeId=xyz)
-     */
-    @GetMapping(path = {"/{storeId}/products"}, name = "products-get-by-store", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('products-get-by-store','all')")
-    public ResponseEntity<HttpResponse> getProductByStore(HttpServletRequest request,
-            @PathVariable(required = true) String storeId,
-            @RequestParam(required = false) String productId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int pageSize) {
-        String logprefix = request.getRequestURI();
-        HttpResponse response = new HttpResponse(request.getRequestURI());
-
-        Pageable pageable = PageRequest.of(page, pageSize);
-
-        Logger.application.info("products-get-by-store, storeId: {}, productId: {}", storeId, productId);
-        Product productMatch = new Product();
-        productMatch.setId(productId);
-        productMatch.setStoreId(storeId);
-        ExampleMatcher matcher = ExampleMatcher
-                .matchingAll()
-                .withIgnoreCase()
-                .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
-        Example<Product> example = Example.of(productMatch, matcher);
-
-        response.setSuccessStatus(HttpStatus.OK);
-        response.setData(productRepository.findAll(example, pageable));
-        return ResponseEntity.status(HttpStatus.OK).body(response);
-
-    }
+//    /**
+//     *
+//     * @param request
+//     * @param storeId
+//     * @param productId
+//     * @param page
+//     * @param pageSize
+//     * @return
+//     * @deprecated use ProductController.getProduct instead (GET:
+//     * product?storeId=xyz)
+//     */
+//    @GetMapping(path = {"/{storeId}/products"}, name = "products-get-by-store", produces = "application/json")
+//    @PreAuthorize("hasAnyAuthority('products-get-by-store','all')")
+//    public ResponseEntity<HttpResponse> getProductByStore(HttpServletRequest request,
+//            @PathVariable(required = true) String storeId,
+//            @RequestParam(required = false) String productId,
+//            @RequestParam(defaultValue = "0") int page,
+//            @RequestParam(defaultValue = "20") int pageSize) {
+//        String logprefix = request.getRequestURI();
+//        HttpResponse response = new HttpResponse(request.getRequestURI());
+//
+//        Pageable pageable = PageRequest.of(page, pageSize);
+//
+//        Logger.application.info("products-get-by-store, storeId: {}, productId: {}", storeId, productId);
+//        Product productMatch = new Product();
+//        productMatch.setId(productId);
+//        productMatch.setStoreId(storeId);
+//        ExampleMatcher matcher = ExampleMatcher
+//                .matchingAll()
+//                .withIgnoreCase()
+//                .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
+//        Example<Product> example = Example.of(productMatch, matcher);
+//
+//        response.setSuccessStatus(HttpStatus.OK);
+//        response.setData(productRepository.findAll(example, pageable));
+//        return ResponseEntity.status(HttpStatus.OK).body(response);
+//
+//    }
 
     @PostMapping(path = {""}, name = "stores-post")
     @PreAuthorize("hasAnyAuthority('stores-post', 'all')")
@@ -120,7 +120,7 @@ public class StoreController {
         String location = Thread.currentThread().getStackTrace()[1].getMethodName();
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
-        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "", "");
+        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "stores-post", "");
         Logger.application.info(ProductServiceApplication.VERSION, logprefix, bodyStore.toString(), "");
 
         response.setSuccessStatus(HttpStatus.CREATED);
@@ -128,7 +128,7 @@ public class StoreController {
         try {
             savedStore = storeRepository.save(bodyStore);
         } catch (Exception exp) {
-            Logger.application.error("Error in creating sotre", exp);
+            Logger.application.error("Error in creating store", exp);
             response.setMessage(exp.getMessage());
             return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(response);
         }

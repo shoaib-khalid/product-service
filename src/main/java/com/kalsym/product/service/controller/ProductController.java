@@ -90,33 +90,50 @@ public class ProductController {
      * @param pageSize
      * @return
      */
-    @GetMapping(path = {"", "/{productId}"}, name = "products-get", produces = "application/json")
+    @GetMapping(path = {""}, name = "products-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('products-get', 'all')")
     public ResponseEntity<HttpResponse> getProduct(HttpServletRequest request,
-            @PathVariable(required = false) String productId,
             @RequestParam(required = false) String storeId,
             @RequestParam(required = false) String categoryId,
-            @RequestParam(required = false) String name,
             @RequestParam(required = false, defaultValue = "true") boolean featured,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int pageSize) {
 
-        logger.info("products-get, storeId: {}, productId: {}", storeId, productId);
+        logger.info("products-get, storeId: {}, categoryId: {}", storeId, categoryId);
         HttpResponse response = new HttpResponse(request.getRequestURI());
-
-        // if productId pathVariable is provided, ignore all other variables
-        if (productId != null) {
-            Optional<Product> matchedProduct = productRepository.findById(productId);
-            response.setSuccessStatus(HttpStatus.OK);
-            response.setData(matchedProduct);
-            return ResponseEntity.status(HttpStatus.OK).body(response);
-        }
 
         Product productMatch = new Product();
 
         Pageable pageable = PageRequest.of(page, pageSize);
         productMatch.setStoreId(storeId);
-        productMatch.setName(name);
+        productMatch.setCategoryId(categoryId);
+        //productMatch.setId(productId);
+        ExampleMatcher matcher = ExampleMatcher
+                .matchingAll()
+                .withIgnoreCase()
+                .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
+        Example<Product> example = Example.of(productMatch, matcher);
+
+        response.setSuccessStatus(HttpStatus.OK);
+        response.setData(productRepository.findAll(example, pageable));
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+    
+    @GetMapping(path = {"/{productId}"}, name = "products-get", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('products-get', 'all')")
+    public ResponseEntity<HttpResponse> getProduct(HttpServletRequest request,
+            @PathVariable(required = false) String productId,
+            @RequestParam(required = false, defaultValue = "true") boolean featured,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int pageSize) {
+
+        logger.info("products-get, productId: {}", productId);
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Product productMatch = new Product();
+
+        Pageable pageable = PageRequest.of(page, pageSize);
+        productMatch.setId(productId);
         ExampleMatcher matcher = ExampleMatcher
                 .matchingAll()
                 .withIgnoreCase()
@@ -437,7 +454,7 @@ public class ProductController {
         response.setData(productAssetRepository.findAll(example, pageable));
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
-    
+
     /**
      * Get product assets by productId and/or itemCode
      *
@@ -473,7 +490,6 @@ public class ProductController {
         response.setData(productAssetRepository.findAll(example, pageable));
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
-    
 
     @PostMapping(path = {"/{productId}/inventory/assets"}, name = "products-assets-post")
     @PreAuthorize("hasAnyAuthority('products-assets-post', 'all')")
