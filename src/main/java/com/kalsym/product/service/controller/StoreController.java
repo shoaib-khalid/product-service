@@ -74,6 +74,34 @@ public class StoreController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @GetMapping(path = {"/{storeId}"}, name = "stores-get-by-id", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('stores-get-by-id', 'all')")
+    public ResponseEntity<HttpResponse> getStoreById(HttpServletRequest request,
+            @PathVariable(required = true) String storeId
+    ) {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Logger.application.info(Logger.pattern, "stores-get-by-id, storeId: {}", storeId);
+
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "", "");
+
+        Store store = new Store();
+        store.setId(storeId);
+
+        ExampleMatcher matcher = ExampleMatcher
+                .matchingAll()
+                .withIgnoreCase()
+                .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
+        Example<Store> example = Example.of(store, matcher);
+
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "");
+        //Pageable pageable = PageRequest.of(page, pageSize);
+        response.setData(storeRepository.findAll(example));
+        response.setSuccessStatus(HttpStatus.OK);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
 //    /**
 //     *
 //     * @param request
@@ -112,7 +140,6 @@ public class StoreController {
 //        return ResponseEntity.status(HttpStatus.OK).body(response);
 //
 //    }
-
     @PostMapping(path = {""}, name = "stores-post")
     @PreAuthorize("hasAnyAuthority('stores-post', 'all')")
     public ResponseEntity<HttpResponse> postStore(HttpServletRequest request, @Valid @RequestBody Store bodyStore) throws Exception {
