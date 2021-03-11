@@ -82,14 +82,14 @@ public class StoreCategoryController {
     @PostMapping(path = {""}, name = "store-categories-post-by-store", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-categories-post-by-store','all')")
     public ResponseEntity<HttpResponse> postStoreCategoryByStoreId(HttpServletRequest request,
-            @RequestParam(required = true) String storeId,
             @Valid @RequestBody StoreCategory bodyStoreCategory) throws Exception {
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
-        Logger.application.info("store-categories-post-by-store, storeId: {}", storeId);
+        String logprefix = request.getRequestURI();
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "", "");
 
         //TODO: implement check for userId authentication with storeId, so only owner of his own store can create a category of store
-        Optional<Store> store = storeRepository.findById(storeId);
+        Optional<Store> store = storeRepository.findById(bodyStoreCategory.getStoreId());
 
         if (store == null) {
             Logger.application.error("store doesn't exist with id: {}", bodyStoreCategory.getId());

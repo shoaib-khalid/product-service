@@ -34,6 +34,29 @@ public class Store implements Serializable {
     private String address;
 
     private String clientId;
-    
+
     private String verticalCode;
+
+    public void update(Store store) {
+
+        if (null != store.getCity()) {
+            city = store.getCity();
+        }
+
+        if (null != store.getName()) {
+            name = store.getName();
+        }
+
+        if (null != store.getAddress()) {
+            address = store.getAddress();
+        }
+
+        if (null != store.getClientId()) {
+            clientId = store.getClientId();
+        }
+        if (null != store.getVerticalCode()) {
+            verticalCode = store.getVerticalCode();
+        }
+
+    }
 }
