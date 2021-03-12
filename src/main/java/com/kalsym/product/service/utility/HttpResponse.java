@@ -40,6 +40,17 @@ public class HttpResponse {
 
     /**
      * *
+     * Sets success and message as reason phrase of provided status.
+     *
+     * @param status
+     */
+    public void setSuccessStatus(HttpStatus status, String message) {
+        this.status = status.value();
+        this.message = message;
+    }
+
+    /**
+     * *
      * Sets status and custom message.
      *
      * @param status
@@ -61,4 +72,3 @@ public class HttpResponse {
         this.error = message;
     }
 }
-

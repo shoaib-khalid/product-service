@@ -81,10 +81,8 @@ public class ProductController {
      * Get product by store or category or productId
      *
      * @param request
-     * @param productId
      * @param storeId
      * @param categoryId
-     * @param name
      * @param featured
      * @param page
      * @param pageSize
@@ -118,7 +116,7 @@ public class ProductController {
         response.setData(productRepository.findAll(example, pageable));
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
-    
+
     @GetMapping(path = {"/{productId}"}, name = "products-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('products-get', 'all')")
     public ResponseEntity<HttpResponse> getProduct(HttpServletRequest request,
@@ -216,7 +214,6 @@ public class ProductController {
      * @param id
      * @param bodyProduct
      * @return
-     * @deprecated use StoreController.postProductByStore instead
      */
     @PutMapping(path = {"/{id}"}, name = "products-put-by-id")
     @PreAuthorize("hasAnyAuthority('products-put-by-id', 'all')")
@@ -294,15 +291,15 @@ public class ProductController {
         return null;
     }
 
-    @GetMapping(path = {"/{productId}/variant"}, name = "products-variant-get-by-product", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('products-variant-get-by-product', 'all')")
+    @GetMapping(path = {"/{productId}/variants"}, name = "products-variants-get-by-product-id", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('products-variants-get-by-product-id', 'all')")
     //@RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json", params = {"storeId", "name", "featured"})
     public ResponseEntity<HttpResponse> getProductVariantByProduct(HttpServletRequest request,
             @PathVariable(required = false) String productId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int pageSize) {
 
-        logger.info("products-variant-get-by-product, productId: {}", productId);
+        logger.info("products-variants-get-by-product, productId: {}", productId);
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
         Pageable pageable = PageRequest.of(page, pageSize);
@@ -314,12 +311,11 @@ public class ProductController {
 
     }
 
-    @PostMapping(path = {"/{productId}/variant"}, name = "products-variant-post-by-product")
-    @PreAuthorize("hasAnyAuthority('products-variant-post-by-product', 'all')")
+    @PostMapping(path = {"/{productId}/variants"}, name = "products-variants-post-by-product")
+    @PreAuthorize("hasAnyAuthority('products-variants-post-by-product', 'all')")
     public ResponseEntity<HttpResponse> postProductVariantByProduct(HttpServletRequest request, @PathVariable String productId,
             @Valid @RequestBody ProductVariant bodyProductVariant) throws Exception {
         String logprefix = request.getRequestURI() + " ";
-        String location = Thread.currentThread().getStackTrace()[1].getMethodName();
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
         logger.info(ProductServiceApplication.VERSION, logprefix, "", "");
@@ -385,8 +381,8 @@ public class ProductController {
         return null;
     }
 
-    @PostMapping(path = {"/{productId}/variant-available"}, name = "products-variant-available-post")
-    @PreAuthorize("hasAnyAuthority('products-variant-available-post', 'all')")
+    @PostMapping(path = {"/{productId}/variants-available"}, name = "products-variants-available-post")
+    @PreAuthorize("hasAnyAuthority('products-variants-available-post', 'all')")
     public ResponseEntity<HttpResponse> postProductVariantAvailable(HttpServletRequest request, @PathVariable String productId,
             @Valid @RequestBody ProductVariantAvailable bodyProductVariantAvailable) throws Exception {
         String logprefix = request.getRequestURI() + " ";

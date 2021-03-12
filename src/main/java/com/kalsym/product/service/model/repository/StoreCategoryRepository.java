@@ -1,8 +1,11 @@
 package com.kalsym.product.service.model.repository;
 
+import com.kalsym.product.service.model.Product;
 import com.kalsym.product.service.model.StoreCategory;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -16,4 +19,6 @@ import org.springframework.stereotype.Repository;
 public interface StoreCategoryRepository extends PagingAndSortingRepository<StoreCategory, String>, JpaRepository<StoreCategory, String> {
 
     //List<Category> findByName(@Param("name") String name);
+    List<StoreCategory> findByStoreId(@Param("storeId") String storeId);
+
 }
