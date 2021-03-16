@@ -2,11 +2,12 @@ package com.kalsym.product.service.controller;
 
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.model.StoreCategory;
-import com.kalsym.product.service.model.Product;
+import com.kalsym.product.service.model.product.Product;
 import com.kalsym.product.service.model.repository.ProductRepository;
 import com.kalsym.product.service.model.repository.StoreRepository;
 import com.kalsym.product.service.utility.HttpResponse;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Set;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.kalsym.product.service.model.Store;
+import com.kalsym.product.service.model.product.*;
 import com.kalsym.product.service.model.repository.StoreCategoryRepository;
 import com.kalsym.product.service.utility.Logger;
 import java.util.List;
@@ -203,61 +205,7 @@ public class StoreController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @PostMapping(path = {"/{storeId}/products"}, name = "products-post-by-store-id")
-    @PreAuthorize("hasAnyAuthority('products-post-by-store-id', 'all')")
-    public ResponseEntity<HttpResponse> postProductByStore(HttpServletRequest request,
-            @PathVariable String storeId,
-            @Valid @RequestBody Product bodyProduct) throws Exception {
-        String logprefix = request.getRequestURI() + " ";
-        HttpResponse response = new HttpResponse(request.getRequestURI());
-
-        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "storeId: " + storeId);
-        Logger.application.info(ProductServiceApplication.VERSION, logprefix, bodyProduct.toString(), "");
-
-        Optional<Store> optStore = storeRepository.findById(storeId);
-
-        if (!optStore.isPresent()) {
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND, "store not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-        }
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
-
-        bodyProduct.setStoreId(storeId);
-
-        Product savedProduct = productRepository.save(bodyProduct);
-        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "product added to store with storeId: {}, productId: {}" + storeId, savedProduct.getId());
-        response.setSuccessStatus(HttpStatus.CREATED);
-
-        response.setData(savedProduct);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
-    @GetMapping(path = {"/{storeId}/products"}, name = "products-get-by-stores-id", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('products-get-by-stores-id', 'all')")
-    public ResponseEntity<HttpResponse> putProductByStoreId(HttpServletRequest request,
-            @PathVariable String storeId) {
-        String logprefix = request.getRequestURI() + " ";
-        HttpResponse response = new HttpResponse(request.getRequestURI());
-
-        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "storeId: " + storeId);
-
-        Optional<Store> optStore = storeRepository.findById(storeId);
-
-        if (!optStore.isPresent()) {
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND, "store not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-        }
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
-
-        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "store found for id: {}", storeId);
-
-        List<Product> products = productRepository.findByStoreId(storeId);
-        response.setSuccessStatus(HttpStatus.OK);
-        response.setData(products);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
-    }
+    
 
     @PostMapping(path = {"/{storeId}/store-categories"}, name = "store-categories-post-by-store-id")
     @PreAuthorize("hasAnyAuthority('store-categories-post-by-store-id', 'all')")

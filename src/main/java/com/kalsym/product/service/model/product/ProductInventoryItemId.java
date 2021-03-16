@@ -1,4 +1,4 @@
-package com.kalsym.product.service.model;
+package com.kalsym.product.service.model.product;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -16,7 +16,7 @@ import lombok.ToString;
 public class ProductInventoryItemId implements Serializable {
 
     private String itemCode;
-    private String variantAvailableId;
+    private String productVariantAvailableId;
 
     @Override
     public boolean equals(Object o) {
@@ -28,11 +28,11 @@ public class ProductInventoryItemId implements Serializable {
         }
         ProductInventoryItemId productInventoryItemId = (ProductInventoryItemId) o;
         return itemCode.equals(productInventoryItemId.itemCode)
-                && variantAvailableId.equals(productInventoryItemId.variantAvailableId);
+                && productVariantAvailableId.equals(productVariantAvailableId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(itemCode, variantAvailableId);
+        return Objects.hash(itemCode, productVariantAvailableId);
     }
 }

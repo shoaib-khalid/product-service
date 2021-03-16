@@ -1,4 +1,4 @@
-package com.kalsym.product.service.model;
+package com.kalsym.product.service.model.product;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import javax.persistence.Entity;
@@ -9,7 +9,9 @@ import lombok.Setter;
 import lombok.ToString;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
+import java.util.List;
 import javax.persistence.*;
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -27,15 +29,23 @@ import org.hibernate.annotations.OnDeleteAction;
 public class ProductVariant implements Serializable {
 
     @Id
+    @GeneratedValue(generator = "uuid2")
+    @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
     private String id;
-    
+
     private String name;
-    
+
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "productId", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonIgnore
-    Product product;
+    private String productId;
+
+//    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+//    @JoinColumn(name = "productId", nullable = false)
+//    @OnDelete(action = OnDeleteAction.CASCADE)
+//    @JsonIgnore
+//    Product product;
+//    @OneToMany(cascade = CascadeType.ALL,
+//            fetch = FetchType.LAZY,
+//            mappedBy = "productVariant")
+//    private List<ProductVariantAvailable> productVariantsAvailable;
 }

@@ -1,8 +1,9 @@
-package com.kalsym.product.service.model;
+package com.kalsym.product.service.model.product;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -48,24 +49,23 @@ public class Product implements Serializable {
     private String categoryId;
 
     private String status;
-    
+
     private String thumbnailUrl;
 
-    @OneToMany(cascade = CascadeType.ALL,
-            fetch = FetchType.LAZY,
-            mappedBy = "product")
-    private Set<ProductVariant> productVariants = new HashSet<>();
+//    @OneToMany(cascade = CascadeType.ALL,
+//            fetch = FetchType.LAZY,
+//            mappedBy = "product")
+//    private List<ProductVariant> productVariants;
 
-    @OneToMany(cascade = CascadeType.ALL,
-            fetch = FetchType.LAZY,
-            mappedBy = "product")
-    private Set<ProductInventory> productInventories = new HashSet<>();
-    
-    @OneToMany(cascade = CascadeType.ALL,
-            fetch = FetchType.LAZY,
-            mappedBy = "product")
-    private Set<ProductReview> productReviews = new HashSet<>();
-
+//    @OneToMany(cascade = CascadeType.ALL,
+//            fetch = FetchType.LAZY,
+//            mappedBy = "product")
+//    private Set<ProductInventory> productInventories = new HashSet<>();
+//    
+//    @OneToMany(cascade = CascadeType.ALL,
+//            fetch = FetchType.LAZY,
+//            mappedBy = "product")
+//    private Set<ProductReview> productReviews = new HashSet<>();
     public void update(Product product) {
         if (null != product.getName()) {
             name = product.getName();

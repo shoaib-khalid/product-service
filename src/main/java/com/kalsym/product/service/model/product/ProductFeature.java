@@ -1,4 +1,4 @@
-package com.kalsym.product.service.model;
+package com.kalsym.product.service.model.product;
 
 import java.io.Serializable;
 import javax.persistence.Entity;

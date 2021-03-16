@@ -1,6 +1,6 @@
 package com.kalsym.product.service.model.repository;
 
-import com.kalsym.product.service.model.ProductVariantAvailable;
+import com.kalsym.product.service.model.product.ProductVariantAvailable;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -14,5 +14,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ProductVariantAvailableRepository extends PagingAndSortingRepository<ProductVariantAvailable, String>, JpaRepository<ProductVariantAvailable, String> {
 
-    //List<ProductVariantAvailable> findByVariantId(@Param("variantId") String variantId);
+    List<ProductVariantAvailable> findByProductId(String productId);
 }

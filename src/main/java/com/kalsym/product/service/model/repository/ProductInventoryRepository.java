@@ -1,6 +1,6 @@
 package com.kalsym.product.service.model.repository;
 
-import com.kalsym.product.service.model.ProductInventory;
+import com.kalsym.product.service.model.product.ProductInventory;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,5 +16,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ProductInventoryRepository extends PagingAndSortingRepository<ProductInventory, String>, JpaRepository<ProductInventory, String> {
 
-    <S extends Object> Page<S> findByProductId(@Param("productId") String productId, Pageable pgbl);
+    List<ProductInventory> findByProductId(@Param("productId") String productId);
 }

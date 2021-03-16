@@ -1,4 +1,4 @@
-package com.kalsym.product.service.model;
+package com.kalsym.product.service.model.product;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;

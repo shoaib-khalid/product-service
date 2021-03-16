@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.kalsym.product.service.model.StoreCategory;
 import com.kalsym.product.service.model.Store;
-import com.kalsym.product.service.model.Product;
+import com.kalsym.product.service.model.product.Product;
 import com.kalsym.product.service.utility.Logger;
 import java.util.ArrayList;
 import java.util.List;

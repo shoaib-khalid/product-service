@@ -1,4 +1,4 @@
-package com.kalsym.product.service.model;
+package com.kalsym.product.service.model.product;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -10,6 +10,7 @@ import javax.persistence.IdClass;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,21 +29,22 @@ import org.hibernate.annotations.OnDeleteAction;
 @Table(name = "product_variant_available")
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@IdClass(ProductVariantAvailableId.class)
+//@IdClass(ProductVariantAvailableId.class)
 public class ProductVariantAvailable implements Serializable {
 
     @Id
     private String id;
 
-    @Id
-//    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-//    @JoinColumn(name = "variantId", nullable = false)
-//    @OnDelete(action = OnDeleteAction.CASCADE)
-//    @JsonIgnore
-//    private ProductVariant productVariant;
+    private String value;
 
-    private String variantId;
-    
-    @Id
-    private String variantValue;
+    private String productId;
+
+    @Transient
+    private String productVariantId;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "productVariantId", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonIgnore
+    private ProductVariant productVariant;
 }
