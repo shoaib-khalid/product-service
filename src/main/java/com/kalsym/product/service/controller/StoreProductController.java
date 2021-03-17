@@ -3,6 +3,7 @@ package com.kalsym.product.service.controller;
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.model.product.Product;
+import com.kalsym.product.service.model.product.ProductWithDetails;
 import com.kalsym.product.service.model.product.ProductReview;
 import com.kalsym.product.service.model.product.ProductAsset;
 import com.kalsym.product.service.model.product.ProductInventory;
@@ -18,6 +19,7 @@ import com.kalsym.product.service.model.repository.ProductRepository;
 import com.kalsym.product.service.model.repository.ProductVariantRepository;
 import com.kalsym.product.service.model.repository.ProductVariantAvailableRepository;
 import com.kalsym.product.service.model.repository.ProductReviewRepository;
+import com.kalsym.product.service.model.repository.ProductWithDetailsRepository;
 import com.kalsym.product.service.utility.Logger;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +57,9 @@ public class StoreProductController {
     ProductRepository productRepository;
 
     @Autowired
+    ProductWithDetailsRepository productWithDetailsRepository;
+
+    @Autowired
     ProductInventoryRepository productInventoryRepository;
 
     @Autowired
@@ -75,8 +80,8 @@ public class StoreProductController {
     @Autowired
     StoreRepository storeRepository;
 
-    @GetMapping(path = {""}, name = "store-products-post", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('store-products-post', 'all')")
+    @GetMapping(path = {""}, name = "store-products-get", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-products-get', 'all')")
     public ResponseEntity<HttpResponse> postStoreProducts(HttpServletRequest request,
             @PathVariable String storeId) {
         String logprefix = request.getRequestURI();
@@ -95,7 +100,7 @@ public class StoreProductController {
 
         Logger.application.info(ProductServiceApplication.VERSION, logprefix, "store found for id: {}", storeId);
 
-        List<Product> products = productRepository.findByStoreId(storeId);
+        List<ProductWithDetails> products = productWithDetailsRepository.findByStoreId(storeId);
         response.setSuccessStatus(HttpStatus.OK);
         response.setData(products);
         return ResponseEntity.status(HttpStatus.OK).body(response);
@@ -120,7 +125,7 @@ public class StoreProductController {
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
 
-        Optional<Product> optProdcut = productRepository.findById(id);
+        Optional<ProductWithDetails> optProdcut = productWithDetailsRepository.findById(id);
 
         if (!optProdcut.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product NOT_FOUND storeId: " + id);
@@ -171,8 +176,8 @@ public class StoreProductController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @PutMapping(path = {"/{id}"}, name = "store-products-get-by-id", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('store-products-get-by-id', 'all')")
+    @PutMapping(path = {"/{id}"}, name = "store-products-put-by-id", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-products-put-by-id', 'all')")
     public ResponseEntity<HttpResponse> putStoreProductById(HttpServletRequest request,
             @PathVariable String storeId,
             @PathVariable String id,
@@ -208,8 +213,8 @@ public class StoreProductController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @PostMapping(path = {""}, name = "products-post-by-store-id")
-    @PreAuthorize("hasAnyAuthority('products-post-by-store-id', 'all')")
+    @PostMapping(path = {""}, name = "store-products-post")
+    @PreAuthorize("hasAnyAuthority('store-products-post', 'all')")
     public ResponseEntity<HttpResponse> StoreProduct(HttpServletRequest request,
             @PathVariable String storeId,
             @Valid @RequestBody Product bodyProduct) throws Exception {

@@ -37,15 +37,14 @@ public class ProductVariant implements Serializable {
 
     private String description;
 
-    private String productId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "productId", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonIgnore
+    Product product;
 
-//    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-//    @JoinColumn(name = "productId", nullable = false)
-//    @OnDelete(action = OnDeleteAction.CASCADE)
-//    @JsonIgnore
-//    Product product;
-//    @OneToMany(cascade = CascadeType.ALL,
-//            fetch = FetchType.LAZY,
-//            mappedBy = "productVariant")
-//    private List<ProductVariantAvailable> productVariantsAvailable;
+    @OneToMany(cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY)
+    @JoinColumn(name = "productVariantId")
+    private List<ProductVariantAvailable> productVariantsAvailable;
 }

@@ -216,6 +216,7 @@ public class StoreProductProductVariantAvailableController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
 
+        variantAvailable.setProductId(productId);
         response.setSuccessStatus(HttpStatus.OK);
         response.setData(productVariantAvailableRepository.save(variantAvailable));
         return ResponseEntity.status(HttpStatus.OK).body(response);

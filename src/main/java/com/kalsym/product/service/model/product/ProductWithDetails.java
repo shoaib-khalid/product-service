@@ -14,6 +14,7 @@ import java.util.Objects;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,7 +33,7 @@ import org.hibernate.annotations.GenericGenerator;
 @Table(name = "product")
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Product implements Serializable {
+public class ProductWithDetails implements Serializable {
 
     @Id
     @GeneratedValue(generator = "uuid2")
@@ -42,7 +43,7 @@ public class Product implements Serializable {
     private String name;
 
     private Integer stock;
-    
+
     private String description;
 
     private String storeId;
@@ -54,7 +55,22 @@ public class Product implements Serializable {
 
     private String thumbnailUrl;
 
-    public void update(Product product) {
+    @OneToMany(cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY)
+    @JoinColumn(name = "productId")
+    private List<ProductVariant> productVariants;
+
+    @OneToMany(cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY)
+    @JoinColumn(name = "productId")
+    private Set<ProductInventory> productInventories = new HashSet<>();
+
+    @OneToMany(cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY)
+    @JoinColumn(name = "productId")
+    private Set<ProductReview> productReviews = new HashSet<>();
+
+    public void update(ProductWithDetails product) {
         if (null != product.getName()) {
             name = product.getName();
         }
@@ -76,7 +92,7 @@ public class Product implements Serializable {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final Product other = (Product) obj;
+        final ProductWithDetails other = (ProductWithDetails) obj;
         return Objects.equals(this.id, other.getId());
     }
 

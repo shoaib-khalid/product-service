@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author 7cu
  */
 @RestController()
-@RequestMapping("/stores/{storeId}/products/{productId}/inventoy-item")
+@RequestMapping("/stores/{storeId}/products/{productId}/inventory-item")
 public class StoreProductInventoryItemController {
 
     @Autowired
@@ -47,8 +47,8 @@ public class StoreProductInventoryItemController {
     @Autowired
     StoreRepository storeRepository;
 
-    @GetMapping(path = {""}, name = "store-product-inventoy-item-get", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('store-product-inventoy-item-get', 'all')")
+    @GetMapping(path = {""}, name = "store-product-inventory-item-get", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-product-inventory-item-get', 'all')")
     public ResponseEntity<HttpResponse> getStoreProductInventoryItems(HttpServletRequest request,
             @PathVariable String storeId,
             @PathVariable String productId) {
@@ -79,8 +79,8 @@ public class StoreProductInventoryItemController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @GetMapping(path = {"/{id}"}, name = "store-product-inventoy-item-get-by-id", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('store-product-inventoy-item-get-by-id', 'all')")
+    @GetMapping(path = {"/{id}"}, name = "store-product-inventory-item-get-by-id", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-product-inventory-item-get-by-id', 'all')")
     public ResponseEntity<HttpResponse> getStoreProductInventoryItemsById(HttpServletRequest request,
             @PathVariable String storeId,
             @PathVariable String productId,
@@ -120,8 +120,8 @@ public class StoreProductInventoryItemController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @DeleteMapping(path = {"/{id}"}, name = "store-product-inventoy-item-delete-by-id", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('store-product-inventoy-item-delete-by-id', 'all')")
+    @DeleteMapping(path = {"/{id}"}, name = "store-product-inventory-item-delete-by-id", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-product-inventory-item-delete-by-id', 'all')")
     public ResponseEntity<HttpResponse> deleteStoreProductInventoryItemsById(HttpServletRequest request,
             @PathVariable String storeId,
             @PathVariable String productId,
@@ -161,8 +161,8 @@ public class StoreProductInventoryItemController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @PostMapping(path = {""}, name = "store-product-inventoy-item-post", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('store-product-inventoy-item-post', 'all')")
+    @PostMapping(path = {""}, name = "store-product-inventory-item-post", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-product-inventory-item-post', 'all')")
     public ResponseEntity<HttpResponse> postStoreProductInventoryItems(HttpServletRequest request,
             @PathVariable String storeId,
             @PathVariable String productId,

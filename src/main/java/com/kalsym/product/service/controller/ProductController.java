@@ -10,6 +10,7 @@ import com.kalsym.product.service.model.product.ProductInventoryItem;
 import com.kalsym.product.service.model.product.ProductVariant;
 import com.kalsym.product.service.model.product.ProductVariantAvailable;
 import com.kalsym.product.service.model.Store;
+import com.kalsym.product.service.model.product.ProductWithDetails;
 import com.kalsym.product.service.model.repository.ProductAssetRepository;
 import com.kalsym.product.service.model.repository.ProductInventoryRepository;
 import com.kalsym.product.service.model.repository.ProductInventoryItemRepository;
@@ -18,6 +19,7 @@ import com.kalsym.product.service.model.repository.ProductRepository;
 import com.kalsym.product.service.model.repository.ProductVariantRepository;
 import com.kalsym.product.service.model.repository.ProductVariantAvailableRepository;
 import com.kalsym.product.service.model.repository.ProductReviewRepository;
+import com.kalsym.product.service.model.repository.ProductWithDetailsRepository;
 import com.kalsym.product.service.utility.Logger;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +54,9 @@ public class ProductController {
 
     @Autowired
     ProductRepository productRepository;
+
+    @Autowired
+    ProductWithDetailsRepository productWithDetailsRepository;
 
     @Autowired
     ProductInventoryRepository productInventoryRepository;
@@ -97,7 +102,7 @@ public class ProductController {
         HttpResponse response = new HttpResponse(request.getRequestURI());
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "", "");
 
-        Product productMatch = new Product();
+        ProductWithDetails productMatch = new ProductWithDetails();
 
         Pageable pageable = PageRequest.of(page, pageSize);
         productMatch.setStoreId(storeId);
@@ -106,10 +111,10 @@ public class ProductController {
                 .matchingAll()
                 .withIgnoreCase()
                 .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
-        Example<Product> example = Example.of(productMatch, matcher);
+        Example<ProductWithDetails> example = Example.of(productMatch, matcher);
 
         response.setSuccessStatus(HttpStatus.OK);
-        response.setData(productRepository.findAll(example, pageable));
+        response.setData(productWithDetailsRepository.findAll(example, pageable));
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -124,7 +129,7 @@ public class ProductController {
         HttpResponse response = new HttpResponse(request.getRequestURI());
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "", "");
 
-        Optional<Product> optProduct = productRepository.findById(id);
+        Optional<ProductWithDetails> optProduct = productWithDetailsRepository.findById(id);
 
         if (!optProduct.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND id: " + id);

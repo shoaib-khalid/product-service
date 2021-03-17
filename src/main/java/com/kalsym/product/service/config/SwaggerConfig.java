@@ -23,27 +23,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @Configuration
 @EnableSwagger2
 public class SwaggerConfig {
-//    @Bean
-//    public Docket productApi() {
-//        return new Docket(DocumentationType.SWAGGER_2)
-//                .select()
-//                // .paths(PathSelectors.any())
-//                .apis(RequestHandlerSelectors.basePackage("com.kalsym.product.service"))
-//                .build()
-//                .apiInfo(apiInfo());
-//    }
 
-//    private ApiInfo apiInfo() {
-//        return new ApiInfoBuilder()
-//                .title("product-service")
-//                .description(
-//                        "exposes the product endpoints")
-//                .termsOfServiceUrl("TBA")
-//                .license("TBA")
-//                .licenseUrl("")
-//                .version(ProductServiceApplication.VERSION)
-//                .build();
-//    }
     public static final String AUTHORIZATION_HEADER = "Authorization";
 
     @Bean

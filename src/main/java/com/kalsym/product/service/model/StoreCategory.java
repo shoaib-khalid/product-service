@@ -26,12 +26,13 @@ public class StoreCategory implements Serializable {
     @GeneratedValue(generator = "uuid2")
     @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
     private String id;
-    
+
     private String storeId;
-    
+
 //    private StoreCategory parentCategory;
-    
     private String parentCategoryId;
 
     private String name;
+
+    private String thumbnailUrl;
 }

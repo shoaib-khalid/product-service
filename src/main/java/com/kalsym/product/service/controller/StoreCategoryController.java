@@ -79,8 +79,8 @@ public class StoreCategoryController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @PostMapping(path = {""}, name = "store-categories-post-by-store", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('store-categories-post-by-store','all')")
+    @PostMapping(path = {""}, name = "store-categories-post", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-categories-post','all')")
     public ResponseEntity<HttpResponse> postStoreCategoryByStoreId(HttpServletRequest request,
             @Valid @RequestBody StoreCategory bodyStoreCategory) throws Exception {
         HttpResponse response = new HttpResponse(request.getRequestURI());

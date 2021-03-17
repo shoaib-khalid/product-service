@@ -40,15 +40,6 @@ import org.hibernate.annotations.OnDeleteAction;
 //@IdClass(ProductReviewId.class)
 public class ProductReview implements Serializable {
 
-//    @Id
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "productId", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonIgnore
-    private Product product;
-
-//    @Id 
-//    private String productId;
     @Id
     private String customerId;
 
@@ -56,4 +47,14 @@ public class ProductReview implements Serializable {
 
     private String review;
 
+    private String productId;
+
+    //    @Id
+//    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+//    @JoinColumn(name = "productId", nullable = false)
+//    @OnDelete(action = OnDeleteAction.CASCADE)
+//    @JsonIgnore
+//    private Product product;
+//    @Id 
+//   
 }
