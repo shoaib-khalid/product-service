@@ -82,8 +82,11 @@ public class StoreProductController {
 
     @GetMapping(path = {""}, name = "store-products-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-products-get', 'all')")
-    public ResponseEntity<HttpResponse> postStoreProducts(HttpServletRequest request,
-            @PathVariable String storeId) {
+    public ResponseEntity<HttpResponse> getStoreProducts(HttpServletRequest request,
+            @PathVariable String storeId,
+            @RequestParam(required = false) String categoryId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int pageSize) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
@@ -98,11 +101,20 @@ public class StoreProductController {
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
 
-        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "store found for id: {}", storeId);
+        ProductWithDetails productMatch = new ProductWithDetails();
 
-        List<ProductWithDetails> products = productWithDetailsRepository.findByStoreId(storeId);
+        Pageable pageable = PageRequest.of(page, pageSize);
+        productMatch.setStoreId(storeId);
+        productMatch.setCategoryId(categoryId);
+        ExampleMatcher matcher = ExampleMatcher
+                .matchingAll()
+                .withIgnoreCase()
+                .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
+        Example<ProductWithDetails> example = Example.of(productMatch, matcher);
+
+        //List<ProductWithDetails> products = productWithDetailsRepository.findByStoreId(storeId);
         response.setSuccessStatus(HttpStatus.OK);
-        response.setData(products);
+        response.setData(productWithDetailsRepository.findAll(example, pageable));
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -215,7 +227,7 @@ public class StoreProductController {
 
     @PostMapping(path = {""}, name = "store-products-post")
     @PreAuthorize("hasAnyAuthority('store-products-post', 'all')")
-    public ResponseEntity<HttpResponse> StoreProduct(HttpServletRequest request,
+    public ResponseEntity<HttpResponse> postStoreProduct(HttpServletRequest request,
             @PathVariable String storeId,
             @Valid @RequestBody Product bodyProduct) throws Exception {
         String logprefix = request.getRequestURI();
