@@ -111,7 +111,7 @@ public class StoreCategoryController {
     @DeleteMapping(path = {"/{storeCategoryId}"}, name = "store-categories-delete-by-id")
     @PreAuthorize("hasAnyAuthority('store-categories-delete-by-id', 'all')")
     public ResponseEntity<HttpResponse> deleteStoreCategoryById(HttpServletRequest request, @PathVariable String storeCategoryId) {
-        String logprefix = request.getRequestURI() + " ";
+        String logprefix = request.getRequestURI();
         String location = Thread.currentThread().getStackTrace()[1].getMethodName();
         HttpResponse response = new HttpResponse(request.getRequestURI());
 

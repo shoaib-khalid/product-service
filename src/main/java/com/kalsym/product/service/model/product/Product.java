@@ -2,19 +2,12 @@ package com.kalsym.product.service.model.product;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.util.Objects;
-import java.util.Set;
-import javax.persistence.CascadeType;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -42,7 +35,7 @@ public class Product implements Serializable {
     private String name;
 
     private Integer stock;
-    
+
     private String description;
 
     private String storeId;
@@ -53,6 +46,14 @@ public class Product implements Serializable {
     private String status;
 
     private String thumbnailUrl;
+
+    private String vendor;
+
+    private String barcode;
+
+    private String region;
+
+    private Double weight;
 
     public void update(Product product) {
         if (null != product.getName()) {

@@ -1,5 +1,6 @@
-package com.kalsym.product.service.model.product;
+package com.kalsym.product.service.model;
 
+import com.kalsym.product.service.model.product.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import javax.persistence.Entity;
@@ -25,19 +26,14 @@ import org.hibernate.annotations.OnDeleteAction;
 @Setter
 @ToString
 @Entity
-@Table(name = "product_asset")
+@Table(name = "store_asset")
 @NoArgsConstructor
-public class ProductAsset implements Serializable {
+public class StoreAsset implements Serializable {
 
     @Id
-    @GeneratedValue(generator = "uuid2")
-    @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
-    private String id;
+    private String storeId;
 
-    private String itemCode;
-
-    private String name;
-    private String url;
-    private String productId;
+    private String logoUrl;
+    private String bannerUrl;
 
 }

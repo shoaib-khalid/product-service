@@ -30,6 +30,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
@@ -52,7 +53,7 @@ public class SessionRequestFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
-        String logprefix = request.getRequestURI() + " ";
+        String logprefix = request.getRequestURI();
 
         Logger.application.info(Logger.pattern, VersionHolder.VERSION, "-------------" + logprefix + "-------------", "", "");
 
@@ -73,47 +74,54 @@ public class SessionRequestFilter extends OncePerRequestFilter {
 
         if (accessToken != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             //Logger.application.info(Logger.pattern, VersionHolder.VERSION, logprefix, "sessionId: " + sessionId, "");
-            ResponseEntity<HttpReponse> authResponse = restTemplate.postForEntity(userServiceSessionDetailsUrl, accessToken, HttpReponse.class);
 
-            Date expiryTime = null;
+            try {
+                ResponseEntity<HttpReponse> authResponse = restTemplate.postForEntity(userServiceSessionDetailsUrl, accessToken, HttpReponse.class);
 
-            Auth auth = null;
-            String username = null;
+                Date expiryTime = null;
 
-            if (authResponse.getStatusCode() == HttpStatus.ACCEPTED) {
-                ObjectMapper mapper = new ObjectMapper();
-                Logger.application.warn(Logger.pattern, VersionHolder.VERSION, logprefix, "data: "+authResponse.getBody().getData(), "");
+                Auth auth = null;
+                String username = null;
 
-                auth = mapper.convertValue(authResponse.getBody().getData(), Auth.class);
-                username = auth.getSession().getUsername();
-                expiryTime = auth.getSession().getExpiry();
+                if (authResponse.getStatusCode() == HttpStatus.ACCEPTED) {
+                    ObjectMapper mapper = new ObjectMapper();
+                    Logger.application.warn(Logger.pattern, VersionHolder.VERSION, logprefix, "data: " + authResponse.getBody().getData(), "");
+
+                    auth = mapper.convertValue(authResponse.getBody().getData(), Auth.class);
+                    username = auth.getSession().getUsername();
+                    expiryTime = auth.getSession().getExpiry();
+                }
+
+                if (null != expiryTime && null != username) {
+                    long diff = 0;
+                    try {
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                        Date currentTime = sdf.parse(DateTimeUtil.currentTimestamp());
+                        diff = expiryTime.getTime() - currentTime.getTime();
+                    } catch (ParseException e) {
+                        Logger.application.warn(Logger.pattern, VersionHolder.VERSION, logprefix, "error calculating time to session expiry", "");
+                    }
+                    Logger.application.info(Logger.pattern, VersionHolder.VERSION, logprefix, "time to session expiry: " + diff + "ms", "");
+                    if (0 < diff) {
+                        MySQLUserDetails userDetails = new MySQLUserDetails(auth, auth.getAuthorities());
+
+                        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
+                                userDetails, null, userDetails.getAuthorities());
+                        usernamePasswordAuthenticationToken
+                                .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                        SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+                    } else {
+                        Logger.application.warn(Logger.pattern, VersionHolder.VERSION, logprefix, "session expired", "");
+                        //response.setStatus(HttpStatus.UNAUTHORIZED);
+                        response.getWriter().append("Session expired");
+                    }
+                }
+            } catch (IOException | IllegalArgumentException | RestClientException e) {
+                Logger.application.error(Logger.pattern, VersionHolder.VERSION, logprefix, "Exception processing session ", "", e);
+
             }
 
-            if (null != expiryTime && null != username) {
-                long diff = 0;
-                try {
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    Date currentTime = sdf.parse(DateTimeUtil.currentTimestamp());
-                    diff = expiryTime.getTime() - currentTime.getTime();
-                } catch (ParseException e) {
-                    Logger.application.warn(Logger.pattern, VersionHolder.VERSION, logprefix, "error calculating time to session expiry", "");
-                }
-                Logger.application.info(Logger.pattern, VersionHolder.VERSION, logprefix, "time to session expiry: " + diff + "ms", "");
-                if (0 < diff) {
-                    MySQLUserDetails userDetails = new MySQLUserDetails(auth, auth.getAuthorities());
-
-                    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-                            userDetails, null, userDetails.getAuthorities());
-                    usernamePasswordAuthenticationToken
-                            .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                    SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-                } else {
-                    Logger.application.warn(Logger.pattern, VersionHolder.VERSION, logprefix, "session expired", "");
-                    //response.setStatus(HttpStatus.UNAUTHORIZED);
-                    response.getWriter().append("Session expired");
-                }
-            }
         }
         chain.doFilter(request, response);
     }

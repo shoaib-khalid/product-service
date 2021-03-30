@@ -130,7 +130,7 @@ public class StoreController {
     @PreAuthorize("hasAnyAuthority('stores-post', 'all')")
     public ResponseEntity<HttpResponse> postStore(HttpServletRequest request,
             @Valid @RequestBody Store bodyStore) throws Exception {
-        String logprefix = request.getRequestURI() + " ";
+        String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
         Logger.application.info(ProductServiceApplication.VERSION, logprefix, "stores-post", "");
@@ -212,7 +212,7 @@ public class StoreController {
     public ResponseEntity<HttpResponse> postStoreCategoryByStoreId(HttpServletRequest request,
             @PathVariable String storeId,
             @Valid @RequestBody StoreCategory bodyStoreCategory) throws Exception {
-        String logprefix = request.getRequestURI() + " ";
+        String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
         Logger.application.info(ProductServiceApplication.VERSION, logprefix, "storeId: " + storeId);
@@ -241,7 +241,7 @@ public class StoreController {
     @PreAuthorize("hasAnyAuthority('store-categories-get-by-stores-id', 'all')")
     public ResponseEntity<HttpResponse> putStoreCategoryByStoreId(HttpServletRequest request,
             @PathVariable String storeId) {
-        String logprefix = request.getRequestURI() + " ";
+        String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
         Logger.application.info(ProductServiceApplication.VERSION, logprefix, "storeId: " + storeId);
