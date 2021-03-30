@@ -164,7 +164,7 @@ public class StoreProductAssetController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @Value("${product.assets.url:https://symplified.ai/assets/product-assets/}")
+    @Value("${product.assets.url:https://symplified.ai/product-assets/}")
     private String productAssetsBaseUrl;
 
     @PostMapping(path = {""}, name = "store-product-assets-post")

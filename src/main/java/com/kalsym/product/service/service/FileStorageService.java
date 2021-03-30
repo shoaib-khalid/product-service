@@ -21,10 +21,10 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class FileStorageService {
 
-    @Value("${product.assets.location:/var/kalsym/symplified/assets/products}")
+    @Value("${product.assets.location:/var/www/html/symplified-assets/product-assets}")
     private String productAssetStorageLocation;
 
-    @Value("${store.assets.location:/var/kalsym/symplified/assets/stores}")
+    @Value("${store.assets.location:/var/www/html/symplified-assets/store-assets}")
     private String storeAssetStorageLocation;
 
     private Path productAssetStorageaPath;
