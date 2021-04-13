@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.IdClass;
 import javax.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,20 +18,17 @@ import lombok.ToString;
 @Setter
 @ToString
 @Entity
-@Table(name = "product_inventory_item")
+@Table(name = "product_delivery_detail")
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@IdClass(ProductInventoryItemId.class)
-public class ProductInventoryItem implements Serializable {
+public class ProductDeliveryDetail implements Serializable {
 
     @Id
-    private String itemCode;
-
-    @Id
-    private String productVariantAvailableId;
-
     private String productId;
 
-    private Integer sequenceNumber;
+    private String type;
+    private String itemType;
+
+    private Double weight;
 
 }

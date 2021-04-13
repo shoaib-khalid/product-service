@@ -37,6 +37,9 @@ public class Store implements Serializable {
 
     private String verticalCode;
 
+    private String storeDescription;
+    private String postcode;
+
     public void update(Store store) {
 
         if (null != store.getCity()) {

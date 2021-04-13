@@ -3,15 +3,9 @@ package com.kalsym.product.service.controller;
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.model.product.Product;
-import com.kalsym.product.service.model.product.ProductReview;
-import com.kalsym.product.service.model.product.ProductAsset;
-import com.kalsym.product.service.model.product.ProductInventory;
-import com.kalsym.product.service.model.product.ProductInventoryItem;
-import com.kalsym.product.service.model.product.ProductVariant;
 import com.kalsym.product.service.model.product.ProductVariantAvailable;
 import com.kalsym.product.service.model.Store;
 import com.kalsym.product.service.model.repository.ProductAssetRepository;
-import com.kalsym.product.service.model.repository.ProductInventoryRepository;
 import com.kalsym.product.service.model.repository.ProductInventoryItemRepository;
 import com.kalsym.product.service.model.repository.StoreRepository;
 import com.kalsym.product.service.model.repository.ProductRepository;
@@ -19,17 +13,9 @@ import com.kalsym.product.service.model.repository.ProductVariantRepository;
 import com.kalsym.product.service.model.repository.ProductVariantAvailableRepository;
 import com.kalsym.product.service.model.repository.ProductReviewRepository;
 import com.kalsym.product.service.utility.Logger;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -37,24 +23,24 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.kalsym.product.service.model.repository.ProductInventoryWithDetailsRepository;
 
 /**
  *
  * @author 7cu
  */
 @RestController()
-@RequestMapping("/stores/{storeId}/products/{productId}/variants")
-public class StoreProductProductVariantController {
+@RequestMapping("/stores/{storeId}/products/{productId}/variants-available")
+public class StoreProductVariantAvailableController {
 
     @Autowired
     ProductRepository productRepository;
 
     @Autowired
-    ProductInventoryRepository productInventoryRepository;
+    ProductInventoryWithDetailsRepository productInventoryRepository;
 
     @Autowired
     ProductInventoryItemRepository productInventoryItemRepository;
@@ -74,9 +60,9 @@ public class StoreProductProductVariantController {
     @Autowired
     StoreRepository storeRepository;
 
-    @GetMapping(path = {""}, name = "store-product-variants-get", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('store-product-variants-get', 'all')")
-    public ResponseEntity<HttpResponse> getStoreProductVariants(HttpServletRequest request,
+    @GetMapping(path = {""}, name = "store-product-variant-available-get", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-product-variant-available-get', 'all')")
+    public ResponseEntity<HttpResponse> getStoreProductVariantAvailable(HttpServletRequest request,
             @PathVariable String storeId,
             @PathVariable String productId) {
         String logprefix = request.getRequestURI();
@@ -102,13 +88,13 @@ public class StoreProductProductVariantController {
         }
 
         response.setSuccessStatus(HttpStatus.OK);
-        response.setData(productVariantRepository.findByProductId(productId));
+        response.setData(productVariantAvailableRepository.findByProductId(productId));
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @GetMapping(path = {"/{id}"}, name = "store-product-variants-get-by-id", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('store-product-variants-get-by-id', 'all')")
-    public ResponseEntity<HttpResponse> getStoreProductVariantsById(HttpServletRequest request,
+    @GetMapping(path = {"/{id}"}, name = "store-product-variant-available-get-by-id", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-product-variant-available-get-by-id', 'all')")
+    public ResponseEntity<HttpResponse> getStoreProductVariantAvailableById(HttpServletRequest request,
             @PathVariable String storeId,
             @PathVariable String productId,
             @PathVariable String id) {
@@ -134,11 +120,11 @@ public class StoreProductProductVariantController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
 
-        Optional<ProductVariant> optProductVariant = productVariantRepository.findById(id);
+        Optional<ProductVariantAvailable> optProductVariant = productVariantAvailableRepository.findById(id);
 
         if (!optProductVariant.isPresent()) {
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "varaint NOT_FOUND varaintId: " + id);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND, "variant not found");
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "varaint-available NOT_FOUND varaintId: " + id);
+            response.setSuccessStatus(HttpStatus.NOT_FOUND, "varaint-available not found");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
 
@@ -147,9 +133,9 @@ public class StoreProductProductVariantController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @DeleteMapping(path = {"/{id}"}, name = "store-product-variants-delete-by-id", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('store-product-variants-delete-by-id', 'all')")
-    public ResponseEntity<HttpResponse> deleteStoreProductVariantsById(HttpServletRequest request,
+    @DeleteMapping(path = {"/{id}"}, name = "store-product-variant-available-delete-by-id", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-product-variant-available-delete-by-id', 'all')")
+    public ResponseEntity<HttpResponse> deleteStoreProductVariantAvailableById(HttpServletRequest request,
             @PathVariable String storeId,
             @PathVariable String productId,
             @PathVariable String id) {
@@ -175,25 +161,25 @@ public class StoreProductProductVariantController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
 
-        Optional<ProductVariant> optProductVariant = productVariantRepository.findById(id);
+        Optional<ProductVariantAvailable> optProductVariantAvailable = productVariantAvailableRepository.findById(id);
 
-        if (!optProductVariant.isPresent()) {
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "varaint NOT_FOUND varaintId: " + id);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND, "varaint not found");
+        if (!optProductVariantAvailable.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "varaint-available NOT_FOUND varaintId: " + id);
+            response.setSuccessStatus(HttpStatus.NOT_FOUND, "varaint-available not found");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
-        productVariantRepository.delete(optProductVariant.get());
+        productVariantAvailableRepository.delete(optProductVariantAvailable.get());
 
         response.setSuccessStatus(HttpStatus.OK);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @PostMapping(path = {""}, name = "store-product-variants-post", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('store-product-variants-post', 'all')")
-    public ResponseEntity<HttpResponse> postStoreProductVariants(HttpServletRequest request,
+    @PostMapping(path = {""}, name = "store-product-variant-available-post", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-product-variant-available-post', 'all')")
+    public ResponseEntity<HttpResponse> postStoreProductVariantAvailable(HttpServletRequest request,
             @PathVariable String storeId,
             @PathVariable String productId,
-            @RequestBody ProductVariant productVariant) {
+            @RequestBody ProductVariantAvailable variantAvailable) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
@@ -216,11 +202,9 @@ public class StoreProductProductVariantController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
 
-        productVariant.setProduct(optProdcut.get());
-
+        variantAvailable.setProductId(productId);
         response.setSuccessStatus(HttpStatus.OK);
-        response.setData(productVariantRepository.save(productVariant));
+        response.setData(productVariantAvailableRepository.save(variantAvailable));
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
-
 }

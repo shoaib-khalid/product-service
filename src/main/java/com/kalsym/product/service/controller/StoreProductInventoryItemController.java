@@ -6,7 +6,6 @@ import com.kalsym.product.service.model.product.Product;
 import com.kalsym.product.service.model.product.ProductInventoryItem;
 import com.kalsym.product.service.model.Store;
 import com.kalsym.product.service.model.repository.ProductAssetRepository;
-import com.kalsym.product.service.model.repository.ProductInventoryRepository;
 import com.kalsym.product.service.model.repository.StoreRepository;
 import com.kalsym.product.service.model.repository.ProductRepository;
 import com.kalsym.product.service.model.repository.ProductInventoryItemRepository;
@@ -25,6 +24,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.kalsym.product.service.model.repository.ProductInventoryWithDetailsRepository;
 
 /**
  *
@@ -38,7 +38,7 @@ public class StoreProductInventoryItemController {
     ProductRepository productRepository;
 
     @Autowired
-    ProductInventoryRepository productInventoryRepository;
+    ProductInventoryWithDetailsRepository productInventoryRepository;
 
     @Autowired
     ProductInventoryItemRepository productInventoryItemRepository;

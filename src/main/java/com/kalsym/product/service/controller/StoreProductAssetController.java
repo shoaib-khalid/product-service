@@ -6,11 +6,8 @@ import com.kalsym.product.service.model.product.Product;
 import com.kalsym.product.service.model.product.ProductAsset;
 import com.kalsym.product.service.model.Store;
 import com.kalsym.product.service.model.repository.ProductAssetRepository;
-import com.kalsym.product.service.model.repository.ProductInventoryRepository;
 import com.kalsym.product.service.model.repository.StoreRepository;
 import com.kalsym.product.service.model.repository.ProductRepository;
-import com.kalsym.product.service.model.repository.ProductInventoryRepository;
-import com.kalsym.product.service.model.repository.ProductReviewRepository;
 import com.kalsym.product.service.service.FileStorageService;
 import com.kalsym.product.service.utility.Logger;
 import java.util.Optional;
@@ -24,7 +21,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -173,7 +169,7 @@ public class StoreProductAssetController {
             @PathVariable String storeId,
             @PathVariable String productId,
             @RequestParam("file") MultipartFile file,
-            @RequestParam String itemCode) {
+            @RequestParam(required = false) String itemCode) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
@@ -199,7 +195,7 @@ public class StoreProductAssetController {
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "OriginalFilename: " + file.getOriginalFilename());
 
-        String storagePath = fileStorageService.saveProductAsset(file, file.getOriginalFilename());
+        String storagePath = fileStorageService.saveProductAsset(file, itemCode+file.getOriginalFilename().replace(" ", ""));
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "storagePath: " + storagePath);
 
         ProductAsset productAsset = new ProductAsset();

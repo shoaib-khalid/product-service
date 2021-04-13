@@ -7,7 +7,6 @@ import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.util.Objects;
@@ -16,6 +15,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -55,6 +55,12 @@ public class ProductWithDetails implements Serializable {
 
     private String thumbnailUrl;
 
+    private String vendor;
+
+    private String barcode;
+
+    private String region;
+
     @OneToMany(cascade = CascadeType.ALL,
             fetch = FetchType.LAZY)
     @JoinColumn(name = "productId")
@@ -63,12 +69,22 @@ public class ProductWithDetails implements Serializable {
     @OneToMany(cascade = CascadeType.ALL,
             fetch = FetchType.LAZY)
     @JoinColumn(name = "productId")
-    private Set<ProductInventory> productInventories = new HashSet<>();
+    private Set<ProductInventoryWithDetails> productInventories = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL,
             fetch = FetchType.LAZY)
     @JoinColumn(name = "productId")
     private Set<ProductReview> productReviews = new HashSet<>();
+
+    @OneToMany(cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY)
+    @JoinColumn(name = "productId")
+    private List<ProductAsset> productAssets;
+
+    @OneToOne(cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY)
+    @JoinColumn(name = "id", referencedColumnName = "productId", insertable = false, updatable = false, nullable = true)
+    private ProductDeliveryDetail productDeliveryDetail;
 
     public void update(ProductWithDetails product) {
         if (null != product.getName()) {

@@ -30,7 +30,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @Table(name = "product_inventory")
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ProductInventory implements Serializable {
+public class ProductInventoryWithDetails implements Serializable {
 
     @Id
     private String itemCode;
@@ -44,5 +44,10 @@ public class ProductInventory implements Serializable {
     private Integer quantity;
 
     private String productId;
+
+    @OneToMany(cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY)
+    @JoinColumn(name = "itemCode")
+    private List<ProductInventoryItem> productInventoryItems;
 
 }

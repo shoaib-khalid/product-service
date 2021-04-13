@@ -3,14 +3,12 @@ package com.kalsym.product.service.controller;
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.model.product.Product;
+import com.kalsym.product.service.model.product.ProductInventoryWithDetails;
 import com.kalsym.product.service.model.product.ProductInventory;
 import com.kalsym.product.service.model.Store;
-import com.kalsym.product.service.model.repository.ProductAssetRepository;
 import com.kalsym.product.service.model.repository.ProductInventoryRepository;
 import com.kalsym.product.service.model.repository.StoreRepository;
 import com.kalsym.product.service.model.repository.ProductRepository;
-import com.kalsym.product.service.model.repository.ProductInventoryRepository;
-import com.kalsym.product.service.model.repository.ProductReviewRepository;
 import com.kalsym.product.service.utility.Logger;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
@@ -25,6 +23,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.kalsym.product.service.model.repository.ProductInventoryWithDetailsRepository;
+import java.util.ArrayList;
+import java.util.List;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  *
@@ -38,6 +40,9 @@ public class StoreProductInventoryController {
     ProductRepository productRepository;
 
     @Autowired
+    ProductInventoryWithDetailsRepository productInventoryWithDetailsRepository;
+
+    @Autowired
     ProductInventoryRepository productInventoryRepository;
 
     @Autowired
@@ -47,7 +52,8 @@ public class StoreProductInventoryController {
     @PreAuthorize("hasAnyAuthority('store-product-inventory-get', 'all')")
     public ResponseEntity<HttpResponse> getStoreProductInventorys(HttpServletRequest request,
             @PathVariable String storeId,
-            @PathVariable String productId) {
+            @PathVariable String productId,
+            @RequestParam List<String> variantIds) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
@@ -70,8 +76,39 @@ public class StoreProductInventoryController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
 
+        List<ProductInventoryWithDetails> productInventorys = productInventoryWithDetailsRepository.findByProductId(productId);
+
+        List<ProductInventoryWithDetails> returnProductInventorys = new ArrayList<>();
+        for (int i = 0; i < productInventorys.size(); i++) {
+            if (null != productInventorys.get(i).getProductInventoryItems()
+                    && !productInventorys.get(i).getProductInventoryItems().isEmpty()) {
+
+                if (productInventorys.get(i).getProductInventoryItems().size() == 1) {
+                    String ii1Id = productInventorys.get(i).getProductInventoryItems().get(0).getProductVariantAvailableId();
+
+                    if (ii1Id.equalsIgnoreCase(variantIds.get(0))) {
+                        returnProductInventorys.add(productInventorys.get(i));
+                    }
+                }
+
+                if (productInventorys.get(i).getProductInventoryItems().size() == 2) {
+                    String ii1Id = productInventorys.get(i).getProductInventoryItems().get(0).getProductVariantAvailableId();
+                    String ii2Id = productInventorys.get(i).getProductInventoryItems().get(1).getProductVariantAvailableId();
+
+                    if ((ii1Id.equalsIgnoreCase(variantIds.get(0)) && ii2Id.equalsIgnoreCase(variantIds.get(1)))
+                            || (ii1Id.equalsIgnoreCase(variantIds.get(1)) && ii2Id.equalsIgnoreCase(variantIds.get(0)))) {
+                        returnProductInventorys.add(productInventorys.get(i));
+                    }
+                }
+            }
+        }
+
         response.setSuccessStatus(HttpStatus.OK);
-        response.setData(productInventoryRepository.findByProductId(productId));
+        if (returnProductInventorys.size() > 0) {
+            response.setData(returnProductInventorys);
+        } else {
+            response.setData(productInventoryWithDetailsRepository.findByProductId(productId));
+        }
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -103,7 +140,7 @@ public class StoreProductInventoryController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
 
-        Optional<ProductInventory> optProductInventory = productInventoryRepository.findById(id);
+        Optional<ProductInventoryWithDetails> optProductInventory = productInventoryWithDetailsRepository.findById(id);
 
         if (!optProductInventory.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "inventory NOT_FOUND inventoryId: " + id);
@@ -144,6 +181,8 @@ public class StoreProductInventoryController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
 
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "FOUND productId: " + productId);
+
         Optional<ProductInventory> optProductInventory = productInventoryRepository.findById(id);
 
         if (!optProductInventory.isPresent()) {
@@ -151,7 +190,11 @@ public class StoreProductInventoryController {
             response.setSuccessStatus(HttpStatus.NOT_FOUND, "inventory not found");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
-        productInventoryRepository.delete(optProductInventory.get());
+
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "FOUND inventoryId: " + id);
+
+        ProductInventory pi = optProductInventory.get();
+        productInventoryRepository.delete(pi);
 
         response.setSuccessStatus(HttpStatus.OK);
         return ResponseEntity.status(HttpStatus.OK).body(response);

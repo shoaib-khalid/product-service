@@ -140,8 +140,7 @@ public class StoreAssetController {
     public ResponseEntity<HttpResponse> postStoreAssets(HttpServletRequest request,
             @PathVariable String storeId,
             @RequestParam("logo") MultipartFile logo,
-            @RequestParam("banner") MultipartFile banner,
-            @RequestParam String name) {
+            @RequestParam("banner") MultipartFile banner) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
 

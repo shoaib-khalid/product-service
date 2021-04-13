@@ -3,7 +3,7 @@ package com.kalsym.product.service.controller;
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.model.product.Product;
-import com.kalsym.product.service.model.product.ProductWithDetails;
+import com.kalsym.product.service.model.product.ProductVariant;
 import com.kalsym.product.service.model.Store;
 import com.kalsym.product.service.model.repository.ProductAssetRepository;
 import com.kalsym.product.service.model.repository.ProductInventoryItemRepository;
@@ -12,16 +12,10 @@ import com.kalsym.product.service.model.repository.ProductRepository;
 import com.kalsym.product.service.model.repository.ProductVariantRepository;
 import com.kalsym.product.service.model.repository.ProductVariantAvailableRepository;
 import com.kalsym.product.service.model.repository.ProductReviewRepository;
-import com.kalsym.product.service.model.repository.ProductWithDetailsRepository;
 import com.kalsym.product.service.utility.Logger;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,10 +23,8 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.kalsym.product.service.model.repository.ProductInventoryWithDetailsRepository;
 
@@ -41,14 +33,11 @@ import com.kalsym.product.service.model.repository.ProductInventoryWithDetailsRe
  * @author 7cu
  */
 @RestController()
-@RequestMapping("/stores/{storeId}/products")
-public class StoreProductController {
+@RequestMapping("/stores/{storeId}/products/{productId}/variants")
+public class StoreProductVariantController {
 
     @Autowired
     ProductRepository productRepository;
-
-    @Autowired
-    ProductWithDetailsRepository productWithDetailsRepository;
 
     @Autowired
     ProductInventoryWithDetailsRepository productInventoryRepository;
@@ -71,13 +60,11 @@ public class StoreProductController {
     @Autowired
     StoreRepository storeRepository;
 
-    @GetMapping(path = {""}, name = "store-products-get", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('store-products-get', 'all')")
-    public ResponseEntity<HttpResponse> getStoreProducts(HttpServletRequest request,
+    @GetMapping(path = {""}, name = "store-product-variants-get", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-product-variants-get', 'all')")
+    public ResponseEntity<HttpResponse> getStoreProductVariants(HttpServletRequest request,
             @PathVariable String storeId,
-            @RequestParam(required = false) String categoryId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int pageSize) {
+            @PathVariable String productId) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
@@ -92,27 +79,24 @@ public class StoreProductController {
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
 
-        ProductWithDetails productMatch = new ProductWithDetails();
+        Optional<Product> optProdcut = productRepository.findById(productId);
 
-        Pageable pageable = PageRequest.of(page, pageSize);
-        productMatch.setStoreId(storeId);
-        productMatch.setCategoryId(categoryId);
-        ExampleMatcher matcher = ExampleMatcher
-                .matchingAll()
-                .withIgnoreCase()
-                .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
-        Example<ProductWithDetails> example = Example.of(productMatch, matcher);
+        if (!optProdcut.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product NOT_FOUND storeId: " + productId);
+            response.setSuccessStatus(HttpStatus.NOT_FOUND, "product not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
 
-        //List<ProductWithDetails> products = productWithDetailsRepository.findByStoreId(storeId);
         response.setSuccessStatus(HttpStatus.OK);
-        response.setData(productWithDetailsRepository.findAll(example, pageable));
+        response.setData(productVariantRepository.findByProductId(productId));
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @GetMapping(path = {"/{id}"}, name = "store-products-get-by-id", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('store-products-get-by-id', 'all')")
-    public ResponseEntity<HttpResponse> getStoreProductById(HttpServletRequest request,
+    @GetMapping(path = {"/{id}"}, name = "store-product-variants-get-by-id", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-product-variants-get-by-id', 'all')")
+    public ResponseEntity<HttpResponse> getStoreProductVariantsById(HttpServletRequest request,
             @PathVariable String storeId,
+            @PathVariable String productId,
             @PathVariable String id) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
@@ -128,26 +112,32 @@ public class StoreProductController {
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
 
-        Optional<ProductWithDetails> optProdcut = productWithDetailsRepository.findById(id);
+        Optional<Product> optProdcut = productRepository.findById(productId);
 
         if (!optProdcut.isPresent()) {
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product NOT_FOUND storeId: " + id);
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product NOT_FOUND productId: " + productId);
             response.setSuccessStatus(HttpStatus.NOT_FOUND, "product not found");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product FOUND storeId: " + id);
 
-        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "store found for id: {}", storeId);
+        Optional<ProductVariant> optProductVariant = productVariantRepository.findById(id);
+
+        if (!optProductVariant.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "varaint NOT_FOUND varaintId: " + id);
+            response.setSuccessStatus(HttpStatus.NOT_FOUND, "variant not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
 
         response.setSuccessStatus(HttpStatus.OK);
-        response.setData(optProdcut.get());
+        response.setData(optProductVariant.get());
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @DeleteMapping(path = {"/{id}"}, name = "store-products-delete-by-id", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('store-products-delete-by-id', 'all')")
-    public ResponseEntity<HttpResponse> deleteStoreProductById(HttpServletRequest request,
+    @DeleteMapping(path = {"/{id}"}, name = "store-product-variants-delete-by-id", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-product-variants-delete-by-id', 'all')")
+    public ResponseEntity<HttpResponse> deleteStoreProductVariantsById(HttpServletRequest request,
             @PathVariable String storeId,
+            @PathVariable String productId,
             @PathVariable String id) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
@@ -163,28 +153,33 @@ public class StoreProductController {
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
 
-        Optional<Product> optProdcut = productRepository.findById(id);
+        Optional<Product> optProdcut = productRepository.findById(productId);
 
         if (!optProdcut.isPresent()) {
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product NOT_FOUND storeId: " + id);
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product NOT_FOUND productId: " + productId);
             response.setSuccessStatus(HttpStatus.NOT_FOUND, "product not found");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product FOUND storeId: " + id);
 
-        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "store found for id: {}", storeId);
+        Optional<ProductVariant> optProductVariant = productVariantRepository.findById(id);
+
+        if (!optProductVariant.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "varaint NOT_FOUND varaintId: " + id);
+            response.setSuccessStatus(HttpStatus.NOT_FOUND, "varaint not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+        productVariantRepository.delete(optProductVariant.get());
 
         response.setSuccessStatus(HttpStatus.OK);
-        productRepository.delete(optProdcut.get());
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @PutMapping(path = {"/{id}"}, name = "store-products-put-by-id", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('store-products-put-by-id', 'all')")
-    public ResponseEntity<HttpResponse> putStoreProductById(HttpServletRequest request,
+    @PostMapping(path = {""}, name = "store-product-variants-post", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-product-variants-post', 'all')")
+    public ResponseEntity<HttpResponse> postStoreProductVariants(HttpServletRequest request,
             @PathVariable String storeId,
-            @PathVariable String id,
-            @Valid @RequestBody Product bodyProduct) {
+            @PathVariable String productId,
+            @RequestBody ProductVariant productVariant) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
@@ -199,49 +194,19 @@ public class StoreProductController {
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
 
-        Optional<Product> optProdcut = productRepository.findById(id);
+        Optional<Product> optProdcut = productRepository.findById(productId);
 
         if (!optProdcut.isPresent()) {
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product NOT_FOUND storeId: " + id);
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product NOT_FOUND storeId: " + productId);
             response.setSuccessStatus(HttpStatus.NOT_FOUND, "product not found");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product FOUND storeId: " + id);
 
-        Product product = optProdcut.get();
-        product.update(bodyProduct);
+        productVariant.setProduct(optProdcut.get());
 
         response.setSuccessStatus(HttpStatus.OK);
-        response.setData(productRepository.save(product));
+        response.setData(productVariantRepository.save(productVariant));
         return ResponseEntity.status(HttpStatus.OK).body(response);
-    }
-
-    @PostMapping(path = {""}, name = "store-products-post")
-    @PreAuthorize("hasAnyAuthority('store-products-post', 'all')")
-    public ResponseEntity<HttpResponse> postStoreProduct(HttpServletRequest request,
-            @PathVariable String storeId,
-            @Valid @RequestBody Product bodyProduct) throws Exception {
-        String logprefix = request.getRequestURI();
-        HttpResponse response = new HttpResponse(request.getRequestURI());
-
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "storeId: " + storeId);
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "bodyProduct: " + bodyProduct.toString());
-
-        Optional<Store> optStore = storeRepository.findById(storeId);
-
-        if (!optStore.isPresent()) {
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND, "store not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-        }
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
-
-        Product savedProduct = productRepository.save(bodyProduct);
-        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "product added to store with storeId: {}, productId: {}" + storeId, savedProduct.getId());
-
-        response.setSuccessStatus(HttpStatus.CREATED);
-        response.setData(savedProduct);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
 }

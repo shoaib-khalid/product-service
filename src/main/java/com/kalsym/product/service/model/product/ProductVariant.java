@@ -47,4 +47,7 @@ public class ProductVariant implements Serializable {
             fetch = FetchType.LAZY)
     @JoinColumn(name = "productVariantId")
     private List<ProductVariantAvailable> productVariantsAvailable;
+    
+    
+    private Integer sequenceNumber;
 }

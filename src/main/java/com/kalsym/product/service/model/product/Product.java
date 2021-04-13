@@ -53,7 +53,6 @@ public class Product implements Serializable {
 
     private String region;
 
-    private Double weight;
 
     public void update(Product product) {
         if (null != product.getName()) {
@@ -67,6 +66,16 @@ public class Product implements Serializable {
         if (null != product.getCategoryId()) {
             categoryId = product.getCategoryId();
         }
+        
+        if(null!=product.getDescription()){
+            description = product.getDescription();
+        }
+        
+        if(null!=product.getStatus()){
+            status = product.getStatus();
+        }
+        
+        
     }
 
     @Override
