@@ -29,6 +29,10 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
         
         <!--spring boot security -->
         <dependency>
@@ -130,17 +134,15 @@
                             </mainClass>
                         </manifest>
                     </archive>
-                    <include resource="logback.xml"/>
                 </configuration>
             </plugin>
         </plugins>
         <resources>
             <resource>
                 <filtering>true</filtering>
-                <directory>./</directory>
+                <directory>src/main/resources</directory>
                 <includes>
                     <include>application.properties</include>
-                    <include resource="logback.xml"/>
                 </includes>
             </resource>
         </resources>

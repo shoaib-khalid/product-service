@@ -1,12 +1,10 @@
 package com.kalsym.product.service.service;
 
 import com.kalsym.product.service.ProductServiceApplication;
-import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.utility.Logger;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.nio.file.Path;

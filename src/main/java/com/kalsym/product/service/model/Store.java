@@ -40,6 +40,8 @@ public class Store implements Serializable {
     private String storeDescription;
     private String postcode;
 
+    private String domain;
+
     public void update(Store store) {
 
         if (null != store.getCity()) {
@@ -59,6 +61,14 @@ public class Store implements Serializable {
         }
         if (null != store.getVerticalCode()) {
             verticalCode = store.getVerticalCode();
+        }
+
+        if (null != store.getStoreDescription()) {
+            storeDescription = store.getStoreDescription();
+        }
+
+        if (null != store.getPostcode()) {
+            postcode = store.getPostcode();
         }
 
     }

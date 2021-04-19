@@ -1,13 +1,12 @@
 package com.kalsym.product.service.controller;
 
+import com.kalsym.product.service.service.StoreSubdomainHandler;
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.model.StoreCategory;
-import com.kalsym.product.service.model.product.Product;
 import com.kalsym.product.service.model.repository.ProductRepository;
 import com.kalsym.product.service.model.repository.StoreRepository;
 import com.kalsym.product.service.utility.HttpResponse;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Set;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -20,9 +19,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.kalsym.product.service.model.Store;
-import com.kalsym.product.service.model.product.*;
 import com.kalsym.product.service.model.repository.StoreCategoryRepository;
 import com.kalsym.product.service.utility.Logger;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Example;
@@ -69,6 +68,9 @@ public class StoreController {
     @Autowired
     StoreCategoryRepository storeCategoryRepository;
 
+    @Autowired
+    StoreSubdomainHandler storeSubdomainHandler;
+
     @GetMapping(path = {""}, name = "stores-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('stores-get', 'all')")
     public ResponseEntity<HttpResponse> getStore(HttpServletRequest request,
@@ -92,7 +94,7 @@ public class StoreController {
         ExampleMatcher matcher = ExampleMatcher
                 .matchingAll()
                 .withIgnoreCase()
-                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
+                .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
         Example<Store> example = Example.of(store, matcher);
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "page: " + page + " pageSize: " + pageSize, "");
@@ -133,19 +135,53 @@ public class StoreController {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
-        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "stores-post", "");
-        Logger.application.info(ProductServiceApplication.VERSION, logprefix, bodyStore.toString(), "");
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store: " + bodyStore.toString(), "");
 
         response.setSuccessStatus(HttpStatus.CREATED);
         Store savedStore = null;
-        try {
-            savedStore = storeRepository.save(bodyStore);
-        } catch (Exception exp) {
-            Logger.application.error("Error in creating store", exp);
-            response.setMessage(exp.getMessage());
-            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(response);
+        List<Store> stores = storeRepository.findAll();
+
+        List<String> errors = new ArrayList<>();
+
+        for (Store store : stores) {
+            if (store.getName().equals(bodyStore.getName())) {
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store name already exists", "");
+                response.setErrorStatus(HttpStatus.CONFLICT);
+                errors.add("store name already exists");
+                response.setData(errors);
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+            }
+
+            if (store.getDomain() != null && store.getDomain().equals(bodyStore.getDomain())) {
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store domain already exists", "");
+                response.setErrorStatus(HttpStatus.CONFLICT);
+                errors.add("store domain already exists");
+                response.setData(errors);
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+            }
+
         }
-        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "store created with id: " + savedStore.getId());
+
+        try {
+
+            String domain = storeSubdomainHandler.createSubDomain(bodyStore.getDomain());
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "domain: " + domain, "");
+
+            if (domain != null) {
+                bodyStore.setDomain(domain);
+                savedStore = storeRepository.save(bodyStore);
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store created with id: " + savedStore.getId(), "");
+            } else {
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "domain could not be created", "");
+                response.setSuccessStatus(HttpStatus.INTERNAL_SERVER_ERROR, "domain could nto be created");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            }
+
+        } catch (Exception e) {
+            Logger.application.error(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " error creating store ", "", e);
+            response.setMessage(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
         response.setData(savedStore);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -204,8 +240,6 @@ public class StoreController {
         response.setSuccessStatus(HttpStatus.OK);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
-
-    
 
     @PostMapping(path = {"/{storeId}/store-categories"}, name = "store-categories-post-by-store-id")
     @PreAuthorize("hasAnyAuthority('store-categories-post-by-store-id', 'all')")

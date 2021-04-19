@@ -57,16 +57,19 @@ public class SessionRequestFilter extends OncePerRequestFilter {
 
         String accessToken = null;
 
+        boolean tokenPresent = false;
+
         // Token is in the form "Bearer token". Remove Bearer word and get only the Token
         if (null != authHeader && authHeader.startsWith("Bearer ")) {
             accessToken = authHeader.replace("Bearer ", "");
             Logger.application.warn(Logger.pattern, VersionHolder.VERSION, logprefix, "token: " + accessToken, "");
             Logger.application.warn(Logger.pattern, VersionHolder.VERSION, logprefix, "token length: " + accessToken.length(), "");
-
+            tokenPresent = true;
         } else {
             Logger.application.warn(Logger.pattern, VersionHolder.VERSION, logprefix, "token does not begin with Bearer String", "");
         }
 
+        boolean authorized = false;
         if (accessToken != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             //Logger.application.info(Logger.pattern, VersionHolder.VERSION, logprefix, "sessionId: " + sessionId, "");
 
@@ -98,6 +101,7 @@ public class SessionRequestFilter extends OncePerRequestFilter {
                     }
                     Logger.application.info(Logger.pattern, VersionHolder.VERSION, logprefix, "time to session expiry: " + diff + "ms", "");
                     if (0 < diff) {
+                        authorized = true;
                         MySQLUserDetails userDetails = new MySQLUserDetails(auth, auth.getAuthorities());
 
                         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
@@ -118,6 +122,9 @@ public class SessionRequestFilter extends OncePerRequestFilter {
             }
 
         }
+
+        Logger.cdr.info(request.getRemoteAddr() + "," + request.getMethod() + "," + request.getRequestURI() + "," + tokenPresent + "," + authorized);
+
         chain.doFilter(request, response);
     }
 }
