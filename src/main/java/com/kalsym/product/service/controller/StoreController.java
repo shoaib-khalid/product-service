@@ -19,7 +19,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.kalsym.product.service.model.Store;
+import com.kalsym.product.service.model.livechatgroup.StoreCreationResponse;
 import com.kalsym.product.service.model.repository.StoreCategoryRepository;
+import com.kalsym.product.service.service.StoreLiveChatService;
 import com.kalsym.product.service.utility.Logger;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,6 +72,9 @@ public class StoreController {
 
     @Autowired
     StoreSubdomainHandler storeSubdomainHandler;
+
+    @Autowired
+    StoreLiveChatService storeLiveChatService;
 
     @GetMapping(path = {""}, name = "stores-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('stores-get', 'all')")
@@ -177,6 +182,21 @@ public class StoreController {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
             }
 
+            StoreCreationResponse scr = storeLiveChatService.createGroup(domain);
+
+            if (scr == null) {
+                storeRepository.delete(savedStore);
+                Logger.application.error(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store group could not be created", "");
+                response.setSuccessStatus(HttpStatus.INTERNAL_SERVER_ERROR, "store group could nto be created");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            } else {
+                savedStore.setLiveChatGroupId(scr.get_id());
+                savedStore.setLiveChatGroupName(domain);
+                storeRepository.save(savedStore);
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store group created", "");
+
+            }
+
         } catch (Exception e) {
             Logger.application.error(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " error creating store ", "", e);
             response.setMessage(e.getMessage());
@@ -234,6 +254,9 @@ public class StoreController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND id: " + id);
+
+        storeLiveChatService.deleteGroup(optStore.get().getLiveChatGroupId());
+
         storeRepository.deleteById(id);
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "deleted store with id: " + id);

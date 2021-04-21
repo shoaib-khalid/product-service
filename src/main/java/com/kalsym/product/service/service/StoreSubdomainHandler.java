@@ -38,15 +38,6 @@ public class StoreSubdomainHandler {
 
         String logprefix = "createSubDomain";
 
-//        
-//        WebClient client = WebClient.builder()
-//                
-//                .baseUrl(storeSubDomainCreationUrl)
-//                .defaultHeader("Authorization", "sso-key AEhWg2ekEsa_6SfRAspfXZeEFbAef1AX8N:2LXBVGr7tRcaerxE587WJN")
-//                .;
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "baseUrl: " + storeSubDomainCreationUrl, "");
-        WebClient webClient = WebClient.create(storeSubDomainCreationUrl);
-
         DomainCreationRequestBody dcrb = new DomainCreationRequestBody();
         dcrb.setData("@");
         dcrb.setName("beta");
@@ -55,6 +46,8 @@ public class StoreSubdomainHandler {
         dcrb.setWeight(0);
         List<DomainCreationRequestBody> list = new ArrayList<>();
         String url = storeSubDomainCreationUrl + "/" + name;
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "url: " + url, "");
+
         try {
 
             RestTemplate restTemplate = new RestTemplate();

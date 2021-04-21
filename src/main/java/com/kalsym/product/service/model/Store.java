@@ -41,6 +41,10 @@ public class Store implements Serializable {
     private String postcode;
 
     private String domain;
+    
+    private String liveChatGroupName;
+    
+    private String liveChatGroupId;
 
     public void update(Store store) {
 

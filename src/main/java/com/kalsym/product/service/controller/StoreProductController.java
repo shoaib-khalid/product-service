@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.kalsym.product.service.model.repository.ProductInventoryWithDetailsRepository;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  *
@@ -235,6 +236,10 @@ public class StoreProductController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
+
+        String productSecoUrl = optStore.get().getDomain() + ".smplified.biz/products/" + bodyProduct.getName().replace(" ", "-");
+
+        bodyProduct.setSeoUrl(productSecoUrl);
 
         Product savedProduct = productRepository.save(bodyProduct);
         Logger.application.info(ProductServiceApplication.VERSION, logprefix, "product added to store with storeId: {}, productId: {}" + storeId, savedProduct.getId());
