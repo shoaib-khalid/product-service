@@ -99,7 +99,6 @@ public class StoreAssetController {
 //        response.setData(optStoreAsset.get());
 //        return ResponseEntity.status(HttpStatus.OK).body(response);
 //    }
-
     @DeleteMapping(path = {"/{id}"}, name = "store-assets-delete-by-id", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-assets-delete-by-id', 'all')")
     public ResponseEntity<HttpResponse> deleteStoreAssetsById(HttpServletRequest request,
@@ -139,8 +138,8 @@ public class StoreAssetController {
     @PreAuthorize("hasAnyAuthority('store-assets-post', 'all')")
     public ResponseEntity<HttpResponse> postStoreAssets(HttpServletRequest request,
             @PathVariable String storeId,
-            @RequestParam("logo") MultipartFile logo,
-            @RequestParam("banner") MultipartFile banner) {
+            @RequestParam(name = "logo", required = false) MultipartFile logo,
+            @RequestParam(name = "banner", required = false) MultipartFile banner) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
 

@@ -76,6 +76,11 @@ public class Product implements Serializable {
         if(null!=product.getStatus()){
             status = product.getStatus();
         }
+        if(null!=product.getThumbnailUrl()){
+            thumbnailUrl = product.getThumbnailUrl();
+        }
+        
+        
         
         
     }

@@ -35,6 +35,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.kalsym.product.service.model.repository.ProductInventoryWithDetailsRepository;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 
 /**
@@ -76,6 +81,7 @@ public class StoreProductController {
     @PreAuthorize("hasAnyAuthority('store-products-get', 'all')")
     public ResponseEntity<HttpResponse> getStoreProducts(HttpServletRequest request,
             @PathVariable String storeId,
+            @RequestParam(required = false) String name,
             @RequestParam(required = false) String categoryId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int pageSize) {
@@ -98,6 +104,8 @@ public class StoreProductController {
         Pageable pageable = PageRequest.of(page, pageSize);
         productMatch.setStoreId(storeId);
         productMatch.setCategoryId(categoryId);
+        productMatch.setName(name);
+        productMatch.setStatus("ACTIVE");
         ExampleMatcher matcher = ExampleMatcher
                 .matchingAll()
                 .withIgnoreCase()
@@ -237,7 +245,21 @@ public class StoreProductController {
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
 
-        String productSecoUrl = optStore.get().getDomain() + ".smplified.biz/products/" + bodyProduct.getName().replace(" ", "-");
+        List<String> errors = new ArrayList<>();
+        List<Product> products = productRepository.findByStoreId(storeId);
+
+        for (Product existingProduct : products) {
+            if (existingProduct.getName().equals(bodyProduct.getName())) {
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "username already exists", "");
+                response.setErrorStatus(HttpStatus.CONFLICT);
+                errors.add("product name already exists");
+                response.setData(errors);
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+            }
+
+        }
+
+        String productSecoUrl = "https://"+optStore.get().getDomain() + ".smplified.store/products/name/" + bodyProduct.getName().replace(" ", "%20");
 
         bodyProduct.setSeoUrl(productSecoUrl);
 

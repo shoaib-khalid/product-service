@@ -42,9 +42,13 @@ public class Store implements Serializable {
 
     private String domain;
     
-    private String liveChatGroupName;
+    private String liveChatOrdersGroupId;
     
-    private String liveChatGroupId;
+    private String liveChatOrdersGroupName;
+    
+    private String liveChatCsrGroupId;
+    
+    private String liveChatCsrGroupName;
 
     public void update(Store store) {
 

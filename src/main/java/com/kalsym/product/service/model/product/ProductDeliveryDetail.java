@@ -16,11 +16,11 @@ import lombok.ToString;
  */
 @Getter
 @Setter
-@ToString
 @Entity
 @Table(name = "product_delivery_detail")
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@ToString
 public class ProductDeliveryDetail implements Serializable {
 
     @Id
@@ -30,5 +30,19 @@ public class ProductDeliveryDetail implements Serializable {
     private String itemType;
 
     private Double weight;
+
+    public void update(ProductDeliveryDetail productDeliveryDetail) {
+        if (productDeliveryDetail.getType() != null) {
+            type = productDeliveryDetail.getType();
+        }
+
+        if (productDeliveryDetail.getWeight() != null) {
+            weight = productDeliveryDetail.getWeight();
+        }
+
+        if (productDeliveryDetail.getItemType() != null) {
+            itemType = productDeliveryDetail.getItemType();
+        }
+    }
 
 }

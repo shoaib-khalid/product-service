@@ -32,7 +32,6 @@ import org.hibernate.annotations.GenericGenerator;
 @Entity
 @Table(name = "product")
 @NoArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProductWithDetails implements Serializable {
 
     @Id
@@ -60,6 +59,8 @@ public class ProductWithDetails implements Serializable {
     private String barcode;
 
     private String region;
+
+    private String seoUrl;
 
     @OneToMany(cascade = CascadeType.ALL,
             fetch = FetchType.LAZY)

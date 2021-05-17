@@ -10,6 +10,7 @@ import com.kalsym.product.service.model.repository.StoreRepository;
 import com.kalsym.product.service.model.repository.ProductRepository;
 import com.kalsym.product.service.service.FileStorageService;
 import com.kalsym.product.service.utility.Logger;
+import java.util.List;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -150,10 +151,18 @@ public class StoreProductAssetController {
         Optional<ProductAsset> optProductAsset = productAssetRepository.findById(id);
 
         if (!optProductAsset.isPresent()) {
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "inventory NOT_FOUND inventoryId: " + id);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND, "inventory not found");
+            Logger.application.warn(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product asset NOT_FOUND inventoryId: " + id);
+            response.setSuccessStatus(HttpStatus.NOT_FOUND, "product asset not found");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
+
+        Product product = optProdcut.get();
+        if (optProductAsset.get().getUrl().equals(product.getThumbnailUrl())) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "deleting thumbail: " + id);
+            product.setThumbnailUrl(null);
+            productRepository.save(product);
+        }
+
         productAssetRepository.delete(optProductAsset.get());
 
         response.setSuccessStatus(HttpStatus.OK);
@@ -169,7 +178,8 @@ public class StoreProductAssetController {
             @PathVariable String storeId,
             @PathVariable String productId,
             @RequestParam("file") MultipartFile file,
-            @RequestParam(required = false) String itemCode) {
+            @RequestParam(required = false) String itemCode,
+            @RequestParam(required = false) Boolean isThumbnail) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
@@ -195,17 +205,43 @@ public class StoreProductAssetController {
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "OriginalFilename: " + file.getOriginalFilename());
 
-        String storagePath = fileStorageService.saveProductAsset(file, itemCode+file.getOriginalFilename().replace(" ", ""));
+        String storagePath = fileStorageService.saveProductAsset(file, itemCode + file.getOriginalFilename().replace(" ", ""));
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "storagePath: " + storagePath);
 
         ProductAsset productAsset = new ProductAsset();
         productAsset.setProductId(productId);
         productAsset.setName(file.getOriginalFilename());
         productAsset.setItemCode(itemCode);
-        productAsset.setUrl(productAssetsBaseUrl + file.getOriginalFilename());
-        //productAsset.setProduct(optProdcut.get());
+        //productAsset.setIsThumbnail(isThumbnail);
+        productAsset.setUrl(productAssetsBaseUrl + itemCode + file.getOriginalFilename().replace(" ", ""));
+
+        productAsset = productAssetRepository.save(productAsset);
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "saved image: " + productAsset.getId());
+
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "isThumbnail: " + isThumbnail);
+
+        Product product = optProdcut.get();
+        if (isThumbnail) {
+
+            product.setThumbnailUrl(productAsset.getUrl());
+            productRepository.save(product);
+            List<ProductAsset> productAssets = productAssetRepository.findByProductId(productId);
+
+            for (ProductAsset productA : productAssets) {
+                if (!productA.getId().equals(productAsset.getId())) {
+                    productA.setIsThumbnail(false);
+                    productAssetRepository.save(productA);
+                }
+            }
+        } else if (product.getThumbnailUrl() == null) {
+            productAsset.setIsThumbnail(true);
+            productAssetRepository.save(productAsset);
+            product.setThumbnailUrl(productAsset.getUrl());
+            productRepository.save(product);
+        }
+
         response.setSuccessStatus(HttpStatus.OK);
-        response.setData(productAssetRepository.save(productAsset));
+        response.setData(productAsset);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 

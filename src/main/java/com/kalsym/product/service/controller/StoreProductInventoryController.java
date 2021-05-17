@@ -78,6 +78,12 @@ public class StoreProductInventoryController {
 
         List<ProductInventoryWithDetails> productInventorys = productInventoryWithDetailsRepository.findByProductId(productId);
 
+        if (variantIds == null) {
+            response.setData(productInventorys);
+            response.setSuccessStatus(HttpStatus.OK);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        }
+
         List<ProductInventoryWithDetails> returnProductInventorys = new ArrayList<>();
         for (int i = 0; i < productInventorys.size(); i++) {
             if (null != productInventorys.get(i).getProductInventoryItems()
@@ -103,12 +109,7 @@ public class StoreProductInventoryController {
             }
         }
 
-        response.setSuccessStatus(HttpStatus.OK);
-        if (returnProductInventorys.size() > 0) {
-            response.setData(returnProductInventorys);
-        } else {
-            response.setData(productInventoryWithDetailsRepository.findByProductId(productId));
-        }
+        response.setData(returnProductInventorys);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 

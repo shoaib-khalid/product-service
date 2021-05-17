@@ -169,6 +169,8 @@ public class StoreController {
 
         try {
 
+            //temp fix to remove apostrophy
+            bodyStore.setDomain(bodyStore.getDomain().replace("'", ""));
             String domain = storeSubdomainHandler.createSubDomain(bodyStore.getDomain());
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "domain: " + domain, "");
 
@@ -182,16 +184,32 @@ public class StoreController {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
             }
 
-            StoreCreationResponse scr = storeLiveChatService.createGroup(domain);
+            StoreCreationResponse scrCsr = storeLiveChatService.createGroup(domain + "-csr");
 
-            if (scr == null) {
+            if (scrCsr == null) {
                 storeRepository.delete(savedStore);
                 Logger.application.error(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store group could not be created", "");
                 response.setSuccessStatus(HttpStatus.INTERNAL_SERVER_ERROR, "store group could nto be created");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
             } else {
-                savedStore.setLiveChatGroupId(scr.get_id());
-                savedStore.setLiveChatGroupName(domain);
+                savedStore.setLiveChatCsrGroupId(scrCsr.get_id());
+                savedStore.setLiveChatCsrGroupName(domain + "-csr");
+                storeRepository.save(savedStore);
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store group created", "");
+
+            }
+            
+            StoreCreationResponse scrOrders = storeLiveChatService.createGroup(domain + "-orders");
+
+            if (scrOrders == null) {
+                storeLiveChatService.deleteGroup(scrCsr.get_id());
+                storeRepository.delete(savedStore);
+                Logger.application.error(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store group could not be created", "");
+                response.setSuccessStatus(HttpStatus.INTERNAL_SERVER_ERROR, "store group could nto be created");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            } else {
+                savedStore.setLiveChatCsrGroupId(scrOrders.get_id());
+                savedStore.setLiveChatCsrGroupName(domain + "-orders");
                 storeRepository.save(savedStore);
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store group created", "");
 
@@ -255,7 +273,8 @@ public class StoreController {
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND id: " + id);
 
-        storeLiveChatService.deleteGroup(optStore.get().getLiveChatGroupId());
+        storeLiveChatService.deleteGroup(optStore.get().getLiveChatCsrGroupId());
+        storeLiveChatService.deleteGroup(optStore.get().getLiveChatOrdersGroupId());
 
         storeRepository.deleteById(id);
 
