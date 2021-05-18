@@ -183,8 +183,10 @@ public class StoreProductController {
 
         Logger.application.info(ProductServiceApplication.VERSION, logprefix, "store found for id: {}", storeId);
 
+        Product p = optProdcut.get();
+        p.setStatus("DELETED");
+        productRepository.save(p);
         response.setSuccessStatus(HttpStatus.OK);
-        productRepository.delete(optProdcut.get());
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -259,7 +261,7 @@ public class StoreProductController {
 
         }
 
-        String productSecoUrl = "https://"+optStore.get().getDomain() + ".smplified.store/products/name/" + bodyProduct.getName().replace(" ", "%20");
+        String productSecoUrl = "https://"+optStore.get().getDomain() + ".symplified.store/products/name/" + bodyProduct.getName().replace(" ", "%20");
 
         bodyProduct.setSeoUrl(productSecoUrl);
 
