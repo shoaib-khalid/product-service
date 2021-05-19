@@ -19,8 +19,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.kalsym.product.service.model.Store;
+import com.kalsym.product.service.model.StoreWithDetails;
 import com.kalsym.product.service.model.livechatgroup.StoreCreationResponse;
 import com.kalsym.product.service.model.repository.StoreCategoryRepository;
+import com.kalsym.product.service.model.repository.StoreWithDetailsRepository;
 import com.kalsym.product.service.service.StoreLiveChatService;
 import com.kalsym.product.service.utility.Logger;
 import java.util.ArrayList;
@@ -28,6 +30,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -68,6 +71,9 @@ public class StoreController {
     StoreRepository storeRepository;
 
     @Autowired
+    StoreWithDetailsRepository storeWithDetailsRepository;
+
+    @Autowired
     StoreCategoryRepository storeCategoryRepository;
 
     @Autowired
@@ -89,24 +95,38 @@ public class StoreController {
         HttpResponse response = new HttpResponse(request.getRequestURI());
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "", "");
 
-        Store store = new Store();
+        try {
+            StoreWithDetails store = new StoreWithDetails();
 
-        store.setClientId(clientId);
-        store.setCity(city);
-        store.setName(name);
-        store.setVerticalCode(verticalCode);
+            store.setClientId(clientId);
+            store.setCity(city);
+            store.setName(name);
+            store.setVerticalCode(verticalCode);
+            store.setRegionCountry(null);
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store: " + store, "");
 
-        ExampleMatcher matcher = ExampleMatcher
-                .matchingAll()
-                .withIgnoreCase()
-                .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
-        Example<Store> example = Example.of(store, matcher);
+            ExampleMatcher matcher = ExampleMatcher
+                    .matchingAll()
+                    .withIgnoreCase()
+                    .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
+            Example<StoreWithDetails> example = Example.of(store, matcher);
 
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "page: " + page + " pageSize: " + pageSize, "");
-        Pageable pageable = PageRequest.of(page, pageSize);
-        response.setData(storeRepository.findAll(example, pageable));
-        response.setSuccessStatus(HttpStatus.OK);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "page: " + page + " pageSize: " + pageSize, "");
+            Pageable pageable = PageRequest.of(page, pageSize);
+            Page<StoreWithDetails> fetchedPage = storeWithDetailsRepository.findAll(example, pageable);
+            //Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "elements: " + fetchedPage.getTotalElements(), "");
+            //Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "element 0: " + fetchedPage.iterator().next(), "");
+
+            response.setData(fetchedPage);
+            response.setSuccessStatus(HttpStatus.OK);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (Exception e) {
+            Logger.application.error(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Error fetching stores", "", e);
+
+            response.setErrorStatus(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+
     }
 
     @GetMapping(path = {"/{id}"}, name = "stores-get-by-id", produces = "application/json")
@@ -119,7 +139,7 @@ public class StoreController {
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " id: " + id, "");
 
-        Optional<Store> optStore = storeRepository.findById(id);
+        Optional<StoreWithDetails> optStore = storeWithDetailsRepository.findById(id);
 
         if (!optStore.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND id: " + id);
@@ -198,7 +218,7 @@ public class StoreController {
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store group created", "");
 
             }
-            
+
             StoreCreationResponse scrOrders = storeLiveChatService.createGroup(domain + "-orders");
 
             if (scrOrders == null) {

@@ -1,6 +1,5 @@
 package com.kalsym.product.service.model.product;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
