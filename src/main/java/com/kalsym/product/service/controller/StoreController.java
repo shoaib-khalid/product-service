@@ -89,6 +89,7 @@ public class StoreController {
             @RequestParam(required = false) String verticalCode,
             @RequestParam(required = false) String city,
             @RequestParam(required = false) String name,
+            @RequestParam(required = false) String domain,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int pageSize) {
         String logprefix = request.getRequestURI();
@@ -103,6 +104,7 @@ public class StoreController {
             store.setName(name);
             store.setVerticalCode(verticalCode);
             store.setRegionCountry(null);
+            store.setDomain(domain);
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store: " + store, "");
 
             ExampleMatcher matcher = ExampleMatcher
