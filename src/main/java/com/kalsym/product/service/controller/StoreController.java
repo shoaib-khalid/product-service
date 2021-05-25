@@ -190,7 +190,9 @@ public class StoreController {
         try {
 
             //temp fix to remove apostrophy
-            bodyStore.setDomain(bodyStore.getDomain().replace("'", ""));
+            String storeDomain = bodyStore.getName().replace("'", "");
+            storeDomain = storeDomain.replace(" ", "-").toLowerCase();
+            bodyStore.setDomain(storeDomain);
             String domain = storeSubdomainHandler.createSubDomain(bodyStore.getDomain());
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "domain: " + domain, "");
 
@@ -200,7 +202,7 @@ public class StoreController {
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store created with id: " + savedStore.getId(), "");
             } else {
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "domain could not be created", "");
-                response.setSuccessStatus(HttpStatus.INTERNAL_SERVER_ERROR, "domain could nto be created");
+                response.setSuccessStatus(HttpStatus.INTERNAL_SERVER_ERROR, "domain could not be created");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
             }
 
@@ -235,13 +237,14 @@ public class StoreController {
 
             }
 
+            response.setData(savedStore);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
             Logger.application.error(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " error creating store ", "", e);
             response.setMessage(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-        response.setData(savedStore);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+
     }
 
     @PutMapping(path = {"/{id}"}, name = "stores-put-by-id", produces = "application/json")
@@ -250,28 +253,37 @@ public class StoreController {
             @PathVariable(required = true) String id,
             @Valid @RequestBody Store bodyStore
     ) {
-        String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
+        String logprefix = request.getRequestURI();
 
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " id: " + id, "");
+        try {
 
-        Optional<Store> optStore = storeRepository.findById(id);
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " id: " + id, "");
 
-        if (!optStore.isPresent()) {
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND id: " + id);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            Optional<Store> optStore = storeRepository.findById(id);
+
+            if (!optStore.isPresent()) {
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND id: " + id);
+                response.setSuccessStatus(HttpStatus.NOT_FOUND);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND id: " + id);
+
+            Store store = optStore.get();
+
+            store.update(bodyStore);
+
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "updated store with id: " + id);
+            response.setData(storeRepository.save(store));
+            response.setSuccessStatus(HttpStatus.OK);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (Exception e) {
+            Logger.application.error(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "error saving store " + id, e);
+            //response.setData(storeRepository.save(store));
+            response.setErrorStatus(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND id: " + id);
 
-        Store store = optStore.get();
-
-        store.update(bodyStore);
-
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "updated store with id: " + id);
-        response.setData(storeRepository.save(store));
-        response.setSuccessStatus(HttpStatus.OK);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @DeleteMapping(path = {"/{id}"}, name = "stores-delete-by-id", produces = "application/json")

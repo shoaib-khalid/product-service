@@ -2,6 +2,7 @@ package com.kalsym.product.service.service;
 
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.utility.Logger;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
@@ -29,18 +30,21 @@ public class StoreSubdomainHandler {
     @Value("${store.subdomain.token:not-set}")
     private String storeSubDomainToken;
 
+    @Value("${store.subdomain.config.path:/etc/nginx/conf.d/symplified.store}")
+    private String storeSubDomainConfigPath;
+
     public String generateDomainName(String storeName) {
         storeName = storeName.replace(" ", "-");
         return storeName;
     }
 
-    public String createSubDomain(String name) {
+    public String createSubDomain(String name) throws Exception {
 
         String logprefix = "createSubDomain";
 
         DomainCreationRequestBody dcrb = new DomainCreationRequestBody();
         dcrb.setData("@");
-        dcrb.setName("beta");
+        //dcrb.setName("beta");
         dcrb.setPriority(0);
         dcrb.setTtl(600);
         dcrb.setWeight(0);
@@ -60,8 +64,9 @@ public class StoreSubdomainHandler {
 
             //restTemplate.postForEntity(storeSubDomainCreationUrl + "/" + name, list, String.class);
             Object res = restTemplate.exchange(url, HttpMethod.PUT, entity, String.class);
-            //restTemplate.exchange(requestEntity, String.class);
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "domain created: " + res, "");
 
+            //restTemplate.exchange(requestEntity, String.class);
 //            Object res = webClient.post()
 //                    .uri(name)
 //                    .header("Authorization", storeSubDomainToken)
@@ -69,11 +74,37 @@ public class StoreSubdomainHandler {
 //                    .retrieve()
 //                    .bodyToMono(Object.class)
 //                    .timeout(Duration.ofSeconds(10));
+            configureNginxWithDomain(name);
+
         } catch (RestClientException e) {
             Logger.application.warn(ProductServiceApplication.VERSION, logprefix, "Error creating domain" + storeSubDomainCreationUrl, e);
             return null;
         }
         return name;
+    }
+
+    public void configureNginxWithDomain(String subDomaiprefix) throws Exception {
+        String logprefix = "configureNginxWithDomain";
+
+        String subdomain = storeSubDomainConfigPath + "/" + subDomaiprefix + ".symplified.store.conf";
+        FileWriter fileWriter = new FileWriter(subdomain);
+
+        String text = configText.replace("<domain>", subDomaiprefix);
+
+        fileWriter.write(text);
+        fileWriter.close();
+
+        String testCommand = "nginx -t";
+
+        Process proc = Runtime.getRuntime().exec(testCommand);
+        int exitCode = proc.waitFor();
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "test result: " + exitCode, "");
+
+        String reloadCommand = "nginx -s reload";
+
+        proc = Runtime.getRuntime().exec(reloadCommand);
+        exitCode = proc.waitFor();
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "reload result: " + exitCode, "");
     }
 
     @Getter
@@ -82,9 +113,63 @@ public class StoreSubdomainHandler {
     public class DomainCreationRequestBody {
 
         private String data;
-        private String name;
+        //private String name;
         private int priority;
         private int ttl;
         private int weight;
     }
+
+    private String configText = "server {\n"
+            + "    listen 80;\n"
+            + "    server_name <domain>.symplified.store;\n"
+            + "    return 301 https://$host$request_uri;\n"
+            + "}\n"
+            + "\n"
+            + "server {\n"
+            + "    listen      443 ssl http2;\n"
+            + "    server_name <domain>.symplified.store;\n"
+            + "    root        /var/www/html/simplify-fe;\n"
+            + "\n"
+            + "    ssl_certificate     /root/.getssl/*.symplified.store/fullchain.crt;\n"
+            + "    ssl_certificate_key /root/.getssl/*.symplified.store/*.symplified.store.key; \n"
+            + "\n"
+            + "    index       index.php index.html index.htm;\n"
+            + "    access_log  /var/log/nginx/domains/*.symplified.store.log combined;\n"
+            + "    access_log  /var/log/nginx/domains/*.symplified.store.bytes bytes;\n"
+            + "    error_log   /var/log/nginx/domains/*.symplified.store.error.log error;\n"
+            + "\n"
+            + "    location / {\n"
+            + "\n"
+            + "        try_files    $uri $uri/ /index.html;\n"
+            + "\n"
+            + "        location ~* ^.+\\.(jpeg|jpg|png|gif|bmp|ico|svg|css|js)$ {\n"
+            + "            expires     max;\n"
+            + "        }\n"
+            + "\n"
+            + "\n"
+            + "        location ~ [^/]\\.php(/|$) {\n"
+            + "            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;\n"
+            + "            if (!-f $document_root$fastcgi_script_name) {\n"
+            + "                return  404;\n"
+            + "            }\n"
+            + "\n"
+            + "            fastcgi_pass    127.0.0.1:9002;\n"
+            + "            fastcgi_index   index.php;\n"
+            + "            include         /etc/nginx/fastcgi_params;\n"
+            + "        }\n"
+            + "    }\n"
+            + "\n"
+            + "    error_page  403 /error/404.html;\n"
+            + "    error_page  404 /error/404.html;\n"
+            + "    error_page  500 502 503 504 /error/50x.html;\n"
+            + "\n"
+            + "    location /error/ {\n"
+            + "        alias   /home/admin/web/symplified.biz/document_errors/;\n"
+            + "    }\n"
+            + "\n"
+            + "    location ~* \"/\\.(htaccess|htpasswd)$\" {\n"
+            + "        deny    all;\n"
+            + "        return  404;\n"
+            + "    }\n"
+            + "}";
 }
