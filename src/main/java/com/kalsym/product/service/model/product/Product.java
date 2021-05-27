@@ -54,6 +54,8 @@ public class Product implements Serializable {
     private String region;
     
     private String seoUrl;
+    
+    private String seoName;
 
 
     public void update(Product product) {

@@ -35,12 +35,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.kalsym.product.service.model.repository.ProductInventoryWithDetailsRepository;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Value;
 
 /**
  *
@@ -82,6 +78,7 @@ public class StoreProductController {
     public ResponseEntity<HttpResponse> getStoreProducts(HttpServletRequest request,
             @PathVariable String storeId,
             @RequestParam(required = false) String name,
+            @RequestParam(required = false) String seoName,
             @RequestParam(required = false) String categoryId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int pageSize) {
@@ -106,6 +103,7 @@ public class StoreProductController {
         productMatch.setCategoryId(categoryId);
         productMatch.setName(name);
         productMatch.setStatus("ACTIVE");
+        productMatch.setSeoName(seoName);
         ExampleMatcher matcher = ExampleMatcher
                 .matchingAll()
                 .withIgnoreCase()
@@ -261,16 +259,28 @@ public class StoreProductController {
 
         }
 
-        String productSecoUrl = "https://"+optStore.get().getDomain() + ".symplified.store/products/name/" + bodyProduct.getName().replace(" ", "%20");
+        String seoName = generateSeoName(bodyProduct.getName());
+        String productSecoUrl = "https://" + optStore.get().getDomain() + ".symplified.store/products?name=" + seoName;
 
         bodyProduct.setSeoUrl(productSecoUrl);
 
+        bodyProduct.setSeoName(seoName);
         Product savedProduct = productRepository.save(bodyProduct);
         Logger.application.info(ProductServiceApplication.VERSION, logprefix, "product added to store with storeId: {}, productId: {}" + storeId, savedProduct.getId());
 
         response.setSuccessStatus(HttpStatus.CREATED);
         response.setData(savedProduct);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    private String generateSeoName(String name) {
+        name = name.replace(" ", "-");
+        name = name.replace("\"", "");
+        name = name.replace("\'", "");
+        name = name.replace("/", "");
+        name = name.replace("\\", "");
+        name = name.replace("&", "");
+        return name;
     }
 
 }

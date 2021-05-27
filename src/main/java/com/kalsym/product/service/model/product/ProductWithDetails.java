@@ -60,6 +60,8 @@ public class ProductWithDetails implements Serializable {
     private String region;
 
     private String seoUrl;
+    
+    private String seoName;
 
     @OneToMany(cascade = CascadeType.ALL,
             fetch = FetchType.LAZY)
