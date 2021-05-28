@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.kalsym.product.service.utility.DateTimeUtil;
 import java.io.Serializable;
+import java.util.Date;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -20,7 +21,7 @@ import org.springframework.http.HttpStatus;
 public class HttpReponse implements Serializable {
 
     public HttpReponse(String requestUri) {
-        this.timestamp = DateTimeUtil.currentTimestamp();
+        this.timestamp = DateTimeUtil.currentTimestamp()+"";
         this.path = requestUri;
     }
 

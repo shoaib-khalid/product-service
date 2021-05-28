@@ -94,9 +94,9 @@ public class SessionRequestFilter extends OncePerRequestFilter {
                     long diff = 0;
                     try {
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                        Date currentTime = sdf.parse(DateTimeUtil.currentTimestamp());
+                        Date currentTime = DateTimeUtil.currentTimestamp();
                         diff = expiryTime.getTime() - currentTime.getTime();
-                    } catch (ParseException e) {
+                    } catch (Exception e) {
                         Logger.application.warn(Logger.pattern, VersionHolder.VERSION, logprefix, "error calculating time to session expiry", "");
                     }
                     Logger.application.info(Logger.pattern, VersionHolder.VERSION, logprefix, "time to session expiry: " + diff + "ms", "");

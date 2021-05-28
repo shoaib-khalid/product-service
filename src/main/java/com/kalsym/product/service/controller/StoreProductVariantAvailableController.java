@@ -74,8 +74,9 @@ public class StoreProductVariantAvailableController {
 
         if (!optStore.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND, "store not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
 
@@ -83,13 +84,14 @@ public class StoreProductVariantAvailableController {
 
         if (!optProdcut.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product NOT_FOUND storeId: " + productId);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND, "product not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("product not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
 
-        response.setSuccessStatus(HttpStatus.OK);
+        response.setStatus(HttpStatus.OK);
         response.setData(productVariantAvailableRepository.findByProductId(productId));
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @GetMapping(path = {"/{id}"}, name = "store-product-variant-available-get-by-id", produces = "application/json")
@@ -107,8 +109,9 @@ public class StoreProductVariantAvailableController {
 
         if (!optStore.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND, "store not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
 
@@ -116,21 +119,23 @@ public class StoreProductVariantAvailableController {
 
         if (!optProdcut.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product NOT_FOUND productId: " + productId);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND, "product not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("product not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
 
         Optional<ProductVariantAvailable> optProductVariant = productVariantAvailableRepository.findById(id);
 
         if (!optProductVariant.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "varaint-available NOT_FOUND varaintId: " + id);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND, "varaint-available not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("varaint-available not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
 
-        response.setSuccessStatus(HttpStatus.OK);
+        response.setStatus(HttpStatus.OK);
         response.setData(optProductVariant.get());
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @DeleteMapping(path = {"/{id}"}, name = "store-product-variant-available-delete-by-id", produces = "application/json")
@@ -148,8 +153,9 @@ public class StoreProductVariantAvailableController {
 
         if (!optStore.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND, "store not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
 
@@ -157,21 +163,23 @@ public class StoreProductVariantAvailableController {
 
         if (!optProdcut.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product NOT_FOUND productId: " + productId);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND, "product not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("product not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
 
         Optional<ProductVariantAvailable> optProductVariantAvailable = productVariantAvailableRepository.findById(id);
 
         if (!optProductVariantAvailable.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "varaint-available NOT_FOUND varaintId: " + id);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND, "varaint-available not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("varaint-available not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
         productVariantAvailableRepository.delete(optProductVariantAvailable.get());
 
-        response.setSuccessStatus(HttpStatus.OK);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        response.setStatus(HttpStatus.OK);
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @PostMapping(path = {""}, name = "store-product-variant-available-post", produces = "application/json")
@@ -189,8 +197,9 @@ public class StoreProductVariantAvailableController {
 
         if (!optStore.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND, "store not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
 
@@ -198,13 +207,14 @@ public class StoreProductVariantAvailableController {
 
         if (!optProdcut.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product NOT_FOUND storeId: " + productId);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND, "product not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("product not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
 
         variantAvailable.setProductId(productId);
-        response.setSuccessStatus(HttpStatus.OK);
+        response.setStatus(HttpStatus.OK);
         response.setData(productVariantAvailableRepository.save(variantAvailable));
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 }

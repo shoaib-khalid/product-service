@@ -83,8 +83,8 @@ public class RegionCountryController {
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "page: " + page + " pageSize: " + pageSize, "");
         Pageable pageable = PageRequest.of(page, pageSize);
         response.setData(regionCountryRepository.findAll(example, pageable));
-        response.setSuccessStatus(HttpStatus.OK);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        response.setStatus(HttpStatus.OK);
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @GetMapping(path = {"/{id}"}, name = "region-countries-get-by-id", produces = "application/json")
@@ -101,14 +101,14 @@ public class RegionCountryController {
 
         if (!optRegionCountry.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND id: " + id);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND id: " + id);
         response.setData(optRegionCountry.get());
-        response.setSuccessStatus(HttpStatus.OK);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        response.setStatus(HttpStatus.OK);
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @PostMapping(path = {""}, name = "region-countries-post")
@@ -121,7 +121,7 @@ public class RegionCountryController {
         Logger.application.info(ProductServiceApplication.VERSION, logprefix, "region-countries-post", "");
         Logger.application.info(ProductServiceApplication.VERSION, logprefix, bodyRegionCountry.toString(), "");
 
-        response.setSuccessStatus(HttpStatus.CREATED);
+        response.setStatus(HttpStatus.CREATED);
         RegionCountry savedRegionCountry = null;
         try {
             savedRegionCountry = regionCountryRepository.save(bodyRegionCountry);
@@ -150,8 +150,8 @@ public class RegionCountryController {
 
         if (!optRegionCountry.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND id: " + id);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND id: " + id);
 
@@ -161,8 +161,8 @@ public class RegionCountryController {
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "updated regionCountry with id: " + id);
         response.setData(regionCountryRepository.save(regionCountry));
-        response.setSuccessStatus(HttpStatus.OK);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        response.setStatus(HttpStatus.OK);
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @DeleteMapping(path = {"/{id}"}, name = "region-countries-delete-by-id", produces = "application/json")
@@ -179,15 +179,15 @@ public class RegionCountryController {
 
         if (!optRegionCountry.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND id: " + id);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND id: " + id);
         regionCountryRepository.deleteById(id);
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "deleted regionCountry with id: " + id);
-        response.setSuccessStatus(HttpStatus.OK);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        response.setStatus(HttpStatus.OK);
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 
 }

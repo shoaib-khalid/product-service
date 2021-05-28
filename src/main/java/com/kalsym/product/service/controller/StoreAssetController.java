@@ -58,14 +58,15 @@ public class StoreAssetController {
 
         if (!optStore.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND, "store not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
 
-        response.setSuccessStatus(HttpStatus.OK);
+        response.setStatus(HttpStatus.OK);
         response.setData(storeAssetRepository.findById(storeId));
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 
 //    @GetMapping(path = {"/{id}"}, name = "store-assets-get-by-id", produces = "application/json")
@@ -82,8 +83,12 @@ public class StoreAssetController {
 //
 //        if (!optStore.isPresent()) {
 //            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
-//            response.setSuccessStatus(HttpStatus.NOT_FOUND, "store not found");
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+//            response.setStatus(HttpStatus.NOT_FOUND);
+//    response.setError (
+//            
+//
+//    "store not found");
+//            return ResponseEntity.status(response.getStatus()).body(response);
 //        }
 //        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
 //
@@ -91,13 +96,17 @@ public class StoreAssetController {
 //
 //        if (!optStoreAsset.isPresent()) {
 //            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "inventory NOT_FOUND inventoryId: " + id);
-//            response.setSuccessStatus(HttpStatus.NOT_FOUND, "inventory not found");
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+//            response.setStatus(HttpStatus.NOT_FOUND);
+//    response.setError (
+//            
+//
+//    "inventory not found");
+//            return ResponseEntity.status(response.getStatus()).body(response);
 //        }
 //
-//        response.setSuccessStatus(HttpStatus.OK);
+//        response.setStatus(HttpStatus.OK);
 //        response.setData(optStoreAsset.get());
-//        return ResponseEntity.status(HttpStatus.OK).body(response);
+//        return ResponseEntity.status(response.getStatus()).body(response);
 //    }
     @DeleteMapping(path = {"/{id}"}, name = "store-assets-delete-by-id", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-assets-delete-by-id', 'all')")
@@ -113,8 +122,9 @@ public class StoreAssetController {
 
         if (!optStore.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND, "store not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
 
@@ -122,13 +132,14 @@ public class StoreAssetController {
 
         if (!optStoreAsset.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "inventory NOT_FOUND inventoryId: " + id);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND, "inventory not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("inventory not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
         storeAssetRepository.delete(optStoreAsset.get());
 
-        response.setSuccessStatus(HttpStatus.OK);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        response.setStatus(HttpStatus.OK);
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @Value("${store.assets.url:https://symplified.ai/store-assets}")
@@ -149,8 +160,9 @@ public class StoreAssetController {
 
         if (!optStore.isPresent()) {
             Logger.application.warn(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND, "store not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
 
@@ -171,9 +183,9 @@ public class StoreAssetController {
 
         storeAsset.setStoreId(storeId);
         //storeAsset.setProduct(optProdcut.get());
-        response.setSuccessStatus(HttpStatus.OK);
+        response.setStatus(HttpStatus.OK);
         response.setData(storeAssetRepository.save(storeAsset));
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 
 }

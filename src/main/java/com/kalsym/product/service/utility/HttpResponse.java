@@ -2,6 +2,7 @@ package com.kalsym.product.service.utility;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import java.util.Date;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.http.HttpStatus;
@@ -20,7 +21,7 @@ public class HttpResponse {
         this.path = requestUri;
     }
 
-    private String timestamp;
+    private Date timestamp;
     private int status;
     private String error;
     private String message;
@@ -33,42 +34,8 @@ public class HttpResponse {
      *
      * @param status
      */
-    public void setSuccessStatus(HttpStatus status) {
+    public void setStatus(HttpStatus status) {
         this.status = status.value();
         this.message = status.getReasonPhrase();
-    }
-
-    /**
-     * *
-     * Sets success and message as reason phrase of provided status.
-     *
-     * @param status
-     */
-    public void setSuccessStatus(HttpStatus status, String message) {
-        this.status = status.value();
-        this.message = message;
-    }
-
-    /**
-     * *
-     * Sets status and custom message.
-     *
-     * @param status
-     */
-    public void setErrorStatus(HttpStatus status) {
-        this.status = status.value();
-        this.error = status.getReasonPhrase();
-    }
-
-    /**
-     * *
-     * Sets status and custom message.
-     *
-     * @param status
-     * @param message
-     */
-    public void setErrorStatus(HttpStatus status, String message) {
-        this.status = status.value();
-        this.error = message;
     }
 }

@@ -83,8 +83,8 @@ public class RegionVerticalController {
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "page: " + page + " pageSize: " + pageSize, "");
         Pageable pageable = PageRequest.of(page, pageSize);
         response.setData(regionVerticalRepository.findAll(example, pageable));
-        response.setSuccessStatus(HttpStatus.OK);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        response.setStatus(HttpStatus.OK);
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @GetMapping(path = {"/{id}"}, name = "region-verticals-get-by-id", produces = "application/json")
@@ -101,14 +101,14 @@ public class RegionVerticalController {
 
         if (!optStore.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND id: " + id);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND id: " + id);
         response.setData(optStore.get());
-        response.setSuccessStatus(HttpStatus.OK);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        response.setStatus(HttpStatus.OK);
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @PostMapping(path = {""}, name = "region-verticals-post")
@@ -121,7 +121,7 @@ public class RegionVerticalController {
         Logger.application.info(ProductServiceApplication.VERSION, logprefix, "region-verticals-post", "");
         Logger.application.info(ProductServiceApplication.VERSION, logprefix, bodyStore.toString(), "");
 
-        response.setSuccessStatus(HttpStatus.CREATED);
+        response.setStatus(HttpStatus.CREATED);
         RegionVertical savedRegionVertical = null;
         try {
             savedRegionVertical = regionVerticalRepository.save(bodyStore);
@@ -150,8 +150,8 @@ public class RegionVerticalController {
 
         if (!optStore.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND id: " + id);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND id: " + id);
 
@@ -161,8 +161,8 @@ public class RegionVerticalController {
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "updated regionVertical with id: " + id);
         response.setData(regionVerticalRepository.save(regionVertical));
-        response.setSuccessStatus(HttpStatus.OK);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        response.setStatus(HttpStatus.OK);
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @DeleteMapping(path = {"/{id}"}, name = "region-verticals-delete-by-id", produces = "application/json")
@@ -179,15 +179,15 @@ public class RegionVerticalController {
 
         if (!optStore.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND id: " + id);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND id: " + id);
         regionVerticalRepository.deleteById(id);
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "deleted regionVertical with id: " + id);
-        response.setSuccessStatus(HttpStatus.OK);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        response.setStatus(HttpStatus.OK);
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 
 }

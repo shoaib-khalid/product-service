@@ -25,6 +25,9 @@ public class StoreLiveChatService {
     @Value("${livechat.store.agent.deletion.url:http://209.58.160.20:3000/api/v1/groups.delete}")
     private String livechatStoreGroupDeletionUrl;
 
+    @Value("${livechat.store.agent.deletion.url:http://209.58.160.20:3000/api/v1/groups.invite}")
+    private String livechatStoreGroupInviteUrl;
+
     @Value("${livechat.token:GvKS_Z_MvqDeExBPAmSrXdwXMYOlrsW3JkuSpsO9l76}")
     private String livechatToken;
 
@@ -119,4 +122,25 @@ public class StoreLiveChatService {
         return null;
     }
 
+    public LiveChatGroupInviteResponse inviteAgent(LiveChatGroupInvite liveChatGroupInvite) {
+        String logprefix = Thread.currentThread().getStackTrace()[1].getMethodName();
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("X-Auth-Token", livechatToken);
+        headers.add("X-User-Id", livechatUserId);
+
+        HttpEntity<LiveChatGroupInvite> entity;
+        entity = new HttpEntity<>(liveChatGroupInvite, headers);
+
+        ResponseEntity<LiveChatGroupInviteResponse> res = restTemplate.exchange(livechatStoreGroupInviteUrl, HttpMethod.POST, entity, LiveChatGroupInviteResponse.class);
+
+        if (res.getBody().success == true) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " invited agent " + res.getBody());
+
+            return res.getBody();
+        } else {
+            return null;
+        }
+    }
 }

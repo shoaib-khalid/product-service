@@ -55,8 +55,9 @@ public class StoreProductDeliveryDetailsController {
 
         if (!optStore.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND, "store not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
 
@@ -64,13 +65,14 @@ public class StoreProductDeliveryDetailsController {
 
         if (!optProdcut.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product NOT_FOUND storeId: " + productId);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND, "product not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError( "product not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
 
-        response.setSuccessStatus(HttpStatus.OK);
+        response.setStatus(HttpStatus.OK);
         response.setData(productDeliveryDetailsRepository.findById(productId));
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @DeleteMapping(path = {""}, name = "store-product-delivery-details-delete-by-id", produces = "application/json")
@@ -87,8 +89,9 @@ public class StoreProductDeliveryDetailsController {
 
         if (!optStore.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND, "store not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
 
@@ -96,8 +99,9 @@ public class StoreProductDeliveryDetailsController {
 
         if (!optProdcut.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product NOT_FOUND productId: " + productId);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND, "product not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError( "product not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "FOUND productId: " + productId);
@@ -106,8 +110,9 @@ public class StoreProductDeliveryDetailsController {
 
         if (!optProductDeliveryDetails.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "deliverydetails NOT_FOUND deliverydetailsId: " + productId);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND, "deliverydetails not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError( "deliverydetails not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "FOUND deliverydetailsId: " + productId);
@@ -115,8 +120,8 @@ public class StoreProductDeliveryDetailsController {
         ProductDeliveryDetail pi = optProductDeliveryDetails.get();
         productDeliveryDetailsRepository.delete(pi);
 
-        response.setSuccessStatus(HttpStatus.OK);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        response.setStatus(HttpStatus.OK);
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @PutMapping(path = {""}, name = "store-product-delivery-details-put-by-id", produces = "application/json")
@@ -134,8 +139,9 @@ public class StoreProductDeliveryDetailsController {
 
         if (!optStore.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND, "store not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
 
@@ -143,8 +149,9 @@ public class StoreProductDeliveryDetailsController {
 
         if (!optProdcut.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product NOT_FOUND storeId: " + productId);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND, "product not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError( "product not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "FOUND productId: " + productId);
@@ -153,8 +160,9 @@ public class StoreProductDeliveryDetailsController {
 
         if (!optProductDeliveryDetails.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "deliverydetails NOT_FOUND deliverydetailsId: " + productId);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND, "deliverydetails not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError( "deliverydetails not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
         ProductDeliveryDetail productDeliveryDetail = optProductDeliveryDetails.get();
 
@@ -163,9 +171,9 @@ public class StoreProductDeliveryDetailsController {
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "productDeliveryDetail: " + productDeliveryDetail);
 
         //productDeliveryDetails.setProduct(optProdcut.get());
-        response.setSuccessStatus(HttpStatus.OK);
+        response.setStatus(HttpStatus.OK);
         response.setData(productDeliveryDetailsRepository.save(productDeliveryDetail));
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @PostMapping(path = {""}, name = "store-product-delivery-details-post", produces = "application/json")
@@ -183,8 +191,9 @@ public class StoreProductDeliveryDetailsController {
 
         if (!optStore.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND, "store not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
 
@@ -192,15 +201,16 @@ public class StoreProductDeliveryDetailsController {
 
         if (!optProdcut.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product NOT_FOUND storeId: " + productId);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND, "product not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError( "product not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
 
         productDeliveryDetails.setProductId(productId);
         //productDeliveryDetails.setProduct(optProdcut.get());
-        response.setSuccessStatus(HttpStatus.OK);
+        response.setStatus(HttpStatus.OK);
         response.setData(productDeliveryDetailsRepository.save(productDeliveryDetails));
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 
 }

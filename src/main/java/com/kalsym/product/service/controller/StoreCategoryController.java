@@ -74,9 +74,9 @@ public class StoreCategoryController {
 
         Pageable pageable = PageRequest.of(page, pageSize);
 
-        response.setSuccessStatus(HttpStatus.OK);
+        response.setStatus(HttpStatus.OK);
         response.setData(storeCategoryRepository.findAll(example, pageable));
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @PostMapping(path = {""}, name = "store-categories-post", produces = "application/json")
@@ -94,7 +94,7 @@ public class StoreCategoryController {
         if (store == null) {
             Logger.application.error("store doesn't exist with id: {}", bodyStoreCategory.getId());
 
-            response.setSuccessStatus(HttpStatus.FAILED_DEPENDENCY);
+            response.setStatus(HttpStatus.FAILED_DEPENDENCY);
             return ResponseEntity.status(HttpStatus.FAILED_DEPENDENCY).body(response);
         }
 
@@ -103,7 +103,7 @@ public class StoreCategoryController {
         storeCategoryRepository.save(bodyStoreCategory);
 
         Logger.application.info("storeCategory created with id: {}", bodyStoreCategory.getId());
-        response.setSuccessStatus(HttpStatus.CREATED);
+        response.setStatus(HttpStatus.CREATED);
         response.setData(storeCategoryRepository.save(bodyStoreCategory));
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -121,16 +121,16 @@ public class StoreCategoryController {
 
         if (!optStoreCategory.isPresent()) {
             Logger.application.info(ProductServiceApplication.VERSION, logprefix, "storeCategory not found", "");
-            response.setErrorStatus(HttpStatus.NOT_FOUND);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
 
         Logger.application.info(ProductServiceApplication.VERSION, logprefix, "storeCategory found", "");
         storeCategoryRepository.delete(optStoreCategory.get());
 
         Logger.application.info(ProductServiceApplication.VERSION, logprefix, "storeCategory deleted, with id: {}", storeCategoryId);
-        response.setSuccessStatus(HttpStatus.OK);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        response.setStatus(HttpStatus.OK);
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 
 }

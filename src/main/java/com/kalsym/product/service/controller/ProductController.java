@@ -104,9 +104,9 @@ public class ProductController {
                 .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
         Example<ProductWithDetails> example = Example.of(productMatch, matcher);
 
-        response.setSuccessStatus(HttpStatus.OK);
+        response.setStatus(HttpStatus.OK);
         response.setData(productWithDetailsRepository.findAll(example, pageable));
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @GetMapping(path = {"/{id}"}, name = "products-get-by-id", produces = "application/json")
@@ -124,13 +124,13 @@ public class ProductController {
 
         if (!optProduct.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND id: " + id);
-            response.setSuccessStatus(HttpStatus.NOT_FOUND);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
 
-        response.setSuccessStatus(HttpStatus.OK);
+        response.setStatus(HttpStatus.OK);
         response.setData(optProduct.get());
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     /**
@@ -167,9 +167,9 @@ public class ProductController {
                 .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
         Example<Product> example = Example.of(productMatch, matcher);
 
-        response.setSuccessStatus(HttpStatus.OK);
+        response.setStatus(HttpStatus.OK);
         response.setData(productRepository.findAll(example, pageable));
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(response.getStatus()).body(response);
 
     }
 
@@ -185,15 +185,15 @@ public class ProductController {
 
         if (!optProduct.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND: " + id, "");
-            response.setErrorStatus(HttpStatus.NOT_FOUND);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product found", "");
         productRepository.delete(optProduct.get());
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product deleted, with id: {}", id);
-        response.setSuccessStatus(HttpStatus.OK);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        response.setStatus(HttpStatus.OK);
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     /**
@@ -216,8 +216,8 @@ public class ProductController {
 
         if (!optProduct.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "NOT_FOUND: {}", id);
-            response.setErrorStatus(HttpStatus.NOT_FOUND);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product found with productId: {}", id);
@@ -227,7 +227,7 @@ public class ProductController {
         product.update(bodyProduct);
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product updated for productId: " + id, "");
-        response.setSuccessStatus(HttpStatus.ACCEPTED);
+        response.setStatus(HttpStatus.ACCEPTED);
         response.setData(productRepository.save(product));
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
     }
