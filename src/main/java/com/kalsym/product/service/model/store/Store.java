@@ -1,9 +1,8 @@
-package com.kalsym.product.service.model;
+package com.kalsym.product.service.model.store;
 
 import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import lombok.Getter;
@@ -41,15 +40,15 @@ public class Store implements Serializable {
     private String postcode;
 
     private String domain;
-    
+
     private String liveChatOrdersGroupId;
-    
+
     private String liveChatOrdersGroupName;
-    
+
     private String liveChatCsrGroupId;
-    
+
     private String liveChatCsrGroupName;
-    
+
     private String regionCountryId;
 
     public void update(Store store) {
@@ -80,8 +79,8 @@ public class Store implements Serializable {
         if (null != store.getPostcode()) {
             postcode = store.getPostcode();
         }
-        
-         if (null != store.getRegionCountryId()) {
+
+        if (null != store.getRegionCountryId()) {
             regionCountryId = store.getRegionCountryId();
         }
 

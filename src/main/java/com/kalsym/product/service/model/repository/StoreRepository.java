@@ -1,6 +1,6 @@
 package com.kalsym.product.service.model.repository;
 
-import com.kalsym.product.service.model.Store;
+import com.kalsym.product.service.model.store.Store;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;

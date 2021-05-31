@@ -4,7 +4,7 @@ import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.model.product.Product;
 import com.kalsym.product.service.model.product.ProductVariantAvailable;
-import com.kalsym.product.service.model.Store;
+import com.kalsym.product.service.model.store.Store;
 import com.kalsym.product.service.model.repository.ProductAssetRepository;
 import com.kalsym.product.service.model.repository.ProductInventoryItemRepository;
 import com.kalsym.product.service.model.repository.StoreRepository;

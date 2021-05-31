@@ -2,8 +2,8 @@ package com.kalsym.product.service.controller;
 
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.utility.HttpResponse;
-import com.kalsym.product.service.model.StoreAsset;
-import com.kalsym.product.service.model.Store;
+import com.kalsym.product.service.model.store.StoreAsset;
+import com.kalsym.product.service.model.store.Store;
 import com.kalsym.product.service.model.repository.StoreAssetRepository;
 import com.kalsym.product.service.model.repository.StoreRepository;
 import com.kalsym.product.service.model.repository.ProductRepository;

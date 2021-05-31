@@ -1,14 +1,15 @@
-package com.kalsym.product.service.model;
+package com.kalsym.product.service.model.store;
 
-import com.kalsym.product.service.model.product.ProductDeliveryDetail;
+import com.kalsym.product.service.model.RegionCountry;
 import java.io.Serializable;
+import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import lombok.Getter;
@@ -63,6 +64,11 @@ public class StoreWithDetails implements Serializable {
             fetch = FetchType.EAGER)
     @JoinColumn(name = "regionCountryId", referencedColumnName = "id", insertable = false, updatable = false, nullable = true)
     private RegionCountry regionCountry;
+
+    @OneToMany(cascade = CascadeType.ALL,
+            fetch = FetchType.EAGER)
+    @JoinColumn(name = "storeId", insertable = false, updatable = false, nullable = true)
+    private List<StoreTiming> storeTiming;
 
     public void update(StoreWithDetails store) {
 
