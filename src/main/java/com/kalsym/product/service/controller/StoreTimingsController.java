@@ -92,7 +92,10 @@ public class StoreTimingsController {
         }
 
         StoreTiming timing = optStoreTiming.get();
-        timing.update(timing);
+        if (null != timingBody.getDay()) {
+            timingBody.setDay(timingBody.getDay().toUpperCase());
+        }
+        timing.update(timingBody);
 
         timingBody.setStoreId(storeId);
         response.setStatus(HttpStatus.ACCEPTED);
@@ -119,6 +122,9 @@ public class StoreTimingsController {
             return ResponseEntity.status(response.getStatus()).body(response);
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
+        if (null != timingBody.getDay()) {
+            timingBody.setDay(timingBody.getDay().toUpperCase());
+        }
 
         timingBody.setStoreId(storeId);
         response.setStatus(HttpStatus.CREATED);
