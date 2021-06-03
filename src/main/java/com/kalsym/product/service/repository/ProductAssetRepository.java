@@ -1,4 +1,4 @@
-package com.kalsym.product.service.model.repository;
+package com.kalsym.product.service.repository;
 
 import com.kalsym.product.service.model.product.ProductAsset;
 import java.util.List;

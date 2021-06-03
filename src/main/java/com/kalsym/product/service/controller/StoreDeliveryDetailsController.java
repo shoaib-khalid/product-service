@@ -2,11 +2,10 @@ package com.kalsym.product.service.controller;
 
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.utility.HttpResponse;
-import com.kalsym.product.service.model.store.StoreTiming;
-import com.kalsym.product.service.model.store.StoreTimingIdentity;
+import com.kalsym.product.service.model.store.StoreDeliveryDetail;
 import com.kalsym.product.service.model.store.Store;
 import com.kalsym.product.service.repository.StoreRepository;
-import com.kalsym.product.service.repository.StoreTimingsRepository;
+import com.kalsym.product.service.repository.StoreDeliveryDetailsRepository;
 import com.kalsym.product.service.utility.Logger;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
@@ -27,18 +26,18 @@ import org.springframework.web.bind.annotation.RestController;
  * @author 7cu
  */
 @RestController()
-@RequestMapping("/stores/{storeId}/timings")
-public class StoreTimingsController {
+@RequestMapping("/stores/{storeId}/deliverydetails")
+public class StoreDeliveryDetailsController {
 
     @Autowired
-    StoreTimingsRepository storeTimingsRepository;
+    StoreDeliveryDetailsRepository storeTimingsRepository;
 
     @Autowired
     StoreRepository storeRepository;
 
-    @GetMapping(path = {""}, name = "store-timings-get", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('store-timings-get', 'all')")
-    public ResponseEntity<HttpResponse> getStoreTimings(HttpServletRequest request,
+    @GetMapping(path = {""}, name = "store-deliverydetails-get", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-deliverydetails-get', 'all')")
+    public ResponseEntity<HttpResponse> getStoreDeliveryDetails(HttpServletRequest request,
             @PathVariable String storeId) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
@@ -56,16 +55,22 @@ public class StoreTimingsController {
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
 
         response.setStatus(HttpStatus.OK);
-        response.setData(storeTimingsRepository.findByStoreId(storeId));
+        response.setData(storeTimingsRepository.findById(storeId));
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PutMapping(path = {"/{day}"}, name = "store-timings-put-by-id")
-    @PreAuthorize("hasAnyAuthority('store-timings-put-by-id', 'all')")
-    public ResponseEntity<HttpResponse> postStoreTimings(HttpServletRequest request,
+    /**
+     *
+     * @param request
+     * @param storeId
+     * @param deliveryDetailBody
+     * @return
+     */
+    @PutMapping(path = {""}, name = "store-deliverydetails-put-by-id")
+    @PreAuthorize("hasAnyAuthority('store-deliverydetails-put-by-id', 'all')")
+    public ResponseEntity<HttpResponse> putStoreDeliveryDetails(HttpServletRequest request,
             @PathVariable String storeId,
-            @PathVariable String day,
-            @RequestBody StoreTiming timingBody) {
+            @RequestBody StoreDeliveryDetail deliveryDetailBody) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
@@ -81,33 +86,31 @@ public class StoreTimingsController {
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
 
-        StoreTimingIdentity sti = new StoreTimingIdentity(storeId, day);
-        Optional<StoreTiming> optStoreTiming = storeTimingsRepository.findById(sti);
 
-        if (!optStoreTiming.isPresent()) {
-            Logger.application.warn(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND store timing: " + storeId);
+        Optional<StoreDeliveryDetail> optStoreDeliveryDetail = storeTimingsRepository.findById(storeId);
+
+        if (!optStoreDeliveryDetail.isPresent()) {
+            Logger.application.warn(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND store deliveryDetail: " + storeId);
             response.setStatus(HttpStatus.NOT_FOUND);
-            response.setError("timing not found");
+            response.setError("deliveryDetail not found");
             return ResponseEntity.status(response.getStatus()).body(response);
         }
 
-        StoreTiming timing = optStoreTiming.get();
-        if (null != timingBody.getDay()) {
-            timingBody.setDay(timingBody.getDay().toUpperCase());
-        }
-        timing.update(timingBody);
+        StoreDeliveryDetail deliveryDetail = optStoreDeliveryDetail.get();
+       
+        deliveryDetail.update(deliveryDetailBody);
 
-        timingBody.setStoreId(storeId);
+        deliveryDetailBody.setStoreId(storeId);
         response.setStatus(HttpStatus.ACCEPTED);
-        response.setData(storeTimingsRepository.save(timing));
+        response.setData(storeTimingsRepository.save(deliveryDetail));
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PostMapping(path = {""}, name = "store-timings-post")
-    @PreAuthorize("hasAnyAuthority('store-timings-post', 'all')")
-    public ResponseEntity<HttpResponse> postStoreTimings(HttpServletRequest request,
+    @PostMapping(path = {""}, name = "store-deliverydetails-post")
+    @PreAuthorize("hasAnyAuthority('store-deliverydetails-post', 'all')")
+    public ResponseEntity<HttpResponse> postStoreDeliveryDetails(HttpServletRequest request,
             @PathVariable String storeId,
-            @RequestBody StoreTiming timingBody) {
+            @RequestBody StoreDeliveryDetail deliveryDetailBody) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
@@ -122,13 +125,11 @@ public class StoreTimingsController {
             return ResponseEntity.status(response.getStatus()).body(response);
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
-        if (null != timingBody.getDay()) {
-            timingBody.setDay(timingBody.getDay().toUpperCase());
-        }
+        
 
-        timingBody.setStoreId(storeId);
+        deliveryDetailBody.setStoreId(storeId);
         response.setStatus(HttpStatus.CREATED);
-        response.setData(storeTimingsRepository.save(timingBody));
+        response.setData(storeTimingsRepository.save(deliveryDetailBody));
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 

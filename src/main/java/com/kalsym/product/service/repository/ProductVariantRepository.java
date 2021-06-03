@@ -1,6 +1,6 @@
-package com.kalsym.product.service.model.repository;
+package com.kalsym.product.service.repository;
 
-import com.kalsym.product.service.model.product.ProductDeliveryDetail;
+import com.kalsym.product.service.model.product.ProductVariant;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
  * @author 7cu
  */
 @Repository
-public interface ProductDeliveryDetailsRepository extends PagingAndSortingRepository<ProductDeliveryDetail, String>, JpaRepository<ProductDeliveryDetail, String> {
+public interface ProductVariantRepository extends PagingAndSortingRepository<ProductVariant, String>, JpaRepository<ProductVariant, String> {
 
+    List<ProductVariant> findByProductId(@Param("productId") String productId);
 }

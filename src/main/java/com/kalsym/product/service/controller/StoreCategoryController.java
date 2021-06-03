@@ -1,9 +1,9 @@
 package com.kalsym.product.service.controller;
 
 import com.kalsym.product.service.ProductServiceApplication;
-import com.kalsym.product.service.model.repository.ProductRepository;
-import com.kalsym.product.service.model.repository.StoreRepository;
-import com.kalsym.product.service.model.repository.StoreCategoryRepository;
+import com.kalsym.product.service.repository.ProductRepository;
+import com.kalsym.product.service.repository.StoreRepository;
+import com.kalsym.product.service.repository.StoreCategoryRepository;
 import com.kalsym.product.service.utility.HttpResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;

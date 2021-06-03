@@ -29,16 +29,13 @@ public class ProductDeliveryDetail implements Serializable {
     private String type;
     private String itemType;
 
-    private Double weight;
-
+ 
     public void update(ProductDeliveryDetail productDeliveryDetail) {
         if (productDeliveryDetail.getType() != null) {
             type = productDeliveryDetail.getType();
         }
 
-        if (productDeliveryDetail.getWeight() != null) {
-            weight = productDeliveryDetail.getWeight();
-        }
+       
 
         if (productDeliveryDetail.getItemType() != null) {
             itemType = productDeliveryDetail.getItemType();

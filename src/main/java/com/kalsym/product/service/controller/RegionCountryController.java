@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.kalsym.product.service.model.RegionCountry;
-import com.kalsym.product.service.model.repository.RegionCountriesRepository;
+import com.kalsym.product.service.repository.RegionCountriesRepository;
 import com.kalsym.product.service.utility.Logger;
 import java.util.Optional;
 import org.springframework.data.domain.Example;

@@ -5,7 +5,7 @@ import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.model.store.Store;
 import com.kalsym.product.service.model.livechatgroup.LiveChatGroupInviteResponse;
-import com.kalsym.product.service.model.repository.StoreRepository;
+import com.kalsym.product.service.repository.StoreRepository;
 import com.kalsym.product.service.utility.Logger;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;

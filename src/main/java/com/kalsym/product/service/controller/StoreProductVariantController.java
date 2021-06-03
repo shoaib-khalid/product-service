@@ -5,13 +5,13 @@ import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.model.product.Product;
 import com.kalsym.product.service.model.product.ProductVariant;
 import com.kalsym.product.service.model.store.Store;
-import com.kalsym.product.service.model.repository.ProductAssetRepository;
-import com.kalsym.product.service.model.repository.ProductInventoryItemRepository;
-import com.kalsym.product.service.model.repository.StoreRepository;
-import com.kalsym.product.service.model.repository.ProductRepository;
-import com.kalsym.product.service.model.repository.ProductVariantRepository;
-import com.kalsym.product.service.model.repository.ProductVariantAvailableRepository;
-import com.kalsym.product.service.model.repository.ProductReviewRepository;
+import com.kalsym.product.service.repository.ProductAssetRepository;
+import com.kalsym.product.service.repository.ProductInventoryItemRepository;
+import com.kalsym.product.service.repository.StoreRepository;
+import com.kalsym.product.service.repository.ProductRepository;
+import com.kalsym.product.service.repository.ProductVariantRepository;
+import com.kalsym.product.service.repository.ProductVariantAvailableRepository;
+import com.kalsym.product.service.repository.ProductReviewRepository;
 import com.kalsym.product.service.utility.Logger;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.kalsym.product.service.model.repository.ProductInventoryWithDetailsRepository;
+import com.kalsym.product.service.repository.ProductInventoryWithDetailsRepository;
 
 /**
  *

@@ -1,6 +1,6 @@
-package com.kalsym.product.service.model.repository;
+package com.kalsym.product.service.repository;
 
-import com.kalsym.product.service.model.product.ProductWithDetails;
+import com.kalsym.product.service.model.product.Product;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.CrudRepository;
@@ -16,13 +16,13 @@ import org.springframework.stereotype.Repository;
 // CRUD refers Create, Read, Update, Delete
 //@RepositoryRestResource(collectionResourceRel = "products", path = "products")
 @Repository
-public interface ProductWithDetailsRepository extends PagingAndSortingRepository<ProductWithDetails, String>, JpaRepository<ProductWithDetails, String> {
+public interface ProductRepository extends PagingAndSortingRepository<Product, String>, JpaRepository<Product, String> {
 
-    List<ProductWithDetails> findByName(@Param("name") String name);
+    List<Product> findByName(@Param("name") String name);
 
-    List<ProductWithDetails> findByStoreId(@Param("storeId") String storeId);
+    List<Product> findByStoreId(@Param("storeId") String storeId);
 
-    List<ProductWithDetails> findByStoreIdAndName(@Param("storeId") String storeId, @Param("name") String name);
+    List<Product> findByStoreIdAndName(@Param("storeId") String storeId, @Param("name") String name);
 
 //    List<Product> findByStoreIdAndName(@Param("storeId") String storeId, @Param("name"), String name);
 }

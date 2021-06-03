@@ -1,4 +1,4 @@
-package com.kalsym.product.service.model.repository;
+package com.kalsym.product.service.repository;
 
 import com.kalsym.product.service.model.product.Product;
 import com.kalsym.product.service.model.store.StoreCategory;

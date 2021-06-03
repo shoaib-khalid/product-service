@@ -1,7 +1,6 @@
-package com.kalsym.product.service.model.repository;
+package com.kalsym.product.service.repository;
 
-import com.kalsym.product.service.model.store.StoreAsset;
-import com.kalsym.product.service.model.product.ProductInventoryItem;
+import com.kalsym.product.service.model.product.ProductDeliveryDetail;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,8 +14,6 @@ import org.springframework.stereotype.Repository;
  * @author 7cu
  */
 @Repository
-public interface StoreAssetRepository extends PagingAndSortingRepository<StoreAsset, String>, JpaRepository<StoreAsset, String> {
-
-    List<StoreAsset> findByStoreId(@Param("storeId") String storeId);
+public interface ProductDeliveryDetailsRepository extends PagingAndSortingRepository<ProductDeliveryDetail, String>, JpaRepository<ProductDeliveryDetail, String> {
 
 }
