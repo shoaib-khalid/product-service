@@ -56,6 +56,8 @@ public class Product implements Serializable {
     private String seoUrl;
     
     private String seoName;
+    
+    private Double weight;
 
 
     public void update(Product product) {

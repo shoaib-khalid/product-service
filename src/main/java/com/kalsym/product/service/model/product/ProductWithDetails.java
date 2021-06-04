@@ -62,6 +62,8 @@ public class ProductWithDetails implements Serializable {
     private String seoUrl;
     
     private String seoName;
+    
+    private Double weight;
 
     @OneToMany(cascade = CascadeType.ALL,
             fetch = FetchType.LAZY)
