@@ -60,6 +60,10 @@ public class StoreWithDetails implements Serializable {
 
     private String regionCountryId;
 
+    private String phoneNumber;
+
+    private String regionCountryStateId;
+    
     @OneToOne(cascade = CascadeType.ALL,
             fetch = FetchType.EAGER)
     @JoinColumn(name = "regionCountryId", referencedColumnName = "id", insertable = false, updatable = false, nullable = true)
@@ -103,5 +107,8 @@ public class StoreWithDetails implements Serializable {
             regionCountryId = store.getRegionCountryId();
         }
 
+        if (null != store.getPhoneNumber()) {
+            phoneNumber = store.getPhoneNumber();
+        }
     }
 }

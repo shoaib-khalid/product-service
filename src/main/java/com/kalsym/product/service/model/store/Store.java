@@ -50,6 +50,10 @@ public class Store implements Serializable {
     private String liveChatCsrGroupName;
 
     private String regionCountryId;
+    
+    private String regionCountryStateId;
+
+    private String phoneNumber;
 
     public void update(Store store) {
 
@@ -82,6 +86,10 @@ public class Store implements Serializable {
 
         if (null != store.getRegionCountryId()) {
             regionCountryId = store.getRegionCountryId();
+        }
+
+        if (null != store.getPhoneNumber()) {
+            phoneNumber = store.getPhoneNumber();
         }
 
     }

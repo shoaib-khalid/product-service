@@ -43,7 +43,7 @@ import com.kalsym.product.service.repository.ProductInventoryWithDetailsReposito
 @RequestMapping("/products")
 public class ProductController {
 
-    @Autowired
+    @Autowired()
     ProductRepository productRepository;
 
     @Autowired
