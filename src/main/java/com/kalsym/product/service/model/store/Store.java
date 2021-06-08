@@ -54,6 +54,8 @@ public class Store implements Serializable {
     private String regionCountryStateId;
 
     private String phoneNumber;
+    
+    private Integer serviceChargesPercentage;
 
     public void update(Store store) {
 
@@ -90,6 +92,15 @@ public class Store implements Serializable {
 
         if (null != store.getPhoneNumber()) {
             phoneNumber = store.getPhoneNumber();
+        }
+        
+        if (null != store.getRegionCountryStateId()) {
+            regionCountryStateId = store.getRegionCountryStateId();
+        }
+
+        
+        if (null != store.getServiceChargesPercentage()) {
+            serviceChargesPercentage = store.getServiceChargesPercentage();
         }
 
     }

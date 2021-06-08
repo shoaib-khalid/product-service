@@ -63,7 +63,9 @@ public class StoreWithDetails implements Serializable {
     private String phoneNumber;
 
     private String regionCountryStateId;
-    
+
+    private Integer serviceChargesPercentage;
+
     @OneToOne(cascade = CascadeType.ALL,
             fetch = FetchType.EAGER)
     @JoinColumn(name = "regionCountryId", referencedColumnName = "id", insertable = false, updatable = false, nullable = true)
@@ -110,5 +112,14 @@ public class StoreWithDetails implements Serializable {
         if (null != store.getPhoneNumber()) {
             phoneNumber = store.getPhoneNumber();
         }
+
+        if (null != store.getRegionCountryStateId()) {
+            regionCountryStateId = store.getRegionCountryStateId();
+        }
+
+        if (null != store.getServiceChargesPercentage()) {
+            serviceChargesPercentage = store.getServiceChargesPercentage();
+        }
+
     }
 }

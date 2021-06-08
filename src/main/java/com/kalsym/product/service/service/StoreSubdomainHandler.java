@@ -44,11 +44,11 @@ public class StoreSubdomainHandler {
 
         DomainCreationRequestBody dcrb = new DomainCreationRequestBody();
         dcrb.setData("@");
-        //dcrb.setName("beta");
         dcrb.setPriority(0);
         dcrb.setTtl(600);
         dcrb.setWeight(0);
         List<DomainCreationRequestBody> list = new ArrayList<>();
+        list.add(dcrb);
         String url = storeSubDomainCreationUrl + "/" + name;
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "url: " + url, "");
 
@@ -61,6 +61,7 @@ public class StoreSubdomainHandler {
 
             HttpEntity<Object> entity;
             entity = new HttpEntity<>(list, headers);
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "entity: " + entity, "");
 
             //restTemplate.postForEntity(storeSubDomainCreationUrl + "/" + name, list, String.class);
             Object res = restTemplate.exchange(url, HttpMethod.PUT, entity, String.class);

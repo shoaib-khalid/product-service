@@ -84,6 +84,10 @@ public class Product implements Serializable {
             thumbnailUrl = product.getThumbnailUrl();
         }
         
+        if(null!=product.getWeight()){
+            weight = product.getWeight();
+        }
+        
         
         
         
