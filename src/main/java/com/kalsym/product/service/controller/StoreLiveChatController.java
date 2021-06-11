@@ -56,9 +56,9 @@ public class StoreLiveChatController {
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
 
         if (body.getRoomId() == null) {
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " roomId not attached");
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " roomId not attached in request");
             body.setRoomId(optStore.get().getLiveChatOrdersGroupId());
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " roomId attached from roomId: " + optStore.get().getLiveChatCsrGroupId());
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " roomId attached from store info: " + body.getRoomId());
         }
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "bodyInvite: " + body);
@@ -72,8 +72,7 @@ public class StoreLiveChatController {
         //response.setData(savedProduct);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-    
-    
+
     @PostMapping(path = {"/complaint-csr/agentinvite"}, name = "store-livechat-post-complaintagentinvite")
     @PreAuthorize("hasAnyAuthority('store-livechat-post-complaintagentinvite', 'all')")
     public ResponseEntity<HttpResponse> postComplaintStoreAgentInvite(HttpServletRequest request,
@@ -96,9 +95,9 @@ public class StoreLiveChatController {
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
 
         if (body.getRoomId() == null) {
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " roomId not attached");
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " roomId not attached in request");
             body.setRoomId(optStore.get().getLiveChatCsrGroupId());
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " roomId attached from roomId: " + optStore.get().getLiveChatCsrGroupId());
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " roomId attached from store info: " + body.getRoomId());
         }
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "bodyInvite: " + body);

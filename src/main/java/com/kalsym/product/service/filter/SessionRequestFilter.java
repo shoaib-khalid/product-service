@@ -83,7 +83,8 @@ public class SessionRequestFilter extends OncePerRequestFilter {
 
                 if (authResponse.getStatusCode() == HttpStatus.ACCEPTED) {
                     ObjectMapper mapper = new ObjectMapper();
-                    Logger.application.warn(Logger.pattern, VersionHolder.VERSION, logprefix, "data: " + authResponse.getBody().getData(), "");
+                    //Logger.application.warn(Logger.pattern, VersionHolder.VERSION, logprefix, "data: " + authResponse.getBody().getData(), "");
+                    Logger.application.warn(Logger.pattern, VersionHolder.VERSION, logprefix, "got session from user-service" , "");
 
                     auth = mapper.convertValue(authResponse.getBody().getData(), Auth.class);
                     username = auth.getSession().getUsername();
