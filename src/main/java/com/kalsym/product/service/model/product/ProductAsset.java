@@ -39,7 +39,22 @@ public class ProductAsset implements Serializable {
     private String name;
     private String url;
     private String productId;
-    
+
     private Boolean isThumbnail;
+
+    public void update(ProductAsset product) {
+        if (null != product.getName()) {
+            name = product.getName();
+        }
+
+        if (null != product.getUrl()) {
+            url = product.getUrl();
+        }
+
+        if (null != product.getIsThumbnail()) {
+            isThumbnail = product.getIsThumbnail();
+        }
+
+    }
 
 }

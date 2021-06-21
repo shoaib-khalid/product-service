@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -177,6 +179,79 @@ public class StoreProductAssetController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
+    @PutMapping(path = {"/{id}"}, name = "store-product-assets-put-by-id")
+    @PreAuthorize("hasAnyAuthority('store-product-assets-put-by-id', 'all')")
+    public ResponseEntity<HttpResponse> putStoreProductAssetsById(HttpServletRequest request,
+            @PathVariable String storeId,
+            @PathVariable String productId,
+            @PathVariable String id,
+            @RequestBody ProductAsset productAssetBody) {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "storeId: " + storeId);
+
+        Optional<Store> optStore = storeRepository.findById(storeId);
+
+        if (!optStore.isPresent()) {
+            Logger.application.warn(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
+
+        Optional<Product> optProdcut = productRepository.findById(productId);
+
+        if (!optProdcut.isPresent()) {
+            Logger.application.warn(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product NOT_FOUND productId: " + productId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("product not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "FOUND productId: " + productId);
+
+        Optional<ProductAsset> optProductAssset = productAssetRepository.findById(id);
+
+        if (!optProductAssset.isPresent()) {
+            Logger.application.warn(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product asset NOT_FOUND id: " + id);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("product asset not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "FOUND product asset Id: " + id);
+
+        ProductAsset productAsset = optProductAssset.get();
+        productAsset.update(productAssetBody);
+
+        productAsset = productAssetRepository.save(productAsset);
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "saved image: " + productAsset.getId());
+
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "isThumbnail: " + productAsset.getIsThumbnail());
+
+        Product product = optProdcut.get();
+
+        //if is thumbnail true then remove thumbnail true from all other assets
+        if (productAsset.getIsThumbnail() == true) {
+
+            product.setThumbnailUrl(productAsset.getUrl());
+            productRepository.save(product);
+            List<ProductAsset> productAssets = productAssetRepository.findByProductId(productId);
+
+            for (ProductAsset productA : productAssets) {
+                if (!productA.getId().equals(productAsset.getId())) {
+                    productA.setIsThumbnail(false);
+                    productAssetRepository.save(productA);
+                }
+            }
+        }
+
+        response.setStatus(HttpStatus.OK);
+        response.setData(productAsset);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
     @Value("${product.assets.url:https://symplified.ai/product-assets/}")
     private String productAssetsBaseUrl;
 
@@ -231,6 +306,8 @@ public class StoreProductAssetController {
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "isThumbnail: " + isThumbnail);
 
         Product product = optProdcut.get();
+
+        //if is thumbnail true then remove thumbnail true from all other assets
         if (isThumbnail) {
 
             product.setThumbnailUrl(productAsset.getUrl());
@@ -239,16 +316,19 @@ public class StoreProductAssetController {
 
             for (ProductAsset productA : productAssets) {
                 if (!productA.getId().equals(productAsset.getId())) {
+                    Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "isThumbnail: " + isThumbnail);
+
                     productA.setIsThumbnail(false);
                     productAssetRepository.save(productA);
                 }
             }
-        } else if (product.getThumbnailUrl() == null) {
-            productAsset.setIsThumbnail(true);
-            productAssetRepository.save(productAsset);
-            product.setThumbnailUrl(productAsset.getUrl());
-            productRepository.save(product);
         }
+//        else if (product.getThumbnailUrl() == null) {
+//            productAsset.setIsThumbnail(true);
+//            productAssetRepository.save(productAsset);
+//            product.setThumbnailUrl(productAsset.getUrl());
+//            productRepository.save(product);
+//        }
 
         response.setStatus(HttpStatus.OK);
         response.setData(productAsset);

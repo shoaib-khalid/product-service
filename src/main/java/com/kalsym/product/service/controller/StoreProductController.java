@@ -3,6 +3,7 @@ package com.kalsym.product.service.controller;
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.model.product.Product;
+import com.kalsym.product.service.model.product.ProductSpecs;
 import com.kalsym.product.service.model.product.ProductWithDetails;
 import com.kalsym.product.service.model.store.Store;
 import com.kalsym.product.service.repository.ProductAssetRepository;
@@ -80,6 +81,7 @@ public class StoreProductController {
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String seoName,
             @RequestParam(required = false) String categoryId,
+            @RequestParam(required = false) List<String> status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int pageSize) {
         String logprefix = request.getRequestURI();
@@ -103,7 +105,7 @@ public class StoreProductController {
         productMatch.setStoreId(storeId);
         productMatch.setCategoryId(categoryId);
         productMatch.setName(name);
-        productMatch.setStatus("ACTIVE");
+        //productMatch.setStatus("ACTIVE");
         productMatch.setSeoName(seoName);
         ExampleMatcher matcher = ExampleMatcher
                 .matchingAll()
@@ -111,9 +113,11 @@ public class StoreProductController {
                 .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
         Example<ProductWithDetails> example = Example.of(productMatch, matcher);
 
+        //ProductSpecs.getProductsSpec(status, example);
         //List<ProductWithDetails> products = productWithDetailsRepository.findByStoreId(storeId);
         response.setStatus(HttpStatus.OK);
-        response.setData(productWithDetailsRepository.findAll(example, pageable));
+
+        response.setData(productWithDetailsRepository.findAll(ProductSpecs.getProductsSpec(status, example), pageable));
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
@@ -142,7 +146,7 @@ public class StoreProductController {
         if (!optProdcut.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product NOT_FOUND storeId: " + id);
             response.setStatus(HttpStatus.NOT_FOUND);
-            response.setError( "product not found");
+            response.setError("product not found");
             return ResponseEntity.status(response.getStatus()).body(response);
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product FOUND storeId: " + id);
@@ -179,7 +183,7 @@ public class StoreProductController {
         if (!optProdcut.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product NOT_FOUND storeId: " + id);
             response.setStatus(HttpStatus.NOT_FOUND);
-            response.setError( "product not found");
+            response.setError("product not found");
             return ResponseEntity.status(response.getStatus()).body(response);
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product FOUND storeId: " + id);
@@ -219,7 +223,7 @@ public class StoreProductController {
         if (!optProdcut.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product NOT_FOUND storeId: " + id);
             response.setStatus(HttpStatus.NOT_FOUND);
-            response.setError( "product not found");
+            response.setError("product not found");
             return ResponseEntity.status(response.getStatus()).body(response);
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product FOUND storeId: " + id);
