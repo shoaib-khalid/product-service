@@ -269,6 +269,7 @@ public class StoreController {
         try {
 
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " id: " + id, "");
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " bodyStore: " + bodyStore, "");
 
             Optional<Store> optStore = storeRepository.findById(id);
 
