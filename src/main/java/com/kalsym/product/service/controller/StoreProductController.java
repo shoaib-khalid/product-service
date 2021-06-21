@@ -272,7 +272,7 @@ public class StoreProductController {
         }
 
         String seoName = generateSeoName(bodyProduct.getName());
-        String productSecoUrl = "https://" + optStore.get().getDomain() + ".symplified.store/products?name=" + seoName;
+        String productSecoUrl = "https://" + optStore.get().getDomain() + ".symplified.store/products/name/" + seoName;
 
         bodyProduct.setSeoUrl(productSecoUrl);
 
