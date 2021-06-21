@@ -36,8 +36,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.kalsym.product.service.repository.ProductInventoryWithDetailsRepository;
+import com.sun.jndi.toolkit.url.Uri;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  *
@@ -73,6 +76,9 @@ public class StoreProductController {
 
     @Autowired
     StoreRepository storeRepository;
+
+    @Value("${product.seo.url:https://{{store-domain}}.symplified.store/products/name/{{product-name}}}")
+    private String productSeoUrl;
 
     @GetMapping(path = {""}, name = "store-products-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-products-get', 'all')")
@@ -272,9 +278,10 @@ public class StoreProductController {
         }
 
         String seoName = generateSeoName(bodyProduct.getName());
-        String productSecoUrl = "https://" + optStore.get().getDomain() + ".symplified.store/products/name/" + seoName;
 
-        bodyProduct.setSeoUrl(productSecoUrl);
+        String seoUrl = productSeoUrl.replace("{{store-domain}}", optStore.get().getDomain());
+        seoUrl = seoUrl.replace("{{product-name}}", seoName);
+        bodyProduct.setSeoUrl(seoUrl);
 
         bodyProduct.setSeoName(seoName);
         Product savedProduct = productRepository.save(bodyProduct);
@@ -285,13 +292,18 @@ public class StoreProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    private String generateSeoName(String name) {
+    private String generateSeoName(String name) throws MalformedURLException {
         name = name.replace(" ", "-");
         name = name.replace("\"", "");
-        name = name.replace("\'", "");
+        name = name.replace("'", "");
         name = name.replace("/", "");
         name = name.replace("\\", "");
         name = name.replace("&", "");
+        name = name.replace(",", "");
+        name = name.replace("%", "percent");
+
+        name = name.replace("(", "%28");
+        name = name.replace(")", "%29");
         return name;
     }
 
