@@ -70,6 +70,7 @@ public class RegionCountryStatesController {
         RegionCountryState regionCountry = new RegionCountryState();
 
         regionCountry.setName(name);
+        regionCountry.setRegionCountryId(regionCountryId);
 
         ExampleMatcher matcher = ExampleMatcher
                 .matchingAll()
