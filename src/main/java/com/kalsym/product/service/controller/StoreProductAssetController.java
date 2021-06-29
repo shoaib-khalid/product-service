@@ -306,13 +306,12 @@ public class StoreProductAssetController {
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "isThumbnail: " + isThumbnail);
 
         Product product = optProdcut.get();
-
+        List<ProductAsset> productAssets = productAssetRepository.findByProductId(productId);
         //if is thumbnail true then remove thumbnail true from all other assets
         if (isThumbnail) {
 
             product.setThumbnailUrl(productAsset.getUrl());
             productRepository.save(product);
-            List<ProductAsset> productAssets = productAssetRepository.findByProductId(productId);
 
             for (ProductAsset productA : productAssets) {
                 if (!productA.getId().equals(productAsset.getId())) {
@@ -320,19 +319,32 @@ public class StoreProductAssetController {
 
                     productA.setIsThumbnail(false);
                     productAssetRepository.save(productA);
+                } else {
+                    productA.setIsThumbnail(true);
+                    productAssetRepository.save(productA);
                 }
             }
+        } else {
+            this.setDefaultThumbnail(productAssets,product);
         }
-//        else if (product.getThumbnailUrl() == null) {
-//            productAsset.setIsThumbnail(true);
-//            productAssetRepository.save(productAsset);
-//            product.setThumbnailUrl(productAsset.getUrl());
-//            productRepository.save(product);
-//        }
 
         response.setStatus(HttpStatus.OK);
         response.setData(productAsset);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
+    private void setDefaultThumbnail(List<ProductAsset> productAssets,Product product) {
+        for (ProductAsset pA : productAssets) {
+            if (pA.getIsThumbnail() != null && pA.getIsThumbnail()) {
+                return;
+            }
+        }
+        if (productAssets.get(0) != null) {
+            ProductAsset pA = productAssets.get(0);
+            pA.setIsThumbnail(true);
+            product.setThumbnailUrl(pA.getUrl());
+            productRepository.save(product);
+            productAssetRepository.save(pA);
+        }
+    }
 }

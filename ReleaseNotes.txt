@@ -1,4 +1,18 @@
 ++++++++++++++++++++++++++++++++++++++++++++
++ product-service-1.0.2
+++++++++++++++++++++++++++++++++++++++++++++
++Changes
+1. Modified the endpoint : POST /stores/{storeId}/products/{productId}/assets
+2. Now thumbnailUrl will not be null if no isThumbnail:true asset is there.  
+
+++++++++++++++++++++++++++++++++++++++++++++
++ product-service-1.0.1
+++++++++++++++++++++++++++++++++++++++++++++
++Changes
+1. Modified the endpoint : POST /stores/{storeId}/products/{productId}/assets
+2. Thumbnail will be set automatically if user does not select it automatically.          
+
+++++++++++++++++++++++++++++++++++++++++++++
 + product-service-1.0-SNAPSHOT
 ++++++++++++++++++++++++++++++++++++++++++++
 
