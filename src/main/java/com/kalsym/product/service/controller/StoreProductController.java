@@ -270,7 +270,7 @@ public class StoreProductController {
             if (existingProduct.getName().equals(bodyProduct.getName())) {
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "username already exists", "");
                 response.setStatus(HttpStatus.CONFLICT);
-                errors.add("product name already exists");
+                errors.add("Product name already exists");
                 response.setData(errors);
                 return ResponseEntity.status(response.getStatus()).body(response);
             }

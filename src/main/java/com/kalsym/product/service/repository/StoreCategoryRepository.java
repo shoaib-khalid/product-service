@@ -20,5 +20,6 @@ public interface StoreCategoryRepository extends PagingAndSortingRepository<Stor
 
     //List<Category> findByName(@Param("name") String name);
     List<StoreCategory> findByStoreId(@Param("storeId") String storeId);
+    List<StoreCategory> findByNameAndStoreId(@Param("name") String name, @Param("storeId") String storeId);
 
 }

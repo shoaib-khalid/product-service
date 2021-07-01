@@ -104,6 +104,16 @@ public class StoreCategoryController {
             return ResponseEntity.status(HttpStatus.FAILED_DEPENDENCY).body(response);
         }
 
+        List<StoreCategory> storeCategoryNames = storeCategoryRepository.findByNameAndStoreId(name, storeId);
+        List<String> errors = new ArrayList<>();
+        if (storeCategoryNames.size() > 0) {
+            Logger.application.error("store doesn't exist with id: {}", storeId);
+            response.setStatus(HttpStatus.CONFLICT);
+            errors.add("Category already exists");
+            response.setData(errors);
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+        }
+
         StoreCategory bodyStoreCategory = new StoreCategory();
         bodyStoreCategory.setName(name);
         bodyStoreCategory.setStoreId(storeId);
@@ -111,8 +121,6 @@ public class StoreCategoryController {
             String categoryThumbnailStoragePath = fileStorageService.saveStoreAsset(file, bodyStoreCategory.getName() + file.getOriginalFilename());
             bodyStoreCategory.setThumbnailUrl(storeAssetsBaseUrl + bodyStoreCategory.getName() + file.getOriginalFilename().replace(" ", ""));
         }
-
-        List<String> errors = new ArrayList<>();
 
         storeCategoryRepository.save(bodyStoreCategory);
 
@@ -173,7 +181,8 @@ public class StoreCategoryController {
     @PreAuthorize("hasAnyAuthority('store-product-assets-put-by-id', 'all')")
     public ResponseEntity<HttpResponse> putStoreProductAssetsById(HttpServletRequest request,
             @PathVariable String storeCategoryId,
-            @RequestParam(name = "name", required = false) String name,
+            @RequestParam(name = "name", required = true) String name,
+            @RequestParam(name = "storeId", required = true) String storeId,
             @RequestParam(name = "file", required = false) MultipartFile file) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
@@ -186,6 +195,16 @@ public class StoreCategoryController {
             return ResponseEntity.status(response.getStatus()).body(response);
         }
 
+        List<StoreCategory> storeCategoryNames = storeCategoryRepository.findByNameAndStoreId(name, storeId);
+        List<String> errors = new ArrayList<>();
+        if (storeCategoryNames.size() > 0) {
+            Logger.application.error("store doesn't exist with id: {}", storeId);
+            response.setStatus(HttpStatus.CONFLICT);
+            errors.add("Category already exists");
+            response.setData(errors);
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+        }
+
         if (name != null) {
             optStoreCategory.get().setName(name);
         }
@@ -194,6 +213,7 @@ public class StoreCategoryController {
             String categoryThumbnailStoragePath = fileStorageService.saveStoreAsset(file, optStoreCategory.get().getName() + file.getOriginalFilename());
             optStoreCategory.get().setThumbnailUrl(storeAssetsBaseUrl + optStoreCategory.get().getName() + file.getOriginalFilename().replace(" ", ""));
         }
+
         response.setStatus(HttpStatus.OK);
         storeCategoryRepository.save(optStoreCategory.get());
         return ResponseEntity.status(response.getStatus()).body(response);
