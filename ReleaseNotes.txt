@@ -1,4 +1,11 @@
 ++++++++++++++++++++++++++++++++++++++++++++
++ product-service-1.0.3
+++++++++++++++++++++++++++++++++++++++++++++
++Changes
+1. Modified the endpoint : POST /store-categories
+2. Now when saving categories, user will be able to add images of categories 
+
+++++++++++++++++++++++++++++++++++++++++++++
 + product-service-1.0.2
 ++++++++++++++++++++++++++++++++++++++++++++
 +Changes

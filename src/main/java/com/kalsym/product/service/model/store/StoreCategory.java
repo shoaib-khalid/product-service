@@ -29,7 +29,6 @@ public class StoreCategory implements Serializable {
 
     private String storeId;
 
-//    private StoreCategory parentCategory;
     private String parentCategoryId;
 
     private String name;

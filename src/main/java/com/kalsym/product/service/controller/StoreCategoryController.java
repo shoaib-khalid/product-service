@@ -6,7 +6,6 @@ import com.kalsym.product.service.repository.StoreRepository;
 import com.kalsym.product.service.repository.StoreCategoryRepository;
 import com.kalsym.product.service.utility.HttpResponse;
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,21 +14,23 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.kalsym.product.service.model.store.StoreCategory;
 import com.kalsym.product.service.model.store.Store;
-import com.kalsym.product.service.model.product.Product;
+import com.kalsym.product.service.service.FileStorageService;
 import com.kalsym.product.service.utility.Logger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
@@ -47,6 +48,12 @@ public class StoreCategoryController {
 
     @Autowired
     StoreCategoryRepository storeCategoryRepository;
+
+    @Autowired
+    FileStorageService fileStorageService;
+
+    @Value("${store.assets.url:https://symplified.ai/store-assets}")
+    private String storeAssetsBaseUrl;
 
     @GetMapping(path = {""}, name = "store-categories-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-categories-get', 'all')")
@@ -79,23 +86,30 @@ public class StoreCategoryController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PostMapping(path = {""}, name = "store-categories-post", produces = "application/json")
+    @PostMapping(path = {""}, name = "store-categories-post")
     @PreAuthorize("hasAnyAuthority('store-categories-post','all')")
     public ResponseEntity<HttpResponse> postStoreCategoryByStoreId(HttpServletRequest request,
-            @Valid @RequestBody StoreCategory bodyStoreCategory) throws Exception {
+            @RequestParam() String name, @RequestParam() String storeId, @RequestParam(name = "file", required = false) MultipartFile file) {
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
         String logprefix = request.getRequestURI();
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "", "");
 
-        //TODO: implement check for userId authentication with storeId, so only owner of his own store can create a category of store
-        Optional<Store> store = storeRepository.findById(bodyStoreCategory.getStoreId());
+//        //TODO: implement check for userId authentication with storeId, so only owner of his own store can create a category of store
+        Optional<Store> store = storeRepository.findById(storeId);
 
-        if (store == null) {
-            Logger.application.error("store doesn't exist with id: {}", bodyStoreCategory.getId());
-
+        if (!store.isPresent()) {
+            Logger.application.error("store doesn't exist with id: {}", storeId);
             response.setStatus(HttpStatus.FAILED_DEPENDENCY);
             return ResponseEntity.status(HttpStatus.FAILED_DEPENDENCY).body(response);
+        }
+
+        StoreCategory bodyStoreCategory = new StoreCategory();
+        bodyStoreCategory.setName(name);
+        bodyStoreCategory.setStoreId(storeId);
+        if (file != null) {
+            String categoryThumbnailStoragePath = fileStorageService.saveStoreAsset(file, bodyStoreCategory.getName() + file.getOriginalFilename());
+            bodyStoreCategory.setThumbnailUrl(storeAssetsBaseUrl + bodyStoreCategory.getName() + file.getOriginalFilename().replace(" ", ""));
         }
 
         List<String> errors = new ArrayList<>();
@@ -131,6 +145,59 @@ public class StoreCategoryController {
         Logger.application.info(ProductServiceApplication.VERSION, logprefix, "storeCategory deleted, with id: {}", storeCategoryId);
         response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @GetMapping(path = {"{storeCategoryId}"}, name = "store-categories-get", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-categories-get', 'all')")
+    public ResponseEntity<HttpResponse> getCategoryById(HttpServletRequest request,
+            @PathVariable String storeCategoryId) {
+
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "", "");
+
+        Optional<StoreCategory> optStoreCategory = storeCategoryRepository.findById(storeCategoryId);
+        if (!optStoreCategory.isPresent()) {
+            Logger.application.info(ProductServiceApplication.VERSION, logprefix, "storeCategory not found", "");
+            response.setStatus(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "Store category found with id: {}", storeCategoryId);
+        response.setData(optStoreCategory);
+        response.setStatus(HttpStatus.OK);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @PutMapping(path = {"/{storeCategoryId}"}, name = "store-product-assets-put-by-id")
+    @PreAuthorize("hasAnyAuthority('store-product-assets-put-by-id', 'all')")
+    public ResponseEntity<HttpResponse> putStoreProductAssetsById(HttpServletRequest request,
+            @PathVariable String storeCategoryId,
+            @RequestParam(name = "name", required = false) String name,
+            @RequestParam(name = "file", required = false) MultipartFile file) {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Optional<StoreCategory> optStoreCategory = storeCategoryRepository.findById(storeCategoryId);
+
+        if (!optStoreCategory.isPresent()) {
+            Logger.application.info(ProductServiceApplication.VERSION, logprefix, "storeCategory not found", "");
+            response.setStatus(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+
+        if (name != null) {
+            optStoreCategory.get().setName(name);
+        }
+
+        if (file != null) {
+            String categoryThumbnailStoragePath = fileStorageService.saveStoreAsset(file, optStoreCategory.get().getName() + file.getOriginalFilename());
+            optStoreCategory.get().setThumbnailUrl(storeAssetsBaseUrl + optStoreCategory.get().getName() + file.getOriginalFilename().replace(" ", ""));
+        }
+        response.setStatus(HttpStatus.OK);
+        storeCategoryRepository.save(optStoreCategory.get());
+        return ResponseEntity.status(response.getStatus()).body(response);
+
     }
 
 }
