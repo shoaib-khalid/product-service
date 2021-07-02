@@ -195,15 +195,15 @@ public class StoreCategoryController {
             return ResponseEntity.status(response.getStatus()).body(response);
         }
 
-        List<StoreCategory> storeCategoryNames = storeCategoryRepository.findByNameAndStoreId(name, storeId);
-        List<String> errors = new ArrayList<>();
-        if (storeCategoryNames.size() > 0) {
-            Logger.application.error("store doesn't exist with id: {}", storeId);
-            response.setStatus(HttpStatus.CONFLICT);
-            errors.add("Category already exists");
-            response.setData(errors);
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
-        }
+//        List<StoreCategory> storeCategoryNames = storeCategoryRepository.findByNameAndStoreId(name, storeId);
+//        List<String> errors = new ArrayList<>();
+//        if (storeCategoryNames.size() > 0) {
+//            Logger.application.error("store doesn't exist with id: {}", storeId);
+//            response.setStatus(HttpStatus.CONFLICT);
+//            errors.add("Category already exists");
+//            response.setData(errors);
+//            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+//        }
 
         if (name != null) {
             optStoreCategory.get().setName(name);
