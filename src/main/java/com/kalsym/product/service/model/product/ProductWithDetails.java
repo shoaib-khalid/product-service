@@ -64,6 +64,10 @@ public class ProductWithDetails implements Serializable {
     private String seoName;
     
     private Double weight;
+    
+    private Boolean trackQuantity;
+    private Boolean allowOutOfStockPurchases;
+    private int minQuantityForAlarm;
 
     @OneToMany(cascade = CascadeType.ALL,
             fetch = FetchType.LAZY)

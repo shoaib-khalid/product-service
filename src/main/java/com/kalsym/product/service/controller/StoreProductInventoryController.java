@@ -1,12 +1,12 @@
 package com.kalsym.product.service.controller;
 
 import com.kalsym.product.service.ProductServiceApplication;
+import com.kalsym.product.service.enums.ProductStatus;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.model.product.Product;
 import com.kalsym.product.service.model.product.ProductInventoryWithDetails;
 import com.kalsym.product.service.model.product.ProductInventory;
 import com.kalsym.product.service.model.store.Store;
-import com.kalsym.product.service.repository.ProductInventoryRepository;
 import com.kalsym.product.service.repository.StoreRepository;
 import com.kalsym.product.service.repository.ProductRepository;
 import com.kalsym.product.service.utility.Logger;
@@ -28,6 +28,9 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import com.kalsym.product.service.model.product.*;
+import com.kalsym.product.service.repository.ProductInventoryRepository;
+import com.kalsym.product.service.repository.ProductInventoryWithProductRepository;
 
 /**
  *
@@ -45,6 +48,9 @@ public class StoreProductInventoryController {
 
     @Autowired
     ProductInventoryRepository productInventoryRepository;
+    
+    @Autowired
+    ProductInventoryWithProductRepository productInventoryWithProductRepository;
 
     @Autowired
     StoreRepository storeRepository;
@@ -246,52 +252,114 @@ public class StoreProductInventoryController {
         response.setData(productInventoryRepository.save(productInventory));
         return ResponseEntity.status(response.getStatus()).body(response);
     }
-    
+
     @PutMapping(path = {"/{itemcode}"}, name = "store-product-inventory-put-by-id")
     @PreAuthorize("hasAnyAuthority('store-product-inventory-put-by-id', 'all')")
-    public ResponseEntity<HttpResponse> reduceProductQuantity(HttpServletRequest request, 
+    public ResponseEntity<HttpResponse> reduceProductQuantity(HttpServletRequest request,
             @PathVariable String storeId,
             @PathVariable String productId,
             @PathVariable String itemcode,
-            @RequestParam(required = true) int quantity){
+            @RequestParam(required = true) int quantity) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
+        try {
+            Logger.application.info(ProductServiceApplication.VERSION, logprefix, "storeId: " + storeId + ", productId: " + productId + ", itemcode: " + itemcode);
+            Optional<Store> optStore = storeRepository.findById(storeId);
 
-        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "storeId: " + storeId + ", productId: " + productId + ", itemcode: " + itemcode);
-        Optional<Store> optStore = storeRepository.findById(storeId);
+            if (!optStore.isPresent()) {
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
+                response.setStatus(HttpStatus.NOT_FOUND);
+                response.setError("store not found");
+                return ResponseEntity.status(response.getStatus()).body(response);
+            }
 
-        if (!optStore.isPresent()) {
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
-            response.setStatus(HttpStatus.NOT_FOUND);
-            response.setError("store not found");
+            Optional<Product> optProdcut = productRepository.findById(productId);
+
+            if (!optProdcut.isPresent()) {
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product NOT_FOUND productId: " + productId);
+                response.setStatus(HttpStatus.NOT_FOUND);
+                response.setError("product not found");
+                return ResponseEntity.status(response.getStatus()).body(response);
+            }
+
+            Optional<ProductInventory> optProductInventory = productInventoryRepository.findById(itemcode);
+
+            if (!optProductInventory.isPresent()) {
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "inventory NOT_FOUND inventoryId: " + itemcode);
+                response.setStatus(HttpStatus.NOT_FOUND);
+                response.setError("inventory not found");
+                return ResponseEntity.status(response.getStatus()).body(response);
+            }
+
+            ProductInventory productInventory = optProductInventory.get();
+            productInventory.setQuantity(productInventory.getQuantity() - quantity);
+            productInventory = productInventoryRepository.save(productInventory);
+            Logger.application.info("Product variant qunatity update remaining quantity is: " + productInventory.getQuantity());
+            //getting details with product 
+            ProductInventoryWithProduct productInventoryWithProduct = productInventoryWithProductRepository.findByItemCode(itemcode);
+            Logger.application.info("got product inventory with details: " + productInventoryWithProduct.toString());
+            response.setStatus(HttpStatus.OK);
+            response.setData(productInventoryWithProduct);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        } catch (Exception ex) {
+            response.setStatus(HttpStatus.NOT_MODIFIED);
             return ResponseEntity.status(response.getStatus()).body(response);
         }
-        
-        Optional<Product> optProdcut = productRepository.findById(productId);
-
-        if (!optProdcut.isPresent()) {
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product NOT_FOUND productId: " + productId);
-            response.setStatus(HttpStatus.NOT_FOUND);
-            response.setError("product not found");
-            return ResponseEntity.status(response.getStatus()).body(response);
-        }
-        
-        Optional<ProductInventory> optProductInventory = productInventoryRepository.findById(itemcode);
-
-        if (!optProductInventory.isPresent()) {
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "inventory NOT_FOUND inventoryId: " + itemcode);
-            response.setStatus(HttpStatus.NOT_FOUND);
-            response.setError("inventory not found");
-            return ResponseEntity.status(response.getStatus()).body(response);
-        }
-        
-        ProductInventory productInventory = optProductInventory.get();
-        productInventory.setQuantity(productInventory.getQuantity() - quantity);
-        productInventoryRepository.save(productInventory);
-        
-        response.setStatus(HttpStatus.OK);
-        return ResponseEntity.status(response.getStatus()).body(response);
     }
     
+    
+    @PutMapping(path = {"/{itemcode}/productStatus"}, name = "store-product-inventory-put-by-id")
+    @PreAuthorize("hasAnyAuthority('store-product-inventory-put-by-id', 'all')")
+    public ResponseEntity<HttpResponse> changeProductStatus(HttpServletRequest request,
+            @PathVariable String storeId,
+            @PathVariable String productId,
+            @PathVariable String itemcode,
+            @RequestParam(required = true) ProductStatus status) {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+        try {
+            Logger.application.info(ProductServiceApplication.VERSION, logprefix, "storeId: " + storeId + ", productId: " + productId + ", itemcode: " + itemcode);
+            Optional<Store> optStore = storeRepository.findById(storeId);
+
+            if (!optStore.isPresent()) {
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
+                response.setStatus(HttpStatus.NOT_FOUND);
+                response.setError("store not found");
+                return ResponseEntity.status(response.getStatus()).body(response);
+            }
+
+            Optional<Product> optProdcut = productRepository.findById(productId);
+
+            if (!optProdcut.isPresent()) {
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product NOT_FOUND productId: " + productId);
+                response.setStatus(HttpStatus.NOT_FOUND);
+                response.setError("product not found");
+                return ResponseEntity.status(response.getStatus()).body(response);
+            }
+
+            Optional<ProductInventory> optProductInventory = productInventoryRepository.findById(itemcode);
+
+            if (!optProductInventory.isPresent()) {
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "inventory NOT_FOUND inventoryId: " + itemcode);
+                response.setStatus(HttpStatus.NOT_FOUND);
+                response.setError("inventory not found");
+                return ResponseEntity.status(response.getStatus()).body(response);
+            }
+
+            ProductInventory productInventory = optProductInventory.get();
+            productInventory.setStatus(status);
+            productInventory = productInventoryRepository.save(productInventory);
+            Logger.application.info("Product variant status updated : " + status.toString());
+            //getting details with product 
+            ProductInventoryWithProduct productInventoryWithProduct = productInventoryWithProductRepository.findByItemCode(itemcode);
+            Logger.application.info("got product inventory with details: " + productInventoryWithProduct.toString());
+            response.setStatus(HttpStatus.OK);
+            response.setData(productInventoryWithProduct);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        } catch (Exception ex) {
+            response.setStatus(HttpStatus.NOT_MODIFIED);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+    }
 
 }

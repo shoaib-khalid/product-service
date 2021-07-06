@@ -267,7 +267,7 @@ public class StoreProductController {
         List<Product> products = productRepository.findByStoreId(storeId);
 
         for (Product existingProduct : products) {
-            if (existingProduct.getName().equals(bodyProduct.getName())) {
+            if (existingProduct.getName().equals(bodyProduct.getName()) && !"DELETED".equalsIgnoreCase(existingProduct.getStatus())) {
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "username already exists", "");
                 response.setStatus(HttpStatus.CONFLICT);
                 errors.add("Product name already exists");

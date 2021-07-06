@@ -58,6 +58,10 @@ public class Product implements Serializable {
     private String seoName;
     
     private Double weight;
+    
+    private Boolean trackQuantity;
+    private Boolean allowOutOfStockPurchases;
+    private int minQuantityForAlarm;
 
 
     public void update(Product product) {
