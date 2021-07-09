@@ -40,7 +40,6 @@ public class ProductWithDetails implements Serializable {
 
     private String name;
 
-    private Integer stock;
 
     private String description;
 
@@ -55,7 +54,6 @@ public class ProductWithDetails implements Serializable {
 
     private String vendor;
 
-    private String barcode;
 
     private String region;
 
@@ -63,7 +61,6 @@ public class ProductWithDetails implements Serializable {
     
     private String seoName;
     
-    private Double weight;
 
     @OneToMany(cascade = CascadeType.ALL,
             fetch = FetchType.LAZY)
@@ -95,9 +92,7 @@ public class ProductWithDetails implements Serializable {
             name = product.getName();
         }
 
-        if (null != product.getStock()) {
-            stock = product.getStock();
-        }
+
 
         if (null != product.getCategoryId()) {
             categoryId = product.getCategoryId();

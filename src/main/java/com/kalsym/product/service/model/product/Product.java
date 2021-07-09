@@ -34,8 +34,6 @@ public class Product implements Serializable {
 
     private String name;
 
-    private Integer stock;
-
     private String description;
 
     private String storeId;
@@ -49,24 +47,17 @@ public class Product implements Serializable {
 
     private String vendor;
 
-    private String barcode;
-
     private String region;
     
     private String seoUrl;
     
     private String seoName;
     
-    private Double weight;
 
 
     public void update(Product product) {
         if (null != product.getName()) {
             name = product.getName();
-        }
-
-        if (null != product.getStock()) {
-            stock = product.getStock();
         }
 
         if (null != product.getCategoryId()) {
@@ -83,14 +74,7 @@ public class Product implements Serializable {
         if(null!=product.getThumbnailUrl()){
             thumbnailUrl = product.getThumbnailUrl();
         }
-        
-        if(null!=product.getWeight()){
-            weight = product.getWeight();
-        }
-        
-        
-        
-        
+             
     }
 
     @Override

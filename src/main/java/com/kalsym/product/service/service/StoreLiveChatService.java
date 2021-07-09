@@ -28,7 +28,7 @@ public class StoreLiveChatService {
     @Value("${livechat.store.agent.deletion.url:http://209.58.160.20:3000/api/v1/groups.invite}")
     private String livechatStoreGroupInviteUrl;
 
-    @Value("${livechat.token:GvKS_Z_MvqDeExBPAmSrXdwXMYOlrsW3JkuSpsO9l76}")
+    @Value("${livechat.token:GMmNIJTFglt3EW-D8CHj4c29AMSc74ix9vVJUPgN_RZ}")
     private String livechatToken;
 
     @Value("${livechat.userid:JEdxZxgW4R5Z53xq2}")
