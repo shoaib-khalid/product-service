@@ -39,7 +39,7 @@ public class StoreDeliveryDetail implements Serializable {
 
     public void update(StoreDeliveryDetail storeDeliveryDetail) {
         if (storeDeliveryDetail.getType() != null) {
-            type = storeDeliveryDetail.getType();
+            type = DeliveryType.fromString(storeDeliveryDetail.getType()).toString();
         }
 
        

@@ -1,5 +1,6 @@
 package com.kalsym.product.service.model.store;
 
+import com.kalsym.product.service.enums.StorePaymentType;
 import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -98,6 +99,10 @@ public class Store implements Serializable {
         
         if (null != store.getRegionCountryStateId()) {
             regionCountryStateId = store.getRegionCountryStateId();
+        }
+        
+        if(null != store.getPaymentType()){
+            paymentType = StorePaymentType.fromString(store.getPaymentType()).toString();
         }
 
         
