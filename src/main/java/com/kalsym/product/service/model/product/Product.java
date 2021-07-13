@@ -34,7 +34,7 @@ public class Product implements Serializable {
 
     private String name;
 
-    private Integer stock;
+//    private Integer stock;
 
     private String description;
 
@@ -49,7 +49,7 @@ public class Product implements Serializable {
 
     private String vendor;
 
-    private String barcode;
+//    private String barcode;
 
     private String region;
     
@@ -57,7 +57,7 @@ public class Product implements Serializable {
     
     private String seoName;
     
-    private Double weight;
+//    private Double weight;
     
     private Boolean trackQuantity;
     private Boolean allowOutOfStockPurchases;
@@ -69,9 +69,9 @@ public class Product implements Serializable {
             name = product.getName();
         }
 
-        if (null != product.getStock()) {
-            stock = product.getStock();
-        }
+//        if (null != product.getStock()) {
+//            stock = product.getStock();
+//        }
 
         if (null != product.getCategoryId()) {
             categoryId = product.getCategoryId();
@@ -88,9 +88,9 @@ public class Product implements Serializable {
             thumbnailUrl = product.getThumbnailUrl();
         }
         
-        if(null!=product.getWeight()){
-            weight = product.getWeight();
-        }
+//        if(null!=product.getWeight()){
+//            weight = product.getWeight();
+//        }
         
         
         

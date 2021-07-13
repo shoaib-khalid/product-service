@@ -1,9 +1,11 @@
 package com.kalsym.product.service.model.store;
 
-import com.kalsym.product.service.model.product.*;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.kalsym.product.service.enums.DeliveryType;
 import java.io.Serializable;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import lombok.Getter;
@@ -27,6 +29,7 @@ public class StoreDeliveryDetail implements Serializable {
     @Id
     private String storeId;
 
+//    @Enumerated(EnumType.STRING)
     private String type;
     private String itemType;
 

@@ -1,4 +1,14 @@
 ++++++++++++++++++++++++++++++++++++++++++++
++ product-service-2.0-SNAPSHOT(branch)
+++++++++++++++++++++++++++++++++++++++++++++
++Changes
+1. Added functionality to reduce quantity once order placed
+2. Added 'trackQuantity', 'allowOutOfStockPurchases' and 'minQuantityForAlarm' fields to product table for trackingquantity
+    2.1. 'allowOutOfStockPurchases' and minQuantityForAlarm is dependent on trackQuantity if trackQuantity is enabled then the module will alarm to merchant on rocket chat when quantity gets low from the alarm value
+    2.2. if allowOutOfStocckPurchases is not enabled the module will set that product outOfstock once inventory ends
+3. Added status field to product inventory table for tracking status of product e.g 'AVAILABLE', 'NOTAVAILABLE' and OUTOFSTOCK.
+
+ ++++++++++++++++++++++++++++++++++++++++++++
 + product-service-1.0.3
 ++++++++++++++++++++++++++++++++++++++++++++
 +Changes

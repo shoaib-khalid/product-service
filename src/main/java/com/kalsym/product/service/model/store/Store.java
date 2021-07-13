@@ -56,6 +56,8 @@ public class Store implements Serializable {
     private String phoneNumber;
     
     private Integer serviceChargesPercentage;
+    
+    private String paymentType;
 
     public void update(Store store) {
 

@@ -1,6 +1,7 @@
 package com.kalsym.product.service.controller;
 
 import com.kalsym.product.service.ProductServiceApplication;
+import com.kalsym.product.service.enums.DeliveryType;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.model.store.StoreDeliveryDetail;
 import com.kalsym.product.service.model.store.Store;
@@ -97,7 +98,7 @@ public class StoreDeliveryDetailsController {
         }
 
         StoreDeliveryDetail deliveryDetail = optStoreDeliveryDetail.get();
-       
+        deliveryDetailBody.setType(DeliveryType.fromString(deliveryDetailBody.getType()).toString());
         deliveryDetail.update(deliveryDetailBody);
 
         deliveryDetailBody.setStoreId(storeId);
@@ -128,6 +129,7 @@ public class StoreDeliveryDetailsController {
         
 
         deliveryDetailBody.setStoreId(storeId);
+        deliveryDetailBody.setType(DeliveryType.fromString(deliveryDetailBody.getType()).toString());
         response.setStatus(HttpStatus.CREATED);
         response.setData(storeTimingsRepository.save(deliveryDetailBody));
         return ResponseEntity.status(response.getStatus()).body(response);

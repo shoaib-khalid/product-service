@@ -1,10 +1,13 @@
 package com.kalsym.product.service.model.store;
 
+import com.kalsym.product.service.enums.StorePaymentType;
 import com.kalsym.product.service.model.RegionCountry;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -17,6 +20,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.GenericGenerator;
+
 
 /**
  *
@@ -65,6 +69,9 @@ public class StoreWithDetails implements Serializable {
     private String regionCountryStateId;
 
     private Integer serviceChargesPercentage;
+    
+    @Enumerated(EnumType.STRING)
+    private StorePaymentType paymentType;
 
     @OneToOne(cascade = CascadeType.ALL,
             fetch = FetchType.EAGER)
