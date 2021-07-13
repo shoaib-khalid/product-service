@@ -11,8 +11,8 @@ import java.util.Map;
  * @author FaisalHayatJadoon
  */
 public enum StorePaymentType {
-    COD(""),
-    ONLINEPAYMENT("");
+    COD("Cash On delivery", "cash-on-delivery", "cash on delivery", "cod", "Cod", "COD", "CoD", "CASH ON DELIVERY", "CASH_ON_DELIVERY", "cash_on_delivery"),
+    ONLINEPAYMENT("Online Payment", "ONLINEPAYMENT", "ONLINE_PAYMENT", "ONLINE-PAYMENT", "online payment", "online-payment", "online_payment");
     
     static final private Map<String, StorePaymentType> ALIAS_MAP = new HashMap<String, StorePaymentType>();
 
