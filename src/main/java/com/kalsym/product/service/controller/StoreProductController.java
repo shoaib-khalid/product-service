@@ -36,7 +36,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.kalsym.product.service.repository.ProductInventoryWithDetailsRepository;
-import com.sun.jndi.toolkit.url.Uri;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;

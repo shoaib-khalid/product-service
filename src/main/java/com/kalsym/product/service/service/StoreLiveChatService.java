@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import com.kalsym.product.service.utility.Logger;
 
 /**
  *
@@ -28,19 +29,30 @@ public class StoreLiveChatService {
     @Value("${livechat.store.agent.deletion.url:http://209.58.160.20:3000/api/v1/groups.invite}")
     private String livechatStoreGroupInviteUrl;
 
-    @Value("${livechat.token:GMmNIJTFglt3EW-D8CHj4c29AMSc74ix9vVJUPgN_RZ}")
-    private String livechatToken;
+//    @Value("${livechat.token:GMmNIJTFglt3EW-D8CHj4c29AMSc74ix9vVJUPgN_RZ}")
+    private String liveChatToken;
 
     @Value("${livechat.userid:JEdxZxgW4R5Z53xq2}")
-    private String livechatUserId;
+    private String liveChatUserId;
+    
+    @Value("${liveChatlogin.username:order}")
+    private String liveChatLoginUsername;
+    @Value("${liveChat.login.password:sarosh@1234}")
+    private String liveChatLoginPassword;
+    @Value("${liveChat.login.url:http://209.58.160.20:3000/api/v1/login}")
+    private String liveChatLoginUrl;
 
     public StoreCreationResponse createGroup(String name) {
+        if (!loginLiveChat()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, " created agent");
+            return null;
+        }
         String logprefix = Thread.currentThread().getStackTrace()[1].getMethodName();
         RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders headers = new HttpHeaders();
-        headers.add("X-Auth-Token", livechatToken);
-        headers.add("X-User-Id", livechatUserId);
+        headers.add("X-Auth-Token", liveChatToken);
+        headers.add("X-User-Id", liveChatUserId);
 
         class LiveChatGroup {
 
@@ -80,12 +92,16 @@ public class StoreLiveChatService {
     }
 
     public Object deleteGroup(String id) {
+        if (!loginLiveChat()) {
+//            logger.info("live chat not logged in");
+            return "";
+        }
         String logprefix = Thread.currentThread().getStackTrace()[1].getMethodName();
         RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders headers = new HttpHeaders();
-        headers.add("X-Auth-Token", livechatToken);
-        headers.add("X-User-Id", livechatUserId);
+        headers.add("X-Auth-Token", liveChatToken);
+        headers.add("X-User-Id", liveChatUserId);
 
         class DeleteGroup {
 
@@ -127,8 +143,8 @@ public class StoreLiveChatService {
         RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders headers = new HttpHeaders();
-        headers.add("X-Auth-Token", livechatToken);
-        headers.add("X-User-Id", livechatUserId);
+        headers.add("X-Auth-Token", liveChatToken);
+        headers.add("X-User-Id", liveChatUserId);
 
         HttpEntity<LiveChatGroupInvite> entity;
         entity = new HttpEntity<>(liveChatGroupInvite, headers);
@@ -141,6 +157,65 @@ public class StoreLiveChatService {
             return res.getBody();
         } else {
             return null;
+        }
+    }
+
+    public boolean loginLiveChat() {
+        String logprefix = "loginLiveChat";
+        if (null != liveChatToken) {
+            return true;
+        }
+        class LoginRequest {
+
+            public String user;
+            public String password;
+
+            public LoginRequest() {
+            }
+
+            public LoginRequest(String user, String password, String code) {
+                this.user = user;
+                this.password = password;
+            }
+
+            public String getUser() {
+                return user;
+            }
+
+            public void setUser(String user) {
+                this.user = user;
+            }
+
+            public String getPassword() {
+                return password;
+            }
+
+            public void setPassword(String password) {
+                this.password = password;
+            }
+
+            @Override
+            public String toString() {
+                return "LoginRequest{" + "user=" + user + ", password=" + password + '}';
+            }
+        }
+        RestTemplate restTemplate = new RestTemplate();
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setUser(liveChatLoginUsername);
+        loginRequest.setPassword(liveChatLoginPassword);
+        HttpEntity<LoginRequest> httpEntity = new HttpEntity<>(loginRequest);
+        try {
+//            logger.info("liveChatLoginUrl: " + liveChatLoginUrl);
+//            logger.info("httpEntity: " + httpEntity);
+            ResponseEntity<LiveChatLoginReponse> res = restTemplate.exchange(liveChatLoginUrl, HttpMethod.POST, httpEntity, LiveChatLoginReponse.class);
+//            logger.info("res: " + res);
+            LiveChatLoginReponse liveChatLoginReponse = res.getBody();
+            liveChatUserId = liveChatLoginReponse.getData().userId;
+            liveChatToken = liveChatLoginReponse.getData().authToken;
+            return true;
+        } catch (Exception e) {
+//            Logger.error("Error loging in livechat ", e);
+            return false;
         }
     }
 }
