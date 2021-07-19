@@ -1,22 +1,14 @@
 package com.kalsym.product.service.controller;
 
 import com.kalsym.product.service.ProductServiceApplication;
+import com.kalsym.product.service.model.product.*;
+import com.kalsym.product.service.repository.*;
 import com.kalsym.product.service.utility.HttpResponse;
-import com.kalsym.product.service.model.product.Product;
-import com.kalsym.product.service.model.product.ProductSpecs;
-import com.kalsym.product.service.model.product.ProductWithDetails;
 import com.kalsym.product.service.model.store.Store;
-import com.kalsym.product.service.repository.ProductAssetRepository;
-import com.kalsym.product.service.repository.ProductInventoryItemRepository;
-import com.kalsym.product.service.repository.StoreRepository;
-import com.kalsym.product.service.repository.ProductRepository;
-import com.kalsym.product.service.repository.ProductVariantRepository;
-import com.kalsym.product.service.repository.ProductVariantAvailableRepository;
-import com.kalsym.product.service.repository.ProductReviewRepository;
-import com.kalsym.product.service.repository.ProductWithDetailsRepository;
 import com.kalsym.product.service.utility.Logger;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
+import javax.swing.*;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -26,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,7 +28,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.kalsym.product.service.repository.ProductInventoryWithDetailsRepository;
+
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,10 +49,16 @@ public class StoreProductController {
     ProductWithDetailsRepository productWithDetailsRepository;
 
     @Autowired
-    ProductInventoryWithDetailsRepository productInventoryRepository;
+    ProductInventoryRepository productInventoryRepository;
+
+    @Autowired
+    ProductInventoryWithDetailsRepository productInventoryWithDetailsRepository;
 
     @Autowired
     ProductInventoryItemRepository productInventoryItemRepository;
+
+    @Autowired
+    ProductDeliveryDetailsRepository productDeliveryDetailsRepository;
 
     @Autowired
     ProductVariantRepository productVariantRepository;
@@ -291,6 +290,133 @@ public class StoreProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @Transactional(rollbackFor=Exception.class)
+    @PostMapping(path = {"/details"}, name = "store-products-post")
+    @PreAuthorize("hasAnyAuthority('store-products-post', 'all')")
+    public ResponseEntity<HttpResponse> postStoreProductWithDetails(HttpServletRequest request,
+                                                         @PathVariable String storeId,
+                                                         @Valid @RequestBody ProductWithDetails bodyProduct) throws Exception {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "storeId: " + storeId);
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "bodyProduct: " + bodyProduct.toString());
+
+        Optional<Store> optStore = storeRepository.findById(storeId);
+
+        if (!optStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
+
+        List<String> errors = new ArrayList<>();
+        List<Product> products = productRepository.findByStoreId(storeId);
+
+        for (Product existingProduct : products) {
+            if (existingProduct.getName().equals(bodyProduct.getName()) &&
+                    !"DELETED".equalsIgnoreCase(existingProduct.getStatus())) {
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "username already exists", "");
+                response.setStatus(HttpStatus.CONFLICT);
+                errors.add("Product name already exists");
+                response.setData(errors);
+                return ResponseEntity.status(response.getStatus()).body(response);
+            }
+        }
+
+        String seoName = generateSeoName(bodyProduct.getName());
+
+        String seoUrl = productSeoUrl.replace("{{store-domain}}", optStore.get().getDomain());
+        seoUrl = seoUrl.replace("{{product-name}}", seoName);
+        bodyProduct.setSeoUrl(seoUrl);
+
+        bodyProduct.setSeoName(seoName);
+        Product p = new Product(
+                bodyProduct.getName(),
+                bodyProduct.getDescription(),
+                bodyProduct.getStoreId(),
+                bodyProduct.getCategoryId(),
+                bodyProduct.getStatus(),
+                bodyProduct.getThumbnailUrl(),
+                bodyProduct.getVendor(),
+                bodyProduct.getRegion(),
+                bodyProduct.getSeoUrl(),
+                bodyProduct.getSeoName()
+        );
+        Product savedProduct = productRepository.save(p);
+
+        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "product added to store with storeId: {}, productId: {}" + storeId, savedProduct.getId());
+
+
+        int itemCodeSuffix = 1;
+
+        // TODO: Save assets
+        for (ProductAsset asset : bodyProduct.getProductAssets()) { }
+
+        ProductDeliveryDetail deliveryDetail = bodyProduct.getProductDeliveryDetail();
+        deliveryDetail.setProductId(savedProduct.getId());
+        productDeliveryDetailsRepository.save(deliveryDetail);
+
+        for (ProductVariant variant : bodyProduct.getProductVariants()) {
+            variant.setProduct(savedProduct);
+
+            ProductVariant savedVariant = productVariantRepository.save(variant);
+
+            for (ProductVariantAvailable variantAvailable :
+                    variant.getProductVariantsAvailable()) {
+                variantAvailable.setProductId(savedProduct.getId());
+                variantAvailable.setProductVariantId(savedVariant.getId());
+                productVariantAvailableRepository.save(variantAvailable);
+            }
+        }
+
+        for (ProductInventoryWithDetails inventory : bodyProduct.getProductInventories()) {
+
+            inventory.setItemCode(savedProduct.getId() + itemCodeSuffix++);
+
+            inventory.setProductId(savedProduct.getId());
+            ProductInventory inv = new ProductInventory(
+                    inventory.getItemCode(),
+                    inventory.getPrice(),
+                    inventory.getCompareAtprice(),
+                    inventory.getSKU(),
+                    inventory.getQuantity(),
+                    inventory.getProductId()
+            );
+            productInventoryRepository.save(inv);
+
+            // TODO: Save Product Inventory Items
+            for (ProductInventoryItem inventoryItem : inventory.getProductInventoryItems()) {
+                inventoryItem.setProductId(savedProduct.getId());
+                inventoryItem.setItemCode(savedProduct.getId() + itemCodeSuffix++);
+//                inventoryItem.setProductVariantAvailableId();
+//                productInventoryItemRepository.save(inventoryItem);
+            }
+        }
+
+        for (ProductReview review : bodyProduct.getProductReviews()) {
+            review.setProductId(savedProduct.getId());
+            productReviewRepository.save(review);
+        }
+
+        // For testing rollback of db transactions in case of error
+//        if (true) {
+//            throw new Exception();
+//        }
+
+        response.setData(savedProduct);
+        ProductWithDetails result =
+                productWithDetailsRepository.findByStoreIdAndName(
+                        savedProduct.getStoreId(), savedProduct.getName()).get(0);
+        if (result != null) {
+            response.setData(result);
+        }
+        response.setStatus(HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
     private String generateSeoName(String name) throws MalformedURLException {
         name = name.replace(" ", "-");
         name = name.replace("\"", "");
@@ -305,5 +431,4 @@ public class StoreProductController {
         name = name.replace(")", "%29");
         return name;
     }
-
 }

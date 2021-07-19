@@ -52,8 +52,19 @@ public class Product implements Serializable {
     private String seoUrl;
     
     private String seoName;
-    
 
+    public Product(String name, String description, String storeId, String categoryId, String status, String thumbnailUrl, String vendor, String region, String seoUrl, String seoName) {
+        this.name = name;
+        this.description = description;
+        this.storeId = storeId;
+        this.categoryId = categoryId;
+        this.status = status;
+        this.thumbnailUrl = thumbnailUrl;
+        this.vendor = vendor;
+        this.region = region;
+        this.seoUrl = seoUrl;
+        this.seoName = seoName;
+    }
 
     public void update(Product product) {
         if (null != product.getName()) {

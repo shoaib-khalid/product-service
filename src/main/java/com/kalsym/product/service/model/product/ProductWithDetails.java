@@ -92,8 +92,6 @@ public class ProductWithDetails implements Serializable {
             name = product.getName();
         }
 
-
-
         if (null != product.getCategoryId()) {
             categoryId = product.getCategoryId();
         }

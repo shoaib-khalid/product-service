@@ -45,4 +45,12 @@ public class ProductInventory implements Serializable {
 
     private String productId;
 
+    public ProductInventory(String itemCode, Double price, Double compareAtprice, String SKU, Integer quantity, String productId) {
+        this.itemCode = itemCode;
+        this.price = price;
+        this.compareAtprice = compareAtprice;
+        this.SKU = SKU;
+        this.quantity = quantity;
+        this.productId = productId;
+    }
 }
