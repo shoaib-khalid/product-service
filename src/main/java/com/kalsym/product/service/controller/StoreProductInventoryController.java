@@ -78,7 +78,13 @@ public class StoreProductInventoryController {
             return ResponseEntity.status(response.getStatus()).body(response);
         }
 
+        Logger.application.info(Logger.pattern,
+                ProductServiceApplication.VERSION, logprefix, " FOUND product: " + optProdcut);
+
         List<ProductInventoryWithDetails> productInventorys = productInventoryWithDetailsRepository.findByProductId(productId);
+
+        Logger.application.info(Logger.pattern,
+                ProductServiceApplication.VERSION, logprefix, " FOUND Product Inventories of size: " + productInventorys.size());
 
         if (variantIds == null) {
             response.setData(productInventorys);
@@ -90,6 +96,9 @@ public class StoreProductInventoryController {
         for (int i = 0; i < productInventorys.size(); i++) {
             if (null != productInventorys.get(i).getProductInventoryItems()
                     && !productInventorys.get(i).getProductInventoryItems().isEmpty()) {
+
+        Logger.application.info(Logger.pattern,
+        ProductServiceApplication.VERSION, logprefix, " Inside for loop first if: " + productInventorys.get(i).getProductInventoryItems());
 
                 if (productInventorys.get(i).getProductInventoryItems().size() == 1) {
                     String ii1Id = productInventorys.get(i).getProductInventoryItems().get(0).getProductVariantAvailableId();
