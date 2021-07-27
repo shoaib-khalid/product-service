@@ -9,6 +9,7 @@ import lombok.Setter;
 import lombok.ToString;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.*;
 import org.hibernate.annotations.GenericGenerator;
@@ -38,7 +39,7 @@ public class ProductVariant implements Serializable {
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "productId", nullable = false)
+    @JoinColumn(name = "productId")
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
     Product product;
@@ -46,8 +47,7 @@ public class ProductVariant implements Serializable {
     @OneToMany(cascade = CascadeType.ALL,
             fetch = FetchType.LAZY)
     @JoinColumn(name = "productVariantId")
-    private List<ProductVariantAvailable> productVariantsAvailable;
-    
-    
+    private List<ProductVariantAvailable> productVariantsAvailable = new ArrayList<>();
+
     private Integer sequenceNumber;
 }

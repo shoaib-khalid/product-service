@@ -212,7 +212,7 @@ public class StoreProductVariantAvailableController {
             return ResponseEntity.status(response.getStatus()).body(response);
         }
 
-        variantAvailable.setProductId(productId);
+        variantAvailable.setProduct(optProdcut.get());
         response.setStatus(HttpStatus.OK);
         response.setData(productVariantAvailableRepository.save(variantAvailable));
         return ResponseEntity.status(response.getStatus()).body(response);

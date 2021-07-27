@@ -2,11 +2,9 @@ package com.kalsym.product.service.model.product;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.io.Serializable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -53,17 +51,29 @@ public class Product implements Serializable {
     
     private String seoName;
 
-    public Product(String name, String description, String storeId, String categoryId, String status, String thumbnailUrl, String vendor, String region, String seoUrl, String seoName) {
-        this.name = name;
-        this.description = description;
-        this.storeId = storeId;
-        this.categoryId = categoryId;
-        this.status = status;
-        this.thumbnailUrl = thumbnailUrl;
-        this.vendor = vendor;
-        this.region = region;
-        this.seoUrl = seoUrl;
-        this.seoName = seoName;
+    @OneToMany(cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY)
+    @JoinColumn(name = "productId")
+    private List<ProductVariant> productVariants = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY)
+    @JoinColumn(name = "productId")
+    private List<ProductVariantAvailable> productVariantsAvailable = new ArrayList<>();
+
+    // Copy constructor
+    public Product(Product product) {
+        this.id = product.getId();
+        this.name = product.getName();
+        this.description = product.getDescription();
+        this.storeId = product.getStoreId();
+        this.categoryId = product.getCategoryId();
+        this.status = product.getStatus();
+        this.thumbnailUrl = product.getThumbnailUrl();
+        this.vendor = product.getVendor();
+        this.region = product.getRegion();
+        this.seoUrl = product.getSeoUrl();
+        this.seoName = product.getSeoName();
     }
 
     public void update(Product product) {

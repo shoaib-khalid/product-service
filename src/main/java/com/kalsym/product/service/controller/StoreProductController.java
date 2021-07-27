@@ -8,7 +8,6 @@ import com.kalsym.product.service.model.store.Store;
 import com.kalsym.product.service.utility.Logger;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
-import javax.swing.*;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -47,30 +46,6 @@ public class StoreProductController {
 
     @Autowired
     ProductWithDetailsRepository productWithDetailsRepository;
-
-    @Autowired
-    ProductInventoryRepository productInventoryRepository;
-
-    @Autowired
-    ProductInventoryWithDetailsRepository productInventoryWithDetailsRepository;
-
-    @Autowired
-    ProductInventoryItemRepository productInventoryItemRepository;
-
-    @Autowired
-    ProductDeliveryDetailsRepository productDeliveryDetailsRepository;
-
-    @Autowired
-    ProductVariantRepository productVariantRepository;
-
-    @Autowired
-    ProductVariantAvailableRepository productVariantAvailableRepository;
-
-    @Autowired
-    ProductReviewRepository productReviewRepository;
-
-    @Autowired
-    ProductAssetRepository productAssetRepository;
 
     @Autowired
     StoreRepository storeRepository;
@@ -295,7 +270,7 @@ public class StoreProductController {
     @PreAuthorize("hasAnyAuthority('store-products-post', 'all')")
     public ResponseEntity<HttpResponse> postStoreProductWithDetails(HttpServletRequest request,
                                                          @PathVariable String storeId,
-                                                         @Valid @RequestBody ProductWithDetails bodyProduct) throws Exception {
+                                                         @Valid @RequestBody ProductWithVariants bodyProduct) throws Exception {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
@@ -313,106 +288,53 @@ public class StoreProductController {
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
 
         List<String> errors = new ArrayList<>();
-        List<Product> products = productRepository.findByStoreId(storeId);
+        List<Product> products = productRepository.findByStoreIdAndName(storeId, bodyProduct.getProduct().getName());
 
-        for (Product existingProduct : products) {
-            if (existingProduct.getName().equals(bodyProduct.getName()) &&
-                    !"DELETED".equalsIgnoreCase(existingProduct.getStatus())) {
-                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "username already exists", "");
-                response.setStatus(HttpStatus.CONFLICT);
-                errors.add("Product name already exists");
-                response.setData(errors);
-                return ResponseEntity.status(response.getStatus()).body(response);
-            }
+        if (!products.isEmpty()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Product name already exists", "");
+            response.setStatus(HttpStatus.CONFLICT);
+            errors.add("Product name already exists");
+            response.setData(errors);
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
 
-        String seoName = generateSeoName(bodyProduct.getName());
+        Product product = new Product(bodyProduct.getProduct());
+
+        String seoName = generateSeoName(product.getName());
+        product.setSeoName(seoName);
 
         String seoUrl = productSeoUrl.replace("{{store-domain}}", optStore.get().getDomain());
         seoUrl = seoUrl.replace("{{product-name}}", seoName);
-        bodyProduct.setSeoUrl(seoUrl);
+        product.setSeoUrl(seoUrl);
 
-        bodyProduct.setSeoName(seoName);
-        Product p = new Product(
-                bodyProduct.getName(),
-                bodyProduct.getDescription(),
-                bodyProduct.getStoreId(),
-                bodyProduct.getCategoryId(),
-                bodyProduct.getStatus(),
-                bodyProduct.getThumbnailUrl(),
-                bodyProduct.getVendor(),
-                bodyProduct.getRegion(),
-                bodyProduct.getSeoUrl(),
-                bodyProduct.getSeoName()
-        );
-        Product savedProduct = productRepository.save(p);
+        for (ProductVariant bodyVariant : bodyProduct.getProductVariants()) {
+            ProductVariant variant = new ProductVariant();
+            variant.setName(bodyVariant.getName());
+            variant.setDescription(bodyVariant.getDescription());
+            variant.setSequenceNumber(bodyVariant.getSequenceNumber());
 
-        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "product added to store with storeId: {}, productId: {}" + storeId, savedProduct.getId());
+            for (ProductVariantAvailable bodyVariantAvailable :
+                    bodyVariant.getProductVariantsAvailable())
+            {
+                ProductVariantAvailable variantAvailable = new ProductVariantAvailable();
+                variantAvailable.setSequenceNumber(bodyVariantAvailable.getSequenceNumber());
+                variantAvailable.setValue(bodyVariantAvailable.getValue());
 
-
-        int itemCodeSuffix = 1;
-
-        // TODO: Save assets
-        for (ProductAsset asset : bodyProduct.getProductAssets()) { }
-
-        ProductDeliveryDetail deliveryDetail = bodyProduct.getProductDeliveryDetail();
-        deliveryDetail.setProductId(savedProduct.getId());
-        productDeliveryDetailsRepository.save(deliveryDetail);
-
-        for (ProductVariant variant : bodyProduct.getProductVariants()) {
-            variant.setProduct(savedProduct);
-
-            ProductVariant savedVariant = productVariantRepository.save(variant);
-
-            for (ProductVariantAvailable variantAvailable :
-                    variant.getProductVariantsAvailable()) {
-                variantAvailable.setProductId(savedProduct.getId());
-                variantAvailable.setProductVariantId(savedVariant.getId());
-                productVariantAvailableRepository.save(variantAvailable);
+                variantAvailable.setProductVariant(variant);
+                variantAvailable.setProduct(product);
+                variant.getProductVariantsAvailable().add(variantAvailable);
+                product.getProductVariantsAvailable().add(variantAvailable);
             }
+//            variant.setProductVariantsAvailable(bodyVariant.getProductVariantsAvailable());
+
+            variant.setProduct(product);
+            product.getProductVariants().add(variant);
         }
 
-        for (ProductInventoryWithDetails inventory : bodyProduct.getProductInventories()) {
+        Product result = productRepository.save(product);
+        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "product added to store with storeId: {}, productId: {}" + storeId, result.getId());
 
-            inventory.setItemCode(savedProduct.getId() + itemCodeSuffix++);
-
-            inventory.setProductId(savedProduct.getId());
-            ProductInventory inv = new ProductInventory(
-                    inventory.getItemCode(),
-                    inventory.getPrice(),
-                    inventory.getCompareAtprice(),
-                    inventory.getSKU(),
-                    inventory.getQuantity(),
-                    inventory.getProductId()
-            );
-            productInventoryRepository.save(inv);
-
-            // TODO: Save Product Inventory Items
-            for (ProductInventoryItem inventoryItem : inventory.getProductInventoryItems()) {
-                inventoryItem.setProductId(savedProduct.getId());
-                inventoryItem.setItemCode(savedProduct.getId() + itemCodeSuffix++);
-//                inventoryItem.setProductVariantAvailableId();
-//                productInventoryItemRepository.save(inventoryItem);
-            }
-        }
-
-        for (ProductReview review : bodyProduct.getProductReviews()) {
-            review.setProductId(savedProduct.getId());
-            productReviewRepository.save(review);
-        }
-
-        // For testing rollback of db transactions in case of error
-//        if (true) {
-//            throw new Exception();
-//        }
-
-        response.setData(savedProduct);
-        ProductWithDetails result =
-                productWithDetailsRepository.findByStoreIdAndName(
-                        savedProduct.getStoreId(), savedProduct.getName()).get(0);
-        if (result != null) {
-            response.setData(result);
-        }
+        response.setData(result);
         response.setStatus(HttpStatus.CREATED);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
