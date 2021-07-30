@@ -40,10 +40,7 @@ public class ProductWithDetails implements Serializable {
 
     private String name;
 
-<<<<<<< HEAD
-//    private Integer stock;
-=======
->>>>>>> origin/master
+
 
     private String description;
 
@@ -58,10 +55,7 @@ public class ProductWithDetails implements Serializable {
 
     private String vendor;
 
-<<<<<<< HEAD
-//    private String barcode;
-=======
->>>>>>> origin/master
+
 
     private String region;
 
@@ -69,14 +63,14 @@ public class ProductWithDetails implements Serializable {
     
     private String seoName;
     
-<<<<<<< HEAD
+
 //    private Double weight;
     
     private Boolean trackQuantity;
     private Boolean allowOutOfStockPurchases;
     private int minQuantityForAlarm;
-=======
->>>>>>> origin/master
+
+
 
     @OneToMany(cascade = CascadeType.ALL,
             fetch = FetchType.LAZY)
@@ -108,13 +102,8 @@ public class ProductWithDetails implements Serializable {
             name = product.getName();
         }
 
-<<<<<<< HEAD
-//        if (null != product.getStock()) {
-//            stock = product.getStock();
-//        }
-=======
 
->>>>>>> origin/master
+
 
         if (null != product.getCategoryId()) {
             categoryId = product.getCategoryId();

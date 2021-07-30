@@ -21,7 +21,6 @@ import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.GenericGenerator;
 
-
 /**
  *
  * @author 7cu
@@ -74,10 +73,9 @@ public class StoreWithDetails implements Serializable {
     private String paymentType;
 
     private Integer serviceChargesPercentage;
-    
-    @Enumerated(EnumType.STRING)
-    private StorePaymentType paymentType;
 
+//    @Enumerated(EnumType.STRING)
+//    private StorePaymentType paymentType;
     @OneToOne(cascade = CascadeType.ALL,
             fetch = FetchType.EAGER)
     @JoinColumn(name = "regionCountryId", referencedColumnName = "id", insertable = false, updatable = false, nullable = true)
@@ -138,7 +136,7 @@ public class StoreWithDetails implements Serializable {
         }
 
         if (null != store.getPaymentType()) {
-            email = store.getPaymentType();
+            paymentType = StorePaymentType.fromString(store.getPaymentType()).toString();
         }
 
     }

@@ -48,11 +48,11 @@ public class ProductInventory implements Serializable {
 
     private String productId;
     
-<<<<<<< HEAD
+
     @Enumerated(EnumType.STRING)
     private ProductStatus status;
 
-=======
-    private String status;
->>>>>>> 7b26b61de7190328949bf9a9c8002fea697ddc16
+
+//    private String status;
+
 }

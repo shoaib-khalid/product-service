@@ -34,11 +34,7 @@ public class Product implements Serializable {
 
     private String name;
 
-<<<<<<< HEAD
-//    private Integer stock;
 
-=======
->>>>>>> origin/master
     private String description;
 
     private String storeId;
@@ -52,25 +48,18 @@ public class Product implements Serializable {
 
     private String vendor;
 
-<<<<<<< HEAD
-//    private String barcode;
 
-=======
->>>>>>> origin/master
     private String region;
     
     private String seoUrl;
     
     private String seoName;
     
-<<<<<<< HEAD
-//    private Double weight;
-    
+
     private boolean trackQuantity;
     private boolean allowOutOfStockPurchases;
     private int minQuantityForAlarm;
-=======
->>>>>>> origin/master
+
 
 
     public void update(Product product) {
@@ -78,13 +67,7 @@ public class Product implements Serializable {
             name = product.getName();
         }
 
-<<<<<<< HEAD
-//        if (null != product.getStock()) {
-//            stock = product.getStock();
-//        }
 
-=======
->>>>>>> origin/master
         if (null != product.getCategoryId()) {
             categoryId = product.getCategoryId();
         }
@@ -99,18 +82,7 @@ public class Product implements Serializable {
         if(null!=product.getThumbnailUrl()){
             thumbnailUrl = product.getThumbnailUrl();
         }
-<<<<<<< HEAD
-        
-//        if(null!=product.getWeight()){
-//            weight = product.getWeight();
-//        }
-        
-        
-        
-        
-=======
-             
->>>>>>> origin/master
+
     }
 
     @Override
