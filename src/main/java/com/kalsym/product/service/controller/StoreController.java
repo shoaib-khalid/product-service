@@ -197,7 +197,7 @@ public class StoreController {
             String storeDomain = bodyStore.getName().replace("'", "");
             storeDomain = storeDomain.replace(" ", "-").toLowerCase();
             bodyStore.setDomain(storeDomain);
-            bodyStore.setPaymentType(StorePaymentType.fromString(bodyStore.getPaymentType()).toString());
+            bodyStore.setPaymentType(StorePaymentType.fromString(!bodyStore.getPaymentType().isEmpty()? "COD": bodyStore.getPaymentType() ).toString());
             String domain = storeSubdomainHandler.createSubDomain(bodyStore.getDomain());
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "domain: " + domain, "");
 

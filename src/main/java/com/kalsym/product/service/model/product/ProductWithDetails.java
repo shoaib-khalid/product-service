@@ -40,7 +40,7 @@ public class ProductWithDetails implements Serializable {
 
     private String name;
 
-    private Integer stock;
+//    private Integer stock;
 
     private String description;
 
@@ -55,7 +55,7 @@ public class ProductWithDetails implements Serializable {
 
     private String vendor;
 
-    private String barcode;
+//    private String barcode;
 
     private String region;
 
@@ -63,7 +63,7 @@ public class ProductWithDetails implements Serializable {
     
     private String seoName;
     
-    private Double weight;
+//    private Double weight;
     
     private Boolean trackQuantity;
     private Boolean allowOutOfStockPurchases;
@@ -99,9 +99,9 @@ public class ProductWithDetails implements Serializable {
             name = product.getName();
         }
 
-        if (null != product.getStock()) {
-            stock = product.getStock();
-        }
+//        if (null != product.getStock()) {
+//            stock = product.getStock();
+//        }
 
         if (null != product.getCategoryId()) {
             categoryId = product.getCategoryId();

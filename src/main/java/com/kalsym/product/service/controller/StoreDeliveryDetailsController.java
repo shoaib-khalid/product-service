@@ -129,7 +129,8 @@ public class StoreDeliveryDetailsController {
         
 
         deliveryDetailBody.setStoreId(storeId);
-        deliveryDetailBody.setType(DeliveryType.fromString(deliveryDetailBody.getType()).toString());
+        // setting 
+        deliveryDetailBody.setType(DeliveryType.fromString(!deliveryDetailBody.getType().isEmpty() ? "SELF": deliveryDetailBody.getType()).toString());
         response.setStatus(HttpStatus.CREATED);
         response.setData(storeTimingsRepository.save(deliveryDetailBody));
         return ResponseEntity.status(response.getStatus()).body(response);

@@ -59,8 +59,8 @@ public class Product implements Serializable {
     
 //    private Double weight;
     
-    private Boolean trackQuantity;
-    private Boolean allowOutOfStockPurchases;
+    private boolean trackQuantity;
+    private boolean allowOutOfStockPurchases;
     private int minQuantityForAlarm;
 
 
