@@ -39,7 +39,8 @@ public class RegionVertical implements Serializable {
     private String name;
     private String description;
     private String regionId;
-
+    private String thumbnailUrl;
+    
     public void update(RegionVertical regionVertical) {
         if (null != regionVertical.getName()) {
             name = regionVertical.getName();

@@ -50,7 +50,10 @@ public class StoreWithDetails implements Serializable {
     private String verticalCode;
 
     private String storeDescription;
+
     private String postcode;
+
+    private String email;
 
     private String domain;
 
@@ -67,6 +70,8 @@ public class StoreWithDetails implements Serializable {
     private String phoneNumber;
 
     private String regionCountryStateId;
+
+    private String paymentType;
 
     private Integer serviceChargesPercentage;
     
@@ -126,6 +131,14 @@ public class StoreWithDetails implements Serializable {
 
         if (null != store.getServiceChargesPercentage()) {
             serviceChargesPercentage = store.getServiceChargesPercentage();
+        }
+
+        if (null != store.getEmail()) {
+            email = store.getEmail();
+        }
+
+        if (null != store.getPaymentType()) {
+            email = store.getPaymentType();
         }
 
     }

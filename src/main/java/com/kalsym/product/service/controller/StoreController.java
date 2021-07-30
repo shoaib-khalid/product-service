@@ -192,7 +192,7 @@ public class StoreController {
         }
 
         try {
-
+            
             //temp fix to remove apostrophy
             String storeDomain = bodyStore.getName().replace("'", "");
             storeDomain = storeDomain.replace(" ", "-").toLowerCase();

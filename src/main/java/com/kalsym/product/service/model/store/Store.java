@@ -38,7 +38,12 @@ public class Store implements Serializable {
     private String verticalCode;
 
     private String storeDescription;
+
     private String postcode;
+
+    private String email;
+
+    private String paymentType;
 
     private String domain;
 
@@ -51,14 +56,13 @@ public class Store implements Serializable {
     private String liveChatCsrGroupName;
 
     private String regionCountryId;
-    
+
     private String regionCountryStateId;
 
     private String phoneNumber;
-    
+
     private Integer serviceChargesPercentage;
     
-    private String paymentType;
 
     public void update(Store store) {
 
@@ -96,7 +100,7 @@ public class Store implements Serializable {
         if (null != store.getPhoneNumber()) {
             phoneNumber = store.getPhoneNumber();
         }
-        
+
         if (null != store.getRegionCountryStateId()) {
             regionCountryStateId = store.getRegionCountryStateId();
         }
@@ -105,10 +109,13 @@ public class Store implements Serializable {
             paymentType = StorePaymentType.fromString(store.getPaymentType()).toString();
         }
 
-        
         if (null != store.getServiceChargesPercentage()) {
             serviceChargesPercentage = store.getServiceChargesPercentage();
         }
 
+        if (null != store.getEmail()) {
+            email = store.getEmail();
+        }
     }
+
 }
