@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 mohsin
+ * Copyright (C) 2021 mohsi
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,24 +16,16 @@
  */
 package com.kalsym.product.service.repository;
 
-import com.kalsym.product.service.model.product.ProductAsset;
-import com.kalsym.product.service.model.store.StoreAsset;
-import com.kalsym.product.service.model.store.StoreCategory;
-import com.kalsym.product.service.model.store.StoreCommission;
-import java.util.List;
-import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
+import com.kalsym.product.service.model.store.StateDeliveryCharge;
 /**
  *
- * @author mohsin
+ * @author mohsi
  */
 @Repository
-public interface StoreCommissionRepository
-        extends PagingAndSortingRepository<StoreCommission, String>, JpaRepository<StoreCommission, String> {
-        
-
+public interface StateDeliveryChargeRepository extends PagingAndSortingRepository<StateDeliveryCharge, String>, JpaRepository<StateDeliveryCharge, String>{
+    
 }

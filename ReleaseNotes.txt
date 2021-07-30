@@ -1,4 +1,11 @@
 ++++++++++++++++++++++++++++++++++++++++++++
++ product-service-1.0.4
+++++++++++++++++++++++++++++++++++++++++++++
++Changes
+1. When adding asset now, if asset with that endpoint already exists it will be deleted
+2. Sorting added in products. Sorting parameter and sortByCol parameter is added.
+
+++++++++++++++++++++++++++++++++++++++++++++
 + product-service-1.0.3
 ++++++++++++++++++++++++++++++++++++++++++++
 +Changes

@@ -44,6 +44,8 @@ public class ProductInventoryWithDetails implements Serializable {
     private Integer quantity;
 
     private String productId;
+    
+    private String status;
 
     @OneToMany(cascade = CascadeType.ALL,
             fetch = FetchType.LAZY)

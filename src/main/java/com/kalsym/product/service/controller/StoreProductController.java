@@ -113,9 +113,9 @@ public class StoreProductController {
 
         Pageable pageable = PageRequest.of(page, pageSize, Sort.by(sortingOrder, sortByCol));
 
-//        if (sortByCol.equalsIgnoreCase("price")) {
-//            pageable = PageRequest.of(page, pageSize, Sort.by(sortingOrder, "productInventories.price"));
-//        }
+        if (sortByCol.equalsIgnoreCase("price")) {
+            pageable = PageRequest.of(page, pageSize, Sort.by(sortingOrder, "productInventories.price"));
+        }
 
         productMatch.setStoreId(storeId);
         productMatch.setCategoryId(categoryId);
