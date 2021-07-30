@@ -1,4 +1,5 @@
 ++++++++++++++++++++++++++++++++++++++++++++
+<<<<<<< HEAD
 + product-service-2.0-SNAPSHOT(branch)
 ++++++++++++++++++++++++++++++++++++++++++++
 +Changes
@@ -9,6 +10,15 @@
 3. Added status field to product inventory table for tracking status of product e.g 'AVAILABLE', 'NOTAVAILABLE' and OUTOFSTOCK.
 
  ++++++++++++++++++++++++++++++++++++++++++++
+=======
++ product-service-1.0.4
+++++++++++++++++++++++++++++++++++++++++++++
++Changes
+1. When adding asset now, if asset with that endpoint already exists it will be deleted
+2. Sorting added in products. Sorting parameter and sortByCol parameter is added.
+
+++++++++++++++++++++++++++++++++++++++++++++
+>>>>>>> 7b26b61de7190328949bf9a9c8002fea697ddc16
 + product-service-1.0.3
 ++++++++++++++++++++++++++++++++++++++++++++
 +Changes

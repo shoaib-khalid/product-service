@@ -290,6 +290,14 @@ public class StoreProductAssetController {
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "OriginalFilename: " + file.getOriginalFilename());
 
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Checking if this asset already exists");
+
+        Optional<ProductAsset> optProdAsset = productAssetRepository.findByItemCode(itemCode);
+        if (optProdAsset.isPresent()) {
+            productAssetRepository.deleteById(optProdAsset.get().getId());
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Existing asset deleted successfully");
+        }
+
         String storagePath = fileStorageService.saveProductAsset(file, itemCode + file.getOriginalFilename().replace(" ", ""));
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "storagePath: " + storagePath);
 
@@ -325,7 +333,7 @@ public class StoreProductAssetController {
                 }
             }
         } else {
-            this.setDefaultThumbnail(productAssets,product);
+            this.setDefaultThumbnail(productAssets, product);
         }
 
         response.setStatus(HttpStatus.OK);
@@ -333,7 +341,7 @@ public class StoreProductAssetController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    private void setDefaultThumbnail(List<ProductAsset> productAssets,Product product) {
+    private void setDefaultThumbnail(List<ProductAsset> productAssets, Product product) {
         for (ProductAsset pA : productAssets) {
             if (pA.getIsThumbnail() != null && pA.getIsThumbnail()) {
                 return;

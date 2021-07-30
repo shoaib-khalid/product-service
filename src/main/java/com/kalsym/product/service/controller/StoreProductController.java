@@ -36,11 +36,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.kalsym.product.service.repository.ProductInventoryWithDetailsRepository;
-import com.sun.jndi.toolkit.url.Uri;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Sort;
 
 /**
  *
@@ -88,6 +88,8 @@ public class StoreProductController {
             @RequestParam(required = false) String seoName,
             @RequestParam(required = false) String categoryId,
             @RequestParam(required = false) List<String> status,
+            @RequestParam(required = false, defaultValue = "name") String sortByCol,
+            @RequestParam(required = false, defaultValue = "ASC") Sort.Direction sortingOrder,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int pageSize) {
         String logprefix = request.getRequestURI();
@@ -107,7 +109,14 @@ public class StoreProductController {
 
         ProductWithDetails productMatch = new ProductWithDetails();
 
-        Pageable pageable = PageRequest.of(page, pageSize);
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Sort By:" + sortingOrder);
+
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.by(sortingOrder, sortByCol));
+
+        if (sortByCol.equalsIgnoreCase("price")) {
+            pageable = PageRequest.of(page, pageSize, Sort.by(sortingOrder, "productInventories.price"));
+        }
+
         productMatch.setStoreId(storeId);
         productMatch.setCategoryId(categoryId);
         productMatch.setName(name);
@@ -267,8 +276,12 @@ public class StoreProductController {
         List<Product> products = productRepository.findByStoreId(storeId);
 
         for (Product existingProduct : products) {
+<<<<<<< HEAD
 
             if (existingProduct.getName().equals(bodyProduct.getName())&& !"DELETED".equalsIgnoreCase(existingProduct.getStatus())) {
+=======
+            if (existingProduct.getName().equals(bodyProduct.getName()) && !"DELETED".equalsIgnoreCase(existingProduct.getStatus())) {
+>>>>>>> 7b26b61de7190328949bf9a9c8002fea697ddc16
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "username already exists", "");
                 response.setStatus(HttpStatus.CONFLICT);
                 errors.add("Product name already exists");

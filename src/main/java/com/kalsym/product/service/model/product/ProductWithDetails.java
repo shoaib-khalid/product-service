@@ -86,7 +86,7 @@ public class ProductWithDetails implements Serializable {
     @OneToMany(cascade = CascadeType.ALL,
             fetch = FetchType.LAZY)
     @JoinColumn(name = "productId")
-    private Set<ProductInventoryWithDetails> productInventories = new HashSet<>();
+    private List<ProductInventoryWithDetails> productInventories;
 
     @OneToMany(cascade = CascadeType.ALL,
             fetch = FetchType.LAZY)
