@@ -34,7 +34,7 @@ public class StoreLiveChatService {
 
     @Value("${livechat.userid:JEdxZxgW4R5Z53xq2}")
     private String liveChatUserId;
-    
+
     @Value("${liveChatlogin.username:order}")
     private String liveChatLoginUsername;
     @Value("${liveChat.login.password:sarosh@1234}")
@@ -44,7 +44,7 @@ public class StoreLiveChatService {
 
     public StoreCreationResponse createGroup(String name) {
         if (!loginLiveChat()) {
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, " created agent");
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, " logged in");
             return null;
         }
         String logprefix = Thread.currentThread().getStackTrace()[1].getMethodName();
@@ -76,6 +76,7 @@ public class StoreLiveChatService {
 
         try {
             ResponseEntity<LiveChatResponse> res = restTemplate.exchange(livechatStoreGroupCreationUrl, HttpMethod.POST, entity, LiveChatResponse.class);
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " res: " + res);
 
             if (res.getBody().success == true) {
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " created agent " + res.getBody());
@@ -199,16 +200,22 @@ public class StoreLiveChatService {
                 return "LoginRequest{" + "user=" + user + ", password=" + password + '}';
             }
         }
+
         RestTemplate restTemplate = new RestTemplate();
         LoginRequest loginRequest = new LoginRequest();
         loginRequest.setUser(liveChatLoginUsername);
         loginRequest.setPassword(liveChatLoginPassword);
+
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " loginRequest: " + loginRequest);
+
         HttpEntity<LoginRequest> httpEntity = new HttpEntity<>(loginRequest);
         try {
 //            logger.info("liveChatLoginUrl: " + liveChatLoginUrl);
 //            logger.info("httpEntity: " + httpEntity);
             ResponseEntity<LiveChatLoginReponse> res = restTemplate.exchange(liveChatLoginUrl, HttpMethod.POST, httpEntity, LiveChatLoginReponse.class);
 //            logger.info("res: " + res);
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " res: " + res);
+
             LiveChatLoginReponse liveChatLoginReponse = res.getBody();
             liveChatUserId = liveChatLoginReponse.getData().userId;
             liveChatToken = liveChatLoginReponse.getData().authToken;
