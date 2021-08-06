@@ -29,10 +29,8 @@ public class StoreDeliveryDetail implements Serializable {
 
     private String type;
     private String itemType;
-
-  
-
     private Integer maxOrderQuantityForBike;
+    private Boolean allowsStorePickup;
 
     public void update(StoreDeliveryDetail storeDeliveryDetail) {
         if (storeDeliveryDetail.getType() != null) {
@@ -42,6 +40,10 @@ public class StoreDeliveryDetail implements Serializable {
        
         if (storeDeliveryDetail.getItemType() != null) {
             itemType = storeDeliveryDetail.getItemType();
+        }
+        
+        if (storeDeliveryDetail.getAllowsStorePickup()!= null) {
+            allowsStorePickup = storeDeliveryDetail.getAllowsStorePickup();
         }
 
         if (storeDeliveryDetail.getMaxOrderQuantityForBike() != null) {

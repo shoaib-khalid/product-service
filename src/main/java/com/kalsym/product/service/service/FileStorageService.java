@@ -84,4 +84,13 @@ public class FileStorageService {
         }
 
     }
+    
+        public String getFileExtension(MultipartFile file) {
+        String name = file.getOriginalFilename();
+        int lastIndexOf = name.lastIndexOf(".");
+        if (lastIndexOf == -1) {
+            return ""; // empty extension
+        }
+        return name.substring(lastIndexOf);
+    }
 }

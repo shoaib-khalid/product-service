@@ -21,6 +21,7 @@ import com.kalsym.product.service.model.store.StoreCategory;
 import com.kalsym.product.service.model.store.Store;
 import com.kalsym.product.service.service.FileStorageService;
 import com.kalsym.product.service.utility.Logger;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -90,14 +91,13 @@ public class StoreCategoryController {
     @PreAuthorize("hasAnyAuthority('store-categories-post','all')")
     public ResponseEntity<HttpResponse> postStoreCategoryByStoreId(HttpServletRequest request,
             @RequestParam() String name, @RequestParam() String storeId, @RequestParam(name = "file", required = false) MultipartFile file) {
-        HttpResponse response = new HttpResponse(request.getRequestURI());
 
+        HttpResponse response = new HttpResponse(request.getRequestURI());
         String logprefix = request.getRequestURI();
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "", "");
 
 //        //TODO: implement check for userId authentication with storeId, so only owner of his own store can create a category of store
         Optional<Store> store = storeRepository.findById(storeId);
-
         if (!store.isPresent()) {
             Logger.application.error("store doesn't exist with id: {}", storeId);
             response.setStatus(HttpStatus.FAILED_DEPENDENCY);
@@ -117,14 +117,13 @@ public class StoreCategoryController {
         StoreCategory bodyStoreCategory = new StoreCategory();
         bodyStoreCategory.setName(name);
         bodyStoreCategory.setStoreId(storeId);
+        storeCategoryRepository.save(bodyStoreCategory);
         if (file != null) {
-            String categoryThumbnailStoragePath = fileStorageService.saveStoreAsset(file, bodyStoreCategory.getName() + file.getOriginalFilename());
-            bodyStoreCategory.setThumbnailUrl(storeAssetsBaseUrl + bodyStoreCategory.getName() + file.getOriginalFilename().replace(" ", ""));
+            Logger.application.info("storeCategory created with id: {}", bodyStoreCategory.getId());
+            String categoryThumbnailStoragePath = fileStorageService.saveStoreAsset(file, bodyStoreCategory.getId() + fileStorageService.getFileExtension(file));
+            bodyStoreCategory.setThumbnailUrl(storeAssetsBaseUrl + bodyStoreCategory.getId() + fileStorageService.getFileExtension(file));
         }
 
-        storeCategoryRepository.save(bodyStoreCategory);
-
-        Logger.application.info("storeCategory created with id: {}", bodyStoreCategory.getId());
         response.setStatus(HttpStatus.CREATED);
         response.setData(storeCategoryRepository.save(bodyStoreCategory));
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -205,14 +204,13 @@ public class StoreCategoryController {
 //            response.setData(errors);
 //            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
 //        }
-
         if (name != null) {
             optStoreCategory.get().setName(name);
         }
 
         if (file != null) {
-            String categoryThumbnailStoragePath = fileStorageService.saveStoreAsset(file, optStoreCategory.get().getName() + file.getOriginalFilename());
-            optStoreCategory.get().setThumbnailUrl(storeAssetsBaseUrl + optStoreCategory.get().getName() + file.getOriginalFilename().replace(" ", ""));
+            String categoryThumbnailStoragePath = fileStorageService.saveStoreAsset(file, optStoreCategory.get().getId() + fileStorageService.getFileExtension(file));
+            optStoreCategory.get().setThumbnailUrl(storeAssetsBaseUrl + optStoreCategory.get().getId() + fileStorageService.getFileExtension(file));
         }
 
         response.setStatus(HttpStatus.OK);

@@ -48,12 +48,16 @@ public class Product implements Serializable {
     private String vendor;
 
     private String region;
-    
-    private String seoUrl;
-    
-    private String seoName;
-    
 
+    private String seoUrl;
+
+    private String seoName;
+
+    private Boolean trackQuantity;
+
+    private Boolean allowOutOfStockPurchases;
+
+    private Integer minQuantityForAlarm;
 
     public void update(Product product) {
         if (null != product.getName()) {
@@ -63,18 +67,29 @@ public class Product implements Serializable {
         if (null != product.getCategoryId()) {
             categoryId = product.getCategoryId();
         }
-        
-        if(null!=product.getDescription()){
+
+        if (null != product.getDescription()) {
             description = product.getDescription();
         }
-        
-        if(null!=product.getStatus()){
+
+        if (null != product.getStatus()) {
             status = product.getStatus();
         }
-        if(null!=product.getThumbnailUrl()){
+
+        if (null != product.getThumbnailUrl()) {
             thumbnailUrl = product.getThumbnailUrl();
         }
-             
+
+        if (null != product.getTrackQuantity()) {
+            trackQuantity = product.getTrackQuantity();
+        }
+        if (null != product.getAllowOutOfStockPurchases()) {
+            allowOutOfStockPurchases = product.getAllowOutOfStockPurchases();
+        }
+        if (null != product.getMinQuantityForAlarm()) {
+            minQuantityForAlarm = product.getMinQuantityForAlarm();
+        }
+
     }
 
     @Override

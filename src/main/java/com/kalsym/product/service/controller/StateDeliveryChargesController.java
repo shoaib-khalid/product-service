@@ -36,6 +36,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.kalsym.product.service.model.store.StateDeliveryCharge;
+import java.util.List;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 /**
  *
@@ -60,9 +62,9 @@ public class StateDeliveryChargesController {
         String logprefix = request.getRequestURI();
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Id recieved: " + storeId);
 
-        Optional<Store> optStoreCommission = storeRepository.findById(storeId);
+        Optional<Store> optStore = storeRepository.findById(storeId);
 
-        if (optStoreCommission == null) {
+        if (!optStore.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Not Found");
             response.setStatus(HttpStatus.NOT_FOUND);
             return ResponseEntity.status(response.getStatus()).body(response);
@@ -70,7 +72,7 @@ public class StateDeliveryChargesController {
 
         Optional<StateDeliveryCharge> stateDCharge = stateDeliveryChargeRepository.findById(id);
 
-        if (stateDCharge == null) {
+        if (!stateDCharge.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Not Found");
             response.setStatus(HttpStatus.NOT_FOUND);
             return ResponseEntity.status(response.getStatus()).body(response);
@@ -125,7 +127,7 @@ public class StateDeliveryChargesController {
 
         Optional<StateDeliveryCharge> stateDCharge = stateDeliveryChargeRepository.findById(id);
 
-        if (stateDCharge == null) {
+        if (!stateDCharge.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Not Found");
             response.setStatus(HttpStatus.NOT_FOUND);
             return ResponseEntity.status(response.getStatus()).body(response);
@@ -137,4 +139,58 @@ public class StateDeliveryChargesController {
         response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
+
+    @GetMapping(path = {""})
+    public ResponseEntity<HttpResponse> getDeliveryChargesByStore(HttpServletRequest request,
+            @PathVariable(required = true) String storeId) {
+
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+        String logprefix = request.getRequestURI();
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Id recieved: " + storeId);
+
+        Optional<Store> optStore = storeRepository.findById(storeId);
+
+        if (!optStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Not Found");
+            response.setStatus(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Found");
+
+        List<StateDeliveryCharge> stateChargesStore = stateDeliveryChargeRepository.findByStoreId(storeId);
+
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "State Charges of store:" + stateChargesStore);
+
+        response.setData(stateChargesStore);
+        response.setStatus(HttpStatus.OK);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @DeleteMapping(path = {"{id}"})
+    public ResponseEntity<HttpResponse> deleteStateDeliveryCharge(HttpServletRequest request,
+            @PathVariable(required = true) String storeId,
+            @PathVariable(required = true) String id) {
+
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+        String logprefix = request.getRequestURI();
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Id recieved: " + storeId);
+
+        Optional<Store> optStore = storeRepository.findById(storeId);
+
+        if (!optStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Not Found");
+            response.setStatus(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Found");
+
+        stateDeliveryChargeRepository.deleteById(id);
+
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix,
+                "State Charge with id: " + id + " deleted successfully.");
+
+        response.setStatus(HttpStatus.OK);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
 }

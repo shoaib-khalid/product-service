@@ -16,16 +16,19 @@
  */
 package com.kalsym.product.service.repository;
 
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 import com.kalsym.product.service.model.store.StateDeliveryCharge;
+import java.util.List;
+import org.springframework.data.repository.query.Param;
+
 /**
  *
  * @author mohsi
  */
 @Repository
-public interface StateDeliveryChargeRepository extends PagingAndSortingRepository<StateDeliveryCharge, String>, JpaRepository<StateDeliveryCharge, String>{
-    
+public interface StateDeliveryChargeRepository extends PagingAndSortingRepository<StateDeliveryCharge, String>, JpaRepository<StateDeliveryCharge, String> {
+
+    List<StateDeliveryCharge> findByStoreId(@Param("storeId") String storeId);
 }

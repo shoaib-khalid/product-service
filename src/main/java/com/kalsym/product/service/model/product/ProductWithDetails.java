@@ -40,7 +40,6 @@ public class ProductWithDetails implements Serializable {
 
     private String name;
 
-
     private String description;
 
     private String storeId;
@@ -54,13 +53,17 @@ public class ProductWithDetails implements Serializable {
 
     private String vendor;
 
-
     private String region;
 
     private String seoUrl;
-    
+
     private String seoName;
     
+    private Boolean trackQuantity;
+
+    private Boolean allowOutOfStockPurchases;
+
+    private Integer minQuantityForAlarm;
 
     @OneToMany(cascade = CascadeType.ALL,
             fetch = FetchType.LAZY)
@@ -91,8 +94,6 @@ public class ProductWithDetails implements Serializable {
         if (null != product.getName()) {
             name = product.getName();
         }
-
-
 
         if (null != product.getCategoryId()) {
             categoryId = product.getCategoryId();

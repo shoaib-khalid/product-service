@@ -291,14 +291,22 @@ public class StoreProductAssetController {
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "OriginalFilename: " + file.getOriginalFilename());
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Checking if this asset already exists");
+        String storagePath;
+        String generatedUrl;
+        if (itemCode != null) {
+            Optional<ProductAsset> optProdAsset = productAssetRepository.findByItemCode(itemCode);
+            if (optProdAsset.isPresent()) {
+                productAssetRepository.deleteById(optProdAsset.get().getId());
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Existing asset deleted successfully");
+            }
+            storagePath = fileStorageService.saveProductAsset(file, itemCode + "-inventory-asset");
+            generatedUrl = itemCode + "-inventory-asset";
+        } else {
+            storagePath = fileStorageService.saveProductAsset(file, itemCode + file.getOriginalFilename().replaceAll("[^A-Za-z0-9]", ""));
+            generatedUrl = itemCode + file.getOriginalFilename().replaceAll("[^A-Za-z0-9]", "");
 
-        Optional<ProductAsset> optProdAsset = productAssetRepository.findByItemCode(itemCode);
-        if (optProdAsset.isPresent()) {
-            productAssetRepository.deleteById(optProdAsset.get().getId());
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Existing asset deleted successfully");
         }
 
-        String storagePath = fileStorageService.saveProductAsset(file, itemCode + file.getOriginalFilename().replace(" ", ""));
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "storagePath: " + storagePath);
 
         ProductAsset productAsset = new ProductAsset();
@@ -306,7 +314,7 @@ public class StoreProductAssetController {
         productAsset.setName(file.getOriginalFilename());
         productAsset.setItemCode(itemCode);
         //productAsset.setIsThumbnail(isThumbnail);
-        productAsset.setUrl(productAssetsBaseUrl + itemCode + file.getOriginalFilename().replace(" ", ""));
+        productAsset.setUrl(productAssetsBaseUrl + generatedUrl);
 
         productAsset = productAssetRepository.save(productAsset);
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "saved image: " + productAsset.getId());
