@@ -33,6 +33,9 @@ public class StoreSubdomainHandler {
     @Value("${store.subdomain.config.path:/etc/nginx/conf.d/symplified.store}")
     private String storeSubDomainConfigPath;
 
+    @Value("${store.subdomain.config.allowed:false}")
+    private Boolean ngInxWithDomain;
+
     public String generateDomainName(String storeName) {
         storeName = storeName.replace(" ", "-");
         return storeName;
@@ -75,7 +78,9 @@ public class StoreSubdomainHandler {
 //                    .retrieve()
 //                    .bodyToMono(Object.class)
 //                    .timeout(Duration.ofSeconds(10));
-            configureNginxWithDomain(name);
+            if (ngInxWithDomain) {
+                configureNginxWithDomain(name);
+            }
 
         } catch (RestClientException e) {
             Logger.application.warn(ProductServiceApplication.VERSION, logprefix, "Error creating domain" + storeSubDomainCreationUrl, e);
