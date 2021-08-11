@@ -140,7 +140,6 @@ public class StoreProductController {
         //ProductSpecs.getProductsSpec(status, example);
         //List<ProductWithDetails> products = productWithDetailsRepository.findByStoreId(storeId);
         response.setStatus(HttpStatus.OK);
-
         response.setData(productWithDetailsRepository.findAll(ProductSpecs.getProductsSpec(status, example), pageable));
         return ResponseEntity.status(response.getStatus()).body(response);
     }
