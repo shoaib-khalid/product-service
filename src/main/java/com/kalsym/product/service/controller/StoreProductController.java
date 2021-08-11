@@ -118,14 +118,23 @@ public class StoreProductController {
         }
 
         productMatch.setStoreId(storeId);
-        productMatch.setCategoryId(categoryId);
-        productMatch.setName(name);
+        if (categoryId != null && !categoryId.isEmpty()) {
+            productMatch.setCategoryId(categoryId);
+        }
+        if (name != null && !name.isEmpty()) {
+            productMatch.setName(name);
+        }
+
         //productMatch.setStatus("ACTIVE");
-        productMatch.setSeoName(seoName);
+        if (seoName != null && !seoName.isEmpty()) {
+            productMatch.setSeoName(seoName);
+        }
+
         ExampleMatcher matcher = ExampleMatcher
                 .matchingAll()
                 .withIgnoreCase()
-                .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
+                .withIgnoreNullValues()
+                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
         Example<ProductWithDetails> example = Example.of(productMatch, matcher);
 
         //ProductSpecs.getProductsSpec(status, example);

@@ -110,6 +110,9 @@ public class ListenerBean {
 
             });
 
+            Logger.application.info(Logger.pattern, VersionHolder.VERSION, "userServiceUrl: " + userServiceUrl);
+            Logger.application.info(Logger.pattern, VersionHolder.VERSION, "authorities: " + authorities.size());
+
             ResponseEntity<String> response = restTemplate.postForEntity(userServiceUrl, authorities, String.class);
             Logger.application.info(Logger.pattern, VersionHolder.VERSION, "response: " + response);
 
