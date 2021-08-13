@@ -121,6 +121,7 @@ public class StoreLiveChatService {
         HttpEntity<DeleteGroup> entity;
         entity = new HttpEntity<>(deleteGroup, headers);
 
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " livechatStoreGroupInviteUrl: " + livechatStoreGroupInviteUrl);
         try {
             ResponseEntity<LiveChatResponse> res = restTemplate.exchange(livechatStoreGroupDeletionUrl, HttpMethod.POST, entity, LiveChatResponse.class);
 
@@ -149,6 +150,7 @@ public class StoreLiveChatService {
         HttpEntity<LiveChatGroupInvite> entity;
         entity = new HttpEntity<>(liveChatGroupInvite, headers);
 
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " livechatStoreGroupInviteUrl: " + livechatStoreGroupInviteUrl);
         ResponseEntity<LiveChatGroupInviteResponse> res = restTemplate.exchange(livechatStoreGroupInviteUrl, HttpMethod.POST, entity, LiveChatGroupInviteResponse.class);
 
         if (res.getBody().success == true) {
