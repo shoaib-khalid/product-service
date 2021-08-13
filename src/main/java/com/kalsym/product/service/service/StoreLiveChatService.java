@@ -20,13 +20,13 @@ import com.kalsym.product.service.utility.Logger;
 @Service
 public class StoreLiveChatService {
 
-    @Value("${livechat.store.agent.creation.url:http://209.58.160.20:3000/api/v1/groups.create}")
+    @Value("${livechat.store.agent.creation.url:https://live.symplified.biz/api/v1/groups.create}")
     private String livechatStoreGroupCreationUrl;
 
-    @Value("${livechat.store.agent.deletion.url:http://209.58.160.20:3000/api/v1/groups.delete}")
+    @Value("${livechat.store.agent.deletion.url:https://live.symplified.biz/api/v1/groups.delete}")
     private String livechatStoreGroupDeletionUrl;
 
-    @Value("${livechat.store.agent.deletion.url:http://209.58.160.20:3000/api/v1/groups.invite}")
+    @Value("${livechat.store.agent.invitation.url:https://live.symplified.biz/api/v1/groups.invite}")
     private String livechatStoreGroupInviteUrl;
 
 //    @Value("${livechat.token:GMmNIJTFglt3EW-D8CHj4c29AMSc74ix9vVJUPgN_RZ}")

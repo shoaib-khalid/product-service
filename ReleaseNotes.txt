@@ -1,4 +1,16 @@
 ++++++++++++++++++++++++++++++++++++++++++++
++ product-service-3.1.1
+++++++++++++++++++++++++++++++++++++++++++++
++Changes
+1. Changed urls in store live chat service
+
+++++++++++++++++++++++++++++++++++++++++++++
++ product-service-3.1.0
+++++++++++++++++++++++++++++++++++++++++++++
++Changes
+1. Made endpoints for delivery Service provider
+2. Made endpoints for linking storeId with delivery service provider
+++++++++++++++++++++++++++++++++++++++++++++
 + product-service-3.0.2
 ++++++++++++++++++++++++++++++++++++++++++++
 +Changes
