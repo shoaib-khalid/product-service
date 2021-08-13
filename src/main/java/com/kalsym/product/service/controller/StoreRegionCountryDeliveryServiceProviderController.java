@@ -32,7 +32,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import com.kalsym.product.service.repository.StoreRepository;
 import com.kalsym.product.service.model.store.StoreRegionCountryDeliveryServiceProvider;
-import com.kalsym.product.service.model.store.StoreWithDetails;
 import com.kalsym.product.service.repository.StoreRegionCountryDeliveryServiceProviderRepository;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
@@ -41,6 +40,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -129,6 +129,32 @@ public class StoreRegionCountryDeliveryServiceProviderController {
         Pageable pageable = PageRequest.of(page, pageSize);
         Page<StoreRegionCountryDeliveryServiceProvider> fetchedPage = sdspr.findAll(example, pageable);
         response.setData(fetchedPage);
+        response.setStatus(HttpStatus.OK);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @PutMapping(path = "{id}", name = "update-store-region-delivery-service-provider", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-product-variants-get', 'all')")
+    public ResponseEntity<HttpResponse> updateStoreRegionCountryDeliveryServiceProviderController(HttpServletRequest request,
+            @PathVariable String storeId,
+            @PathVariable(required = false) String id,
+            @RequestParam String deliverySpId) {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+        Optional<Store> optStore = storeRepository.findById(storeId);
+        if (!optStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
+
+        StoreRegionCountryDeliveryServiceProvider sdsp = new StoreRegionCountryDeliveryServiceProvider();
+        sdsp.setId(id);
+        sdsp.setDeliverySpId(deliverySpId);
+        sdsp.setStoreId(storeId);
+        response.setData(sdspr.save(sdsp));
         response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
