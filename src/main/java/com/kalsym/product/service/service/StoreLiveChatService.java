@@ -34,7 +34,7 @@ public class StoreLiveChatService {
 
     @Value("${livechat.userid:JEdxZxgW4R5Z53xq2}")
     private String liveChatUserId;
-    
+
     @Value("${liveChatlogin.username:order}")
     private String liveChatLoginUsername;
     @Value("${liveChat.login.password:sarosh@1234}")
@@ -142,7 +142,10 @@ public class StoreLiveChatService {
     public LiveChatGroupInviteResponse inviteAgent(LiveChatGroupInvite liveChatGroupInvite) {
         String logprefix = Thread.currentThread().getStackTrace()[1].getMethodName();
         RestTemplate restTemplate = new RestTemplate();
-
+        if (!loginLiveChat()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, " created agent");
+            return null;
+        }
         HttpHeaders headers = new HttpHeaders();
         headers.add("X-Auth-Token", liveChatToken);
         headers.add("X-User-Id", liveChatUserId);
