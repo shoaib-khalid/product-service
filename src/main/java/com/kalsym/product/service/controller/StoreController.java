@@ -20,14 +20,19 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.kalsym.product.service.model.store.Store;
 import com.kalsym.product.service.model.store.StoreWithDetails;
+import com.kalsym.product.service.model.store.StoreCommission;
+
 import com.kalsym.product.service.model.livechatgroup.StoreCreationResponse;
 import com.kalsym.product.service.repository.StoreCategoryRepository;
 import com.kalsym.product.service.repository.StoreWithDetailsRepository;
+import com.kalsym.product.service.repository.StoreCommissionRepository;
+
 import com.kalsym.product.service.service.StoreLiveChatService;
 import com.kalsym.product.service.utility.Logger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
@@ -81,6 +86,14 @@ public class StoreController {
 
     @Autowired
     StoreLiveChatService storeLiveChatService;
+
+    @Value("${storeCommission.minChargeAmount:1.5}")
+    private Double minChargeAmount;
+    @Value("${storeCommission.rate:3.5}")
+    private Double rate;
+
+    @Autowired
+    StoreCommissionRepository storeComisssionRepository;
 
     @GetMapping(path = {""}, name = "stores-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('stores-get', 'all')")
@@ -164,6 +177,8 @@ public class StoreController {
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store: " + bodyStore.toString(), "");
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "minChargeAmount: " + minChargeAmount, "");
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "rate: " + rate, "");
 
         response.setStatus(HttpStatus.CREATED);
         Store savedStore = null;
@@ -191,7 +206,7 @@ public class StoreController {
         }
 
         try {
-            
+
             //temp fix to remove apostrophy
             String storeDomain = bodyStore.getName().replace("'", "");
             storeDomain = storeDomain.replace(" ", "-").toLowerCase();
@@ -247,6 +262,12 @@ public class StoreController {
 
             }
 
+            StoreCommission sc = new StoreCommission();
+            sc.setRate(rate);
+            sc.setMinChargeAmount(minChargeAmount);
+            sc.setStoreId(savedStore.getId());
+            sc.setSettlementDays(5);
+            storeComisssionRepository.save(sc);
             response.setData(savedStore);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
