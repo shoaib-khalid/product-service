@@ -33,6 +33,7 @@ import org.springframework.http.HttpStatus;
 import com.kalsym.product.service.repository.StoreRepository;
 import com.kalsym.product.service.model.store.StoreRegionCountryDeliveryServiceProvider;
 import com.kalsym.product.service.repository.StoreRegionCountryDeliveryServiceProviderRepository;
+import java.util.List;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
@@ -155,6 +156,30 @@ public class StoreRegionCountryDeliveryServiceProviderController {
         sdsp.setDeliverySpId(deliverySpId);
         sdsp.setStoreId(storeId);
         response.setData(sdspr.save(sdsp));
+        response.setStatus(HttpStatus.OK);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @DeleteMapping(path = "all", name = "delete-store-region-delivery-service-provider", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-product-variants-get', 'all')")
+    public ResponseEntity<HttpResponse> deleteStoreDeliveryServiceProvider(HttpServletRequest request,
+            @PathVariable String storeId) {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+        Optional<Store> optStore = storeRepository.findById(storeId);
+        if (!optStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
+        List<StoreRegionCountryDeliveryServiceProvider> sdsps = sdspr.findByStoreId(storeId);
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Deleting previous delivery providers linked to store");
+        for (StoreRegionCountryDeliveryServiceProvider sdsp : sdsps) {
+            sdspr.deleteById(sdsp.getId());
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Successfully deleted previous delivery providers linked to store");
         response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
