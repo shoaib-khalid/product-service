@@ -117,9 +117,9 @@ public class StoreProductController {
         Pageable pageable = null;
 
         if (sortByCol.equals("name")) {
-            pageable = PageRequest.of(page, pageSize, sortingOrder, "name");
+            pageable = PageRequest.of(page, pageSize, sortingOrder,"name");
         } else {
-            pageable = PageRequest.of(page, pageSize, sortingOrder, "pi.price");
+            pageable = PageRequest.of(page, pageSize, sortingOrder, "name");
         }
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Pageable object created:" + sortingOrder);
