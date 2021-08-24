@@ -93,7 +93,13 @@ public class StoreProductController {
             @RequestParam(defaultValue = "20") int pageSize) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
-
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " STATUS: " + status);
+        
+        if(status==null){
+            status= new ArrayList();
+            status.add("ACTIVE");
+        }
+        
         Logger.application.info(ProductServiceApplication.VERSION, logprefix, "storeId: " + storeId);
 
         Optional<Store> optStore = storeRepository.findById(storeId);

@@ -31,7 +31,7 @@ public interface ProductWithDetailsRepository extends PagingAndSortingRepository
     List<ProductWithDetails> findByStoreIdAndName(@Param("storeId") String storeId, @Param("name") String name);
 
     @Query(
-            " SELECT DISTINCT pwd  "
+            " SELECT DISTINCT pwd,pi.price  "
             + "FROM ProductWithDetails pwd INNER JOIN "
             + "ProductInventoryWithDetails pi ON pwd.id = pi.productId "
             + "WHERE pwd.name LIKE CONCAT('%', :name ,'%') "
