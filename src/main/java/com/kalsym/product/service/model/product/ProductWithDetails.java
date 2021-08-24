@@ -1,4 +1,4 @@
-package com.kalsym.product.service.model.product;
+1package com.kalsym.product.service.model.product;
 
 import java.io.Serializable;
 import java.util.HashSet;

@@ -43,7 +43,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 
 /**
- *
  * @author 7cu
  */
 @RestController()
@@ -107,40 +106,32 @@ public class StoreProductController {
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
 
-        ProductWithDetails productMatch = new ProductWithDetails();
-
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Sort By:" + sortingOrder);
 
-        Pageable pageable = PageRequest.of(page, pageSize, Sort.by(sortingOrder, sortByCol));
+        Pageable pageable = null;
 
-        if (sortByCol.equalsIgnoreCase("price")) {
-            pageable = PageRequest.of(page, pageSize, Sort.by(sortingOrder, "productInventories.price"));
+        if (sortByCol.equals("name")) {
+            pageable = PageRequest.of(page, pageSize, sortingOrder, "name");
+        } else {
+            pageable = PageRequest.of(page, pageSize, sortingOrder, "pi.price");
         }
 
-        productMatch.setStoreId(storeId);
-        if (categoryId != null && !categoryId.isEmpty()) {
-            productMatch.setCategoryId(categoryId);
-        }
-        if (name != null && !name.isEmpty()) {
-            productMatch.setName(name);
-        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Pageable object created:" + sortingOrder);
 
-        //productMatch.setStatus("ACTIVE");
-        if (seoName != null && !seoName.isEmpty()) {
-            productMatch.setSeoName(seoName);
+        if (categoryId == null || categoryId.isEmpty()) {
+            categoryId = "";
+        }
+        if (name == null || name.isEmpty()) {
+            name = "";
         }
 
-        ExampleMatcher matcher = ExampleMatcher
-                .matchingAll()
-                .withIgnoreCase()
-                .withIgnoreNullValues()
-                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
-        Example<ProductWithDetails> example = Example.of(productMatch, matcher);
+        if (seoName == null || seoName.isEmpty()) {
+            seoName = "";
+        }
 
-        //ProductSpecs.getProductsSpec(status, example);
-        //List<ProductWithDetails> products = productWithDetailsRepository.findByStoreId(storeId);
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Name of product recieved:" + name);
         response.setStatus(HttpStatus.OK);
-        response.setData(productWithDetailsRepository.findAll(ProductSpecs.getProductsSpec(status, example), pageable));
+        response.setData(productWithDetailsRepository.findByNameOrSeoNameAscendingOrderByPrice(storeId, name, seoName, status, categoryId, pageable));
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
