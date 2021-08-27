@@ -94,12 +94,12 @@ public class StoreProductController {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " STATUS: " + status);
-        
-        if(status==null){
-            status= new ArrayList();
+
+        if (status == null) {
+            status = new ArrayList();
             status.add("ACTIVE");
         }
-        
+
         Logger.application.info(ProductServiceApplication.VERSION, logprefix, "storeId: " + storeId);
 
         Optional<Store> optStore = storeRepository.findById(storeId);
@@ -114,12 +114,15 @@ public class StoreProductController {
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Sort By:" + sortingOrder);
 
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Sort By column:" + sortByCol);
+
         Pageable pageable = null;
 
-        if (sortByCol.equals("name")) {
-            pageable = PageRequest.of(page, pageSize, sortingOrder,"name");
-        } else {
+        if (sortByCol.equals("price")) {
             pageable = PageRequest.of(page, pageSize, sortingOrder, "pi.price");
+        } else {
+            pageable = PageRequest.of(page, pageSize, sortingOrder, sortByCol);
+
         }
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Pageable object created:" + sortingOrder);
@@ -127,6 +130,7 @@ public class StoreProductController {
         if (categoryId == null || categoryId.isEmpty()) {
             categoryId = "";
         }
+        
         if (name == null || name.isEmpty()) {
             name = "";
         }

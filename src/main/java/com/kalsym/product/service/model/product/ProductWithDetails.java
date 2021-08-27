@@ -1,6 +1,8 @@
 package com.kalsym.product.service.model.product;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import javax.persistence.Column;
@@ -19,7 +21,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UpdateTimestamp;
 
 /**
  *
@@ -58,12 +62,18 @@ public class ProductWithDetails implements Serializable {
     private String seoUrl;
 
     private String seoName;
-    
+
     private Boolean trackQuantity;
 
     private Boolean allowOutOfStockPurchases;
 
     private Integer minQuantityForAlarm;
+
+    @CreationTimestamp
+    private Date created;
+
+    @UpdateTimestamp
+    private LocalDateTime updated;
 
     @OneToMany(cascade = CascadeType.ALL,
             fetch = FetchType.LAZY)

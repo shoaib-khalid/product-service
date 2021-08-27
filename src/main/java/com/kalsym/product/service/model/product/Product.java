@@ -2,6 +2,8 @@ package com.kalsym.product.service.model.product;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -12,7 +14,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 /**
  *
@@ -58,6 +64,13 @@ public class Product implements Serializable {
     private Boolean allowOutOfStockPurchases;
 
     private Integer minQuantityForAlarm;
+
+
+    @CreationTimestamp
+    private Date created;
+
+    @UpdateTimestamp
+    private LocalDateTime updated;
 
     public void update(Product product) {
         if (null != product.getName()) {
