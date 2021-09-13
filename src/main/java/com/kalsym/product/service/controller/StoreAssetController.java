@@ -172,6 +172,8 @@ public class StoreAssetController {
             String bannerStoragePath = fileStorageService.saveStoreAsset(banner, storeId+"-banner");
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "banner storagePath: " + bannerStoragePath);
             storeAsset.setBannerUrl(storeAssetsBaseUrl + storeId+"-banner");
+        }else{
+            storeAsset.setBannerUrl(null);
         }
 
         if (null != logo) {
@@ -179,6 +181,8 @@ public class StoreAssetController {
             String logoStoragePath = fileStorageService.saveStoreAsset(logo, storeId+"-logo");
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "logo storagePath: " + logoStoragePath);
             storeAsset.setLogoUrl(storeAssetsBaseUrl + storeId+"-logo");
+        }else{
+            storeAsset.setLogoUrl(null);
         }
 
         storeAsset.setStoreId(storeId);
