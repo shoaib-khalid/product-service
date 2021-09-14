@@ -90,10 +90,11 @@ public class StoreDiscountController {
             response.setStatus(HttpStatus.NOT_FOUND);
             return ResponseEntity.status(response.getStatus()).body(response);
         }
-                
+
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Object:" + optStore);
         storeDiscount.setStoreId(storeId);
-        storeDiscountRepository.save(storeDiscount);
+
+        response.setData(storeDiscountRepository.save(storeDiscount));
         response.setStatus(HttpStatus.CREATED);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
@@ -114,7 +115,7 @@ public class StoreDiscountController {
             response.setStatus(HttpStatus.NOT_FOUND);
             return ResponseEntity.status(response.getStatus()).body(response);
         }
-        
+
         Optional<StoreDiscount> optStoreDiscount = storeDiscountRepository.findById(storeDiscount.getId());
 
         if (!optStoreDiscount.isPresent()) {
@@ -125,7 +126,8 @@ public class StoreDiscountController {
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "StoreDiscount Found Object:" + optStoreDiscount);
         storeDiscount.setStoreId(storeId);
-        storeDiscountRepository.save(storeDiscount);
+        response.setData(storeDiscountRepository.save(storeDiscount));
+
         response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
