@@ -111,8 +111,7 @@ public class StoreAssetController {
     @DeleteMapping(path = {"/banner"}, name = "store-assets-banner-delete-by-id", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-assets-delete-by-id', 'all')")
     public ResponseEntity<HttpResponse> deleteStoreBannerById(HttpServletRequest request,
-            @PathVariable String storeId,
-            @PathVariable String id) {
+            @PathVariable String storeId) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
@@ -128,10 +127,10 @@ public class StoreAssetController {
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
 
-        Optional<StoreAsset> optStoreAsset = storeAssetRepository.findById(id);
+        Optional<StoreAsset> optStoreAsset = storeAssetRepository.findById(storeId);
 
         if (!optStoreAsset.isPresent()) {
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store asset NOT_FOUND store assetId: " + id);
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store asset NOT_FOUND store assetId: " + storeId);
             response.setStatus(HttpStatus.NOT_FOUND);
             response.setError("store asset not found");
             return ResponseEntity.status(response.getStatus()).body(response);
@@ -150,8 +149,7 @@ public class StoreAssetController {
     @DeleteMapping(path = {"/logo"}, name = "store-assets-logo-delete-by-id", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-assets-delete-by-id', 'all')")
     public ResponseEntity<HttpResponse> deleteStoreLogoById(HttpServletRequest request,
-            @PathVariable String storeId,
-            @PathVariable String id) {
+            @PathVariable String storeId) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
@@ -167,10 +165,10 @@ public class StoreAssetController {
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
 
-        Optional<StoreAsset> optStoreAsset = storeAssetRepository.findById(id);
+        Optional<StoreAsset> optStoreAsset = storeAssetRepository.findById(storeId);
 
         if (!optStoreAsset.isPresent()) {
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store asset NOT_FOUND store assetId: " + id);
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store asset NOT_FOUND store assetId: " + storeId);
             response.setStatus(HttpStatus.NOT_FOUND);
             response.setError("store asset not found");
             return ResponseEntity.status(response.getStatus()).body(response);
