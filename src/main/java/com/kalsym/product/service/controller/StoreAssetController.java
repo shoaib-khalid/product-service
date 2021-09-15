@@ -95,12 +95,12 @@ public class StoreAssetController {
 //        Optional<StoreAsset> optStoreAsset = storeAssetRepository.findById(id);
 //
 //        if (!optStoreAsset.isPresent()) {
-//            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "inventory NOT_FOUND inventoryId: " + id);
+//            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store asset NOT_FOUND store assetId: " + id);
 //            response.setStatus(HttpStatus.NOT_FOUND);
 //    response.setError (
 //            
 //
-//    "inventory not found");
+//    "store asset not found");
 //            return ResponseEntity.status(response.getStatus()).body(response);
 //        }
 //
@@ -108,9 +108,9 @@ public class StoreAssetController {
 //        response.setData(optStoreAsset.get());
 //        return ResponseEntity.status(response.getStatus()).body(response);
 //    }
-    @DeleteMapping(path = {"/{id}"}, name = "store-assets-delete-by-id", produces = "application/json")
+    @DeleteMapping(path = {"/banner"}, name = "store-assets-banner-delete-by-id", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-assets-delete-by-id', 'all')")
-    public ResponseEntity<HttpResponse> deleteStoreAssetsById(HttpServletRequest request,
+    public ResponseEntity<HttpResponse> deleteStoreBannerById(HttpServletRequest request,
             @PathVariable String storeId,
             @PathVariable String id) {
         String logprefix = request.getRequestURI();
@@ -131,17 +131,58 @@ public class StoreAssetController {
         Optional<StoreAsset> optStoreAsset = storeAssetRepository.findById(id);
 
         if (!optStoreAsset.isPresent()) {
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "inventory NOT_FOUND inventoryId: " + id);
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store asset NOT_FOUND store assetId: " + id);
             response.setStatus(HttpStatus.NOT_FOUND);
-            response.setError("inventory not found");
+            response.setError("store asset not found");
             return ResponseEntity.status(response.getStatus()).body(response);
         }
-        storeAssetRepository.delete(optStoreAsset.get());
 
+        StoreAsset storeAsset = optStoreAsset.get();
+        storeAsset.setBannerUrl(null);
+        storeAssetRepository.save(storeAsset);
+        
         response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
+    
+    
+    @DeleteMapping(path = {"/logo"}, name = "store-assets-logo-delete-by-id", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-assets-delete-by-id', 'all')")
+    public ResponseEntity<HttpResponse> deleteStoreLogoById(HttpServletRequest request,
+            @PathVariable String storeId,
+            @PathVariable String id) {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "storeId: " + storeId);
+
+        Optional<Store> optStore = storeRepository.findById(storeId);
+
+        if (!optStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
+
+        Optional<StoreAsset> optStoreAsset = storeAssetRepository.findById(id);
+
+        if (!optStoreAsset.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store asset NOT_FOUND store assetId: " + id);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store asset not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+
+        StoreAsset storeAsset = optStoreAsset.get();
+        storeAsset.setLogoUrl(null);
+        storeAssetRepository.save(storeAsset);
+        
+        response.setStatus(HttpStatus.OK);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
     @Value("${store.assets.url:https://symplified.ai/store-assets}")
     private String storeAssetsBaseUrl;
 
@@ -169,20 +210,16 @@ public class StoreAssetController {
         StoreAsset storeAsset = new StoreAsset();
         if (null != banner) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "banner Filename: " + banner.getOriginalFilename());
-            String bannerStoragePath = fileStorageService.saveStoreAsset(banner, storeId+"-banner");
+            String bannerStoragePath = fileStorageService.saveStoreAsset(banner, storeId + "-banner");
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "banner storagePath: " + bannerStoragePath);
-            storeAsset.setBannerUrl(storeAssetsBaseUrl + storeId+"-banner");
-        }else{
-            storeAsset.setBannerUrl(null);
+            storeAsset.setBannerUrl(storeAssetsBaseUrl + storeId + "-banner");
         }
 
         if (null != logo) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "logo Filename: " + logo.getOriginalFilename());
-            String logoStoragePath = fileStorageService.saveStoreAsset(logo, storeId+"-logo");
+            String logoStoragePath = fileStorageService.saveStoreAsset(logo, storeId + "-logo");
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "logo storagePath: " + logoStoragePath);
-            storeAsset.setLogoUrl(storeAssetsBaseUrl + storeId+"-logo");
-        }else{
-            storeAsset.setLogoUrl(null);
+            storeAsset.setLogoUrl(storeAssetsBaseUrl + storeId + "-logo");
         }
 
         storeAsset.setStoreId(storeId);
