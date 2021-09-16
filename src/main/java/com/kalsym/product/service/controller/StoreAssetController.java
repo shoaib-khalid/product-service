@@ -139,13 +139,11 @@ public class StoreAssetController {
         StoreAsset storeAsset = optStoreAsset.get();
         storeAsset.setBannerUrl(null);
         storeAssetRepository.save(storeAsset);
-        
+
         response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    
-    
     @DeleteMapping(path = {"/logo"}, name = "store-assets-logo-delete-by-id", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-assets-delete-by-id', 'all')")
     public ResponseEntity<HttpResponse> deleteStoreLogoById(HttpServletRequest request,
@@ -177,7 +175,7 @@ public class StoreAssetController {
         StoreAsset storeAsset = optStoreAsset.get();
         storeAsset.setLogoUrl(null);
         storeAssetRepository.save(storeAsset);
-        
+
         response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
@@ -206,6 +204,15 @@ public class StoreAssetController {
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
 
         StoreAsset storeAsset = new StoreAsset();
+
+        Optional<StoreAsset> storeAssetSaved = storeAssetRepository.findById(storeId);
+
+        if (storeAssetSaved != null) {
+            storeAsset.setBannerUrl(storeAssetSaved.get().getBannerUrl());
+            storeAsset.setLogoUrl(storeAssetSaved.get().getLogoUrl());
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Set old values in the store asset model");
+        }
+
         if (null != banner) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "banner Filename: " + banner.getOriginalFilename());
             String bannerStoragePath = fileStorageService.saveStoreAsset(banner, storeId + "-banner");
