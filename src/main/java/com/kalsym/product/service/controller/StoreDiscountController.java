@@ -24,6 +24,7 @@ import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.utility.Logger;
 import java.util.Optional;
 import java.util.List;
+import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -62,6 +63,27 @@ public class StoreDiscountController {
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Id recieved: " + storeId);
 
         List<StoreDiscount> storeDiscountList = storeDiscountRepository.findByStoreId(storeId);
+
+        if (storeDiscountList == null) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Discount Not Found");
+            response.setStatus(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Discount Found");
+        response.setData(storeDiscountList);
+        response.setStatus(HttpStatus.OK);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+    
+    @GetMapping(path = {"/active"})
+    public ResponseEntity<HttpResponse> getActiveDiscountByStoreId(HttpServletRequest request,
+            @PathVariable(required = true) String storeId) {
+
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+        String logprefix = request.getRequestURI();
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Id recieved: " + storeId);
+
+        List<StoreDiscount> storeDiscountList = storeDiscountRepository.findAvailableDiscount(storeId, new Date());
 
         if (storeDiscountList == null) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Discount Not Found");
