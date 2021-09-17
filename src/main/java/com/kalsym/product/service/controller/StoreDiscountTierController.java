@@ -51,10 +51,10 @@ public class StoreDiscountTierController {
 
     @Autowired
     StoreDiscountTierRepository storeDiscountTierRepository;
-    
+
     @Autowired
     StoreDiscountRepository storeDiscountRepository;
-    
+
     @Autowired
     StoreRepository storeRepository;
 
@@ -97,10 +97,10 @@ public class StoreDiscountTierController {
             response.setStatus(HttpStatus.NOT_FOUND);
             return ResponseEntity.status(response.getStatus()).body(response);
         }
-                
+
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "StoreDiscount Object:" + optStoreDiscount);
         storeDiscountTier.setStoreDiscountId(discountId);
-        storeDiscountTierRepository.save(storeDiscountTier);
+        response.setData(storeDiscountTierRepository.save(storeDiscountTier));
         response.setStatus(HttpStatus.CREATED);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
@@ -111,7 +111,7 @@ public class StoreDiscountTierController {
             @PathVariable(required = true) String discountId,
             @RequestBody StoreDiscountTier storeDiscountTier) {
 
-       HttpResponse response = new HttpResponse(request.getRequestURI());
+        HttpResponse response = new HttpResponse(request.getRequestURI());
         String logprefix = request.getRequestURI();
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "discountId recieved: " + discountId);
 
@@ -122,7 +122,7 @@ public class StoreDiscountTierController {
             response.setStatus(HttpStatus.NOT_FOUND);
             return ResponseEntity.status(response.getStatus()).body(response);
         }
-        
+
         Optional<StoreDiscountTier> optStoreDiscountTier = storeDiscountTierRepository.findById(storeDiscountTier.getId());
 
         if (!optStoreDiscountTier.isPresent()) {
@@ -130,10 +130,10 @@ public class StoreDiscountTierController {
             response.setStatus(HttpStatus.NOT_FOUND);
             return ResponseEntity.status(response.getStatus()).body(response);
         }
-                
+
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "StoreDiscountTier Object:" + optStoreDiscountTier);
         storeDiscountTier.setStoreDiscountId(discountId);
-        storeDiscountTierRepository.save(storeDiscountTier);
+        response.setData(storeDiscountTierRepository.save(storeDiscountTier));
         response.setStatus(HttpStatus.CREATED);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
