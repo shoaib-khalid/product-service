@@ -36,6 +36,7 @@ import org.springframework.http.HttpStatus;
 import com.kalsym.product.service.model.store.StoreDiscount;
 import com.kalsym.product.service.model.store.Store;
 import com.kalsym.product.service.model.store.StoreDiscountTier;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -137,5 +138,45 @@ public class StoreDiscountTierController {
         response.setStatus(HttpStatus.CREATED);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
+    
+    
+    @DeleteMapping(path = {"/{id}"}, name = "store-discounts-tier-delete-by-id", produces = "application/json")
+    public ResponseEntity<HttpResponse> deleteStoreDiscountById(HttpServletRequest request,
+            @PathVariable String storeId,
+            @PathVariable String discountId,
+            @PathVariable String id) {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "discountId: " + storeId);
+
+        Optional<StoreDiscount> optStoreDiscount = storeDiscountRepository.findById(discountId);
+
+        if (!optStoreDiscount.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND discountId: " + discountId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("StoreDiscount not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND discountId: " + discountId);
+
+        Optional<StoreDiscountTier> optStoreDiscountTier = storeDiscountTierRepository.findById(id);
+
+        if (!optStoreDiscountTier.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "discountTIer NOT_FOUND storeId: " + id);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("discountTIer not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "discountTIer FOUND tierId: " + id);
+
+        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "discountTIer found for id: {}", id);
+
+        StoreDiscountTier p = optStoreDiscountTier.get();
+        storeDiscountRepository.deleteById(p.getId());
+        response.setStatus(HttpStatus.OK);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
 
 }

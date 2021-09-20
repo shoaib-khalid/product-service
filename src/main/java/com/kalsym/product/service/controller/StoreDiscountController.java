@@ -17,6 +17,7 @@
 package com.kalsym.product.service.controller;
 
 import com.kalsym.product.service.ProductServiceApplication;
+import com.kalsym.product.service.model.product.Product;
 import com.kalsym.product.service.repository.StoreDiscountRepository;
 import com.kalsym.product.service.repository.StoreRepository;
 
@@ -35,6 +36,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.http.HttpStatus;
 import com.kalsym.product.service.model.store.StoreDiscount;
 import com.kalsym.product.service.model.store.Store;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -150,6 +153,43 @@ public class StoreDiscountController {
         storeDiscount.setStoreId(storeId);
         response.setData(storeDiscountRepository.save(storeDiscount));
 
+        response.setStatus(HttpStatus.OK);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+    
+    @DeleteMapping(path = {"/{id}"}, name = "store-discounts-delete-by-id", produces = "application/json")
+    public ResponseEntity<HttpResponse> deleteStoreDiscountById(HttpServletRequest request,
+            @PathVariable String storeId,
+            @PathVariable String id) {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "storeId: " + storeId);
+
+        Optional<Store> optStore = storeRepository.findById(storeId);
+
+        if (!optStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
+
+        Optional<StoreDiscount> optStoreDiscount = storeDiscountRepository.findById(id);
+
+        if (!optStoreDiscount.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product NOT_FOUND storeId: " + id);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("StoreDiscount not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "StoreDiscount FOUND storeId: " + id);
+
+        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "store found for id: {}", storeId);
+
+        StoreDiscount p = optStoreDiscount.get();
+        storeDiscountRepository.deleteById(p.getId());
         response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
