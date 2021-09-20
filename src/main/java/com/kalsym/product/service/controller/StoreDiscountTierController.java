@@ -141,7 +141,7 @@ public class StoreDiscountTierController {
     
     
     @DeleteMapping(path = {"/{id}"}, name = "store-discounts-tier-delete-by-id", produces = "application/json")
-    public ResponseEntity<HttpResponse> deleteStoreDiscountById(HttpServletRequest request,
+    public ResponseEntity<HttpResponse> deleteStoreDiscountTierById(HttpServletRequest request,
             @PathVariable String storeId,
             @PathVariable String discountId,
             @PathVariable String id) {
