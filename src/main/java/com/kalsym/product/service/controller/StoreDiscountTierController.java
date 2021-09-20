@@ -173,7 +173,7 @@ public class StoreDiscountTierController {
         Logger.application.info(ProductServiceApplication.VERSION, logprefix, "discountTIer found for id: {}", id);
 
         StoreDiscountTier p = optStoreDiscountTier.get();
-        storeDiscountRepository.deleteById(p.getId());
+        storeDiscountTierRepository.deleteById(p.getId());
         response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
