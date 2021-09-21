@@ -80,6 +80,30 @@ public class StoreDiscountTierController {
         response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
+    
+    @GetMapping(path = {"/{id}"})
+    public ResponseEntity<HttpResponse> getDiscountTierById(HttpServletRequest request,
+            @PathVariable(required = true) String storeId,
+            @PathVariable(required = true) String discountId,
+            @PathVariable(required = true) String id
+    ) {
+
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+        String logprefix = request.getRequestURI();
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Discount Tier Id recieved: " + id);
+
+        Optional<StoreDiscountTier> storeDiscountTier = storeDiscountTierRepository.findById(id);
+
+        if (!storeDiscountTier.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "StoreDiscountTier Not Found");
+            response.setStatus(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "StoreDiscountTier Found");
+        response.setData(storeDiscountTier.get());
+        response.setStatus(HttpStatus.OK);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }    
 
     @PostMapping(path = {""})
     public ResponseEntity<HttpResponse> postStoreDiscountTier(HttpServletRequest request,

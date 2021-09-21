@@ -78,6 +78,28 @@ public class StoreDiscountController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
     
+    @GetMapping(path = {"/{id}"})
+    public ResponseEntity<HttpResponse> getDiscountById(HttpServletRequest request,
+            @PathVariable(required = true) String storeId,
+            @PathVariable String id) {
+
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+        String logprefix = request.getRequestURI();
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Id recieved: " + storeId+" DiscountId:"+id);
+
+        Optional<StoreDiscount> storeDiscount = storeDiscountRepository.findById(id);
+
+        if (!storeDiscount.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Discount Not Found");
+            response.setStatus(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Discount Found");
+        response.setData(storeDiscount.get());
+        response.setStatus(HttpStatus.OK);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+    
     @GetMapping(path = {"/active"})
     public ResponseEntity<HttpResponse> getActiveDiscountByStoreId(HttpServletRequest request,
             @PathVariable(required = true) String storeId) {
