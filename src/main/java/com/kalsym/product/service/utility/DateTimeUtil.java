@@ -4,6 +4,8 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Calendar;
 import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 /**
  *
@@ -32,5 +34,19 @@ public class DateTimeUtil {
     public static Date expiryTimestamp(int seconds) {
         Date expiryDate = Date.from(Instant.now().plusSeconds(seconds));
         return expiryDate;
+    }
+    
+    
+    public static Date convertToDateViaInstant(LocalDateTime dateToConvert, ZoneId timezone) {
+    return java.util.Date
+      .from(dateToConvert.atZone(timezone)
+      .toInstant());
+    }
+    
+    
+    public static LocalDateTime convertToLocalDateTimeViaInstant(Date dateToConvert, ZoneId timezone) {
+        return dateToConvert.toInstant()
+          .atZone(timezone)
+          .toLocalDateTime();
     }
 }
