@@ -12,6 +12,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.GenericGenerator;
 import java.util.Date;
+import java.sql.Time;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.FetchType;
@@ -44,13 +45,21 @@ public class StoreDiscount implements Serializable {
     private String discountType;
     private Boolean isActive;
     
-    @Temporal(TemporalType.TIMESTAMP)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    @Temporal(javax.persistence.TemporalType.DATE)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date startDate;
     
-    @Temporal(TemporalType.TIMESTAMP)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    @Temporal(javax.persistence.TemporalType.TIME)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
+    private Time startTime;
+    
+    @Temporal(javax.persistence.TemporalType.DATE)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date endDate;
+    
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
+    @Temporal(javax.persistence.TemporalType.TIME)
+    private Time endTime;
     
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "storeDiscountId", insertable = false, updatable = false, nullable = true)    
