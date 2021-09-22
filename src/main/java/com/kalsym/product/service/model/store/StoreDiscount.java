@@ -49,7 +49,6 @@ public class StoreDiscount implements Serializable {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date startDate;
     
-    @Temporal(javax.persistence.TemporalType.TIME)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
     private Time startTime;
     
@@ -58,7 +57,6 @@ public class StoreDiscount implements Serializable {
     private Date endDate;
     
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
-    @Temporal(javax.persistence.TemporalType.TIME)
     private Time endTime;
     
     @OneToMany(fetch = FetchType.LAZY)
