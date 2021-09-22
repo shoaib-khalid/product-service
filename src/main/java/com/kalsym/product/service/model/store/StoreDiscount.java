@@ -18,6 +18,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import java.time.LocalDateTime;
 
 /**
  *
@@ -42,10 +43,10 @@ public class StoreDiscount implements Serializable {
     private Boolean isActive;
     
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
-    private Date startDate;
+    private LocalDateTime startDate;
     
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
-    private Date endDate;
+    private LocalDateTime endDate;
     
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "storeDiscountId", insertable = false, updatable = false, nullable = true)    
