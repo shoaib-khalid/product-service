@@ -139,16 +139,53 @@ public class StoreDiscountController {
         HttpResponse response = new HttpResponse(request.getRequestURI());
         String logprefix = request.getRequestURI();
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Id recieved: " + storeId+" DiscountId:"+id);
+        
+        Optional<Store> optStore = storeRepository.findById(storeId);
 
-        Optional<StoreDiscount> storeDiscount = storeDiscountRepository.findById(id);
+        if (!optStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Not Found");
+            response.setStatus(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        
+        Optional<StoreDiscount> tstoreDiscount = storeDiscountRepository.findById(id);
 
-        if (!storeDiscount.isPresent()) {
+        if (!tstoreDiscount.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Discount Not Found");
             response.setStatus(HttpStatus.NOT_FOUND);
             return ResponseEntity.status(response.getStatus()).body(response);
         }
+        
+        StoreDiscount storeDiscount = tstoreDiscount.get();
+        Discount discount = new Discount();
+        discount.setId(storeDiscount.getId());
+        discount.setDiscountName(storeDiscount.getDiscountName());
+        discount.setDiscountType(storeDiscount.getDiscountType());
+        discount.setIsActive(storeDiscount.getIsActive());
+        discount.setStoreId(storeId);
+        discount.setStoreDiscountTierList(storeDiscount.getStoreDiscountTierList());
+
+        //convert time to merchant timezone
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "StartDate:"+storeDiscount.getStartDate().toString());
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "EndDate:"+storeDiscount.getEndDate().toString());
+        
+        RegionCountry regionCountry = null;
+        Optional<RegionCountry> t = regionCountriesRepository.findById(optStore.get().getRegionCountryId());
+        if (t.isPresent()) {
+            regionCountry = t.get();
+        }
+        
+        if (regionCountry!=null) {
+            LocalDateTime startLocalTime = DateTimeUtil.convertToLocalDateTimeViaInstant(storeDiscount.getStartDate(), ZoneId.of(regionCountry.getTimezone()) );
+            LocalDateTime endLocalTime = DateTimeUtil.convertToLocalDateTimeViaInstant(storeDiscount.getEndDate(), ZoneId.of(regionCountry.getTimezone()) );
+            discount.setStartDate(startLocalTime.toLocalDate());
+            discount.setStartTime(startLocalTime.toLocalTime());
+            discount.setEndDate(endLocalTime.toLocalDate());
+            discount.setEndTime(endLocalTime.toLocalTime());                
+        }
+        
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Discount Found");
-        response.setData(storeDiscount.get());
+        response.setData(discount);
         response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
