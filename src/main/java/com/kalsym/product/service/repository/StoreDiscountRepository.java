@@ -44,4 +44,31 @@ public interface StoreDiscountRepository
             @Param("queryStoreId") String storeId,
             @Param("currentDate") Date currentDate
             );
+    
+        @Query("SELECT m FROM StoreDiscount m WHERE m.storeId = :queryStoreId "
+                + "AND m.isActive=true "
+                + "AND ("
+                + "(startDateTime >= m.startDate AND startDateTime <= m.endDate) "
+                + " OR (endDateTime >= m.startDate AND endDateTime <= m.endDate)"
+                + ")") 
+    List<StoreDiscount> findAvailableDiscountDateRange(
+            @Param("queryStoreId") String storeId,
+            @Param("discountType") String discountType,
+            @Param("startDateTime") Date startDateTime,
+            @Param("endDateTime") Date endDateTime
+            );
+    
+    @Query("SELECT m FROM StoreDiscount m WHERE m.storeId = :queryStoreId "
+                + "AND m.isActive=true AND m.id <> :discountId "
+                + "AND ("
+                + "(startDateTime >= m.startDate AND startDateTime <= m.endDate) "
+                + " OR (endDateTime >= m.startDate AND endDateTime <= m.endDate)"
+                + ")") 
+    List<StoreDiscount> findOtherAvailableDiscountDateRange(
+            @Param("queryStoreId") String storeId,
+            @Param("discountType") String discountType,
+            @Param("startDateTime") Date startDateTime,
+            @Param("endDateTime") Date endDateTime,
+            @Param("discountId") String discountId
+            );
 }

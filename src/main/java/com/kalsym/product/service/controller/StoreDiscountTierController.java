@@ -121,10 +121,20 @@ public class StoreDiscountTierController {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "StoreDiscount Not Found");
             response.setStatus(HttpStatus.NOT_FOUND);
             return ResponseEntity.status(response.getStatus()).body(response);
-        }
+        }        
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "StoreDiscount Object:" + optStoreDiscount);
         storeDiscountTier.setStoreDiscountId(discountId);
+        
+        //check for overlap
+        List<StoreDiscountTier> existingDiscountTierList = storeDiscountTierRepository.findDiscountTierAmountRange(discountId, storeDiscountTier.getStartTotalSalesAmount(), storeDiscountTier.getEndTotalSalesAmount());
+        if (existingDiscountTierList.size()>0) {
+            StoreDiscountTier activeDiscountTier = existingDiscountTierList.get(0);
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Overlap tier Id:"+activeDiscountTier.getId()+" StartAmount:"+activeDiscountTier.getStartTotalSalesAmount()+" EndAmount:"+activeDiscountTier.getEndTotalSalesAmount());
+            response.setMessage("Overlap discount tier with "+activeDiscountTier.getStartTotalSalesAmount()+" - "+activeDiscountTier.getEndTotalSalesAmount());
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(response);
+        }
+                
         response.setData(storeDiscountTierRepository.save(storeDiscountTier));
         response.setStatus(HttpStatus.CREATED);
         return ResponseEntity.status(response.getStatus()).body(response);
@@ -158,6 +168,16 @@ public class StoreDiscountTierController {
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "StoreDiscountTier Object:" + optStoreDiscountTier);
         storeDiscountTier.setStoreDiscountId(discountId);
+        
+        //check for overlap
+        List<StoreDiscountTier> existingDiscountTierList = storeDiscountTierRepository.findDiscountTierAmountRange(discountId, storeDiscountTier.getStartTotalSalesAmount(), storeDiscountTier.getEndTotalSalesAmount());
+        if (existingDiscountTierList.size()>0) {
+            StoreDiscountTier activeDiscountTier = existingDiscountTierList.get(0);
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Overlap tier Id:"+activeDiscountTier.getId()+" StartAmount:"+activeDiscountTier.getStartTotalSalesAmount()+" EndAmount:"+activeDiscountTier.getEndTotalSalesAmount());
+            response.setMessage("Overlap discount tier with "+activeDiscountTier.getStartTotalSalesAmount()+" - "+activeDiscountTier.getEndTotalSalesAmount());
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(response);
+        }
+        
         response.setData(storeDiscountTierRepository.save(storeDiscountTier));
         response.setStatus(HttpStatus.CREATED);
         return ResponseEntity.status(response.getStatus()).body(response);

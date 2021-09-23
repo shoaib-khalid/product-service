@@ -24,6 +24,7 @@ import com.kalsym.product.service.model.store.StoreDiscountTier;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -37,4 +38,15 @@ public interface StoreDiscountTierRepository
         extends PagingAndSortingRepository<StoreDiscountTier, String>, JpaRepository<StoreDiscountTier, String> {
         
         List<StoreDiscountTier> findByStoreDiscountId(@Param("storeDiscountId") String storeDiscountId);
+
+        @Query("SELECT m FROM StoreDiscountTier m WHERE m.storeDiscountId = :discountId "
+                + "AND ("
+                + "(startSalesAmount >= m.startTotalSalesAmount AND startSalesAmount <= m.endTotalSalesAmount )"
+                + " OR (endSalesAmount >= m.startTotalSalesAmount AND endSalesAmount <= m.endTotalSalesAmount )"
+                + ")") 
+        List<StoreDiscountTier> findDiscountTierAmountRange(
+            @Param("discountId") String discountId,
+            @Param("startSalesAmount") Double startSalesAmount,
+            @Param("endSalesAmount") Double endSalesAmount
+            );
 }
