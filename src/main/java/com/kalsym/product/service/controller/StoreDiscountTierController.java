@@ -36,6 +36,7 @@ import org.springframework.http.HttpStatus;
 import com.kalsym.product.service.model.store.StoreDiscount;
 import com.kalsym.product.service.model.store.Store;
 import com.kalsym.product.service.model.store.StoreDiscountTier;
+import java.util.ArrayList;
 import org.springframework.web.bind.annotation.DeleteMapping;
 
 import org.springframework.web.bind.annotation.PostMapping;
@@ -130,8 +131,12 @@ public class StoreDiscountTierController {
         List<StoreDiscountTier> existingDiscountTierList = storeDiscountTierRepository.findDiscountTierAmountRange(discountId, storeDiscountTier.getStartTotalSalesAmount(), storeDiscountTier.getEndTotalSalesAmount());
         if (existingDiscountTierList.size()>0) {
             StoreDiscountTier activeDiscountTier = existingDiscountTierList.get(0);
+            List<String> errors = new ArrayList<>();
+            String errorMsg = "Overlap discount tier with "+activeDiscountTier.getStartTotalSalesAmount()+" - "+activeDiscountTier.getEndTotalSalesAmount();
+            errors.add(errorMsg);
+            response.setData(errors);
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Overlap tier Id:"+activeDiscountTier.getId()+" StartAmount:"+activeDiscountTier.getStartTotalSalesAmount()+" EndAmount:"+activeDiscountTier.getEndTotalSalesAmount());
-            response.setMessage("Overlap discount tier with "+activeDiscountTier.getStartTotalSalesAmount()+" - "+activeDiscountTier.getEndTotalSalesAmount());
+            response.setMessage(errorMsg);
             return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(response);
         }
                 
@@ -174,7 +179,10 @@ public class StoreDiscountTierController {
         if (existingDiscountTierList.size()>0) {
             StoreDiscountTier activeDiscountTier = existingDiscountTierList.get(0);
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Overlap tier Id:"+activeDiscountTier.getId()+" StartAmount:"+activeDiscountTier.getStartTotalSalesAmount()+" EndAmount:"+activeDiscountTier.getEndTotalSalesAmount());
-            response.setMessage("Overlap discount tier with "+activeDiscountTier.getStartTotalSalesAmount()+" - "+activeDiscountTier.getEndTotalSalesAmount());
+            List<String> errors = new ArrayList<>();
+            String errorMsg = "Overlap discount tier with "+activeDiscountTier.getStartTotalSalesAmount()+" - "+activeDiscountTier.getEndTotalSalesAmount();
+            errors.add(errorMsg);
+            response.setData(errors);
             return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(response);
         }
         

@@ -265,8 +265,12 @@ public class StoreDiscountController {
             List<StoreDiscount> storeDiscountList = storeDiscountRepository.findAvailableDiscountDateRange(storeId, storeDiscount.getDiscountType(), storeDiscount.getStartDate(), storeDiscount.getEndDate());
             if (storeDiscountList.size()>0) {
                 StoreDiscount activeDiscount = storeDiscountList.get(0);
+                List<String> errors = new ArrayList<>();
+                String errorMsg = "Overlap active discount. Please deactivate : "+activeDiscount.getDiscountName();
+                errors.add(errorMsg);
+                response.setData(errors);
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Overlap discount Id:"+activeDiscount.getId()+" StartDate:"+activeDiscount.getStartDate()+" EndDate:"+activeDiscount.getEndDate());
-                response.setMessage("Overlap active discount. Please deactivate : "+activeDiscount.getDiscountName());
+                response.setMessage(errorMsg);
                 return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(response);
             }
         }
@@ -340,8 +344,12 @@ public class StoreDiscountController {
             List<StoreDiscount> storeDiscountList = storeDiscountRepository.findOtherAvailableDiscountDateRange(storeId, storeDiscount.getDiscountType(), storeDiscount.getStartDate(), storeDiscount.getEndDate(), storeDiscount.getId());
             if (storeDiscountList.size()>0) {
                 StoreDiscount activeDiscount = storeDiscountList.get(0);
+                List<String> errors = new ArrayList<>();
+                String errorMsg = "Overlap active discount. Please deactivate : "+activeDiscount.getDiscountName();
+                errors.add(errorMsg);
+                response.setData(errors);
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Overlap discount Id:"+activeDiscount.getId()+" StartDate:"+activeDiscount.getStartDate()+" EndDate:"+activeDiscount.getEndDate());
-                response.setMessage("Overlap active discount. Please deactivate : "+activeDiscount.getDiscountName());
+                response.setMessage(errorMsg);
                 return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(response);
             }
         }
