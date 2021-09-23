@@ -41,8 +41,8 @@ public interface StoreDiscountTierRepository
 
         @Query("SELECT m FROM StoreDiscountTier m WHERE m.storeDiscountId = :discountId "
                 + "AND ("
-                + "(startSalesAmount >= m.startTotalSalesAmount AND startSalesAmount <= m.endTotalSalesAmount )"
-                + " OR (endSalesAmount >= m.startTotalSalesAmount AND endSalesAmount <= m.endTotalSalesAmount )"
+                + "(:startSalesAmount >= m.startTotalSalesAmount AND :startSalesAmount <= m.endTotalSalesAmount )"
+                + " OR (:endSalesAmount >= m.startTotalSalesAmount AND :endSalesAmount <= m.endTotalSalesAmount )"
                 + ")") 
         List<StoreDiscountTier> findDiscountTierAmountRange(
             @Param("discountId") String discountId,
