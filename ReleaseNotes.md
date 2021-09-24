@@ -1,4 +1,39 @@
 ##################################################
+# product-service-3.2.17 | 24-September-2021
+##################################################
+### Code Changes:
+1. Added new features : Store Discount.
+
+### DB Changes:
+Add 2 New table :
+
+CREATE TABLE `store_discount` (
+  `id` varchar(50) CHARACTER SET utf8 NOT NULL,
+  `storeId` varchar(50) CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT NULL,
+  `discountName` varchar(100) CHARACTER SET utf8 DEFAULT NULL,
+  `discountType` enum('SHIPPING','TOTALSALES') CHARACTER SET utf8 DEFAULT NULL,
+  `isActive` bit(1) DEFAULT NULL,
+  `startDate` datetime DEFAULT NULL,
+  `endDate` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `storeId` (`storeId`),
+  CONSTRAINT `store_discount_ibfk_1` FOREIGN KEY (`storeId`) REFERENCES `store` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `store_discount_tier` (
+  `id` varchar(50) CHARACTER SET utf8 NOT NULL,
+  `storeDiscountId` varchar(50) CHARACTER SET utf8 DEFAULT NULL COMMENT 'link to table store_discount',
+  `startTotalSalesAmount` decimal(10,2) DEFAULT NULL,
+  `endTotalSalesAmount` decimal(10,2) DEFAULT NULL,
+  `discountAmount` decimal(10,2) DEFAULT NULL,
+  `calculationType` enum('PERCENT','FIX','SHIPAMT') CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT 'SHIPAMT = shipping amount',
+  PRIMARY KEY (`id`),
+  KEY `store_discount_tier_ibfk_1` (`storeDiscountId`),
+  CONSTRAINT `store_discount_tier_ibfk_1` FOREIGN KEY (`storeDiscountId`) REFERENCES `store_discount` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+##################################################
 # product-service-3.2.5 | 15-September-2021
 ##################################################
 ### Code Changes:
