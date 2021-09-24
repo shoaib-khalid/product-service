@@ -175,7 +175,7 @@ public class StoreDiscountTierController {
         storeDiscountTier.setStoreDiscountId(discountId);
         
         //check for overlap
-        List<StoreDiscountTier> existingDiscountTierList = storeDiscountTierRepository.findDiscountTierAmountRange(discountId, storeDiscountTier.getStartTotalSalesAmount(), storeDiscountTier.getEndTotalSalesAmount());
+        List<StoreDiscountTier> existingDiscountTierList = storeDiscountTierRepository.findOtherDiscountTierAmountRange(discountId, storeDiscountTier.getStartTotalSalesAmount(), storeDiscountTier.getEndTotalSalesAmount(), storeDiscountTier.getId() );
         if (existingDiscountTierList.size()>0) {
             StoreDiscountTier activeDiscountTier = existingDiscountTierList.get(0);
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Overlap tier Id:"+activeDiscountTier.getId()+" StartAmount:"+activeDiscountTier.getStartTotalSalesAmount()+" EndAmount:"+activeDiscountTier.getEndTotalSalesAmount());
