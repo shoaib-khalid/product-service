@@ -149,7 +149,15 @@ public class StoreAssetController {
         }
 
         StoreAsset storeAsset = optStoreAsset.get();
-        storeAsset.setBannerUrl(null);
+        //set default value
+        Store storeInfo = optStore.get();
+        if (storeInfo.getVerticalCode()!=null) {                
+            if (storeInfo.getVerticalCode().toUpperCase().contains("FNB")) {
+                storeAsset.setBannerUrl(storeBannerFnbDefaultUrl);
+            }
+        } else {
+            storeAsset.setBannerUrl(storeBannerEcommerceDefaultUrl);
+        }
         storeAssetRepository.save(storeAsset);
         
         response.setStatus(HttpStatus.OK);
@@ -187,7 +195,7 @@ public class StoreAssetController {
         }
 
         StoreAsset storeAsset = optStoreAsset.get();
-        storeAsset.setLogoUrl(null);
+        storeAsset.setLogoUrl(storeLogoDefaultUrl);
         storeAssetRepository.save(storeAsset);
         
         response.setStatus(HttpStatus.OK);

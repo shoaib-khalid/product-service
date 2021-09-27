@@ -23,6 +23,8 @@ import com.kalsym.product.service.model.store.StoreWithDetails;
 import com.kalsym.product.service.model.store.StoreCommission;
 
 import com.kalsym.product.service.model.livechatgroup.StoreCreationResponse;
+import com.kalsym.product.service.model.store.StoreAsset;
+import com.kalsym.product.service.repository.StoreAssetRepository;
 import com.kalsym.product.service.repository.StoreCategoryRepository;
 import com.kalsym.product.service.repository.StoreWithDetailsRepository;
 import com.kalsym.product.service.repository.StoreCommissionRepository;
@@ -86,15 +88,27 @@ public class StoreController {
 
     @Autowired
     StoreLiveChatService storeLiveChatService;
-
+    
     @Value("${storeCommission.minChargeAmount:1.5}")
     private Double minChargeAmount;
     @Value("${storeCommission.rate:3.5}")
     private Double rate;
-
+    
+    @Value("${store.logo.default.url:https://symplified.ai/store-assets/logo_symplified_bg.png}")
+    private String storeLogoDefaultUrl;
+    
+    @Value("${store.banner.ecommerce.default.url:https://symplified.ai/store-assets/banner-ecomm.jpeg}")
+    private String storeBannerEcommerceDefaultUrl;
+    
+    @Value("${store.banner.fnb.default.url:https://symplified.ai/store-assets/banner-fnb.png}")
+    private String storeBannerFnbDefaultUrl;
+    
     @Autowired
     StoreCommissionRepository storeComisssionRepository;
-
+    
+    @Autowired
+    StoreAssetRepository storeAssetRepository;
+     
     @GetMapping(path = {""}, name = "stores-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('stores-get', 'all')")
     public ResponseEntity<HttpResponse> getStore(HttpServletRequest request,
@@ -269,6 +283,19 @@ public class StoreController {
             sc.setSettlementDays(5);
             storeComisssionRepository.save(sc);
             response.setData(savedStore);
+            
+            //set default store asset
+            StoreAsset storeAsset = new StoreAsset();
+            storeAsset.setLogoUrl(storeLogoDefaultUrl);
+            if (savedStore.getVerticalCode()!=null) {                
+                if (savedStore.getVerticalCode().toUpperCase().contains("FNB")) {
+                    storeAsset.setBannerUrl(storeBannerFnbDefaultUrl);
+                }
+            } else {
+                storeAsset.setBannerUrl(storeBannerEcommerceDefaultUrl);
+            }
+            storeAssetRepository.save(storeAsset);
+            
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
             Logger.application.error(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " error creating store ", "", e);
