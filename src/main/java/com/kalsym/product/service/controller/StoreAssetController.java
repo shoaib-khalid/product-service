@@ -44,6 +44,18 @@ public class StoreAssetController {
 
     @Autowired
     StoreRepository storeRepository;
+    
+    @Value("${store.assets.url:https://symplified.ai/store-assets}")
+    private String storeAssetsBaseUrl;
+    
+    @Value("${store.logo.default.url:https://symplified.ai/store-assets/logo_symplified_bg.png}")
+    private String storeLogoDefaultUrl;
+    
+    @Value("${store.banner.ecommerce.default.url:https://symplified.ai/store-assets/banner-ecomm.jpeg}")
+    private String storeBannerEcommerceDefaultUrl;
+    
+    @Value("${store.banner.fnb.default.url:https://symplified.ai/store-assets/banner-fnb.png}")
+    private String storeBannerFnbDefaultUrl;
 
     @GetMapping(path = {""}, name = "store-assets-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-assets-get', 'all')")
@@ -181,9 +193,7 @@ public class StoreAssetController {
         response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
-    @Value("${store.assets.url:https://symplified.ai/store-assets}")
-    private String storeAssetsBaseUrl;
-
+   
     @PostMapping(path = {""}, name = "store-assets-post")
     @PreAuthorize("hasAnyAuthority('store-assets-post', 'all')")
     public ResponseEntity<HttpResponse> postStoreAssets(HttpServletRequest request,
@@ -204,24 +214,44 @@ public class StoreAssetController {
             return ResponseEntity.status(response.getStatus()).body(response);
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
-
-        StoreAsset storeAsset = new StoreAsset();
+        
+        Optional<StoreAsset> storeAssetOpt = storeAssetRepository.findById(storeId);
+        StoreAsset storeAsset = null;
+        if (storeAssetOpt.isPresent()) {
+            storeAsset = storeAssetOpt.get();
+        } else {
+            storeAsset = new StoreAsset();
+        }
         if (null != banner) {
+            //user upload new banner
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "banner Filename: " + banner.getOriginalFilename());
             String bannerStoragePath = fileStorageService.saveStoreAsset(banner, storeId + "-banner");
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "banner storagePath: " + bannerStoragePath);
             storeAsset.setBannerUrl(storeAssetsBaseUrl + storeId + "-banner");
+        } else if (storeAsset.getBannerUrl()==null) {
+            //set default value
+            Store storeInfo = optStore.get();
+            if (storeInfo.getVerticalCode()!=null) {                
+                if (storeInfo.getVerticalCode().toUpperCase().contains("FNB")) {
+                    storeAsset.setBannerUrl(storeBannerFnbDefaultUrl);
+                }
+            } else {
+                storeAsset.setBannerUrl(storeBannerEcommerceDefaultUrl);
+            }
         }
 
         if (null != logo) {
+            //user upload new logo
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "logo Filename: " + logo.getOriginalFilename());
             String logoStoragePath = fileStorageService.saveStoreAsset(logo, storeId + "-logo");
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "logo storagePath: " + logoStoragePath);
             storeAsset.setLogoUrl(storeAssetsBaseUrl + storeId + "-logo");
+        } else if (storeAsset.getLogoUrl()==null) {
+            //set default logo
+            storeAsset.setLogoUrl(storeLogoDefaultUrl);
         }
 
         storeAsset.setStoreId(storeId);
-        //storeAsset.setProduct(optProdcut.get());
         response.setStatus(HttpStatus.OK);
         response.setData(storeAssetRepository.save(storeAsset));
         return ResponseEntity.status(response.getStatus()).body(response);
