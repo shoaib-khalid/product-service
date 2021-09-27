@@ -1,4 +1,17 @@
 ##################################################
+# product-service-3.2.19 | 27-September-2021
+##################################################
+### Code Changes:
+1. Set default logo & banner url for store asset
+
+### New config:
+Url for default logo & banner. Image file need to uploaded manually to server:
+store.logo.default.url=https://symplified.biz/store-assets/logo_symplified_bg.png
+store.banner.ecommerce.default.url=https://symplified.biz/store-assets/banner-fnb.png
+store.banner.fnb.default.url=https://symplified.biz/store-assets/banner-ecomm.jpeg
+
+
+##################################################
 # product-service-3.2.17 | 24-September-2021
 ##################################################
 ### Code Changes:
