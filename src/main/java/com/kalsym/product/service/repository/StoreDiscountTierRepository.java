@@ -43,6 +43,7 @@ public interface StoreDiscountTierRepository
                 + "AND ("
                 + "(:startSalesAmount >= m.startTotalSalesAmount AND :startSalesAmount <= m.endTotalSalesAmount )"
                 + " OR (:endSalesAmount >= m.startTotalSalesAmount AND :endSalesAmount <= m.endTotalSalesAmount )"
+                + " OR (:startSalesAmount <= m.startTotalSalesAmount AND :endSalesAmount >= m.endTotalSalesAmount)"
                 + ")") 
         List<StoreDiscountTier> findDiscountTierAmountRange(
             @Param("discountId") String discountId,
@@ -54,6 +55,7 @@ public interface StoreDiscountTierRepository
                 + "AND m.id <> :tierId AND ("
                 + "(:startSalesAmount >= m.startTotalSalesAmount AND :startSalesAmount <= m.endTotalSalesAmount )"
                 + " OR (:endSalesAmount >= m.startTotalSalesAmount AND :endSalesAmount <= m.endTotalSalesAmount )"
+                + " OR (:startSalesAmount <= m.startTotalSalesAmount AND :endSalesAmount >= m.endTotalSalesAmount)"
                 + ")") 
         List<StoreDiscountTier> findOtherDiscountTierAmountRange(
             @Param("discountId") String discountId,
