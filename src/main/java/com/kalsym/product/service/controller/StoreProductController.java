@@ -50,6 +50,12 @@ public class StoreProductController {
     @Autowired
     StoreRepository storeRepository;
 
+    @Autowired
+    ProductVariantAvailableRepository productVariantAvailableRepository;
+
+    @Autowired
+    ProductInventoryItemRepository productInventoryItemRepositoryRepository;
+
     @Value("${product.seo.url:https://{{store-domain}}.symplified.store/products/name/{{product-name}}}")
     private String productSeoUrl;
 
@@ -229,7 +235,7 @@ public class StoreProductController {
         Optional<Store> optStore = storeRepository.findById(storeId);
 
         if (!optStore.isPresent()) {
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
+//            Logger.applicationp.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
             response.setStatus(HttpStatus.NOT_FOUND);
             response.setError("store not found");
             return ResponseEntity.status(response.getStatus()).body(response);
@@ -240,7 +246,7 @@ public class StoreProductController {
         List<Product> products = productRepository.findByStoreId(storeId);
 
         for (Product existingProduct : products) {
-            if (existingProduct.getName().equals(bodyProduct.getName())&& !"DELETED".equalsIgnoreCase(existingProduct.getStatus())) {
+            if (existingProduct.getName().equals(bodyProduct.getName()) && !"DELETED".equalsIgnoreCase(existingProduct.getStatus())) {
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "username already exists", "");
                 response.setStatus(HttpStatus.CONFLICT);
                 errors.add("Product name already exists");
@@ -265,12 +271,12 @@ public class StoreProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @Transactional(rollbackFor=Exception.class)
+    @Transactional(rollbackFor = Exception.class)
     @PostMapping(path = {"/details"}, name = "store-products-post")
     @PreAuthorize("hasAnyAuthority('store-products-post', 'all')")
     public ResponseEntity<HttpResponse> postStoreProductWithDetails(HttpServletRequest request,
-                                                         @PathVariable String storeId,
-                                                         @Valid @RequestBody ProductWithVariants bodyProduct) throws Exception {
+            @PathVariable String storeId,
+            @Valid @RequestBody ProductWithVariants bodyProduct) throws Exception {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
@@ -285,7 +291,6 @@ public class StoreProductController {
             response.setError("store not found");
             return ResponseEntity.status(response.getStatus()).body(response);
         }
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
 
         List<String> errors = new ArrayList<>();
         List<Product> products = productRepository.findByStoreIdAndName(storeId, bodyProduct.getProduct().getName());
@@ -307,15 +312,16 @@ public class StoreProductController {
         seoUrl = seoUrl.replace("{{product-name}}", seoName);
         product.setSeoUrl(seoUrl);
 
+        ProductVariantAvailable productVariantAvailable = null;
+
         for (ProductVariant bodyVariant : bodyProduct.getProductVariants()) {
             ProductVariant variant = new ProductVariant();
             variant.setName(bodyVariant.getName());
             variant.setDescription(bodyVariant.getDescription());
             variant.setSequenceNumber(bodyVariant.getSequenceNumber());
 
-            for (ProductVariantAvailable bodyVariantAvailable :
-                    bodyVariant.getProductVariantsAvailable())
-            {
+            for (ProductVariantAvailable bodyVariantAvailable
+                    : bodyVariant.getProductVariantsAvailable()) {
                 ProductVariantAvailable variantAvailable = new ProductVariantAvailable();
                 variantAvailable.setSequenceNumber(bodyVariantAvailable.getSequenceNumber());
                 variantAvailable.setValue(bodyVariantAvailable.getValue());
@@ -324,16 +330,33 @@ public class StoreProductController {
                 variantAvailable.setProduct(product);
                 variant.getProductVariantsAvailable().add(variantAvailable);
                 product.getProductVariantsAvailable().add(variantAvailable);
+
             }
 //            variant.setProductVariantsAvailable(bodyVariant.getProductVariantsAvailable());
 
             variant.setProduct(product);
             product.getProductVariants().add(variant);
         }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Product Inventories recieved: " + bodyProduct.getProductInventories());
 
         Product result = productRepository.save(product);
-        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "product added to store with storeId: {}, productId: {}" + storeId, result.getId());
+        Logger.application.info(Logger.pattern,ProductServiceApplication.VERSION, logprefix, "Product added to store with storeId: {}, product: {}" + storeId, result);
 
+        for (ProductInventoryWithDetails pi : bodyProduct.getProductInventories()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION,
+                    logprefix, "Inside product with details loop: " + pi);
+
+            pi.setProductId(result.getId());
+            for (ProductInventoryItem pii : pi.getProductInventoryItems()) {
+                pii.setItemCode(pi.getItemCode());
+                pii.setProductId(result.getId());
+//                pii.setProductVariantAvailableId(result.getProductVariantsAvailable().get(0).getId());
+            }
+            product.getProductInventories().add(pi);
+        }
+
+        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "Product added to store with storeId: {}, productId: {}" + storeId, result.getId());
+        productRepository.save(product);
         response.setData(result);
         response.setStatus(HttpStatus.CREATED);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);

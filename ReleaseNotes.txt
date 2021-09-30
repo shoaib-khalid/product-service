@@ -1,4 +1,16 @@
 ++++++++++++++++++++++++++++++++++++++++++++
++ product-service-1.0.3 (Trying to achieve one product api call)
+++++++++++++++++++++++++++++++++++++++++++++
++Changes
+1. Modified the end point /stores/{storeId}/products/details
+2. Product is successfully added up until the inventory.
+
++Todo for the next developer:
+1. Try to find a way to save product inventory items with valid product variant availables.
+2. To find correct product variant available ids you need to figure out what combination of 
+   inventory items was made at front-end.
+ 
+++++++++++++++++++++++++++++++++++++++++++++
 + product-service-1.0.3
 ++++++++++++++++++++++++++++++++++++++++++++
 +Changes

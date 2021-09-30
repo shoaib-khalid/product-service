@@ -45,4 +45,6 @@ public class ProductInventoryWithDetails implements Serializable {
             fetch = FetchType.LAZY)
     @JoinColumn(name = "itemCode")
     private List<ProductInventoryItem> productInventoryItems;
+    
+    
 }

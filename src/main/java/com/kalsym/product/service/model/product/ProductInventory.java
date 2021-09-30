@@ -45,6 +45,18 @@ public class ProductInventory implements Serializable {
 
     private String productId;
 
+//    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+//    @JoinColumn(name = "productId")
+//    @OnDelete(action = OnDeleteAction.CASCADE)
+//    @JsonIgnore
+//    Product product;
+//
+//    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+//    @JoinColumn(name = "itemCode")
+//    @OnDelete(action = OnDeleteAction.CASCADE)
+//    @JsonIgnore
+//    ProductInventoryWithDetails pwd;
+
     public ProductInventory(String itemCode, Double price, Double compareAtprice, String SKU, Integer quantity, String productId) {
         this.itemCode = itemCode;
         this.price = price;

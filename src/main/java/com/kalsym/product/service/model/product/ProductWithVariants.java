@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ProductWithVariants implements Serializable {
     private Product product;
-
     private List<ProductVariant> productVariants = new ArrayList<>();
+    private List<ProductInventoryWithDetails> productInventories =new ArrayList<>();
 }
 

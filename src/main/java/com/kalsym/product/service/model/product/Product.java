@@ -46,9 +46,9 @@ public class Product implements Serializable {
     private String vendor;
 
     private String region;
-    
+
     private String seoUrl;
-    
+
     private String seoName;
 
     @OneToMany(cascade = CascadeType.ALL,
@@ -61,6 +61,16 @@ public class Product implements Serializable {
     @JoinColumn(name = "productId")
     private List<ProductVariantAvailable> productVariantsAvailable = new ArrayList<>();
 
+    @OneToMany(cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY)
+    @JoinColumn(name = "productId")
+    private List<ProductInventoryWithDetails> productInventories = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY)
+    @JoinColumn(name = "productId")
+    private List<ProductInventoryItem> productInventoryItems = new ArrayList<>();
+    
     // Copy constructor
     public Product(Product product) {
         this.id = product.getId();
@@ -84,18 +94,18 @@ public class Product implements Serializable {
         if (null != product.getCategoryId()) {
             categoryId = product.getCategoryId();
         }
-        
-        if(null!=product.getDescription()){
+
+        if (null != product.getDescription()) {
             description = product.getDescription();
         }
-        
-        if(null!=product.getStatus()){
+
+        if (null != product.getStatus()) {
             status = product.getStatus();
         }
-        if(null!=product.getThumbnailUrl()){
+        if (null != product.getThumbnailUrl()) {
             thumbnailUrl = product.getThumbnailUrl();
         }
-             
+
     }
 
     @Override

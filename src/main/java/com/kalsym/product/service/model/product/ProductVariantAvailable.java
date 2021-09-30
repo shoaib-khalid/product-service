@@ -3,6 +3,8 @@ package com.kalsym.product.service.model.product;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.*;
 
 import lombok.Getter;
@@ -47,4 +49,6 @@ public class ProductVariantAvailable implements Serializable {
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
     private ProductVariant productVariant;
+    
+
 }

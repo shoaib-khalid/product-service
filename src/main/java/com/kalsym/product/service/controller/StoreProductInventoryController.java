@@ -87,29 +87,29 @@ public class StoreProductInventoryController {
         }
 
         List<ProductInventoryWithDetails> returnProductInventorys = new ArrayList<>();
-        for (int i = 0; i < productInventorys.size(); i++) {
-            if (null != productInventorys.get(i).getProductInventoryItems()
-                    && !productInventorys.get(i).getProductInventoryItems().isEmpty()) {
-
-                if (productInventorys.get(i).getProductInventoryItems().size() == 1) {
-                    String ii1Id = productInventorys.get(i).getProductInventoryItems().get(0).getProductVariantAvailableId();
-
-                    if (ii1Id.equalsIgnoreCase(variantIds.get(0))) {
-                        returnProductInventorys.add(productInventorys.get(i));
-                    }
-                }
-
-                if (productInventorys.get(i).getProductInventoryItems().size() == 2) {
-                    String ii1Id = productInventorys.get(i).getProductInventoryItems().get(0).getProductVariantAvailableId();
-                    String ii2Id = productInventorys.get(i).getProductInventoryItems().get(1).getProductVariantAvailableId();
-
-                    if ((ii1Id.equalsIgnoreCase(variantIds.get(0)) && ii2Id.equalsIgnoreCase(variantIds.get(1)))
-                            || (ii1Id.equalsIgnoreCase(variantIds.get(1)) && ii2Id.equalsIgnoreCase(variantIds.get(0)))) {
-                        returnProductInventorys.add(productInventorys.get(i));
-                    }
-                }
-            }
-        }
+//        for (int i = 0; i < productInventorys.size(); i++) {
+//            if (null != productInventorys.get(i).getProductInventoryItems()
+//                    && !productInventorys.get(i).getProductInventoryItems().isEmpty()) {
+//
+//                if (productInventorys.get(i).getProductInventoryItems().size() == 1) {
+//                    String ii1Id = productInventorys.get(i).getProductInventoryItems().get(0).getProductVariantAvailableId();
+//
+//                    if (ii1Id.equalsIgnoreCase(variantIds.get(0))) {
+//                        returnProductInventorys.add(productInventorys.get(i));
+//                    }
+//                }
+//
+//                if (productInventorys.get(i).getProductInventoryItems().size() == 2) {
+//                    String ii1Id = productInventorys.get(i).getProductInventoryItems().get(0).getProductVariantAvailableId();
+//                    String ii2Id = productInventorys.get(i).getProductInventoryItems().get(1).getProductVariantAvailableId();
+//
+//                    if ((ii1Id.equalsIgnoreCase(variantIds.get(0)) && ii2Id.equalsIgnoreCase(variantIds.get(1)))
+//                            || (ii1Id.equalsIgnoreCase(variantIds.get(1)) && ii2Id.equalsIgnoreCase(variantIds.get(0)))) {
+//                        returnProductInventorys.add(productInventorys.get(i));
+//                    }
+//                }
+//            }
+//        }
 
         response.setData(returnProductInventorys);
         return ResponseEntity.status(response.getStatus()).body(response);
