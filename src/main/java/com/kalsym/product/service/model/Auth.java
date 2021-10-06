@@ -23,7 +23,8 @@ public class Auth {
 
     private String role;
     private List<String> authorities;
-
+    private String sessionType;
+    
     @JsonCreator
     public Auth(@JsonProperty("session") Session session, 
             @JsonProperty("role") String role,  
