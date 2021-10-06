@@ -21,7 +21,8 @@ public class MySQLUserDetails implements UserDetails {
     private boolean locked;
     private boolean expired;
     private String role;
-
+    private String ownerId;
+            
     private List<GrantedAuthority> grantedAuthorities;
 
     public MySQLUserDetails() {
@@ -31,9 +32,10 @@ public class MySQLUserDetails implements UserDetails {
         this.userName = username;
     }
 
-    public MySQLUserDetails(Auth auth, List<String> auths) {
+    public MySQLUserDetails(Auth auth, List<String> auths, String ownerId) {
         this.userName = auth.getSession().getUsername();
-        this.password = auth.getRole();
+        this.password = auth.getRole();   
+        this.ownerId = ownerId;
         this.locked = false;
         Logger.application.info(Logger.pattern, VersionHolder.VERSION, "user: ", auth, "");
 
@@ -87,6 +89,14 @@ public class MySQLUserDetails implements UserDetails {
 
     public void setRole(String role) {
         this.role = role;
+    }
+    
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
     }
 
 }

@@ -103,7 +103,7 @@ public class SessionRequestFilter extends OncePerRequestFilter {
                     Logger.application.info(Logger.pattern, VersionHolder.VERSION, logprefix, "time to session expiry: " + diff + "ms", "");
                     if (0 < diff) {
                         authorized = true;
-                        MySQLUserDetails userDetails = new MySQLUserDetails(auth, auth.getAuthorities());
+                        MySQLUserDetails userDetails = new MySQLUserDetails(auth, auth.getAuthorities(), auth.getSession().getOwnerId());
 
                         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
                                 userDetails, null, userDetails.getAuthorities());

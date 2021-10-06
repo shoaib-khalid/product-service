@@ -24,7 +24,9 @@ public class Session {
     private String created;
     private String accessToken;
     private String refreshToken;
-
+    private String ownerId;
+    private String sessionType;
+    
     @JsonCreator
     public Session(@JsonProperty("id") String id,
             @JsonProperty("username") String username,

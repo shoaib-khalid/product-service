@@ -115,7 +115,7 @@ public class StoreController {
     @GetMapping(path = {""}, name = "stores-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('stores-get', 'all')")
     public ResponseEntity<HttpResponse> getStore(HttpServletRequest request,
-            @RequestParam(required = true) String clientId,
+            @RequestParam(required = false) String clientId,
             @RequestParam(required = false) String verticalCode,
             @RequestParam(required = false) String city,
             @RequestParam(required = false) String name,
@@ -131,7 +131,7 @@ public class StoreController {
             
             UsernamePasswordAuthenticationToken userDetails = (UsernamePasswordAuthenticationToken)SecurityContextHolder.getContext().getAuthentication();
             MySQLUserDetails mysqlUserDetails = (MySQLUserDetails)userDetails.getPrincipal();
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Token userRole: " + mysqlUserDetails.getRole(), "");
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Token userRole: " + mysqlUserDetails.getRole()+" ownerId:"+mysqlUserDetails.getOwnerId(), "");
             
             if (mysqlUserDetails.getRole().equals("SUPER_USER")) {
                 store.setClientId(null);
