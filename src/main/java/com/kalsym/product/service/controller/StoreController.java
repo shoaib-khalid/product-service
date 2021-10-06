@@ -2,6 +2,7 @@ package com.kalsym.product.service.controller;
 
 import com.kalsym.product.service.service.StoreSubdomainHandler;
 import com.kalsym.product.service.ProductServiceApplication;
+import com.kalsym.product.service.model.MySQLUserDetails;
 import com.kalsym.product.service.model.store.StoreCategory;
 import com.kalsym.product.service.repository.ProductRepository;
 import com.kalsym.product.service.repository.StoreRepository;
@@ -38,6 +39,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -112,7 +115,7 @@ public class StoreController {
     @GetMapping(path = {""}, name = "stores-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('stores-get', 'all')")
     public ResponseEntity<HttpResponse> getStore(HttpServletRequest request,
-            @RequestParam(required = false) String clientId,
+            @RequestParam(required = true) String clientId,
             @RequestParam(required = false) String verticalCode,
             @RequestParam(required = false) String city,
             @RequestParam(required = false) String name,
@@ -125,8 +128,16 @@ public class StoreController {
 
         try {
             StoreWithDetails store = new StoreWithDetails();
-
-            store.setClientId(clientId);
+            
+            UsernamePasswordAuthenticationToken userDetails = (UsernamePasswordAuthenticationToken)SecurityContextHolder.getContext().getAuthentication();
+            MySQLUserDetails mysqlUserDetails = (MySQLUserDetails)userDetails.getPrincipal();
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Token userRole: " + mysqlUserDetails.getRole(), "");
+            
+            if (mysqlUserDetails.getRole().equals("SUPER_USER")) {
+                store.setClientId(null);
+            } else {
+                store.setClientId(clientId);
+            }
             store.setCity(city);
             store.setName(name);
             store.setVerticalCode(verticalCode);

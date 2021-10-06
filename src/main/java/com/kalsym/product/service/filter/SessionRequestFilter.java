@@ -83,8 +83,8 @@ public class SessionRequestFilter extends OncePerRequestFilter {
 
                 if (authResponse.getStatusCode() == HttpStatus.ACCEPTED) {
                     ObjectMapper mapper = new ObjectMapper();
-                    //Logger.application.warn(Logger.pattern, VersionHolder.VERSION, logprefix, "data: " + authResponse.getBody().getData(), "");
-                    Logger.application.warn(Logger.pattern, VersionHolder.VERSION, logprefix, "got session from user-service" , "");
+                    //Logger.application.debug(Logger.pattern, VersionHolder.VERSION, logprefix, "data: " + authResponse.getBody().getData(), "");
+                    Logger.application.debug(Logger.pattern, VersionHolder.VERSION, logprefix, "got session from user-service" , "");
 
                     auth = mapper.convertValue(authResponse.getBody().getData(), Auth.class);
                     username = auth.getSession().getUsername();
@@ -111,6 +111,7 @@ public class SessionRequestFilter extends OncePerRequestFilter {
                                 .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                         SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+                                                
                     } else {
                         Logger.application.warn(Logger.pattern, VersionHolder.VERSION, logprefix, "session expired", "");
                         //response.setStatus(HttpStatus.UNAUTHORIZED);
