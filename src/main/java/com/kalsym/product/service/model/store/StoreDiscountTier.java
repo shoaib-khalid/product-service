@@ -29,7 +29,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @Entity
 @Table(name = "store_discount_tier")
 @NoArgsConstructor
-public class StoreDiscountTier implements Serializable {
+public class StoreDiscountTier implements Serializable, Comparable< StoreDiscountTier > {
 
     @Id
     @GeneratedValue(generator = "uuid2")
@@ -41,5 +41,10 @@ public class StoreDiscountTier implements Serializable {
     private Double endTotalSalesAmount;
     private Double discountAmount;
     private String calculationType;
+    
+    @Override
+    public int compareTo(StoreDiscountTier o) {
+        return this.getStartTotalSalesAmount().compareTo(o.getStartTotalSalesAmount());
+    }
 
 }

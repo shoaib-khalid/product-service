@@ -63,4 +63,20 @@ public interface StoreDiscountTierRepository
             @Param("endSalesAmount") Double endSalesAmount,
             @Param("tierId") String tierId
             );
+        
+        
+        @Query("SELECT m FROM StoreDiscountTier m WHERE m.storeDiscountId = :discountId "
+                + "AND m.startTotalSalesAmount = :startSalesAmount") 
+        List<StoreDiscountTier> findDiscountTierStartAmount(
+            @Param("discountId") String discountId,
+            @Param("startSalesAmount") Double startSalesAmount
+           );
+        
+        @Query("SELECT m FROM StoreDiscountTier m WHERE m.storeDiscountId = :discountId "
+                + "AND m.startTotalSalesAmount = :startSalesAmount AND m.id <> :tierId") 
+        List<StoreDiscountTier> findOtherDiscountTierStartAmount(
+            @Param("discountId") String discountId,
+            @Param("startSalesAmount") Double startSalesAmount,
+            @Param("tierId") String tierId
+           );
 }
