@@ -28,10 +28,12 @@ public class Auth {
     @JsonCreator
     public Auth(@JsonProperty("session") Session session, 
             @JsonProperty("role") String role,  
+            @JsonProperty("sessionType") String sessionType,
             @JsonProperty("authorities") List<String> authorities) {
         this.session = session;
         this.role = role;
         this.authorities = authorities;
+        this.sessionType = sessionType;
     }
 
 }
