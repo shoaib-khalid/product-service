@@ -1,5 +1,5 @@
 ##################################################
-# product-service-3.2.25 | 11-October-2021
+# product-service-3.2.26 | 11-October-2021
 ##################################################
 ### Code Changes:
 Add custom pre-authorize to check if session token allowed to access function
