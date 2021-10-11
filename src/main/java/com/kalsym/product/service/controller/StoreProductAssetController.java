@@ -128,7 +128,7 @@ public class StoreProductAssetController {
     }
 
     @DeleteMapping(path = {"/{id}"}, name = "store-product-assets-delete-by-id", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('store-product-assets-delete-by-id', 'all')")
+    @PreAuthorize("hasAnyAuthority('store-product-assets-delete-by-id', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> deleteStoreProductAssetsById(HttpServletRequest request,
             @PathVariable String storeId,
             @PathVariable String productId,
@@ -180,7 +180,7 @@ public class StoreProductAssetController {
     }
 
     @PutMapping(path = {"/{id}"}, name = "store-product-assets-put-by-id")
-    @PreAuthorize("hasAnyAuthority('store-product-assets-put-by-id', 'all')")
+    @PreAuthorize("hasAnyAuthority('store-product-assets-put-by-id', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> putStoreProductAssetsById(HttpServletRequest request,
             @PathVariable String storeId,
             @PathVariable String productId,
@@ -256,7 +256,7 @@ public class StoreProductAssetController {
     private String productAssetsBaseUrl;
 
     @PostMapping(path = {""}, name = "store-product-assets-post")
-    @PreAuthorize("hasAnyAuthority('store-product-assets-post', 'all')")
+    @PreAuthorize("hasAnyAuthority('store-product-assets-post', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> postStoreProductAssets(HttpServletRequest request,
             @PathVariable String storeId,
             @PathVariable String productId,

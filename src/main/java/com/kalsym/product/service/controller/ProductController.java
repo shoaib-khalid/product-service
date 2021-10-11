@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.kalsym.product.service.repository.ProductInventoryWithDetailsRepository;
+import com.kalsym.product.service.utility.Validation;
 
 /**
  *
@@ -94,7 +95,7 @@ public class ProductController {
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "", "");
 
         ProductWithDetails productMatch = new ProductWithDetails();
-
+        
         Pageable pageable = PageRequest.of(page, pageSize);
         productMatch.setStoreId(storeId);
         productMatch.setCategoryId(categoryId);
@@ -127,7 +128,7 @@ public class ProductController {
             response.setStatus(HttpStatus.NOT_FOUND);
             return ResponseEntity.status(response.getStatus()).body(response);
         }
-
+        
         response.setStatus(HttpStatus.OK);
         response.setData(optProduct.get());
         return ResponseEntity.status(response.getStatus()).body(response);
@@ -154,8 +155,8 @@ public class ProductController {
             @RequestParam(defaultValue = "20") int pageSize) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "", "");
-
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "", "");        
+        
         Product productMatch = new Product();
 
         Pageable pageable = PageRequest.of(page, pageSize);
@@ -173,8 +174,10 @@ public class ProductController {
 
     }
 
+    //@PreAuthorize("hasAnyAuthority('products-delete-by-id', 'all') and projectAccessHandler.validatedProductOwner(#id)")
+    
     @DeleteMapping(path = {"/{id}"}, name = "products-delete-by-id")
-    @PreAuthorize("hasAnyAuthority('products-delete-by-id', 'all')")
+    @PreAuthorize("hasAnyAuthority('products-delete-by-id','all') and @customOwnerVerifier.VerifyProduct(#id)")
     public ResponseEntity<HttpResponse> deleteProductById(HttpServletRequest request,
             @PathVariable String id) {
         String logprefix = request.getRequestURI();
@@ -187,6 +190,13 @@ public class ProductController {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND: " + id, "");
             response.setStatus(HttpStatus.NOT_FOUND);
             return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        
+        if (!Validation.VerifyStoreId(optProduct.get().getStoreId(), storeRepository)) {
+            Logger.application.error(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Unathorized productId", "");
+            response.setStatus(HttpStatus.UNAUTHORIZED);
+            response.setError("Unathorized productId");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product found", "");
@@ -204,7 +214,7 @@ public class ProductController {
      * @return
      */
     @PutMapping(path = {"/{id}"}, name = "products-put-by-id")
-    @PreAuthorize("hasAnyAuthority('products-put-by-id', 'all')")
+    @PreAuthorize("hasAnyAuthority('products-put-by-id', 'all') and @customOwnerVerifier.VerifyProduct(#id)")
     public ResponseEntity<HttpResponse> putProductById(HttpServletRequest request,
             @PathVariable String id,
             @RequestBody Product bodyProduct) {
@@ -218,6 +228,13 @@ public class ProductController {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "NOT_FOUND: {}", id);
             response.setStatus(HttpStatus.NOT_FOUND);
             return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        
+        if (!Validation.VerifyStoreId(optProduct.get().getStoreId(), storeRepository)) {
+            Logger.application.error(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Unathorized productId", "");
+            response.setStatus(HttpStatus.UNAUTHORIZED);
+            response.setError("Unathorized productId");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product found with productId: {}", id);

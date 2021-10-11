@@ -22,7 +22,9 @@ public class MySQLUserDetails implements UserDetails {
     private boolean expired;
     private String role;
     private String ownerId;
-            
+    private String sessionType;
+    private boolean isSuperUser;
+    
     private List<GrantedAuthority> grantedAuthorities;
 
     public MySQLUserDetails() {
@@ -32,11 +34,18 @@ public class MySQLUserDetails implements UserDetails {
         this.userName = username;
     }
 
-    public MySQLUserDetails(Auth auth, List<String> auths, String ownerId) {
+    public MySQLUserDetails(Auth auth, List<String> auths, String ownerId, String sessionType) {
         this.userName = auth.getSession().getUsername();
         this.password = auth.getRole();   
         this.ownerId = ownerId;
+        this.sessionType = sessionType;
         this.locked = false;
+        
+        if (auth.getRole().equals("SUPER_USER")) 
+            isSuperUser=true;
+        else
+            isSuperUser=false;
+        
         Logger.application.info(Logger.pattern, VersionHolder.VERSION, "user: ", auth, "");
 
         this.expired = false;
@@ -97,6 +106,22 @@ public class MySQLUserDetails implements UserDetails {
 
     public void setOwnerId(String ownerId) {
         this.ownerId = ownerId;
+    }
+    
+    public String getSessionType() {
+        return sessionType;
+    }
+
+    public void setSessionType(String sessionType) {
+        this.sessionType = sessionType;
+    }
+    
+    public boolean getIsSuperUser() {
+        return isSuperUser;
+    }
+
+    public void setIsSuperUser(boolean isSuperUser) {
+        this.isSuperUser = isSuperUser;
     }
 
 }

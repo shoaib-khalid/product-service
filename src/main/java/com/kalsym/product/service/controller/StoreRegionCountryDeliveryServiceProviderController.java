@@ -59,7 +59,7 @@ public class StoreRegionCountryDeliveryServiceProviderController {
     StoreRegionCountryDeliveryServiceProviderRepository sdspr;
 
     @PostMapping(path = "{deliverySpId}", name = "post-store-region-delivery-service-provider", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('store-product-variants-get', 'all')")
+    @PreAuthorize("hasAnyAuthority('store-product-variants-get', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> postStoreRegionCountryDeliveryServiceProvider(HttpServletRequest request,
             @PathVariable String storeId,
             @PathVariable String deliverySpId) {
@@ -82,7 +82,7 @@ public class StoreRegionCountryDeliveryServiceProviderController {
     }
 
     @DeleteMapping(path = "{deliverySpId}", name = "delete-store-region-delivery-service-provider", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('store-product-variants-get', 'all')")
+    @PreAuthorize("hasAnyAuthority('store-product-variants-get', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> deleteStoreRegionCountryDeliveryServiceProviderController(HttpServletRequest request,
             @PathVariable String storeId,
             @PathVariable String deliverySpId) {
@@ -135,7 +135,7 @@ public class StoreRegionCountryDeliveryServiceProviderController {
     }
 
     @PutMapping(path = "{id}", name = "update-store-region-delivery-service-provider", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('store-product-variants-get', 'all')")
+    @PreAuthorize("hasAnyAuthority('store-product-variants-get', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> updateStoreRegionCountryDeliveryServiceProviderController(HttpServletRequest request,
             @PathVariable String storeId,
             @PathVariable(required = false) String id,
@@ -161,7 +161,7 @@ public class StoreRegionCountryDeliveryServiceProviderController {
     }
 
     @DeleteMapping(path = "all", name = "delete-store-region-delivery-service-provider", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('store-product-variants-get', 'all')")
+    @PreAuthorize("hasAnyAuthority('store-product-variants-get', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> deleteStoreDeliveryServiceProvider(HttpServletRequest request,
             @PathVariable String storeId) {
         String logprefix = request.getRequestURI();

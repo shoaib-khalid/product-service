@@ -61,7 +61,7 @@ public class StoreTimingsController {
     }
 
     @PutMapping(path = {"/{day}"}, name = "store-timings-put-by-id")
-    @PreAuthorize("hasAnyAuthority('store-timings-put-by-id', 'all')")
+    @PreAuthorize("hasAnyAuthority('store-timings-put-by-id', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> postStoreTimings(HttpServletRequest request,
             @PathVariable String storeId,
             @PathVariable String day,
@@ -104,7 +104,7 @@ public class StoreTimingsController {
     }
 
     @PostMapping(path = {""}, name = "store-timings-post")
-    @PreAuthorize("hasAnyAuthority('store-timings-post', 'all')")
+    @PreAuthorize("hasAnyAuthority('store-timings-post', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> postStoreTimings(HttpServletRequest request,
             @PathVariable String storeId,
             @RequestBody StoreTiming timingBody) {

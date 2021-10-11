@@ -38,6 +38,7 @@ import com.kalsym.product.service.model.store.Store;
 import com.kalsym.product.service.model.store.StoreDiscountTier;
 import java.util.ArrayList;
 import java.util.Collections;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 
 import org.springframework.web.bind.annotation.PostMapping;
@@ -108,6 +109,7 @@ public class StoreDiscountTierController {
     }    
 
     @PostMapping(path = {""})
+    @PreAuthorize("@customOwnerVerifier.VerifyStore(#storeId)")    
     public ResponseEntity<HttpResponse> postStoreDiscountTier(HttpServletRequest request,
             @PathVariable(required = true) String storeId,
             @PathVariable(required = true) String discountId,
@@ -184,6 +186,7 @@ public class StoreDiscountTierController {
     }
 
     @PutMapping(path = {""})
+    @PreAuthorize("@customOwnerVerifier.VerifyStore(#storeId)")    
     public ResponseEntity<HttpResponse> putStoreDiscountTier(HttpServletRequest request,
             @PathVariable(required = true) String storeId,
             @PathVariable(required = true) String discountId,
@@ -269,6 +272,7 @@ public class StoreDiscountTierController {
     
     
     @DeleteMapping(path = {"/{id}"}, name = "store-discounts-tier-delete-by-id", produces = "application/json")
+    @PreAuthorize("@customOwnerVerifier.VerifyStore(#storeId)")    
     public ResponseEntity<HttpResponse> deleteStoreDiscountTierById(HttpServletRequest request,
             @PathVariable String storeId,
             @PathVariable String discountId,

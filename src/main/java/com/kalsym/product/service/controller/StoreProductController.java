@@ -183,7 +183,7 @@ public class StoreProductController {
     }
 
     @DeleteMapping(path = {"/{id}"}, name = "store-products-delete-by-id", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('store-products-delete-by-id', 'all')")
+    @PreAuthorize("hasAnyAuthority('store-products-delete-by-id', 'all')  and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> deleteStoreProductById(HttpServletRequest request,
             @PathVariable String storeId,
             @PathVariable String id) {
@@ -222,7 +222,7 @@ public class StoreProductController {
     }
 
     @PutMapping(path = {"/{id}"}, name = "store-products-put-by-id", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('store-products-put-by-id', 'all')")
+    @PreAuthorize("hasAnyAuthority('store-products-put-by-id', 'all')  and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> putStoreProductById(HttpServletRequest request,
             @PathVariable String storeId,
             @PathVariable String id,
@@ -261,7 +261,7 @@ public class StoreProductController {
     }
 
     @PostMapping(path = {""}, name = "store-products-post")
-    @PreAuthorize("hasAnyAuthority('store-products-post', 'all')")
+    @PreAuthorize("hasAnyAuthority('store-products-post', 'all')  and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> postStoreProduct(HttpServletRequest request,
             @PathVariable String storeId,
             @Valid @RequestBody Product bodyProduct) throws Exception {

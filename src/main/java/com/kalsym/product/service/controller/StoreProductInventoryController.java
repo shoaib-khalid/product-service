@@ -169,7 +169,7 @@ public class StoreProductInventoryController {
     }
 
     @DeleteMapping(path = {"/{id}"}, name = "store-product-inventory-delete-by-id", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('store-product-inventory-delete-by-id', 'all')")
+    @PreAuthorize("hasAnyAuthority('store-product-inventory-delete-by-id', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> deleteStoreProductInventorysById(HttpServletRequest request,
             @PathVariable String storeId,
             @PathVariable String productId,
@@ -219,7 +219,7 @@ public class StoreProductInventoryController {
     }
 
     @PostMapping(path = {""}, name = "store-product-inventory-post", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('store-product-inventory-post', 'all')")
+    @PreAuthorize("hasAnyAuthority('store-product-inventory-post', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> postStoreProductInventorys(HttpServletRequest request,
             @PathVariable String storeId,
             @PathVariable String productId,

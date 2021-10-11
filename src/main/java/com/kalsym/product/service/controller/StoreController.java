@@ -7,6 +7,8 @@ import com.kalsym.product.service.model.store.StoreCategory;
 import com.kalsym.product.service.repository.ProductRepository;
 import com.kalsym.product.service.repository.StoreRepository;
 import com.kalsym.product.service.utility.HttpResponse;
+import com.kalsym.product.service.utility.Validation;
+import com.kalsym.product.service.utility.SessionInformation;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -126,18 +128,16 @@ public class StoreController {
         HttpResponse response = new HttpResponse(request.getRequestURI());
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "", "");
 
-        try {
+        try {            
+            
             StoreWithDetails store = new StoreWithDetails();
             
-            UsernamePasswordAuthenticationToken userDetails = (UsernamePasswordAuthenticationToken)SecurityContextHolder.getContext().getAuthentication();
-            MySQLUserDetails mysqlUserDetails = (MySQLUserDetails)userDetails.getPrincipal();
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Token userRole: " + mysqlUserDetails.getRole()+" ownerId:"+mysqlUserDetails.getOwnerId(), "");
-            
-            if (mysqlUserDetails.getRole().equals("SUPER_USER")) {
+            MySQLUserDetails mysqlUserDetails = SessionInformation.getSessionInfo(logprefix);            
+            if (mysqlUserDetails.getIsSuperUser())
                 store.setClientId(null);
-            } else {
-                store.setClientId(clientId);
-            }
+            else 
+                store.setClientId(clientId);            
+                        
             store.setCity(city);
             store.setName(name);
             store.setVerticalCode(verticalCode);
@@ -187,7 +187,7 @@ public class StoreController {
             response.setStatus(HttpStatus.NOT_FOUND);
             return ResponseEntity.status(response.getStatus()).body(response);
         }
-
+       
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND id: " + id);
         response.setData(optStore.get());
         response.setStatus(HttpStatus.OK);
@@ -318,7 +318,7 @@ public class StoreController {
     }
 
     @PutMapping(path = {"/{id}"}, name = "stores-put-by-id", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('stores-put-by-id', 'all')")
+    @PreAuthorize("hasAnyAuthority('stores-put-by-id', 'all') and @customOwnerVerifier.VerifyStore(#id)")
     public ResponseEntity<HttpResponse> putStoreById(HttpServletRequest request,
             @PathVariable(required = true) String id,
             @Valid @RequestBody Store bodyStore
@@ -339,7 +339,14 @@ public class StoreController {
                 return ResponseEntity.status(response.getStatus()).body(response);
             }
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND id: " + id);
-
+            
+            if (!Validation.VerifyClientId(optStore.get().getClientId())) {
+                Logger.application.error(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Invalid clientId", "");
+                response.setStatus(HttpStatus.UNAUTHORIZED);
+                response.setError("Unathorized storeId");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            }
+            
             Store store = optStore.get();
 
             store.update(bodyStore);
@@ -359,7 +366,7 @@ public class StoreController {
     }
 
     @DeleteMapping(path = {"/{id}"}, name = "stores-delete-by-id", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('stores-delete-by-id', 'all')")
+    @PreAuthorize("hasAnyAuthority('stores-delete-by-id', 'all') and @customOwnerVerifier.VerifyStore(#id)")
     public ResponseEntity<HttpResponse> deleteStoreById(HttpServletRequest request,
             @PathVariable(required = true) String id
     ) {
@@ -376,7 +383,14 @@ public class StoreController {
             return ResponseEntity.status(response.getStatus()).body(response);
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND id: " + id);
-
+        
+        if (!Validation.VerifyClientId(optStore.get().getClientId())) {
+            Logger.application.error(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Invalid clientId", "");
+            response.setStatus(HttpStatus.UNAUTHORIZED);
+            response.setError("Unathorized storeId");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+        
         storeLiveChatService.deleteGroup(optStore.get().getLiveChatCsrGroupId());
         storeLiveChatService.deleteGroup(optStore.get().getLiveChatOrdersGroupId());
 
@@ -388,7 +402,7 @@ public class StoreController {
     }
 
     @PostMapping(path = {"/{storeId}/store-categories"}, name = "store-categories-post-by-store-id")
-    @PreAuthorize("hasAnyAuthority('store-categories-post-by-store-id', 'all')")
+    @PreAuthorize("hasAnyAuthority('store-categories-post-by-store-id', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> postStoreCategoryByStoreId(HttpServletRequest request,
             @PathVariable String storeId,
             @Valid @RequestBody StoreCategory bodyStoreCategory) throws Exception {
@@ -407,7 +421,14 @@ public class StoreController {
             return ResponseEntity.status(response.getStatus()).body(response);
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
-
+        
+        if (!Validation.VerifyClientId(optStore.get().getClientId())) {
+            Logger.application.error(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Invalid clientId", "");
+            response.setStatus(HttpStatus.UNAUTHORIZED);
+            response.setError("Unathorized storeId");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+        
         bodyStoreCategory.setStoreId(storeId);
 
         StoreCategory savedStoreCategory = storeCategoryRepository.save(bodyStoreCategory);
@@ -419,7 +440,7 @@ public class StoreController {
     }
 
     @GetMapping(path = {"/{storeId}/store-categories"}, name = "store-categories-get-by-stores-id", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('store-categories-get-by-stores-id', 'all')")
+    @PreAuthorize("hasAnyAuthority('store-categories-get-by-stores-id', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> putStoreCategoryByStoreId(HttpServletRequest request,
             @PathVariable String storeId) {
         String logprefix = request.getRequestURI();
@@ -435,8 +456,8 @@ public class StoreController {
             response.setError("store not found");
             return ResponseEntity.status(response.getStatus()).body(response);
         }
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
-
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);        
+        
         Logger.application.info(ProductServiceApplication.VERSION, logprefix, "store found for id: {}", storeId);
 
         List<StoreCategory> storeCategories = storeCategoryRepository.findByStoreId(storeId);

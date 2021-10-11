@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.http.HttpStatus;
 import com.kalsym.product.service.model.store.StoreCommission;
 import com.kalsym.product.service.model.store.Store;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -74,6 +75,7 @@ public class StoreCommissionController {
     }
 
     @PostMapping(path = {""})
+    @PreAuthorize("@customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> postStoreCommission(HttpServletRequest request,
             @PathVariable(required = true) String storeId,
             @RequestBody StoreCommission storeCommission) {
@@ -98,6 +100,7 @@ public class StoreCommissionController {
     }
 
     @PutMapping(path = {""})
+    @PreAuthorize("@customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> putStoreCommission(HttpServletRequest request,
             @PathVariable(required = true) String storeId,
             @RequestBody StoreCommission storeCommission) {

@@ -139,7 +139,7 @@ public class StoreProductVariantController {
     }
 
     @DeleteMapping(path = {"/{id}"}, name = "store-product-variants-delete-by-id", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('store-product-variants-delete-by-id', 'all')")
+    @PreAuthorize("hasAnyAuthority('store-product-variants-delete-by-id', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> deleteStoreProductVariantsById(HttpServletRequest request,
             @PathVariable String storeId,
             @PathVariable String productId,
@@ -183,7 +183,7 @@ public class StoreProductVariantController {
     }
 
     @PostMapping(path = {""}, name = "store-product-variants-post", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('store-product-variants-post', 'all')")
+    @PreAuthorize("hasAnyAuthority('store-product-variants-post', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> postStoreProductVariants(HttpServletRequest request,
             @PathVariable String storeId,
             @PathVariable String productId,

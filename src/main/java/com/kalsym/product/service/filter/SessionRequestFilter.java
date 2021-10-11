@@ -89,7 +89,7 @@ public class SessionRequestFilter extends OncePerRequestFilter {
                     auth = mapper.convertValue(authResponse.getBody().getData(), Auth.class);
                     username = auth.getSession().getUsername();
                     expiryTime = auth.getSession().getExpiry();
-                    Logger.application.info(Logger.pattern, VersionHolder.VERSION, logprefix, "user role:"+auth.getRole() , "");
+                    Logger.application.info(Logger.pattern, VersionHolder.VERSION, logprefix, "user role:"+auth.getRole()+" sessionType:"+auth.getSessionType() , "");
                 }
 
                 if (null != expiryTime && null != username) {
@@ -104,7 +104,7 @@ public class SessionRequestFilter extends OncePerRequestFilter {
                     Logger.application.info(Logger.pattern, VersionHolder.VERSION, logprefix, "time to session expiry: " + diff + "ms", "");
                     if (0 < diff) {
                         authorized = true;
-                        MySQLUserDetails userDetails = new MySQLUserDetails(auth, auth.getAuthorities(), auth.getSession().getOwnerId());
+                        MySQLUserDetails userDetails = new MySQLUserDetails(auth, auth.getAuthorities(), auth.getSession().getOwnerId(), auth.getSessionType());
 
                         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
                                 userDetails, null, userDetails.getAuthorities());

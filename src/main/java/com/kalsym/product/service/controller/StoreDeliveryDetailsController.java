@@ -67,7 +67,7 @@ public class StoreDeliveryDetailsController {
      * @return
      */
     @PutMapping(path = {""}, name = "store-deliverydetails-put-by-id")
-    @PreAuthorize("hasAnyAuthority('store-deliverydetails-put-by-id', 'all')")
+    @PreAuthorize("hasAnyAuthority('store-deliverydetails-put-by-id', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> putStoreDeliveryDetails(HttpServletRequest request,
             @PathVariable String storeId,
             @RequestBody StoreDeliveryDetail deliveryDetailBody) {
@@ -107,7 +107,7 @@ public class StoreDeliveryDetailsController {
     }
 
     @PostMapping(path = {""}, name = "store-deliverydetails-post")
-    @PreAuthorize("hasAnyAuthority('store-deliverydetails-post', 'all')")
+    @PreAuthorize("hasAnyAuthority('store-deliverydetails-post', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> postStoreDeliveryDetails(HttpServletRequest request,
             @PathVariable String storeId,
             @RequestBody StoreDeliveryDetail deliveryDetailBody) {

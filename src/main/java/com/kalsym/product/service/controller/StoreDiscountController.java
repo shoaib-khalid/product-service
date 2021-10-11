@@ -212,6 +212,7 @@ public class StoreDiscountController {
     }
 
     @PostMapping(path = {""})
+    @PreAuthorize("@customOwnerVerifier.VerifyStore(#storeId)")    
     public ResponseEntity<HttpResponse> postStoreDiscount(HttpServletRequest request,
             @PathVariable(required = true) String storeId,
             @RequestBody Discount discount) {
@@ -284,6 +285,7 @@ public class StoreDiscountController {
     }
 
     @PutMapping(path = {""})
+    @PreAuthorize("@customOwnerVerifier.VerifyStore(#storeId)")    
     public ResponseEntity<HttpResponse> putStoreDiscount(HttpServletRequest request,
             @PathVariable(required = true) String storeId,
             @RequestBody Discount discount) {
@@ -363,6 +365,7 @@ public class StoreDiscountController {
     }
     
     @DeleteMapping(path = {"/{id}"}, name = "store-discounts-delete-by-id", produces = "application/json")
+    @PreAuthorize("@customOwnerVerifier.VerifyStore(#storeId)")    
     public ResponseEntity<HttpResponse> deleteStoreDiscountById(HttpServletRequest request,
             @PathVariable String storeId,
             @PathVariable String id) {

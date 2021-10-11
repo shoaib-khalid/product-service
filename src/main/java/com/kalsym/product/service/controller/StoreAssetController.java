@@ -121,7 +121,7 @@ public class StoreAssetController {
 //        return ResponseEntity.status(response.getStatus()).body(response);
 //    }
     @DeleteMapping(path = {"/banner"}, name = "store-assets-banner-delete-by-id", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('store-assets-delete-by-id', 'all')")
+    @PreAuthorize("hasAnyAuthority('store-assets-delete-by-id', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> deleteStoreBannerById(HttpServletRequest request,
             @PathVariable String storeId) {
         String logprefix = request.getRequestURI();
@@ -167,7 +167,7 @@ public class StoreAssetController {
     
     
     @DeleteMapping(path = {"/logo"}, name = "store-assets-logo-delete-by-id", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('store-assets-delete-by-id', 'all')")
+    @PreAuthorize("hasAnyAuthority('store-assets-delete-by-id', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> deleteStoreLogoById(HttpServletRequest request,
             @PathVariable String storeId) {
         String logprefix = request.getRequestURI();
@@ -203,7 +203,7 @@ public class StoreAssetController {
     }
    
     @PostMapping(path = {""}, name = "store-assets-post")
-    @PreAuthorize("hasAnyAuthority('store-assets-post', 'all')")
+    @PreAuthorize("hasAnyAuthority('store-assets-post', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> postStoreAssets(HttpServletRequest request,
             @PathVariable String storeId,
             @RequestParam(name = "logo", required = false) MultipartFile logo,

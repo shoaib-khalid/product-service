@@ -88,7 +88,7 @@ public class StoreCategoryController {
     }
 
     @PostMapping(path = {""}, name = "store-categories-post")
-    @PreAuthorize("hasAnyAuthority('store-categories-post','all')")
+    @PreAuthorize("hasAnyAuthority('store-categories-post','all')  and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> postStoreCategoryByStoreId(HttpServletRequest request,
             @RequestParam() String name, @RequestParam() String storeId, @RequestParam(name = "file", required = false) MultipartFile file) {
 
@@ -130,7 +130,7 @@ public class StoreCategoryController {
     }
 
     @DeleteMapping(path = {"/{storeCategoryId}"}, name = "store-categories-delete-by-id")
-    @PreAuthorize("hasAnyAuthority('store-categories-delete-by-id', 'all')")
+    @PreAuthorize("hasAnyAuthority('store-categories-delete-by-id', 'all')  and @customOwnerVerifier.VerifyStoreCategory(#storeCategoryId)")
     public ResponseEntity<HttpResponse> deleteStoreCategoryById(HttpServletRequest request, @PathVariable String storeCategoryId) {
         String logprefix = request.getRequestURI();
         String location = Thread.currentThread().getStackTrace()[1].getMethodName();
@@ -177,7 +177,7 @@ public class StoreCategoryController {
     }
 
     @PutMapping(path = {"/{storeCategoryId}"}, name = "store-product-assets-put-by-id")
-    @PreAuthorize("hasAnyAuthority('store-product-assets-put-by-id', 'all')")
+    @PreAuthorize("hasAnyAuthority('store-product-assets-put-by-id', 'all') and @customOwnerVerifier.VerifyStoreCategory(#storeCategoryId)")
     public ResponseEntity<HttpResponse> putStoreProductAssetsById(HttpServletRequest request,
             @PathVariable String storeCategoryId,
             @RequestParam(name = "name", required = true) String name,
