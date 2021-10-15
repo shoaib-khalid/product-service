@@ -1,4 +1,11 @@
 ##################################################
+# product-service-3.2.27 | 15-October-2021
+##################################################
+### Code Changes:
+Add new function to get asset for all store filter by clientId
+
+
+##################################################
 # product-service-3.2.26 | 11-October-2021
 ##################################################
 ### Code Changes:

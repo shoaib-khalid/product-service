@@ -23,5 +23,8 @@ public interface StoreRepository extends PagingAndSortingRepository<Store, Strin
     //List<Product> findByStoreId(@Param("storeId") String storeId);
     //List<Product> findByIdAndName(@Param("Id") String storeId, @Param("name") String name);
     <S extends Object> Page<S> findByClientId(@Param("clientId") String clientId,  Pageable pgbl);
+    
+    List<Store> findByClientId(@Param("clientId") String clientId);
+    
 
 }

@@ -465,5 +465,37 @@ public class StoreController {
         response.setData(storeCategories);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
+    
+    @GetMapping(path = {"/asset/{clientId}"}, name = "store-assets-get-by-client-id", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-assets-get', 'all')")
+    public ResponseEntity<HttpResponse> getStoreAssetsByClientId(HttpServletRequest request,
+            @PathVariable String clientId) {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "clientId: " + clientId);
+
+        List<Store> storeList = storeRepository.findByClientId(clientId);
+
+        if (storeList==null) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " Store not found for clientId: " + clientId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND store "+storeList.size()+" for clientId: " + clientId);
+        
+        List<StoreAsset> storeAssetList = new ArrayList<StoreAsset>();
+        for (int i=0;i<storeList.size();i++) {
+            String storeId = storeList.get(i).getId();
+            Optional<StoreAsset> optAsset = storeAssetRepository.findById(storeId);
+            if (optAsset.isPresent()) {
+                storeAssetList.add(optAsset.get());
+            }
+        }
+        response.setStatus(HttpStatus.OK);
+        response.setData(storeAssetList);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
 
 }
