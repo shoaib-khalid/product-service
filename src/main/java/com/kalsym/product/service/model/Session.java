@@ -24,6 +24,7 @@ public class Session {
     private String created;
     private String accessToken;
     private String refreshToken;
+    private String ownerId;
 
     @JsonCreator
     public Session(@JsonProperty("id") String id,
@@ -31,13 +32,15 @@ public class Session {
             @JsonProperty("expiry") Date expiry,
             @JsonProperty("created") String created,
             @JsonProperty("accessToken") String accessToken,
-            @JsonProperty("refreshToken") String refreshToken) {
+            @JsonProperty("refreshToken") String refreshToken,
+            @JsonProperty("ownerId") String ownerId) {
         this.id = id;
         this.username = username;
         this.expiry = expiry;
         this.created = created;
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
+        this.ownerId = ownerId;
     }
 
 }

@@ -1,4 +1,16 @@
 ++++++++++++++++++++++++++++++++++++++++++++
++ product-service-1.0.4 (Trying to achieve one product api call)
+++++++++++++++++++++++++++++++++++++++++++++
++Changes
+1. Saving all details using single product api call is done
+2. PROBLEM: The order is not correct in which inventory items are stored and therefore
+   product variant available id is hardcoded.
+
++Todo for the next developer:
+1. Try to find a way to save product inventory items with valid product variant availables.
+2. To find correct product variant available ids you need to figure out what combination of 
+   inventory items was made at front-end.
+++++++++++++++++++++++++++++++++++++++++++++
 + product-service-1.0.3 (Trying to achieve one product api call)
 ++++++++++++++++++++++++++++++++++++++++++++
 +Changes

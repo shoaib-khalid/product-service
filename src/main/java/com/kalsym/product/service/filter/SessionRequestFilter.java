@@ -1,5 +1,6 @@
 package com.kalsym.product.service.filter;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kalsym.product.service.VersionHolder;
 import com.kalsym.product.service.model.Auth;
@@ -8,7 +9,6 @@ import com.kalsym.product.service.model.MySQLUserDetails;
 import com.kalsym.product.service.service.MySQLUserDetailsService;
 import com.kalsym.product.service.utility.Logger;
 import com.kalsym.product.service.utility.DateTimeUtil;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.io.IOException;
 import java.util.Date;
@@ -82,7 +82,7 @@ public class SessionRequestFilter extends OncePerRequestFilter {
                 String username = null;
 
                 if (authResponse.getStatusCode() == HttpStatus.ACCEPTED) {
-                    ObjectMapper mapper = new ObjectMapper();
+                    ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);;
                     //Logger.application.warn(Logger.pattern, VersionHolder.VERSION, logprefix, "data: " + authResponse.getBody().getData(), "");
                     Logger.application.warn(Logger.pattern, VersionHolder.VERSION, logprefix, "got session from user-service" , "");
 
