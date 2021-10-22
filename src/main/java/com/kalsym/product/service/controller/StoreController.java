@@ -236,59 +236,68 @@ public class StoreController {
                 String shortDescription = bodyStore.getStoreDescription().substring(0, 100);
                 bodyStore.setStoreDescription(shortDescription);
             }
-            //temp fix to remove apostrophy
-            String storeDomain = bodyStore.getName().replace("'", "");
-            storeDomain = storeDomain.replace(" ", "-").toLowerCase();
-            bodyStore.setDomain(storeDomain);
-            String domain = storeSubdomainHandler.createSubDomain(bodyStore.getDomain());
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "domain: " + domain, "");
 
-            if (domain != null) {
-                bodyStore.setDomain(domain);
+            if (bodyStore.getIsBranch()==false) {
+                //only create domain for non-branch store
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "create store domain for non-branch", "");
+                
+                //customer will enter domain
+                String domain = storeSubdomainHandler.createSubDomain(bodyStore.getDomain());
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "domain: " + domain, "");
+                
+                if (domain != null) {
+                    bodyStore.setDomain(domain);
+                    savedStore = storeRepository.save(bodyStore);
+                    Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store created with id: " + savedStore.getId(), "");
+                } else {
+                    Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "domain could not be created", "");
+                    response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+                    response.setError("domain could not be created");
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+                }
+  
+                StoreCreationResponse scrCsr = storeLiveChatService.createGroup(domain + "-csr");
+
+                if (scrCsr == null) {
+                    Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "csr group could not created", "");
+                    storeRepository.delete(savedStore);
+                    Logger.application.error(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store group could not be created", "");
+                    response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+                    response.setError("store group could nto be created");
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+                } else {
+                    Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "csr group id: " + scrCsr.get_id(), "");
+                    savedStore.setLiveChatCsrGroupId(scrCsr.get_id());
+                    savedStore.setLiveChatCsrGroupName(domain + "-csr");
+                    storeRepository.save(savedStore);
+                    Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store group created", "");
+
+                }
+            
+           
+                StoreCreationResponse scrOrders = storeLiveChatService.createGroup(domain + "-orders");
+
+                if (scrOrders == null) {
+                    Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "orders group could not created", "");
+                    storeLiveChatService.deleteGroup(scrOrders.get_id());
+                    storeRepository.delete(savedStore);
+                    Logger.application.error(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store group could not be created", "");
+                    response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+                    response.setError("store group could not be created");
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+                } else {
+                    Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "orders group id: " + scrOrders.get_id(), "");
+                    savedStore.setLiveChatOrdersGroupId(scrOrders.get_id());
+                    savedStore.setLiveChatOrdersGroupName(domain + "-orders");
+                    storeRepository.save(savedStore);
+                    Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store group created", "");
+
+                }
+            
+            } else {
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "not create store domain for branch", "");
                 savedStore = storeRepository.save(bodyStore);
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store created with id: " + savedStore.getId(), "");
-            } else {
-                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "domain could not be created", "");
-                response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-                response.setError("domain could not be created");
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-            }
-
-            StoreCreationResponse scrCsr = storeLiveChatService.createGroup(domain + "-csr");
-
-            if (scrCsr == null) {
-                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "csr group could not created", "");
-                storeRepository.delete(savedStore);
-                Logger.application.error(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store group could not be created", "");
-                response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-                response.setError("store group could nto be created");
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-            } else {
-                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "csr group id: " + scrCsr.get_id(), "");
-                savedStore.setLiveChatCsrGroupId(scrCsr.get_id());
-                savedStore.setLiveChatCsrGroupName(domain + "-csr");
-                storeRepository.save(savedStore);
-                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store group created", "");
-
-            }
-
-            StoreCreationResponse scrOrders = storeLiveChatService.createGroup(domain + "-orders");
-
-            if (scrOrders == null) {
-                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "orders group could not created", "");
-                storeLiveChatService.deleteGroup(scrOrders.get_id());
-                storeRepository.delete(savedStore);
-                Logger.application.error(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store group could not be created", "");
-                response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-                response.setError("store group could not be created");
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-            } else {
-                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "orders group id: " + scrOrders.get_id(), "");
-                savedStore.setLiveChatOrdersGroupId(scrOrders.get_id());
-                savedStore.setLiveChatOrdersGroupName(domain + "-orders");
-                storeRepository.save(savedStore);
-                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store group created", "");
-
             }
 
             StoreCommission sc = new StoreCommission();
@@ -500,6 +509,33 @@ public class StoreController {
         response.setStatus(HttpStatus.OK);
         response.setData(storeAssetList);
         return ResponseEntity.status(response.getStatus()).body(response);
+    }
+    
+    
+    @GetMapping(path = {"/{id}"}, name = "stores-check-domain-availability", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('stores-check-domain-availability', 'all')")
+    public ResponseEntity<HttpResponse> checkDomainAvailability(HttpServletRequest request,
+            @RequestParam(required = true) String domain
+    ) {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " id: " + domain, "");
+
+        Optional<StoreWithDetails> optStore = storeWithDetailsRepository.findByDomain(domain);
+
+        if (!optStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " Domain: " + domain+" IS available");
+            response.setStatus(HttpStatus.OK);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        } else {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " Domain: " + domain+" NOT available");
+            response.setStatus(HttpStatus.CONFLICT);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+       
+        
+        
     }
 
 }

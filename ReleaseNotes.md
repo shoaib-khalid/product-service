@@ -1,4 +1,16 @@
 ##################################################
+# product-service-3.2.30 | 22-October-2021
+##################################################
+### Code Changes:
+
+1. Merchant Portal need to send domain when create new store (parameter : domain)
+
+2. Domain will not be created for branch store (isBranch=true)
+
+3. Group for RocketChat will not be created for branch store
+
+
+##################################################
 # product-service-3.2.29 | 22-October-2021
 ##################################################
 ### Code Changes:
