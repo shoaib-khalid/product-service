@@ -68,7 +68,9 @@ public class ProductWithDetails implements Serializable {
     private Boolean allowOutOfStockPurchases;
 
     private Integer minQuantityForAlarm;
-
+    
+    private String packingSize;
+     
     @CreationTimestamp
     private Date created;
 

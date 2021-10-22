@@ -70,7 +70,15 @@ public class StoreWithDetails implements Serializable {
     private String paymentType;
 
     private Integer serviceChargesPercentage;
-
+    
+    private Boolean isOnline;
+    
+    private Boolean isBranch;
+            
+    private String latitude;
+    
+    private String longitude;
+    
     @OneToOne(cascade = CascadeType.ALL,
             fetch = FetchType.EAGER)
     @JoinColumn(name = "regionCountryId", referencedColumnName = "id", insertable = false, updatable = false, nullable = true)
@@ -131,7 +139,23 @@ public class StoreWithDetails implements Serializable {
         }
 
         if (null != store.getPaymentType()) {
-            email = store.getPaymentType();
+            paymentType = store.getPaymentType();
+        }
+        
+        if (null != store.getIsOnline()) {
+            isOnline = store.getIsOnline();
+        }
+             
+        if (null != store.getIsBranch()) {
+            isBranch = store.getIsBranch();
+        }
+        
+        if (null != store.getLatitude()) {
+            latitude = store.getLatitude();
+        }
+        
+        if (null != store.getLongitude()) {
+            longitude = store.getLongitude();
         }
 
     }

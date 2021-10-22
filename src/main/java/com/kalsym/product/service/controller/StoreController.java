@@ -231,7 +231,11 @@ public class StoreController {
         }
 
         try {
-
+            //limit store desription to 100 characters
+            if (bodyStore.getStoreDescription().length()>100) {
+                String shortDescription = bodyStore.getStoreDescription().substring(0, 100);
+                bodyStore.setStoreDescription(shortDescription);
+            }
             //temp fix to remove apostrophy
             String storeDomain = bodyStore.getName().replace("'", "");
             storeDomain = storeDomain.replace(" ", "-").toLowerCase();

@@ -64,7 +64,8 @@ public class Product implements Serializable {
     private Boolean allowOutOfStockPurchases;
 
     private Integer minQuantityForAlarm;
-
+    
+    private String packingSize;
 
     @CreationTimestamp
     private Date created;
@@ -119,6 +120,9 @@ public class Product implements Serializable {
             minQuantityForAlarm = product.getMinQuantityForAlarm();
         }
         
+        if (null != product.getPackingSize()) {
+            packingSize = product.getPackingSize();
+        }
         
 
     }

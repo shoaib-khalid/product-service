@@ -61,7 +61,15 @@ public class Store implements Serializable {
     private String phoneNumber;
 
     private Integer serviceChargesPercentage;
-
+    
+    private Boolean isOnline;
+    
+    private Boolean isBranch;
+            
+    private String latitude;
+    
+    private String longitude;
+    
     public void update(Store store) {
 
         if (null != store.getCity()) {
@@ -84,7 +92,13 @@ public class Store implements Serializable {
         }
 
         if (null != store.getStoreDescription()) {
-            storeDescription = store.getStoreDescription();
+            //limit store desription to 100 characters
+            if (store.getStoreDescription().length()>100) {
+                String shortDescription = store.getStoreDescription().substring(0, 100);
+                storeDescription = shortDescription;
+            } else {
+                storeDescription = store.getStoreDescription();
+            }
         }
 
         if (null != store.getPostcode()) {
@@ -113,6 +127,22 @@ public class Store implements Serializable {
 
         if (null != store.getPaymentType()) {
             paymentType = store.getPaymentType();
+        }
+        
+        if (null != store.getIsOnline()) {
+            isOnline = store.getIsOnline();
+        }
+             
+        if (null != store.getIsBranch()) {
+            isBranch = store.getIsBranch();
+        }
+        
+        if (null != store.getLatitude()) {
+            latitude = store.getLatitude();
+        }
+        
+        if (null != store.getLongitude()) {
+            longitude = store.getLongitude();
         }
 
     }
