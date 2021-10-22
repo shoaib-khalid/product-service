@@ -9,6 +9,10 @@
 
 3. Group for RocketChat will not be created for branch store
 
+4. New function to check domain availability :
+/stores/checkdomain
+return http 200 if domain available
+return http 409 if domain not available
 
 ##################################################
 # product-service-3.2.29 | 22-October-2021

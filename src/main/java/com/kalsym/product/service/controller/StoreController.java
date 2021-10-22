@@ -512,7 +512,7 @@ public class StoreController {
     }
     
     
-    @GetMapping(path = {"/{id}"}, name = "stores-check-domain-availability", produces = "application/json")
+    @GetMapping(path = {"/checkdomain"}, name = "stores-check-domain-availability", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('stores-check-domain-availability', 'all')")
     public ResponseEntity<HttpResponse> checkDomainAvailability(HttpServletRequest request,
             @RequestParam(required = true) String domain
