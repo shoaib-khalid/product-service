@@ -1,4 +1,64 @@
 ##################################################
+# product-service-3.2.28 | 22-October-2021
+##################################################
+### Code Changes:
+Buf fix for update product
+
+DB Changes:
+
+1) new table : store_user
+
+	CREATE TABLE store_user 
+	(
+	id VARCHAR(100) PRIMARY KEY,
+	storeId VARCHAR(50),
+	username VARCHAR(256),
+	PASSWORD VARCHAR(256),
+	NAME VARCHAR(200),
+	phoneNumber VARCHAR(30),
+	phoneNumberVerified TINYINT(1),
+	email VARCHAR(300),
+	emailVerified TINYINT(1),
+	deactivated TINYINT(1),
+	LOCKED TINYINT(1),
+	created TIMESTAMP,
+	updated TIMESTAMP,
+	roledId VARCHAR(50)
+	);
+
+2) new table : store_user_session
+	CREATE TABLE store_user_session 
+	(
+	id VARCHAR(100) PRIMARY KEY,
+	remoteAddress varchar(50),
+	status varchar(50),
+	username varchar(50),
+	expiry timestamp,
+	accessToken  varchar(300),
+	refreshToken  varchar(300),
+	created timestamp,
+	updated timestamp,
+	ownerId varchar(50)
+	);
+	
+3) new field in store table :
+	
+	ALTER TABLE `store` ADD isOnline TINYINT(1) DEFAULT 1 COMMENT 'to indicate online or not. This flag will take preference over the store timings';
+
+	ALTER TABLE `store` ADD isBranch TINYINT(1) DEFAULT 0 COMMENT 'to indicate branch or head-office';
+
+4) new vertical :
+	
+	INSERT INTO `region_vertical` values ('e-commerce-b2b2c','E-commerce','E-commerce for Hero Runcit','SEA','https://symplified.biz/merchant.portal-assets/eCommerce.jpg');
+	
+	INSERT INTO `order_completion_status_config` SELECT id,'e-commerce-b2b2c',STATUS,storePickup,storeDeliveryType,
+	statusSequence, emailToCustomer, emailToStore, requestDelivery, rcMessage, 
+	`pushNotificationToMerchat`, customerEmailContent, `storeEmailContent`,
+	`rcMessageContent`, `comments`, `created`, `updated`, `storePushNotificationContent`, `storePushNotificationTitle`
+	FROM `order_completion_status_config` WHERE `verticalId`='FnB';
+
+
+##################################################
 # product-service-3.2.27 | 15-October-2021
 ##################################################
 ### Code Changes:

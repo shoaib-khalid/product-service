@@ -75,7 +75,7 @@ public class Product implements Serializable {
     public void update(Product product) {
         if (null != product.getName()) {
             name = product.getName();
-        }
+        }        
 
         if (null != product.getCategoryId()) {
             categoryId = product.getCategoryId();
@@ -93,6 +93,22 @@ public class Product implements Serializable {
             thumbnailUrl = product.getThumbnailUrl();
         }
 
+        if (null != product.getVendor()) {
+            vendor = product.getVendor();
+        }
+        
+        if (null != product.getRegion()) {
+            region = product.getRegion();
+        }
+        
+        if (null != product.getSeoUrl()) {
+            seoUrl = product.getSeoUrl();
+        }
+         
+        if (null != product.getSeoName()) {
+            seoName = product.getSeoName();
+        }
+        
         if (null != product.getTrackQuantity()) {
             trackQuantity = product.getTrackQuantity();
         }
@@ -102,6 +118,8 @@ public class Product implements Serializable {
         if (null != product.getMinQuantityForAlarm()) {
             minQuantityForAlarm = product.getMinQuantityForAlarm();
         }
+        
+        
 
     }
 
