@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.util.Date;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -62,7 +63,11 @@ public class Store implements Serializable {
 
     private Integer serviceChargesPercentage;
     
-    private Boolean isOnline;
+    private Boolean isSnooze;
+     
+    private Date snoozeEndTime;
+    
+    private String snoozeReason;
     
     private Boolean isBranch;
             
@@ -129,10 +134,6 @@ public class Store implements Serializable {
             paymentType = store.getPaymentType();
         }
         
-        if (null != store.getIsOnline()) {
-            isOnline = store.getIsOnline();
-        }
-             
         if (null != store.getIsBranch()) {
             isBranch = store.getIsBranch();
         }

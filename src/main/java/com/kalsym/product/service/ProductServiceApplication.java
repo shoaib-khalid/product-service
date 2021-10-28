@@ -9,12 +9,15 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  *
  * @author 7cu
  */
-@SpringBootApplication()
+@SpringBootApplication
+@EnableScheduling
+
 public class ProductServiceApplication {
 
     public static String VERSION;

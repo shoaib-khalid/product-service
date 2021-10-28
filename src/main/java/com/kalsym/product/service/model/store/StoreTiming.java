@@ -47,6 +47,10 @@ public class StoreTiming implements Serializable {
     private String closeTime;
 
     private Boolean isOff;
+    
+    private String breakStartTime;
+    
+    private String breakEndTime;
 
     public void update(StoreTiming storeTiming) {
         if (null != storeTiming.getOpenTime()) {
@@ -57,6 +61,12 @@ public class StoreTiming implements Serializable {
         }
         if (null != storeTiming.getIsOff()) {
             this.isOff = storeTiming.getIsOff();
+        }
+        if (null != storeTiming.getBreakStartTime()) {
+            this.breakStartTime = storeTiming.getBreakStartTime();
+        }
+        if (null != storeTiming.getBreakEndTime()) {
+            this.breakEndTime = storeTiming.getBreakEndTime();
         }
     }
 

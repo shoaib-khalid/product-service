@@ -207,7 +207,9 @@ public class StoreAssetController {
     public ResponseEntity<HttpResponse> postStoreAssets(HttpServletRequest request,
             @PathVariable String storeId,
             @RequestParam(name = "logo", required = false) MultipartFile logo,
-            @RequestParam(name = "banner", required = false) MultipartFile banner) {
+            @RequestParam(name = "banner", required = false) MultipartFile banner,
+            @RequestParam(name = "bannerMobile", required = false) MultipartFile bannerMobile
+            ) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
@@ -245,6 +247,24 @@ public class StoreAssetController {
                 }
             } else {
                 storeAsset.setBannerUrl(storeBannerEcommerceDefaultUrl);
+            }
+        }
+        
+        if (null != bannerMobile) {
+            //user upload new banner mobile
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "banner Filename: " + banner.getOriginalFilename());
+            String bannerStoragePath = fileStorageService.saveStoreAsset(banner, storeId + "-banner-mobile");
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "banner storagePath: " + bannerStoragePath);
+            storeAsset.setBannerMobileUrl(storeAssetsBaseUrl + storeId + "-banner-mobile");
+        } else if (storeAsset.getBannerMobileUrl()==null) {
+            //set default value
+            Store storeInfo = optStore.get();
+            if (storeInfo.getVerticalCode()!=null) {                
+                if (storeInfo.getVerticalCode().toUpperCase().contains("FNB")) {
+                    storeAsset.setBannerMobileUrl(storeBannerFnbDefaultUrl);
+                }
+            } else {
+                storeAsset.setBannerMobileUrl(storeBannerEcommerceDefaultUrl);
             }
         }
 

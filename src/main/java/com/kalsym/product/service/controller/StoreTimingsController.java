@@ -8,6 +8,8 @@ import com.kalsym.product.service.model.store.Store;
 import com.kalsym.product.service.repository.StoreRepository;
 import com.kalsym.product.service.repository.StoreTimingsRepository;
 import com.kalsym.product.service.utility.Logger;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -62,7 +65,7 @@ public class StoreTimingsController {
 
     @PutMapping(path = {"/{day}"}, name = "store-timings-put-by-id")
     @PreAuthorize("hasAnyAuthority('store-timings-put-by-id', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
-    public ResponseEntity<HttpResponse> postStoreTimings(HttpServletRequest request,
+    public ResponseEntity<HttpResponse> putStoreTimings(HttpServletRequest request,
             @PathVariable String storeId,
             @PathVariable String day,
             @RequestBody StoreTiming timingBody) {
@@ -129,6 +132,54 @@ public class StoreTimingsController {
         timingBody.setStoreId(storeId);
         response.setStatus(HttpStatus.CREATED);
         response.setData(storeTimingsRepository.save(timingBody));
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+    
+    @PutMapping(path = {"/snooze"}, name = "store-timings-snooze")
+    @PreAuthorize("hasAnyAuthority('store-timings-put-by-id', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
+    public ResponseEntity<HttpResponse> putStoreSnooze(HttpServletRequest request,
+            @PathVariable String storeId,
+            @RequestParam(required = false) Boolean isSnooze,
+            @RequestParam(required = false) Integer snoozeDuration,
+            @RequestParam(required = false) String snoozeReason
+            ) {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "storeId:" + storeId +" isSnooze:"+isSnooze+" snoozeDuration:"+snoozeDuration);
+
+        Optional<Store> optStore = storeRepository.findById(storeId);
+
+        if (!optStore.isPresent()) {
+            Logger.application.warn(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
+        
+        if (isSnooze) {
+            //put store to offline
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Calendar cl = Calendar.getInstance();
+            cl.add(Calendar.MINUTE, snoozeDuration);
+            Store store = optStore.get();
+            store.setIsSnooze(true);
+            store.setSnoozeEndTime(cl.getTime()); 
+            if (snoozeReason!=null) {
+                store.setSnoozeReason(snoozeReason);
+            }
+            storeRepository.save(store);
+             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store:"+storeId+" put store snooze on");
+        } else {
+            //put store to online
+            Store store = optStore.get();
+            store.setIsSnooze(false);
+            store.setSnoozeReason(null);
+            storeRepository.save(store);
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store:"+storeId+" put store snooze off");
+        }
+        response.setStatus(HttpStatus.ACCEPTED);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 

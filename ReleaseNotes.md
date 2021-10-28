@@ -1,4 +1,27 @@
 ##################################################
+# product-service-3.2.32 | 28-October-2021
+##################################################
+### Code Changes:
+New request & response parameter in store timings API POST, PUT, GET :
+breakStartTime
+breakEndTime
+Add new parameter in store asset POST,PUST,GET : bannerMobile
+
+### DB Changes:
+ALTER TABLE `store_timing` ADD breakStartTime VARCHAR(10), ADD breakEndTime VARCHAR(10);
+ALTER TABLE `store_asset` ADD bannerMobileUrl VARCHAR(300);
+
+
+##################################################
+# product-service-3.2.31 | 25-October-2021
+##################################################
+### Code Changes:
+
+1. New function to put store in snooze mode (temporary closed) : PUT /stores/{storeId}/timings/snooze
+2. Scheduler to put store off snooze mode when snooze end time reach. Run every minute
+
+
+##################################################
 # product-service-3.2.30 | 22-October-2021
 ##################################################
 ### Code Changes:
@@ -29,16 +52,20 @@ Buf fix for update product
 New parameter for store during view, insert & edit : isOnline, isBranch, latitude, longitude
 New parameter for product : packingSize (possible value : S, M, L, XL, XXL)
 
-DB Changes:
+### DB Changes:
 
 
 1) new field in store table :
 	
-	ALTER TABLE `store` ADD isOnline TINYINT(1) DEFAULT 1 COMMENT 'to indicate online or not. This flag will take preference over the store timings';
+	ALTER TABLE `store` ADD isSnooze TINYINT(1) DEFAULT 1 COMMENT 'to indicate snooze or not (temporary closed). This flag will take preference over the store timings';
+	
+	ALTER TABLE `store` ADD snoozeEndTime TINYINT(1) DEFAULT 1 COMMENT 'use by backend scheduler to set isSnooze=false when snoozeEndTime reach';
 
+	ALTER TABLE `store` ADD snoozeReason VARCHAR(100);
+	
 	ALTER TABLE `store` ADD isBranch TINYINT(1) DEFAULT 0 COMMENT 'to indicate branch or head-office';
 	
-	ALTER TABLE `store` ADD latitude VARCHAR(20), ADD longitude VARCHAR(20);
+	ALTER TABLE `store` ADD latitude VARCHAR(20), ADD longitude VARCHAR(20);	
 
 2) new vertical :
 	

@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.kalsym.product.service.model.store.Store;
 import com.kalsym.product.service.model.store.StoreWithDetails;
 import com.kalsym.product.service.model.store.StoreCommission;
+import com.kalsym.product.service.model.store.Client;
 
 import com.kalsym.product.service.model.livechatgroup.StoreCreationResponse;
 import com.kalsym.product.service.model.store.StoreAsset;
@@ -31,9 +32,11 @@ import com.kalsym.product.service.repository.StoreCategoryRepository;
 import com.kalsym.product.service.repository.StoreWithDetailsRepository;
 import com.kalsym.product.service.repository.StoreCommissionRepository;
 import com.kalsym.product.service.repository.StoreAssetRepository;
+import com.kalsym.product.service.repository.ClientsRepository;
 
 import com.kalsym.product.service.service.StoreLiveChatService;
 import com.kalsym.product.service.utility.Logger;
+import com.kalsym.product.service.service.WhatsappService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -43,6 +46,7 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -84,6 +88,9 @@ public class StoreController {
 
     @Autowired
     StoreWithDetailsRepository storeWithDetailsRepository;
+    
+    @Autowired
+    ClientsRepository clientRepository;
 
     @Autowired
     StoreCategoryRepository storeCategoryRepository;
@@ -93,6 +100,9 @@ public class StoreController {
 
     @Autowired
     StoreLiveChatService storeLiveChatService;
+    
+    @Autowired
+    WhatsappService whatsappService;
     
     @Value("${storeCommission.minChargeAmount:1.5}")
     private Double minChargeAmount;
@@ -106,13 +116,19 @@ public class StoreController {
     private String storeBannerEcommerceDefaultUrl;
     
     @Value("${store.banner.fnb.default.url:https://symplified.ai/store-assets/banner-fnb.png}")
-    private String storeBannerFnbDefaultUrl;
+    private String storeBannerFnbDefaultUrl;    
+
+    @Value("${client.default.password:kalsym@123}")
+    private String clientDefaultPassword;
     
     @Autowired
     StoreCommissionRepository storeComisssionRepository;
     
     @Autowired
     StoreAssetRepository storeAssetRepository;
+    
+    @Autowired
+    private PasswordEncoder bcryptEncoder;
      
     @GetMapping(path = {""}, name = "stores-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('stores-get', 'all')")
@@ -236,7 +252,10 @@ public class StoreController {
                 String shortDescription = bodyStore.getStoreDescription().substring(0, 100);
                 bodyStore.setStoreDescription(shortDescription);
             }
-
+            
+            if (bodyStore.getIsBranch()==null) {
+                bodyStore.setIsBranch(false);
+            }
             if (bodyStore.getIsBranch()==false) {
                 //only create domain for non-branch store
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "create store domain for non-branch", "");
@@ -320,6 +339,21 @@ public class StoreController {
                 storeAsset.setBannerUrl(storeBannerEcommerceDefaultUrl);
             }
             storeAssetRepository.save(storeAsset);
+            
+            //send whatsapp notification to merchant
+            Optional<Client> clientOpt = clientRepository.findById(savedStore.getClientId());
+            Client client = clientOpt.get();
+            String password = "xxxxx";
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Default password:"+clientDefaultPassword);
+            if (bcryptEncoder.matches(clientDefaultPassword, client.getPassword())) {
+                //still using default password
+                password = clientDefaultPassword;
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Still using default password");
+            } else {
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Password already changed");
+            }
+            String[] recipients = {savedStore.getPhoneNumber()};            
+            whatsappService.sendWhatsappMessage(recipients, client.getUsername(), password);
             
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
