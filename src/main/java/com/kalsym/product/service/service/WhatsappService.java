@@ -37,7 +37,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class WhatsappService {
         
-    @Value("${whatsapp.service.push.url:http://waw.symplified.it/360dialog/callback/templatemessage/push}")
+    @Value("${whatsapp.service.push.url:https://waw.symplified.it/360dialog/callback/templatemessage/push}")
     private String whatsappServiceUrl;
     
     public boolean sendWhatsappMessage(String[] recipients, String username, String password) throws Exception {

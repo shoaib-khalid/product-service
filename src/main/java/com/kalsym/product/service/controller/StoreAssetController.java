@@ -154,9 +154,10 @@ public class StoreAssetController {
         if (storeInfo.getVerticalCode()!=null) {                
             if (storeInfo.getVerticalCode().toUpperCase().contains("FNB")) {
                 storeAsset.setBannerUrl(storeBannerFnbDefaultUrl);
+                storeAsset.setBannerMobileUrl(storeBannerFnbDefaultUrl);
             }
         } else {
-            storeAsset.setBannerUrl(storeBannerEcommerceDefaultUrl);
+            storeAsset.setBannerMobileUrl(storeBannerEcommerceDefaultUrl);
         }
         storeAssetRepository.save(storeAsset);
         
