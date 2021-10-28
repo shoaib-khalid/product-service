@@ -71,7 +71,7 @@ public class StoreWithDetails implements Serializable {
 
     private Integer serviceChargesPercentage;
     
-    private Boolean isOnline;
+    private Boolean isSnooze;
     
     private Boolean isBranch;
             
@@ -142,8 +142,8 @@ public class StoreWithDetails implements Serializable {
             paymentType = store.getPaymentType();
         }
         
-        if (null != store.getIsOnline()) {
-            isOnline = store.getIsOnline();
+        if (null != store.getIsSnooze()) {
+            isSnooze = store.getIsSnooze();
         }
              
         if (null != store.getIsBranch()) {
