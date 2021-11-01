@@ -37,7 +37,7 @@ public class SnoozeScheduler {
     @Autowired
     StoreRepository storeRepository;
     
-    @Scheduled(fixedRate = 6000)
+    @Scheduled(fixedRate = 60000)
     public void checkExpiredSnooze() throws Exception {
         System.out.println("Run Snooze-Scheduler");
         String logprefix = "Snooze-Scheduler";
