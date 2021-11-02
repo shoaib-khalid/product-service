@@ -1,4 +1,12 @@
 ##################################################
+# product-service-3.2.35 | 02-November-2021
+##################################################
+### Code Changes:
+Add sort & search by name in function getStore
+Bug fix for getProductInventory for product with Variant
+
+
+##################################################
 # product-service-3.2.33 | 01-November-2021
 ##################################################
 ### Code Changes:
