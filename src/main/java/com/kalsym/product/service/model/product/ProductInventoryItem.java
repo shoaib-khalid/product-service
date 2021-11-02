@@ -40,7 +40,7 @@ public class ProductInventoryItem implements Serializable {
     private Integer sequenceNumber;
     
     @OneToOne(cascade = CascadeType.ALL,
-            fetch = FetchType.LAZY)
+            fetch = FetchType.EAGER)
     @JoinColumn(name = "productVariantAvailableId", referencedColumnName = "id", insertable = false, updatable = false, nullable = true)    
     private ProductVariantAvailable productVariantAvailable;
 }
