@@ -2,9 +2,13 @@ package com.kalsym.product.service.model.product;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.io.Serializable;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,5 +38,9 @@ public class ProductInventoryItem implements Serializable {
     private String productId;
 
     private Integer sequenceNumber;
-
+    
+    @OneToOne(cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY)
+    @JoinColumn(name = "productVariantAvailableId", referencedColumnName = "id", insertable = false, updatable = false, nullable = true)    
+    private ProductVariantAvailable productVariantAvailable;
 }
