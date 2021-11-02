@@ -44,6 +44,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -138,6 +139,8 @@ public class StoreController {
             @RequestParam(required = false) String city,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String domain,
+            @RequestParam(required = false, defaultValue = "name") String sortByCol,
+            @RequestParam(required = false, defaultValue = "ASC") Sort.Direction sortingOrder,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int pageSize) {
         String logprefix = request.getRequestURI();
@@ -164,11 +167,15 @@ public class StoreController {
             ExampleMatcher matcher = ExampleMatcher
                     .matchingAll()
                     .withIgnoreCase()
-                    .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
+                    .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
             Example<StoreWithDetails> example = Example.of(store, matcher);
 
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "page: " + page + " pageSize: " + pageSize, "");
             Pageable pageable = PageRequest.of(page, pageSize);
+            if (sortingOrder==Sort.Direction.ASC)
+                pageable = PageRequest.of(page, pageSize, Sort.by(sortByCol).ascending());
+            else if (sortingOrder==Sort.Direction.DESC)
+                pageable = PageRequest.of(page, pageSize, Sort.by(sortByCol).descending());
             Page<StoreWithDetails> fetchedPage = storeWithDetailsRepository.findAll(example, pageable);
             //Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "elements: " + fetchedPage.getTotalElements(), "");
             //Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "element 0: " + fetchedPage.iterator().next(), "");
