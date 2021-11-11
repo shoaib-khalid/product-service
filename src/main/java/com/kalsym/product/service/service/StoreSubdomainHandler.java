@@ -24,13 +24,13 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Service
 public class StoreSubdomainHandler {
 
-    @Value("${store.subdomain.creation.url:https://api.godaddy.com/v1/domains/symplified.store/records/CNAME}")
+    @Value("${store.subdomain.creation.url:https://api.godaddy.com/v1/domains/<base-domain>/records/CNAME}")
     private String storeSubDomainCreationUrl;
 
     @Value("${store.subdomain.token:not-set}")
     private String storeSubDomainToken;
 
-    @Value("${store.subdomain.config.path:/etc/nginx/conf.d/symplified.store}")
+    @Value("${store.subdomain.config.path:/etc/nginx/conf.d/var}")
     private String storeSubDomainConfigPath;
 
     @Value("${store.subdomain.config.allowed:false}")
@@ -41,7 +41,7 @@ public class StoreSubdomainHandler {
         return storeName;
     }
 
-    public String createSubDomain(String name) throws Exception {
+    public String createSubDomain(String name, String verticalId, String baseDomain) throws Exception {
 
         String logprefix = "createSubDomain";
 
@@ -53,6 +53,7 @@ public class StoreSubdomainHandler {
         List<DomainCreationRequestBody> list = new ArrayList<>();
         list.add(dcrb);
         String url = storeSubDomainCreationUrl + "/" + name;
+        url = url.replaceAll("<base-domain>", baseDomain);
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "url: " + url, "");
 
         try {
@@ -79,7 +80,7 @@ public class StoreSubdomainHandler {
 //                    .bodyToMono(Object.class)
 //                    .timeout(Duration.ofSeconds(10));
             if (ngInxWithDomain) {
-                configureNginxWithDomain(name);
+                configureNginxWithDomain(name, baseDomain);
             }
 
         } catch (RestClientException e) {
@@ -89,14 +90,15 @@ public class StoreSubdomainHandler {
         return name;
     }
 
-    public void configureNginxWithDomain(String subDomaiprefix) throws Exception {
+    public void configureNginxWithDomain(String subDomaiprefix, String baseDomain) throws Exception {
         String logprefix = "configureNginxWithDomain";
 
-        String subdomain = storeSubDomainConfigPath + "/" + subDomaiprefix + ".symplified.store.conf";
+        String subdomain = storeSubDomainConfigPath + "/" + subDomaiprefix + "."+baseDomain+".conf";
         FileWriter fileWriter = new FileWriter(subdomain);
 
         String text = configText.replace("<domain>", subDomaiprefix);
-
+        text = text.replaceAll("<base-domain>", baseDomain);
+        
         fileWriter.write(text);
         fileWriter.close();
 
@@ -127,22 +129,22 @@ public class StoreSubdomainHandler {
 
     private String configText = "server {\n"
             + "    listen 80;\n"
-            + "    server_name <domain>.symplified.store;\n"
+            + "    server_name <domain>.<base-domain>;\n"
             + "    return 301 https://$host$request_uri;\n"
             + "}\n"
             + "\n"
             + "server {\n"
             + "    listen      443 ssl http2;\n"
-            + "    server_name <domain>.symplified.store;\n"
+            + "    server_name <domain>.<base-domain>;\n"
             + "    root        /var/www/html/simplify-fe;\n"
             + "\n"
-            + "    ssl_certificate     /root/.getssl/*.symplified.store/fullchain.crt;\n"
-            + "    ssl_certificate_key /root/.getssl/*.symplified.store/*.symplified.store.key; \n"
+            + "    ssl_certificate     /root/.getssl/*.<base-domain>/fullchain.crt;\n"
+            + "    ssl_certificate_key /root/.getssl/*.<base-domain>/*.<base-domain>.key; \n"
             + "\n"
             + "    index       index.php index.html index.htm;\n"
-            + "    access_log  /var/log/nginx/domains/*.symplified.store.log combined;\n"
-            + "    access_log  /var/log/nginx/domains/*.symplified.store.bytes bytes;\n"
-            + "    error_log   /var/log/nginx/domains/*.symplified.store.error.log error;\n"
+            + "    access_log  /var/log/nginx/domains/*.<base-domain>.log combined;\n"
+            + "    access_log  /var/log/nginx/domains/*.<base-domain>.bytes bytes;\n"
+            + "    error_log   /var/log/nginx/domains/*.<base-domain>.error.log error;\n"
             + "\n"
             + "    location / {\n"
             + "\n"

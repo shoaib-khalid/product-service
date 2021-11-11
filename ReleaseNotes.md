@@ -1,4 +1,18 @@
 ##################################################
+# product-service-3.2.36 | 11-November-2021
+##################################################
+### Code Changes:
+Add new domain easydukan.co for region South Asia in DB
+Each vertical will have own domain
+Skip domain creation in godaddy & nginx
+Use full domain in store table for field domain
+Bug fix for snooze mode
+
+### DB Changes:
+ALTER TABLE region_vertical ADD domain VARCHAR(200);
+
+
+##################################################
 # product-service-3.2.35 | 02-November-2021
 ##################################################
 ### Code Changes:

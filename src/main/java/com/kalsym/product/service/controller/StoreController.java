@@ -3,9 +3,11 @@ package com.kalsym.product.service.controller;
 import com.kalsym.product.service.service.StoreSubdomainHandler;
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.model.MySQLUserDetails;
+import com.kalsym.product.service.model.RegionVertical;
 import com.kalsym.product.service.model.store.StoreCategory;
 import com.kalsym.product.service.repository.ProductRepository;
 import com.kalsym.product.service.repository.StoreRepository;
+import com.kalsym.product.service.repository.RegionVerticalRepository;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.utility.Validation;
 import com.kalsym.product.service.utility.SessionInformation;
@@ -130,7 +132,10 @@ public class StoreController {
     
     @Autowired
     private PasswordEncoder bcryptEncoder;
-     
+    
+    @Autowired
+    RegionVerticalRepository regionVerticalRepository;
+    
     @GetMapping(path = {""}, name = "stores-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('stores-get', 'all')")
     public ResponseEntity<HttpResponse> getStore(HttpServletRequest request,
@@ -268,9 +273,18 @@ public class StoreController {
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "create store domain for non-branch", "");
                 
                 //customer will enter domain
-                String domain = storeSubdomainHandler.createSubDomain(bodyStore.getDomain());
-                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "domain: " + domain, "");
+                String baseDomain = "";
+                Optional<RegionVertical> regionVertical = regionVerticalRepository.findById(bodyStore.getVerticalCode());
+                if (regionVertical.isPresent()) {
+                    baseDomain = regionVertical.get().getDomain();
+                }
                 
+                //skip create domain in godaddy & nginx
+                //String domain = storeSubdomainHandler.createSubDomain(bodyStore.getDomain(), bodyStore.getVerticalCode(), baseDomain);
+                 
+                String domain = bodyStore.getDomain()+ "." + baseDomain;
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "verticalCode:"+bodyStore.getVerticalCode()+" domain: " + domain, "");
+               
                 if (domain != null) {
                     bodyStore.setDomain(domain);
                     savedStore = storeRepository.save(bodyStore);
@@ -289,7 +303,7 @@ public class StoreController {
                     storeRepository.delete(savedStore);
                     Logger.application.error(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store group could not be created", "");
                     response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-                    response.setError("store group could nto be created");
+                    response.setError("store group could not be created");
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
                 } else {
                     Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "csr group id: " + scrCsr.get_id(), "");

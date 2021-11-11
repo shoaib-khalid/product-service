@@ -2,6 +2,7 @@ package com.kalsym.product.service.model.store;
 
 import com.kalsym.product.service.model.RegionCountry;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -73,6 +74,10 @@ public class StoreWithDetails implements Serializable {
     
     private Boolean isSnooze;
     
+    private Date snoozeEndTime;
+    
+    private String snoozeReason;
+        
     private Boolean isBranch;
             
     private String latitude;
