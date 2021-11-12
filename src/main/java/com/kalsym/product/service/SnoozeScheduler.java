@@ -37,15 +37,16 @@ public class SnoozeScheduler {
     @Autowired
     StoreRepository storeRepository;
     
-    @Scheduled(fixedRate = 60000)
+    //@Scheduled(fixedRate = 60000) //remove comment to enable scheduler
     public void checkExpiredSnooze() throws Exception {
         System.out.println("Run Snooze-Scheduler");
         String logprefix = "Snooze-Scheduler";
-        List<Store> storeList = storeRepository.getSnoozeExpired();
+        //List<Store> storeList = storeRepository.getSnoozeExpired();
+        List<Store> storeList = null;
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Start checking snooze. Expired snooze:"+storeList.size());        
         for (int i=0;i<storeList.size();i++) {
             Store store = storeList.get(i);
-            store.setIsSnooze(false);
+            //store.setIsSnooze(false);
             storeRepository.save(store);
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store:"+store.getId()+" Update snooze off");
         }

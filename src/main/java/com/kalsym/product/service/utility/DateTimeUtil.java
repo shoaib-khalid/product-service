@@ -6,6 +6,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.TimeZone;
 
 /**
  *
@@ -48,5 +49,12 @@ public class DateTimeUtil {
         return dateToConvert.toInstant()
           .atZone(timezone)
           .toLocalDateTime();
+    }
+    
+    
+    public static Date ConvertDateToTimeZone(Date dateToConvert, ZoneId timezone) {
+       LocalDateTime ldt = LocalDateTime.ofInstant(dateToConvert.toInstant(), timezone);
+       Date out = Date.from(ldt.atZone(timezone).toInstant());
+       return out;
     }
 }

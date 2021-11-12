@@ -1,11 +1,13 @@
 package com.kalsym.product.service.model.store;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.util.Date;
+import javax.persistence.Temporal;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -62,9 +64,13 @@ public class Store implements Serializable {
     private String phoneNumber;
 
     private Integer serviceChargesPercentage;
+        
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date snoozeStartTime;
     
-    private Boolean isSnooze;
-     
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private Date snoozeEndTime;
     
     private String snoozeReason;

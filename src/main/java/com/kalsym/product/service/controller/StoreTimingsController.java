@@ -1,15 +1,22 @@
 package com.kalsym.product.service.controller;
 
 import com.kalsym.product.service.ProductServiceApplication;
+import com.kalsym.product.service.model.RegionCountry;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.model.store.StoreTiming;
 import com.kalsym.product.service.model.store.StoreTimingIdentity;
 import com.kalsym.product.service.model.store.Store;
+import com.kalsym.product.service.model.StoreSnooze;
+import com.kalsym.product.service.repository.RegionCountriesRepository;
 import com.kalsym.product.service.repository.StoreRepository;
 import com.kalsym.product.service.repository.StoreTimingsRepository;
+import com.kalsym.product.service.utility.DateTimeUtil;
 import com.kalsym.product.service.utility.Logger;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +45,9 @@ public class StoreTimingsController {
 
     @Autowired
     StoreRepository storeRepository;
+    
+    @Autowired
+    RegionCountriesRepository regionCountriesRepository;
 
     @GetMapping(path = {""}, name = "store-timings-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-timings-get', 'all')")
@@ -136,7 +146,7 @@ public class StoreTimingsController {
     }
     
     @PutMapping(path = {"/snooze"}, name = "store-timings-snooze")
-    @PreAuthorize("hasAnyAuthority('store-timings-put-by-id', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
+    @PreAuthorize("hasAnyAuthority('store-timings-put-by-id', 'all')")
     public ResponseEntity<HttpResponse> putStoreSnooze(HttpServletRequest request,
             @PathVariable String storeId,
             @RequestParam(required = false) Boolean isSnooze,
@@ -164,22 +174,75 @@ public class StoreTimingsController {
             Calendar cl = Calendar.getInstance();
             cl.add(Calendar.MINUTE, snoozeDuration);
             Store store = optStore.get();
-            store.setIsSnooze(true);
+            //store.setIsSnooze(true);
+            store.setSnoozeStartTime(Calendar.getInstance().getTime()); 
             store.setSnoozeEndTime(cl.getTime()); 
             if (snoozeReason!=null) {
                 store.setSnoozeReason(snoozeReason);
             }
             storeRepository.save(store);
-             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store:"+storeId+" put store snooze on");
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store:"+storeId+" put store snooze on");
         } else {
             //put store to online
             Store store = optStore.get();
-            store.setIsSnooze(false);
+            //store.setIsSnooze(false);
+            store.setSnoozeStartTime(null); 
+            store.setSnoozeEndTime(null); 
             store.setSnoozeReason(null);
             storeRepository.save(store);
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store:"+storeId+" put store snooze off");
         }
         response.setStatus(HttpStatus.ACCEPTED);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+    
+    @GetMapping(path = {"/snooze"}, name = "store-timings-snooze", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-timings-get', 'all')")
+    public ResponseEntity<HttpResponse> getStoreSnooze(HttpServletRequest request,
+            @PathVariable String storeId) {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "storeId: " + storeId);
+
+        Optional<Store> optStore = storeRepository.findById(storeId);
+
+        if (!optStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
+        
+        StoreSnooze storeSnooze=new StoreSnooze();
+        Store store = optStore.get();
+        if (store.getSnoozeStartTime()!=null && store.getSnoozeEndTime()!=null) {
+            int result = store.getSnoozeEndTime().compareTo(Calendar.getInstance().getTime());
+            if (result < 0) {
+                //snooze already expired
+                storeSnooze.isSnooze=false;
+            } else {
+                storeSnooze.isSnooze=true;
+                storeSnooze.snoozeEndTime=store.getSnoozeEndTime();
+                storeSnooze.snoozeReason=store.getSnoozeReason();
+                
+                //convert time to merchant timezone
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Snooze End Time:"+store.getSnoozeEndTime().toString());
+                Optional<RegionCountry> t = regionCountriesRepository.findById(store.getRegionCountryId());
+                if (t.isPresent()) {
+                    RegionCountry regionCountry = t.get();                      
+                    Date startTime = DateTimeUtil.ConvertDateToTimeZone(store.getSnoozeStartTime(), ZoneId.of(regionCountry.getTimezone()));
+                    Date endTime = DateTimeUtil.ConvertDateToTimeZone(store.getSnoozeEndTime(), ZoneId.of(regionCountry.getTimezone()));
+                    storeSnooze.snoozeStartTime = startTime; 
+                    storeSnooze.snoozeEndTime = endTime;
+                }
+            }
+        } else {
+            storeSnooze.isSnooze=false;
+        }
+        response.setStatus(HttpStatus.OK);
+        response.setData(storeSnooze);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 

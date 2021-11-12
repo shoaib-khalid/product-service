@@ -1,4 +1,25 @@
 ##################################################
+# product-service-3.2.37 | 11-November-2021
+##################################################
+### Code Changes:
+Add snooze start time & end time.
+Remove scheduler to check snooze expired. 
+Backend will check based on snoozeStartTime & snoozeEndTime to determine isSnooze flag.
+
+New API to get snooze info :
+function getStoreSnooze() -> GET /stores/{storeId}/timings/snooze
+
+New API to put store to snooze mode :
+function putStoreSnooze() -> PUT /stores/{storeId}/timings/snooze
+
+
+### DB Changes:
+ALTER TABLE `store` DROP isSnooze ;
+ALTER TABLE `store` ADD snoozeStartTime TINYINT(1);
+
+
+
+##################################################
 # product-service-3.2.36 | 11-November-2021
 ##################################################
 ### Code Changes:

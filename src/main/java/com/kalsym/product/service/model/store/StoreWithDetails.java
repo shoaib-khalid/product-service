@@ -1,5 +1,6 @@
 package com.kalsym.product.service.model.store;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.kalsym.product.service.model.RegionCountry;
 import java.io.Serializable;
 import java.util.Date;
@@ -13,6 +14,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -72,8 +74,12 @@ public class StoreWithDetails implements Serializable {
 
     private Integer serviceChargesPercentage;
     
-    private Boolean isSnooze;
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date snoozeStartTime;
     
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private Date snoozeEndTime;
     
     private String snoozeReason;
@@ -146,11 +152,7 @@ public class StoreWithDetails implements Serializable {
         if (null != store.getPaymentType()) {
             paymentType = store.getPaymentType();
         }
-        
-        if (null != store.getIsSnooze()) {
-            isSnooze = store.getIsSnooze();
-        }
-             
+         
         if (null != store.getIsBranch()) {
             isBranch = store.getIsBranch();
         }
