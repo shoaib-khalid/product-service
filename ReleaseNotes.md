@@ -14,8 +14,8 @@ function putStoreSnooze() -> PUT /stores/{storeId}/timings/snooze
 
 
 ### DB Changes:
-ALTER TABLE `store` DROP isSnooze ;
-ALTER TABLE `store` ADD snoozeStartTime TINYINT(1) AFTER invoiceSeqNo;
+ALTER TABLE `store` DROP COLUMN  isSnooze ;
+ALTER TABLE `store` ADD snoozeStartTime timestamp;
 
 
 
