@@ -17,6 +17,7 @@
 package com.kalsym.product.service.model;
 
 import java.util.Date;
+import java.time.LocalDateTime;  
 
 /**
  *
@@ -25,6 +26,6 @@ import java.util.Date;
 public class StoreSnooze {
     public boolean isSnooze;
     public String snoozeReason;
-    public Date snoozeStartTime;
-    public Date snoozeEndTime;
+    public LocalDateTime snoozeStartTime;
+    public LocalDateTime snoozeEndTime;
 }

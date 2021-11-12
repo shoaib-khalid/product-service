@@ -224,16 +224,17 @@ public class StoreTimingsController {
                 storeSnooze.isSnooze=false;
             } else {
                 storeSnooze.isSnooze=true;
-                storeSnooze.snoozeEndTime=store.getSnoozeEndTime();
                 storeSnooze.snoozeReason=store.getSnoozeReason();
                 
                 //convert time to merchant timezone
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Snooze End Time:"+store.getSnoozeEndTime().toString());
                 Optional<RegionCountry> t = regionCountriesRepository.findById(store.getRegionCountryId());
                 if (t.isPresent()) {
-                    RegionCountry regionCountry = t.get();                      
-                    Date startTime = DateTimeUtil.ConvertDateToTimeZone(store.getSnoozeStartTime(), ZoneId.of(regionCountry.getTimezone()));
-                    Date endTime = DateTimeUtil.ConvertDateToTimeZone(store.getSnoozeEndTime(), ZoneId.of(regionCountry.getTimezone()));
+                    RegionCountry regionCountry = t.get(); 
+                    Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store timezone:"+regionCountry.getTimezone());
+                    LocalDateTime startTime = DateTimeUtil.convertToLocalDateTimeViaInstant(store.getSnoozeStartTime(), ZoneId.of(regionCountry.getTimezone()));
+                    LocalDateTime endTime = DateTimeUtil.convertToLocalDateTimeViaInstant(store.getSnoozeEndTime(), ZoneId.of(regionCountry.getTimezone()));
+                    Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Snooze End Time in store timezone:"+endTime);
                     storeSnooze.snoozeStartTime = startTime; 
                     storeSnooze.snoozeEndTime = endTime;
                 }
