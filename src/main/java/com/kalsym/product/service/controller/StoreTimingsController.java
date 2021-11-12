@@ -149,8 +149,8 @@ public class StoreTimingsController {
     @PreAuthorize("hasAnyAuthority('store-timings-put-by-id', 'all')")
     public ResponseEntity<HttpResponse> putStoreSnooze(HttpServletRequest request,
             @PathVariable String storeId,
-            @RequestParam(required = false) Boolean isSnooze,
-            @RequestParam(required = false) Integer snoozeDuration,
+            @RequestParam(required = true) Boolean isSnooze,
+            @RequestParam(required = true) Integer snoozeDuration,
             @RequestParam(required = false) String snoozeReason
             ) {
         String logprefix = request.getRequestURI();
