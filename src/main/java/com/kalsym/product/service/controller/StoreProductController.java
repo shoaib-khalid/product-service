@@ -295,8 +295,10 @@ public class StoreProductController {
 
         }
 
-        String seoName = generateSeoName(bodyProduct.getName());
-
+        //String seoName = generateSeoName(bodyProduct.getName());
+        
+        String seoName = bodyProduct.getSeoName();
+        
         String seoUrl = productSeoUrl.replace("{{store-domain}}", optStore.get().getDomain());
         seoUrl = seoUrl.replace("{{product-name}}", seoName);
         bodyProduct.setSeoUrl(seoUrl);
