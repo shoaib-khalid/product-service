@@ -592,5 +592,32 @@ public class StoreController {
         
         
     }
+    
+    
+    @GetMapping(path = {"/checkname"}, name = "stores-check-name-availability", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('stores-check-name-availability', 'all')")
+    public ResponseEntity<HttpResponse> checkNameAvailability(HttpServletRequest request,
+            @RequestParam(required = true) String storeName
+    ) {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " id: " + storeName, "");
+
+        Optional<StoreWithDetails> optStore = storeWithDetailsRepository.findByName(storeName);
+
+        if (!optStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " Name: " + storeName+" IS available");
+            response.setStatus(HttpStatus.OK);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        } else {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " Name: " + storeName+" NOT available");
+            response.setStatus(HttpStatus.CONFLICT);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+       
+        
+        
+    }
 
 }
