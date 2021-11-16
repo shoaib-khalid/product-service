@@ -121,7 +121,7 @@ public class StoreController {
     @Value("${store.banner.fnb.default.url:https://symplified.ai/store-assets/banner-fnb.png}")
     private String storeBannerFnbDefaultUrl;  
     
-    @Value("${store.description.length:300")
+    @Value("${store.description.length:300}")
     private Integer storeDescriptionLength;
 
     @Value("${client.default.password:kalsym@123}")
