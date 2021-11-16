@@ -1,4 +1,11 @@
 ##################################################
+# product-service-3.2.40 | 16-November-2021
+##################################################
+### Code Changes:
+Bug fix for date format for snoozeStartTime & snoozeEndTime in getStoreSnooze()
+
+
+##################################################
 # product-service-3.2.39 | 16-November-2021
 ##################################################
 ### Code Changes:

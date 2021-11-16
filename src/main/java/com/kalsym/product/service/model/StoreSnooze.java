@@ -16,6 +16,7 @@
  */
 package com.kalsym.product.service.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.util.Date;
 import java.time.LocalDateTime;  
 
@@ -26,6 +27,10 @@ import java.time.LocalDateTime;
 public class StoreSnooze {
     public boolean isSnooze;
     public String snoozeReason;
+    
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     public LocalDateTime snoozeStartTime;
+    
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     public LocalDateTime snoozeEndTime;
 }
