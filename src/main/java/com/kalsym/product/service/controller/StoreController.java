@@ -119,7 +119,10 @@ public class StoreController {
     private String storeBannerEcommerceDefaultUrl;
     
     @Value("${store.banner.fnb.default.url:https://symplified.ai/store-assets/banner-fnb.png}")
-    private String storeBannerFnbDefaultUrl;    
+    private String storeBannerFnbDefaultUrl;  
+    
+    @Value("${store.description.length:300")
+    private Integer storeDescriptionLength;
 
     @Value("${client.default.password:kalsym@123}")
     private String clientDefaultPassword;
@@ -260,8 +263,8 @@ public class StoreController {
 
         try {
             //limit store desription to 100 characters
-            if (bodyStore.getStoreDescription().length()>100) {
-                String shortDescription = bodyStore.getStoreDescription().substring(0, 100);
+            if (bodyStore.getStoreDescription().length()>storeDescriptionLength) {
+                String shortDescription = bodyStore.getStoreDescription().substring(0, storeDescriptionLength);
                 bodyStore.setStoreDescription(shortDescription);
             }
             
@@ -416,7 +419,13 @@ public class StoreController {
             }
             
             Store store = optStore.get();
-
+            
+             //limit store desription to 100 characters
+            if (bodyStore.getStoreDescription().length()>storeDescriptionLength) {
+                String shortDescription = bodyStore.getStoreDescription().substring(0, storeDescriptionLength);
+                bodyStore.setStoreDescription(shortDescription);
+            }
+            
             store.update(bodyStore);
 
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "updated store with id: " + id);

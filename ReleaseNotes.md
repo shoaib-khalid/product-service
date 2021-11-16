@@ -1,4 +1,15 @@
 ##################################################
+# product-service-3.2.39 | 16-November-2021
+##################################################
+### Code Changes:
+Put store description max length in config : store.description.length
+
+### Config Changes:
+New config : 
+store.description.length=300
+
+
+##################################################
 # product-service-3.2.37 | 11-November-2021
 ##################################################
 ### Code Changes:
