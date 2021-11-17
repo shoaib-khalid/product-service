@@ -1,4 +1,32 @@
 ##################################################
+# product-service-3.2.41 | 17-November-2021
+##################################################
+
+### Code Changes:
+New field for store & product
+New API to manage product package (combo)
+Bug fix for storeDescription character length
+
+### DB Changes:
+ALTER TABLE product ADD isPackage TINYINT(1) DEFAULT 0;
+ALTER TABLE store ADD googleAnalyticId VARCHAR(50);
+
+CREATE TABLE product_package_option (
+id VARCHAR(50) PRIMARY KEY,
+packageId VARCHAR(50),
+title VARCHAR(100),
+totalAllow INT
+);
+
+
+CREATE TABLE product_package_option_detail (
+id VARCHAR(50) PRIMARY KEY,
+productPackageOptionId VARCHAR(50),
+productId VARCHAR(50)
+);
+
+
+##################################################
 # product-service-3.2.40 | 16-November-2021
 ##################################################
 ### Code Changes:

@@ -102,14 +102,8 @@ public class Store implements Serializable {
             verticalCode = store.getVerticalCode();
         }
 
-        if (null != store.getStoreDescription()) {
-            //limit store desription to 100 characters
-            if (store.getStoreDescription().length()>100) {
-                String shortDescription = store.getStoreDescription().substring(0, 100);
-                storeDescription = shortDescription;
-            } else {
-                storeDescription = store.getStoreDescription();
-            }
+        if (null != store.getStoreDescription()) {           
+            storeDescription = store.getStoreDescription();            
         }
 
         if (null != store.getPostcode()) {

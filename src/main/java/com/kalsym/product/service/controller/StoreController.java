@@ -418,9 +418,20 @@ public class StoreController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
             }
             
+            //TODO: check if merchant change domain
+            /*
+            if (bodyStore.getDomain() != null && !optStore.get().getDomain().equals(bodyStore.getDomain())) {
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "change store domain", "");
+                //check if domain conflict with other store
+                response.setStatus(HttpStatus.CONFLICT);
+                errors.add("store domain already exists");
+                response.setData(errors);
+                return ResponseEntity.status(response.getStatus()).body(response);
+            }*/
+            
             Store store = optStore.get();
             
-             //limit store desription to 100 characters
+            //limit store desription to 100 characters
             if (bodyStore.getStoreDescription().length()>storeDescriptionLength) {
                 String shortDescription = bodyStore.getStoreDescription().substring(0, storeDescriptionLength);
                 bodyStore.setStoreDescription(shortDescription);
