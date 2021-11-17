@@ -74,6 +74,8 @@ public class StoreWithDetails implements Serializable {
 
     private Integer serviceChargesPercentage;
     
+    private String googleAnalyticId;
+    
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private Date snoozeStartTime;
