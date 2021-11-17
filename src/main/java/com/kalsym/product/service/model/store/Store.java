@@ -64,6 +64,8 @@ public class Store implements Serializable {
     private String phoneNumber;
 
     private Integer serviceChargesPercentage;
+    
+    private String googleAnalyticId;
         
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
