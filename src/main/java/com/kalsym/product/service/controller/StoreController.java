@@ -3,9 +3,11 @@ package com.kalsym.product.service.controller;
 import com.kalsym.product.service.service.StoreSubdomainHandler;
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.model.MySQLUserDetails;
+import com.kalsym.product.service.model.RegionVertical;
 import com.kalsym.product.service.model.store.StoreCategory;
 import com.kalsym.product.service.repository.ProductRepository;
 import com.kalsym.product.service.repository.StoreRepository;
+import com.kalsym.product.service.repository.RegionVerticalRepository;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.utility.Validation;
 import com.kalsym.product.service.utility.SessionInformation;
@@ -117,7 +119,10 @@ public class StoreController {
     private String storeBannerEcommerceDefaultUrl;
     
     @Value("${store.banner.fnb.default.url:https://symplified.ai/store-assets/banner-fnb.png}")
-    private String storeBannerFnbDefaultUrl;    
+    private String storeBannerFnbDefaultUrl;  
+    
+    @Value("${store.description.length:300}")
+    private Integer storeDescriptionLength;
 
     @Value("${client.default.password:kalsym@123}")
     private String clientDefaultPassword;
@@ -130,7 +135,10 @@ public class StoreController {
     
     @Autowired
     private PasswordEncoder bcryptEncoder;
-     
+    
+    @Autowired
+    RegionVerticalRepository regionVerticalRepository;
+    
     @GetMapping(path = {""}, name = "stores-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('stores-get', 'all')")
     public ResponseEntity<HttpResponse> getStore(HttpServletRequest request,
@@ -255,8 +263,8 @@ public class StoreController {
 
         try {
             //limit store desription to 100 characters
-            if (bodyStore.getStoreDescription().length()>100) {
-                String shortDescription = bodyStore.getStoreDescription().substring(0, 100);
+            if (bodyStore.getStoreDescription().length()>storeDescriptionLength) {
+                String shortDescription = bodyStore.getStoreDescription().substring(0, storeDescriptionLength);
                 bodyStore.setStoreDescription(shortDescription);
             }
             
@@ -268,9 +276,18 @@ public class StoreController {
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "create store domain for non-branch", "");
                 
                 //customer will enter domain
-                String domain = storeSubdomainHandler.createSubDomain(bodyStore.getDomain());
-                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "domain: " + domain, "");
+                String baseDomain = "";
+                Optional<RegionVertical> regionVertical = regionVerticalRepository.findById(bodyStore.getVerticalCode());
+                if (regionVertical.isPresent()) {
+                    baseDomain = regionVertical.get().getDomain();
+                }
                 
+                //skip create domain in godaddy & nginx
+                //String domain = storeSubdomainHandler.createSubDomain(bodyStore.getDomain(), bodyStore.getVerticalCode(), baseDomain);
+                 
+                String domain = bodyStore.getDomain()+ "." + baseDomain;
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "verticalCode:"+bodyStore.getVerticalCode()+" domain: " + domain, "");
+               
                 if (domain != null) {
                     bodyStore.setDomain(domain);
                     savedStore = storeRepository.save(bodyStore);
@@ -289,7 +306,7 @@ public class StoreController {
                     storeRepository.delete(savedStore);
                     Logger.application.error(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store group could not be created", "");
                     response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-                    response.setError("store group could nto be created");
+                    response.setError("store group could not be created");
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
                 } else {
                     Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "csr group id: " + scrCsr.get_id(), "");
@@ -401,8 +418,25 @@ public class StoreController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
             }
             
+            //TODO: check if merchant change domain
+            /*
+            if (bodyStore.getDomain() != null && !optStore.get().getDomain().equals(bodyStore.getDomain())) {
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "change store domain", "");
+                //check if domain conflict with other store
+                response.setStatus(HttpStatus.CONFLICT);
+                errors.add("store domain already exists");
+                response.setData(errors);
+                return ResponseEntity.status(response.getStatus()).body(response);
+            }*/
+            
             Store store = optStore.get();
-
+            
+            //limit store desription to 100 characters
+            if (bodyStore.getStoreDescription().length()>storeDescriptionLength) {
+                String shortDescription = bodyStore.getStoreDescription().substring(0, storeDescriptionLength);
+                bodyStore.setStoreDescription(shortDescription);
+            }
+            
             store.update(bodyStore);
 
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "updated store with id: " + id);
@@ -571,6 +605,33 @@ public class StoreController {
             return ResponseEntity.status(response.getStatus()).body(response);
         } else {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " Domain: " + domain+" NOT available");
+            response.setStatus(HttpStatus.CONFLICT);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+       
+        
+        
+    }
+    
+    
+    @GetMapping(path = {"/checkname"}, name = "stores-check-name-availability", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('stores-check-name-availability', 'all')")
+    public ResponseEntity<HttpResponse> checkNameAvailability(HttpServletRequest request,
+            @RequestParam(required = true) String storeName
+    ) {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " id: " + storeName, "");
+
+        Optional<StoreWithDetails> optStore = storeWithDetailsRepository.findByName(storeName);
+
+        if (!optStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " Name: " + storeName+" IS available");
+            response.setStatus(HttpStatus.OK);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        } else {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " Name: " + storeName+" NOT available");
             response.setStatus(HttpStatus.CONFLICT);
             return ResponseEntity.status(response.getStatus()).body(response);
         }

@@ -203,5 +203,91 @@ public class StoreProductInventoryItemController {
         response.setData(productInventoryItemRepository.save(productVariant));
         return ResponseEntity.status(response.getStatus()).body(response);
     }
+    
+    
+    @PostMapping(path = {"/bulk"}, name = "store-product-inventory-item-post", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-product-inventory-item-post', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
+    public ResponseEntity<HttpResponse> postStoreProductInventoryItemsBulk(HttpServletRequest request,
+            @PathVariable String storeId,
+            @PathVariable String productId,
+            @RequestBody ProductInventoryItem[] productVariantList) {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "postStoreProductInventoryItemsBulk storeId: " + storeId);
+
+        Optional<Store> optStore = storeRepository.findById(storeId);
+
+        if (!optStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " postStoreProductInventoryItemsBulk NOT_FOUND storeId: " + storeId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " postStoreProductInventoryItemsBulk FOUND storeId: " + storeId);
+
+        Optional<Product> optProdcut = productRepository.findById(productId);
+
+        if (!optProdcut.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "postStoreProductInventoryItemsBulk product NOT_FOUND storeId: " + productId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError( "product not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        
+        ProductInventoryItem[] productVariantStoredList = new ProductInventoryItem[productVariantList.length];
+        for (int i=0;i<productVariantList.length;i++) {
+            ProductInventoryItem  productVariant = productVariantList[i];
+            productInventoryItemRepository.save(productVariant);
+            productVariantStoredList[i] = productVariant;
+        }
+        
+        response.setStatus(HttpStatus.OK);
+        response.setData(productVariantStoredList);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+    
+    
+    @DeleteMapping(path = {"/bulk"}, name = "store-product-inventory-item-delete-by-id", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-product-inventory-item-delete-by-id', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
+    public ResponseEntity<HttpResponse> deleteStoreProductInventoryItemsByIdBulk(HttpServletRequest request,
+            @PathVariable String storeId,
+            @PathVariable String productId,
+            @RequestBody ProductInventoryItem[] productVariantList) {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "deleteStoreProductInventoryItemsByIdBulk storeId: " + storeId);
+
+        Optional<Store> optStore = storeRepository.findById(storeId);
+
+        if (!optStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "deleteStoreProductInventoryItemsByIdBulk NOT_FOUND storeId: " + storeId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "deleteStoreProductInventoryItemsByIdBulk FOUND storeId: " + storeId);
+
+        Optional<Product> optProdcut = productRepository.findById(productId);
+
+        if (!optProdcut.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "deleteStoreProductInventoryItemsByIdBulk product NOT_FOUND productId: " + productId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError( "product not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+
+        for (int i=0;i<productVariantList.length;i++) {
+            ProductInventoryItem  productVariant = productVariantList[i];
+            Optional<ProductInventoryItem> optProductInventoryItem = productInventoryItemRepository.findByItemCodeAndProductVariantAvailableId(productVariant.getItemCode(), productVariant.getProductVariantAvailableId());
+            if (optProductInventoryItem.isPresent()) {
+                productInventoryItemRepository.delete(optProductInventoryItem.get());
+            }
+        }
+        
+        response.setStatus(HttpStatus.OK);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
 
 }

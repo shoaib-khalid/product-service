@@ -16,5 +16,7 @@ import java.util.Optional;
 public interface StoreWithDetailsRepository extends PagingAndSortingRepository<StoreWithDetails, String>, JpaRepository<StoreWithDetails, String> {
 
    Optional<StoreWithDetails> findByDomain(@Param("domain") String domain);
+   
+   Optional<StoreWithDetails> findByName(@Param("name") String name);
 
 }

@@ -40,6 +40,7 @@ public class RegionVertical implements Serializable {
     private String description;
     private String regionId;
     private String thumbnailUrl;
+    private String domain;
     
     public void update(RegionVertical regionVertical) {
         if (null != regionVertical.getName()) {
@@ -52,6 +53,10 @@ public class RegionVertical implements Serializable {
 
         if (null != regionVertical.getRegionId()) {
             regionId = regionVertical.getRegionId();
+        }
+        
+        if (null != regionVertical.getDomain()) {
+            domain = regionVertical.getDomain();
         }
     }
 

@@ -1,4 +1,85 @@
 ##################################################
+# product-service-3.2.41 | 17-November-2021
+##################################################
+
+### Code Changes:
+New field for store & product
+New API to manage product package (combo)
+Bug fix for storeDescription character length
+
+### DB Changes:
+ALTER TABLE product ADD isPackage TINYINT(1) DEFAULT 0;
+ALTER TABLE store ADD googleAnalyticId VARCHAR(50);
+
+CREATE TABLE product_package_option (
+id VARCHAR(50) PRIMARY KEY,
+packageId VARCHAR(50),
+title VARCHAR(100),
+totalAllow INT
+);
+
+
+CREATE TABLE product_package_option_detail (
+id VARCHAR(50) PRIMARY KEY,
+productPackageOptionId VARCHAR(50),
+productId VARCHAR(50)
+);
+
+
+##################################################
+# product-service-3.2.40 | 16-November-2021
+##################################################
+### Code Changes:
+Bug fix for date format for snoozeStartTime & snoozeEndTime in getStoreSnooze()
+
+
+##################################################
+# product-service-3.2.39 | 16-November-2021
+##################################################
+### Code Changes:
+Put store description max length in config : store.description.length
+
+### Config Changes:
+New config : 
+store.description.length=300
+
+
+##################################################
+# product-service-3.2.37 | 11-November-2021
+##################################################
+### Code Changes:
+Add snooze start time & end time.
+Remove scheduler to check snooze expired. 
+Backend will check based on snoozeStartTime & snoozeEndTime to determine isSnooze flag.
+
+New API to get snooze info :
+function getStoreSnooze() -> GET /stores/{storeId}/timings/snooze
+
+New API to put store to snooze mode :
+function putStoreSnooze() -> PUT /stores/{storeId}/timings/snooze
+
+
+### DB Changes:
+ALTER TABLE `store` DROP COLUMN  isSnooze ;
+ALTER TABLE `store` ADD snoozeStartTime timestamp;
+
+
+
+##################################################
+# product-service-3.2.36 | 11-November-2021
+##################################################
+### Code Changes:
+Add new domain easydukan.co for region South Asia in DB
+Each vertical will have own domain
+Skip domain creation in godaddy & nginx
+Use full domain in store table for field domain
+Bug fix for snooze mode
+
+### DB Changes:
+ALTER TABLE region_vertical ADD domain VARCHAR(200);
+
+
+##################################################
 # product-service-3.2.35 | 02-November-2021
 ##################################################
 ### Code Changes:
