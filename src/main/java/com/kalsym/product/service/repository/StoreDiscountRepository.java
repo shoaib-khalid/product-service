@@ -16,14 +16,12 @@
  */
 package com.kalsym.product.service.repository;
 
-import com.kalsym.product.service.model.product.ProductAsset;
-import com.kalsym.product.service.model.store.StoreAsset;
-import com.kalsym.product.service.model.store.StoreCategory;
 import com.kalsym.product.service.model.store.StoreDiscount;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
@@ -35,8 +33,9 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface StoreDiscountRepository
-        extends PagingAndSortingRepository<StoreDiscount, String>, JpaRepository<StoreDiscount, String> {
-        
+        extends PagingAndSortingRepository<StoreDiscount, String>, JpaRepository<StoreDiscount, String>, JpaSpecificationExecutor<StoreDiscount> {
+    
+
         List<StoreDiscount> findByStoreId(@Param("storeId") String storeId);
         
         @Query("SELECT m FROM StoreDiscount m WHERE m.storeId = :queryStoreId AND m.isActive=true AND m.startDate < :currentDate AND m.endDate > :currentDate") 
@@ -73,4 +72,7 @@ public interface StoreDiscountRepository
             @Param("endDateTime") Date endDateTime,
             @Param("discountId") String discountId
             );
+    
+    
+    
 }
