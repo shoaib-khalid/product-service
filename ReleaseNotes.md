@@ -1,5 +1,5 @@
 ##################################################
-# product-service-3.2.42 | 17-November-2021
+# product-service-3.2.42 | 22-November-2021
 ##################################################
 
 New API for store discount : search & pagination ->  searchDiscountByStoreId()
