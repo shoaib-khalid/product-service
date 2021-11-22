@@ -46,11 +46,34 @@ public class StoreDiscountSearchSpecs {
 
         return (Specification<StoreDiscount>) (root, query, builder) -> {
             final List<Predicate> predicates = new ArrayList<>();
-
+            
             if (from != null && to != null) {
                 to.setDate(to.getDate() + 1);
-                predicates.add(builder.greaterThanOrEqualTo(root.get("startDate"), from));
-                predicates.add(builder.lessThanOrEqualTo(root.get("startDate"), to));
+                
+                //date1
+                Predicate predicateForStartDate1 = builder.greaterThanOrEqualTo(root.get("startDate"), from);
+                Predicate predicateForEndDate1 = builder.lessThanOrEqualTo(root.get("endDate"), to); 
+                Predicate predicateForDate1 = builder.and(predicateForStartDate1, predicateForEndDate1);
+                
+                //date2
+                Predicate predicateForStartDate2 = builder.lessThanOrEqualTo(root.get("startDate"), from);
+                Predicate predicateForEndDate2 = builder.greaterThanOrEqualTo(root.get("startDate"), to); 
+                Predicate predicateForDate2 = builder.and(predicateForStartDate2, predicateForEndDate2);
+                
+                //date3
+                Predicate predicateForStartDate3 = builder.lessThanOrEqualTo(root.get("endDate"), from);
+                Predicate predicateForEndDate3 = builder.greaterThanOrEqualTo(root.get("endDate"), to); 
+                Predicate predicateForDate3 = builder.and(predicateForStartDate3, predicateForEndDate3);
+                
+                Predicate finalPredicate1 = builder.or(predicateForDate1, predicateForDate2, predicateForDate3);
+               //Predicate finalPredicate2 = builder.or(predicateForDate2, predicateForDate3);
+               // Predicate finalPredicate3 = builder.or(predicateForDate2, predicateForDate3);
+                
+                predicates.add(finalPredicate1);
+              //  predicates.add(finalPredicate2);
+              //  predicates.add(finalPredicate3);  
+
+              //NOTES : The SQL Server AND operator takes precedence over the SQL Server OR operator (just like a multiplication operation takes precedence over an addition operation).              
             }
             if (discountName!=null) {
                 predicates.add(builder.equal(root.get("discountName"), discountName));

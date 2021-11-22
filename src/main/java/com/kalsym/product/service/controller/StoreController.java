@@ -285,7 +285,8 @@ public class StoreController {
                 //skip create domain in godaddy & nginx
                 //String domain = storeSubdomainHandler.createSubDomain(bodyStore.getDomain(), bodyStore.getVerticalCode(), baseDomain);
                  
-                String domain = bodyStore.getDomain()+ "." + baseDomain;
+                //String domain = bodyStore.getDomain()+ "." + baseDomain;
+                String domain = bodyStore.getDomain();
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "verticalCode:"+bodyStore.getVerticalCode()+" domain: " + domain, "");
                
                 if (domain != null) {
@@ -418,16 +419,19 @@ public class StoreController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
             }
             
-            //TODO: check if merchant change domain
-            /*
+            //check if merchant change domain            
             if (bodyStore.getDomain() != null && !optStore.get().getDomain().equals(bodyStore.getDomain())) {
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "change store domain", "");
                 //check if domain conflict with other store
-                response.setStatus(HttpStatus.CONFLICT);
-                errors.add("store domain already exists");
-                response.setData(errors);
-                return ResponseEntity.status(response.getStatus()).body(response);
-            }*/
+                List<Store> storesList = storeRepository.findByDomain(bodyStore.getDomain());
+                for (int i=0;i<storesList.size();i++) {
+                    if (!storesList.get(i).getId().equals(id)) {
+                        response.setStatus(HttpStatus.CONFLICT);
+                        response.setData("store domain already exists");
+                        return ResponseEntity.status(response.getStatus()).body(response);
+                    }
+                }                
+            }
             
             Store store = optStore.get();
             

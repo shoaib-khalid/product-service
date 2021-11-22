@@ -179,6 +179,8 @@ public class StoreTimingsController {
             store.setSnoozeEndTime(cl.getTime()); 
             if (snoozeReason!=null) {
                 store.setSnoozeReason(snoozeReason);
+            } else {
+                store.setSnoozeReason(null);
             }
             storeRepository.save(store);
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store:"+storeId+" put store snooze on");
