@@ -49,10 +49,8 @@ public class ProductPackageOptionDetail implements Serializable {
     
     private String productId;
     
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "productId", insertable = false, updatable = false, nullable = true)    
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonIgnore
     Product product;
 
 }
