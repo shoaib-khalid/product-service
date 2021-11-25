@@ -15,6 +15,7 @@ import javax.persistence.FetchType;
 import javax.persistence.IdClass;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -48,10 +49,9 @@ public class ProductPackageOptionDetail implements Serializable {
     private String productPackageOptionId;
     
     private String productId;
-    
+   
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "productId", insertable = false, updatable = false, nullable = true)    
-    @JsonIgnore
-    Product product;
+    @JoinColumn(name = "productId", insertable = false, updatable = false)
+    private Product product;
 
 }
