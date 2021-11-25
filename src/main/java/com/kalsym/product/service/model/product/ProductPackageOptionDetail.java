@@ -49,8 +49,9 @@ public class ProductPackageOptionDetail implements Serializable {
     
     private String productId;
     
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "productId", insertable = false, updatable = false, nullable = true)    
+    @JsonIgnore
     Product product;
 
 }
