@@ -43,4 +43,17 @@ public class ProductInventoryItem implements Serializable {
             fetch = FetchType.EAGER)
     @JoinColumn(name = "productVariantAvailableId", referencedColumnName = "id", insertable = false, updatable = false, nullable = true)    
     private ProductVariantAvailable productVariantAvailable;
+    
+    
+     public void update(ProductInventoryItem pi) {
+        
+        if (null != pi.getProductId()) {
+            productId = pi.getProductId();
+        }
+        
+        if (null != pi.getSequenceNumber()) {
+            sequenceNumber = pi.getSequenceNumber();
+        }
+
+    }
 }

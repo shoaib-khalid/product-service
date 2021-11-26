@@ -3,8 +3,11 @@
 ##################################################
 
 Bug fix for update domain in store details
+Add new function :
+	1. putStoreProductInventorysById()
+	2. putStoreProductInventoryItemsById()
 
-
+	
 ##################################################
 # product-service-3.2.43 | 25-November-2021
 ##################################################
