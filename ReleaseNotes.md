@@ -3,7 +3,8 @@
 ##################################################
 
 Add product details in response of POST & PUT productPackageOption
-	
+Add product-inventory in response of GET productPackageOption
+
 	
 ##################################################
 # product-service-3.2.44 | 26-November-2021
