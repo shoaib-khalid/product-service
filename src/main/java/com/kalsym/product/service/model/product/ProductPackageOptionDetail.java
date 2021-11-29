@@ -57,7 +57,7 @@ public class ProductPackageOptionDetail implements Serializable {
     @JoinColumn(name = "productId", insertable = false, updatable = false)
     private Product product;
     
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "productId", referencedColumnName="productId", insertable = false, updatable = false)
     private List<ProductInventory> productInventory;
 }
