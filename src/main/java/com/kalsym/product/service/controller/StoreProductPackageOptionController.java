@@ -88,8 +88,8 @@ public class StoreProductPackageOptionController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @GetMapping(path = {"/{id}"}, name = "store-package-options-get-by-id", produces = "application/json")
-    @PreAuthorize("hasAnyAuthority('store-package-options-get-by-id', 'all')")
+    @GetMapping(path = {"/{id}"}, name = "store-package-options-get", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-package-options-get', 'all')")
     public ResponseEntity<HttpResponse> getStorePackageOptionsById(HttpServletRequest request,
             @PathVariable String storeId,
             @PathVariable String packageId,
@@ -237,8 +237,27 @@ public class StoreProductPackageOptionController {
             }
         }
         
+        //query back whole object to response all updated data
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "retrieve updated package option id: " + packageOption.getId());
+        Optional<ProductPackageOption> optProductPackageUpdated = productPackageOptionRepository.findById(packageOption.getId());
+        ProductPackageOption updatedPackageOption = null;
+        if (optProductPackageUpdated.isPresent()) {
+            updatedPackageOption = optProductPackageUpdated.get();
+            for (int i=0;i<updatedPackageOption.getProductPackageOptionDetail().size();i++) {
+                ProductPackageOptionDetail optionDetails = updatedPackageOption.getProductPackageOptionDetail().get(i);
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Option details Id:"+optionDetails.getId()+" productId:"+optionDetails.getProductId());
+                if (optionDetails.getProduct()==null) {
+                    Optional<Product> optProduct = productRepository.findById(optionDetails.getProductId());
+                    if (optProduct.isPresent()) {
+                        optionDetails.setProduct(optProduct.get());
+                    }
+                }
+                Product product = optionDetails.getProduct();
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Product details Id:"+product.getId()+" productId:"+product.getName());                
+            }
+        }
         response.setStatus(HttpStatus.OK);
-        response.setData(packageOption);
+        response.setData(updatedPackageOption);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
@@ -281,10 +300,29 @@ public class StoreProductPackageOptionController {
             productPackageOptionDetailRepository.save(product);
         }
         
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "saved product package : " + productPackageOption.getId());
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "saved product package id : " + productPackageOption.getId());
 
+        //query back whole object to response all updated data
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "retrieve inserted package option id: " + productPackageOption.getId());
+        Optional<ProductPackageOption> optProductPackageUpdated = productPackageOptionRepository.findById(productPackageOption.getId());
+        ProductPackageOption updatedPackageOption = null;
+        if (optProductPackageUpdated.isPresent()) {
+            updatedPackageOption = optProductPackageUpdated.get();
+            for (int i=0;i<updatedPackageOption.getProductPackageOptionDetail().size();i++) {
+                ProductPackageOptionDetail optionDetails = updatedPackageOption.getProductPackageOptionDetail().get(i);
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Option details Id:"+optionDetails.getId()+" productId:"+optionDetails.getProductId());
+                if (optionDetails.getProduct()==null) {
+                    Optional<Product> optProduct = productRepository.findById(optionDetails.getProductId());
+                    if (optProduct.isPresent()) {
+                        optionDetails.setProduct(optProduct.get());
+                    }
+                }
+                Product product = optionDetails.getProduct();
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Product details Id:"+product.getId()+" productId:"+product.getName());                
+            }
+        }
         response.setStatus(HttpStatus.OK);
-        response.setData(productPackageOption);
+        response.setData(updatedPackageOption);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
