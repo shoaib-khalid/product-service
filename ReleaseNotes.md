@@ -3,6 +3,7 @@
 ##################################################
 
 Add product details in response of getStoreProductInventorysById()
+Add relationship in ProductInventoryWithDetails class
 
 
 ##################################################
