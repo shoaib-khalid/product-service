@@ -4,6 +4,7 @@ import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.model.product.Product;
 import com.kalsym.product.service.model.product.ProductInventoryWithDetails;
+import com.kalsym.product.service.model.product.ProductInventoryWithProductDetails;
 import com.kalsym.product.service.model.product.ProductInventory;
 import com.kalsym.product.service.model.store.Store;
 import com.kalsym.product.service.repository.ProductInventoryRepository;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.kalsym.product.service.repository.ProductInventoryWithDetailsRepository;
+import com.kalsym.product.service.repository.ProductInventoryWithProductDetailsRepository;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -42,6 +44,9 @@ public class StoreProductInventoryController {
 
     @Autowired
     ProductInventoryWithDetailsRepository productInventoryWithDetailsRepository;
+    
+    @Autowired
+    ProductInventoryWithProductDetailsRepository productInventoryWithProductDetailsRepository;
 
     @Autowired
     ProductInventoryRepository productInventoryRepository;
@@ -155,7 +160,7 @@ public class StoreProductInventoryController {
             return ResponseEntity.status(response.getStatus()).body(response);
         }
 
-        Optional<ProductInventoryWithDetails> optProductInventory = productInventoryWithDetailsRepository.findById(id);
+        Optional<ProductInventoryWithProductDetails> optProductInventory = productInventoryWithProductDetailsRepository.findById(id);
 
         if (!optProductInventory.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "inventory NOT_FOUND inventoryId: " + id);
