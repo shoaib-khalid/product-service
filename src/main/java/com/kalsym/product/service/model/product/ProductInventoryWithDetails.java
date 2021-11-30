@@ -11,6 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -51,5 +52,8 @@ public class ProductInventoryWithDetails implements Serializable {
             fetch = FetchType.LAZY)
     @JoinColumn(name = "itemCode")
     private List<ProductInventoryItem> productInventoryItems;
-
+    
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "productId", insertable = false, updatable = false, nullable = true)
+    private Product product;
 }
