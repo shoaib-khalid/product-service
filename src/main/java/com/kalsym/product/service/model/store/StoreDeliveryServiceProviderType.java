@@ -16,58 +16,47 @@
  */
 package com.kalsym.product.service.model.store;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.kalsym.product.service.model.product.Product;
 import java.io.Serializable;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 /**
  *
  * @author mohsi
  */
 @Entity
-@Table(name = "delivery_sp")
+@Table(name = "delivery_sp_type")
 @Getter
 @Setter
 @ToString
-public class StoreDeliveryServiceProvider implements Serializable {
+public class StoreDeliveryServiceProviderType implements Serializable {
 
     @Id
     @GeneratedValue(generator = "uuid2")
     @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
     private String id;
 
-    private String name;
+    private String deliverySpId;
 
-    private String address;
+    private String deliveryType;
 
-    private String contactNo;
+    private String regionCountry;
 
-    private String contactPerson;
-
-    private String getPriceClassname;
-
-    private String submitOrderClassName;
-
-    private String cancelOrderClassName;
-
-    private String queryOrderClassName;
-
-    private String spCallbackClassname;
-
-    private String pickupDateClassname;
-
-    private String pickupTimeClassname;
-
-    private String locationIdClassname;
-
-    private String providerImage;
-            
-    private String regionCountryId;
-
+    
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "deliverySpId", insertable = false, updatable = false, nullable = true)
+    private StoreDeliveryServiceProvider storeDeliveryServiceProvider;
 }

@@ -17,6 +17,7 @@
 package com.kalsym.product.service.controller;
 
 import com.kalsym.product.service.repository.StoreDeliveryProviderRepository;
+import com.kalsym.product.service.repository.StoreDeliveryProviderTypeRepository;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.utility.Logger;
 import javax.servlet.http.HttpServletRequest;
@@ -28,10 +29,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.kalsym.product.service.model.store.StoreDeliveryServiceProvider;
+import com.kalsym.product.service.model.store.StoreDeliveryServiceProviderType;
 import org.springframework.http.HttpStatus;
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.repository.RegionCountriesRepository;
 import java.util.Optional;
+import java.util.List;
+import java.util.ArrayList;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -51,13 +55,18 @@ public class StoreDeliveryProviderController {
 
     @Autowired
     private StoreDeliveryProviderRepository deliveryProviderRepository;
+    
+    @Autowired
+    private StoreDeliveryProviderTypeRepository deliveryProviderTypeRepository;
 
     @Autowired
     private RegionCountriesRepository regionCountryRepository;
 
     @GetMapping(path = {""}, name = "delivery-provider-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-deliverydetails-get', 'all')")
-    public ResponseEntity<HttpResponse> getDeliveryServiceProvider(HttpServletRequest request, @RequestParam(required = true) String regionCountryId) {
+    public ResponseEntity<HttpResponse> getDeliveryServiceProvider(HttpServletRequest request, 
+            @RequestParam(required = true) String regionCountryId,
+            @RequestParam(required = false) String deliveryType) {
         HttpResponse response = new HttpResponse(request.getRequestURI());
         String logprefix = request.getRequestURI();
 
@@ -69,9 +78,23 @@ public class StoreDeliveryProviderController {
             return ResponseEntity.status(response.getStatus()).body(response);
         }
         Logger.application.info(ProductServiceApplication.VERSION, logprefix, "Region Country found: " + regionCountry);
-
+        
+        List<StoreDeliveryServiceProviderType> deliveryProviderTypeList = null;
+        if (deliveryType==null)
+            deliveryProviderTypeList = deliveryProviderTypeRepository.findByRegionCountry(regionCountryId);
+        else
+            deliveryProviderTypeList = deliveryProviderTypeRepository.findByRegionCountryAndDeliveryType(regionCountryId, deliveryType);
+        
+        List<StoreDeliveryServiceProvider> storeDeliveryServiceProvider = new ArrayList<StoreDeliveryServiceProvider>();
+        for (int i=0;i<deliveryProviderTypeList.size();i++) {            
+            StoreDeliveryServiceProvider provider = deliveryProviderTypeList.get(i).getStoreDeliveryServiceProvider();
+            storeDeliveryServiceProvider.add(provider);
+        }
         response.setStatus(HttpStatus.OK);
-        response.setData(deliveryProviderRepository.findByregionCountryId(regionCountryId));
+        response.setData(storeDeliveryServiceProvider);
+        
+        //response.setStatus(HttpStatus.OK);
+        //response.setData(deliveryProviderTypeList);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
