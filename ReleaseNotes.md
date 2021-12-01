@@ -3,6 +3,10 @@
 ##################################################
 
 Add new filter 'deliveryType' in request of getDeliveryServiceProvider()
+Add max discount amount for store discount
+
+##DB Changes
+ALTER TABLE `store_discount` ADD maxDiscountAmount decimal(10,2);
 
 
 ##################################################
