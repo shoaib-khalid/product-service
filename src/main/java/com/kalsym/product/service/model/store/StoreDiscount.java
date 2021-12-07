@@ -1,6 +1,7 @@
 package com.kalsym.product.service.model.store;
 
 import com.kalsym.product.service.model.product.ProductVariant;
+import com.kalsym.product.service.enums.StoreDiscountType;
 import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -20,6 +21,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -42,9 +45,13 @@ public class StoreDiscount implements Serializable {
     
     private String storeId;
     private String discountName;
-    private String discountType;
+    
+    @Enumerated(EnumType.STRING)
+    private StoreDiscountType discountType;
+    
     private Boolean isActive;
     private Double maxDiscountAmount;
+    private Boolean normalPriceItemOnly;
     
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
@@ -54,7 +61,7 @@ public class StoreDiscount implements Serializable {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private Date endDate;
     
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "storeDiscountId", insertable = false, updatable = false, nullable = true)    
     private List<StoreDiscountTier> storeDiscountTierList;
 

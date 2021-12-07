@@ -17,6 +17,7 @@
 package com.kalsym.product.service.repository;
 
 import com.kalsym.product.service.model.store.StoreDiscount;
+import com.kalsym.product.service.enums.StoreDiscountType;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -44,6 +45,11 @@ public interface StoreDiscountRepository
             @Param("currentDate") Date currentDate
             );
     
+        @Query("SELECT m FROM StoreDiscount m WHERE m.isActive=true AND m.startDate < :currentDate AND m.endDate > :currentDate") 
+       List<StoreDiscount> findAllAvailableDiscount(
+             @Param("currentDate") Date currentDate
+            );
+    
         @Query("SELECT m FROM StoreDiscount m WHERE m.storeId = :queryStoreId "
                 + "AND m.isActive=true AND m.discountType = :discountType "
                 + "AND ("
@@ -53,7 +59,7 @@ public interface StoreDiscountRepository
                 + ")") 
     List<StoreDiscount> findAvailableDiscountDateRange(
             @Param("queryStoreId") String storeId,
-            @Param("discountType") String discountType,
+            @Param("discountType") StoreDiscountType discountType,
             @Param("startDateTime") Date startDateTime,
             @Param("endDateTime") Date endDateTime
             );
@@ -67,7 +73,7 @@ public interface StoreDiscountRepository
                 + ")") 
     List<StoreDiscount> findOtherAvailableDiscountDateRange(
             @Param("queryStoreId") String storeId,
-            @Param("discountType") String discountType,
+            @Param("discountType") StoreDiscountType discountType,
             @Param("startDateTime") Date startDateTime,
             @Param("endDateTime") Date endDateTime,
             @Param("discountId") String discountId

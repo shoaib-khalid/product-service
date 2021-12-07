@@ -1,4 +1,40 @@
 ##################################################
+# product-service-3.3.0 | 07-December-2021
+##################################################
+
+##Code Changes
+New function to manage item in store discount : StoreDiscountProduct -> POST, GET, PUT
+Add new response parameter in getStoreProducts() & getStoreProductById() to give discounted price on every item : productInventories->itemDiscount
+	
+
+##DB Changes
+ALTER TABLE `store_discount` ADD normalPriceItemOnly tinyint(1);
+ALTER TABLE
+    `store_discount`
+MODIFY COLUMN
+    `discountType` enum(
+        'SHIPPING',
+        'TOTALSALES',
+        'ITEM'
+    );
+
+	
+CREATE TABLE `store_discount_product` (
+  `id` varchar(50) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL,
+  `storeDiscountId` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
+  `itemCode` varchar(50) CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT NULL,
+  `categoryId` varchar(50) CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `storeDiscountId` (`storeDiscountId`,`itemCode`),
+  KEY `itemCode` (`itemCode`),
+  KEY `categoryId` (`categoryId`),
+  CONSTRAINT `store_discount_product_ibfk_1` FOREIGN KEY (`storeDiscountId`) REFERENCES `store_discount` (`id`),
+  CONSTRAINT `store_discount_product_ibfk_2` FOREIGN KEY (`itemCode`) REFERENCES `product_inventory` (`itemCode`),
+  CONSTRAINT `store_discount_product_ibfk_3` FOREIGN KEY (`categoryId`) REFERENCES `store_category` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+
+##################################################
 # product-service-3.2.47 | 30-November-2021
 ##################################################
 

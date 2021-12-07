@@ -2,7 +2,6 @@ package com.kalsym.product.service.model.store;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.kalsym.product.service.model.product.Product;
-import com.kalsym.product.service.enums.DiscountCalculationType;
 import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -14,8 +13,6 @@ import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.GenericGenerator;
 import java.util.Date;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -30,9 +27,9 @@ import org.hibernate.annotations.OnDeleteAction;
 @Setter
 @ToString
 @Entity
-@Table(name = "store_discount_tier")
+@Table(name = "store_discount_product")
 @NoArgsConstructor
-public class StoreDiscountTier implements Serializable, Comparable< StoreDiscountTier > {
+public class StoreDiscountProduct implements Serializable {
 
     @Id
     @GeneratedValue(generator = "uuid2")
@@ -40,16 +37,8 @@ public class StoreDiscountTier implements Serializable, Comparable< StoreDiscoun
     private String id;
     
     private String storeDiscountId;
-    private Double startTotalSalesAmount;
-    private Double endTotalSalesAmount;
-    private Double discountAmount;
-    
-    @Enumerated(EnumType.STRING)
-    private DiscountCalculationType calculationType;
-    
-    @Override
-    public int compareTo(StoreDiscountTier o) {
-        return this.getStartTotalSalesAmount().compareTo(o.getStartTotalSalesAmount());
-    }
+    private String itemCode;
+    private String categoryId;
+   
 
 }

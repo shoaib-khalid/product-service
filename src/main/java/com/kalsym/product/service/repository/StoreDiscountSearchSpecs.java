@@ -16,6 +16,7 @@
  */
 package com.kalsym.product.service.repository;
 
+import com.kalsym.product.service.enums.StoreDiscountType;
 import com.kalsym.product.service.model.store.StoreDiscount;
 import java.util.ArrayList;
 import java.util.Date;
@@ -40,7 +41,7 @@ public class StoreDiscountSearchSpecs {
     public static Specification<StoreDiscount> getSpecWithDatesBetween(
             Date from, Date to, 
             String discountName, 
-            String discountType,
+            StoreDiscountType discountType,
             Boolean isActive, 
             Example<StoreDiscount> example) {
 

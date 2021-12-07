@@ -17,6 +17,7 @@
 package com.kalsym.product.service.controller;
 
 import com.kalsym.product.service.ProductServiceApplication;
+import com.kalsym.product.service.enums.StoreDiscountType;
 import com.kalsym.product.service.model.product.Product;
 import com.kalsym.product.service.model.RegionCountry;
 import com.kalsym.product.service.model.product.ProductWithDetails;
@@ -148,7 +149,7 @@ public class StoreDiscountController {
             @RequestParam(required = false) @DateTimeFormat(pattern="yyyy-MM-dd") Date startDate,
             @RequestParam(required = false) @DateTimeFormat(pattern="yyyy-MM-dd") Date endDate,
             @RequestParam(required = false) String discountName,
-            @RequestParam(required = false) String discountType,
+            @RequestParam(required = false) StoreDiscountType discountType,
             @RequestParam(required = false) Boolean isActive,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int pageSize) {

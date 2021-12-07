@@ -1,11 +1,22 @@
 package com.kalsym.product.service.controller;
 
 import com.kalsym.product.service.ProductServiceApplication;
+import com.kalsym.product.service.HashmapLoader;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.model.product.Product;
+import com.kalsym.product.service.model.product.ProductInventoryWithDetails;
 import com.kalsym.product.service.model.product.ProductSpecs;
 import com.kalsym.product.service.model.product.ProductWithDetails;
 import com.kalsym.product.service.model.store.Store;
+import com.kalsym.product.service.model.ItemDiscount;
+import com.kalsym.product.service.model.store.StoreDiscount;
+import com.kalsym.product.service.enums.StoreDiscountType;
+import com.kalsym.product.service.enums.DiscountCalculationType;
+import com.kalsym.product.service.model.RegionCountry;
+import com.kalsym.product.service.model.product.ProductInventoryItem;
+import com.kalsym.product.service.model.store.StoreDiscountProduct;
+import com.kalsym.product.service.model.store.StoreDiscountTier;
+import com.kalsym.product.service.model.store.object.CustomPageable;
 import com.kalsym.product.service.repository.ProductAssetRepository;
 import com.kalsym.product.service.repository.ProductInventoryItemRepository;
 import com.kalsym.product.service.repository.StoreRepository;
@@ -36,10 +47,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.kalsym.product.service.repository.ProductInventoryWithDetailsRepository;
+import com.kalsym.product.service.repository.RegionCountriesRepository;
+import com.kalsym.product.service.repository.StoreDiscountRepository;
+import com.kalsym.product.service.repository.StoreDiscountProductRepository;
+import com.kalsym.product.service.utility.DateTimeUtil;
 import java.net.MalformedURLException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.HashMap;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 
 /**
@@ -75,7 +95,19 @@ public class StoreProductController {
 
     @Autowired
     StoreRepository storeRepository;
+    
+    @Autowired
+    StoreDiscountRepository storeDiscountRepository;
+    
+    @Autowired
+    StoreDiscountProductRepository storeDiscountProductRepository;
 
+    @Autowired
+    RegionCountriesRepository regionCountriesRepository;
+    
+    @Autowired
+    private HashmapLoader hashmapLoader;
+            
     @Value("${product.seo.url:https://{{store-domain}}.symplified.store/products/name/{{product-name}}}")
     private String productSeoUrl;
 
@@ -138,10 +170,51 @@ public class StoreProductController {
         if (seoName == null || seoName.isEmpty()) {
             seoName = "";
         }
-
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Name of product recieved:" + name);
+        
+        Page<ProductWithDetails> productWithPage = productWithDetailsRepository.findByNameOrSeoNameAscendingOrderByPrice(storeId, name, seoName, status, categoryId, pageable);
+        List<ProductWithDetails> productList = productWithPage.getContent();
+        
+        ProductWithDetails[] productWithDetailsList = new ProductWithDetails[productList.size()];
+        for (int x=0;x<productList.size();x++) {
+            //check for item discount in hashmap
+            ProductWithDetails productDetails = productList.get(x);
+            for (int i=0;i<productDetails.getProductInventories().size();i++) {
+                ProductInventoryWithDetails productInventory = productDetails.getProductInventories().get(i);
+                //ItemDiscount discountDetails = discountedItemMap.get(productInventory.getItemCode());
+                ItemDiscount discountDetails = hashmapLoader.GetDiscountedItemMap(storeId, productInventory.getItemCode());
+                if (discountDetails!=null) {
+                    double discountedPrice = productInventory.getPrice();
+                    if (discountDetails.calculationType.equals(DiscountCalculationType.FIX)) {
+                        discountedPrice = productInventory.getPrice() - discountDetails.discountAmount;
+                    } else if (discountDetails.calculationType.equals(DiscountCalculationType.PERCENT)) {
+                        discountedPrice = productInventory.getPrice() - (discountDetails.discountAmount / 100 * productInventory.getPrice());
+                    }
+                    discountDetails.discountedPrice = discountedPrice;
+                    discountDetails.normalPrice = productInventory.getPrice();
+                    productInventory.setItemDiscount(discountDetails); 
+                }
+            }
+            productWithDetailsList[x]=productDetails;
+        }
+        
+        //create custom pageable object with modified content
+        CustomPageable customPageable = new CustomPageable();
+        customPageable.content = productWithDetailsList;
+        customPageable.pageable = productWithPage.getPageable();
+        customPageable.totalPages = productWithPage.getTotalPages();
+        customPageable.totalElements = productWithPage.getTotalElements();
+        customPageable.last = productWithPage.isLast();
+        customPageable.size = productWithPage.getSize();
+        customPageable.number = productWithPage.getNumber();
+        customPageable.sort = productWithPage.getSort();        
+        customPageable.numberOfElements = productWithPage.getNumberOfElements();
+        customPageable.first  = productWithPage.isFirst();
+        customPageable.empty = productWithPage.isEmpty();
+        
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Product Found");
+        response.setData(customPageable);
         response.setStatus(HttpStatus.OK);
-        response.setData(productWithDetailsRepository.findByNameOrSeoNameAscendingOrderByPrice(storeId, name, seoName, status, categoryId, pageable));
+               
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
@@ -176,9 +249,33 @@ public class StoreProductController {
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product FOUND storeId: " + id);
 
         Logger.application.info(ProductServiceApplication.VERSION, logprefix, "store found for id: {}", storeId);
-
+        
+        RegionCountry regionCountry = null;
+        Optional<RegionCountry> t = regionCountriesRepository.findById(optStore.get().getRegionCountryId());
+        if (t.isPresent()) {
+            regionCountry = t.get();
+        }
+                
+        //check for item discount in hashmap
+        ProductWithDetails productDetails = optProdcut.get();
+        for (int i=0;i<productDetails.getProductInventories().size();i++) {
+            ProductInventoryWithDetails productInventory = productDetails.getProductInventories().get(i);
+            //ItemDiscount discountDetails = discountedItemMap.get(productInventory.getItemCode());
+            ItemDiscount discountDetails = hashmapLoader.GetDiscountedItemMap(storeId, productInventory.getItemCode());
+            if (discountDetails!=null) {
+                double discountedPrice = productInventory.getPrice();
+                if (discountDetails.calculationType.equals(DiscountCalculationType.FIX)) {
+                    discountedPrice = productInventory.getPrice() - discountDetails.discountAmount;
+                } else if (discountDetails.calculationType.equals(DiscountCalculationType.PERCENT)) {
+                    discountedPrice = productInventory.getPrice() - (discountDetails.discountAmount / 100 * productInventory.getPrice());
+                }
+                discountDetails.discountedPrice = discountedPrice;
+                discountDetails.normalPrice = productInventory.getPrice();
+                productInventory.setItemDiscount(discountDetails); 
+            }
+        }
         response.setStatus(HttpStatus.OK);
-        response.setData(optProdcut.get());
+        response.setData(productDetails);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
