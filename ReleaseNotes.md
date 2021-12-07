@@ -26,6 +26,7 @@ CREATE TABLE `store_discount_product` (
   `categoryId` varchar(50) CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `storeDiscountId` (`storeDiscountId`,`itemCode`),
+  UNIQUE KEY `storeDiscountId` (`storeDiscountId`,`categoryId`),
   KEY `itemCode` (`itemCode`),
   KEY `categoryId` (`categoryId`),
   CONSTRAINT `store_discount_product_ibfk_1` FOREIGN KEY (`storeDiscountId`) REFERENCES `store_discount` (`id`),
