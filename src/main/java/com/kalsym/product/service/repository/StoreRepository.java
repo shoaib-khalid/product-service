@@ -20,6 +20,8 @@ import org.springframework.data.jpa.repository.Query;
 public interface StoreRepository extends PagingAndSortingRepository<Store, String>, JpaRepository<Store, String> {
 
     List<Store> findByName(@Param("name") String name);
+    
+    List<Store> findByDomain(@Param("domain") String domain);
 
     //List<Product> findByStoreId(@Param("storeId") String storeId);
     //List<Product> findByIdAndName(@Param("Id") String storeId, @Param("name") String name);

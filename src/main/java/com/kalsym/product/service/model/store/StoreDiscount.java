@@ -44,6 +44,7 @@ public class StoreDiscount implements Serializable {
     private String discountName;
     private String discountType;
     private Boolean isActive;
+    private Double maxDiscountAmount;
     
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")

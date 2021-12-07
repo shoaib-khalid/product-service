@@ -19,7 +19,10 @@ package com.kalsym.product.service.controller;
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.model.product.Product;
 import com.kalsym.product.service.model.RegionCountry;
+import com.kalsym.product.service.model.product.ProductWithDetails;
+import com.kalsym.product.service.model.store.object.CustomPageable;
 import com.kalsym.product.service.repository.StoreDiscountRepository;
+import com.kalsym.product.service.repository.StoreDiscountSearchSpecs;
 import com.kalsym.product.service.repository.StoreRepository;
 import com.kalsym.product.service.repository.RegionCountriesRepository;
 import com.kalsym.product.service.utility.DateTimeUtil;
@@ -45,12 +48,20 @@ import org.springframework.http.HttpStatus;
 import com.kalsym.product.service.model.store.StoreDiscount;
 import com.kalsym.product.service.model.store.Store;
 import com.kalsym.product.service.model.store.object.Discount;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.format.annotation.DateTimeFormat;
 
 /**
  *
@@ -127,6 +138,103 @@ public class StoreDiscountController {
         
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Discount Found");
         response.setData(discountList);
+        response.setStatus(HttpStatus.OK);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+    
+    @GetMapping(path = {"/search"})
+    public ResponseEntity<HttpResponse> searchDiscountByStoreId(HttpServletRequest request,
+            @PathVariable(required = true) String storeId,
+            @RequestParam(required = false) @DateTimeFormat(pattern="yyyy-MM-dd") Date startDate,
+            @RequestParam(required = false) @DateTimeFormat(pattern="yyyy-MM-dd") Date endDate,
+            @RequestParam(required = false) String discountName,
+            @RequestParam(required = false) String discountType,
+            @RequestParam(required = false) Boolean isActive,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int pageSize) {
+
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+        String logprefix = request.getRequestURI();
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Id recieved: " + storeId);
+
+        List<StoreDiscount> storeDiscountList = storeDiscountRepository.findByStoreId(storeId);
+
+        if (storeDiscountList == null) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Discount Not Found");
+            response.setStatus(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        
+        Optional<Store> optStore = storeRepository.findById(storeId);
+
+        if (!optStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Not Found");
+            response.setStatus(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        
+        RegionCountry regionCountry = null;
+        Optional<RegionCountry> t = regionCountriesRepository.findById(optStore.get().getRegionCountryId());
+        if (t.isPresent()) {
+            regionCountry = t.get();
+        }
+        
+        StoreDiscount discountMatch = new StoreDiscount();
+        Pageable pageable = PageRequest.of(page, pageSize);
+        discountMatch.setStoreId(storeId);
+        
+        ExampleMatcher matcher = ExampleMatcher
+                .matchingAll()
+                .withIgnoreCase()
+                .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
+        Example<StoreDiscount> example = Example.of(discountMatch, matcher);
+        Specification discountSpec = StoreDiscountSearchSpecs.getSpecWithDatesBetween(startDate, endDate, discountName, discountType, isActive, example );
+        Page<StoreDiscount> storeDiscountWithPage = storeDiscountRepository.findAll(discountSpec, pageable);
+        storeDiscountList = storeDiscountWithPage.getContent();
+        
+        
+        Discount[] discountList = new Discount[storeDiscountList.size()];
+        for (int i=0;i<storeDiscountList.size();i++) {
+            StoreDiscount storeDiscount = storeDiscountList.get(i);
+            Discount discount = new Discount();
+            discount.setId(storeDiscount.getId());
+            discount.setDiscountName(storeDiscount.getDiscountName());
+            discount.setDiscountType(storeDiscount.getDiscountType());
+            discount.setIsActive(storeDiscount.getIsActive());
+            discount.setStoreId(storeId);
+            discount.setStoreDiscountTierList(storeDiscount.getStoreDiscountTierList());
+            
+            //convert time to merchant timezone
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, storeDiscount.getId()+" -> StartDate:"+storeDiscount.getStartDate().toString());
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, storeDiscount.getId()+" -> EndDate:"+storeDiscount.getEndDate().toString());
+            
+            if (regionCountry!=null) {
+                LocalDateTime startLocalTime = DateTimeUtil.convertToLocalDateTimeViaInstant(storeDiscount.getStartDate(), ZoneId.of(regionCountry.getTimezone()) );
+                LocalDateTime endLocalTime = DateTimeUtil.convertToLocalDateTimeViaInstant(storeDiscount.getEndDate(), ZoneId.of(regionCountry.getTimezone()) );
+                discount.setStartDate(startLocalTime.toLocalDate());
+                discount.setStartTime(startLocalTime.toLocalTime());
+                discount.setEndDate(endLocalTime.toLocalDate());
+                discount.setEndTime(endLocalTime.toLocalTime());                
+            }
+            discountList[i] = discount;
+        }
+        
+        //create custom pageable object with modified content
+        CustomPageable customPageable = new CustomPageable();
+        customPageable.content = discountList;
+        customPageable.pageable = storeDiscountWithPage.getPageable();
+        customPageable.totalPages = storeDiscountWithPage.getTotalPages();
+        customPageable.totalElements = storeDiscountWithPage.getTotalElements();
+        customPageable.last = storeDiscountWithPage.isLast();
+        customPageable.size = storeDiscountWithPage.getSize();
+        customPageable.number = storeDiscountWithPage.getNumber();
+        customPageable.sort = storeDiscountWithPage.getSort();        
+        customPageable.numberOfElements = storeDiscountWithPage.getNumberOfElements();
+        customPageable.first  = storeDiscountWithPage.isFirst();
+        customPageable.empty = storeDiscountWithPage.isEmpty();
+        
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Discount Found");
+        response.setData(customPageable);
         response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);
     }

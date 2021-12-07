@@ -147,6 +147,10 @@ public class Store implements Serializable {
         if (null != store.getLongitude()) {
             longitude = store.getLongitude();
         }
+        
+         if (null != store.getDomain()) {
+            domain = store.getDomain();
+        }
 
     }
 

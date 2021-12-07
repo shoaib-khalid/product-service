@@ -1,4 +1,55 @@
 ##################################################
+# product-service-3.2.47 | 30-November-2021
+##################################################
+
+Add new filter 'deliveryType' in request of getDeliveryServiceProvider()
+Add max discount amount for store discount
+
+##DB Changes
+ALTER TABLE `store_discount` ADD maxDiscountAmount decimal(10,2);
+
+
+##################################################
+# product-service-3.2.46 | 30-November-2021
+##################################################
+
+Add product details in response of getStoreProductInventorysById()
+Add relationship in ProductInventoryWithDetails class
+
+
+##################################################
+# product-service-3.2.45 | 29-November-2021
+##################################################
+
+Add product details in response of POST & PUT productPackageOption
+Add product-inventory in response of GET productPackageOption
+
+	
+##################################################
+# product-service-3.2.44 | 26-November-2021
+##################################################
+
+Bug fix for update domain in store details
+Add new function :
+	1. putStoreProductInventorysById()
+	2. putStoreProductInventoryItemsById()
+
+	
+##################################################
+# product-service-3.2.43 | 25-November-2021
+##################################################
+
+new parameter in product package option details -> product details
+
+
+##################################################
+# product-service-3.2.42 | 22-November-2021
+##################################################
+
+New API for store discount : search & pagination ->  searchDiscountByStoreId()
+
+
+##################################################
 # product-service-3.2.41 | 17-November-2021
 ##################################################
 

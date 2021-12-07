@@ -70,6 +70,8 @@ public class ProductWithDetails implements Serializable {
     private Integer minQuantityForAlarm;
     
     private String packingSize;
+    
+    private Boolean isPackage;
      
     @CreationTimestamp
     private Date created;

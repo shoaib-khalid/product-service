@@ -46,4 +46,31 @@ public class ProductInventory implements Serializable {
     private String productId;
     
     private String status;
+    
+    public void update(ProductInventory pi) {
+        if (null != pi.getPrice()) {
+            price = pi.getPrice();
+        }        
+
+        if (null != pi.getCompareAtprice()) {
+            compareAtprice = pi.getCompareAtprice();
+        }
+
+        if (null != pi.getSKU()) {
+            SKU = pi.getSKU();
+        }
+
+        if (null != pi.getQuantity()) {
+            quantity = pi.getQuantity();
+        }
+
+        if (null != pi.getProductId()) {
+            productId = pi.getProductId();
+        }
+        
+        if (null != pi.getStatus()) {
+            status = pi.getStatus();
+        }
+
+    }
 }
