@@ -75,7 +75,7 @@ public class HashmapLoader {
     
     HashMap<String, ItemDiscount> discountedItemMap = new HashMap<String, ItemDiscount>();
     
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 120000)
     public void LoadDiscountedItemMap() {
         String logprefix = "LoadDiscountedItemMap";        
         List<StoreDiscount> storeDiscountList = storeDiscountRepository.findAllAvailableDiscount(new Date());
@@ -91,7 +91,7 @@ public class HashmapLoader {
                 regionCountry = t.get();
             }
         
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Discount id:" + discountAvailable.getId()+" type:"+discountAvailable.getDiscountType()+" name:"+discountAvailable.getDiscountName());
+            //Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Discount id:" + discountAvailable.getId()+" type:"+discountAvailable.getDiscountType()+" name:"+discountAvailable.getDiscountName());
            // System.out.println("LoadDiscountedItemMap() -> Discount id:" + discountAvailable.getId()+" type:"+discountAvailable.getDiscountType()+" name:"+discountAvailable.getDiscountName());
             if (discountAvailable.getDiscountType().equals(StoreDiscountType.ITEM)) {
                 
@@ -101,11 +101,11 @@ public class HashmapLoader {
                
                 //get all item
                 List<StoreDiscountProduct> storeDiscountProductList = storeDiscountProductRepository.findByStoreDiscountId(discountAvailable.getId());
-                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Discount product found:" + storeDiscountProductList.size());
+                //Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Discount product found:" + storeDiscountProductList.size());
                // System.out.println("LoadDiscountedItemMap() -> Discount product found:" + storeDiscountProductList.size());
                 for (int y=0;y<storeDiscountProductList.size();y++) {
                     StoreDiscountProduct discountProduct = storeDiscountProductList.get(y);
-                    Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "ItemCode:" + discountProduct.getItemCode());
+                    //Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "ItemCode:" + discountProduct.getItemCode());
                     //System.out.println("LoadDiscountedItemMap() -> ItemCode:"+discountProduct.getItemCode()+" CategoryId:"+discountProduct.getCategoryId());
                     if (discountProduct.getItemCode()!=null) {
                         ItemDiscount discountDetails = new ItemDiscount();
@@ -118,7 +118,7 @@ public class HashmapLoader {
                         discountDetails.discountEndTime = endLocalTime;
                         discountDetails.lastUpdateTime = new Date();
                         discountedItemMap.put(storeId+"|"+discountProduct.getItemCode(), discountDetails);
-                        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "itemCode:"+discountProduct.getItemCode()+" discountAmount:" + discountDetails.discountAmount + " calculationType:"+discountDetails.calculationType);
+                        //Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "itemCode:"+discountProduct.getItemCode()+" discountAmount:" + discountDetails.discountAmount + " calculationType:"+discountDetails.calculationType);
                        // System.out.println("itemCode:"+discountProduct.getItemCode()+" discountAmount:" + discountDetails.discountAmount + " calculationType:"+discountDetails.calculationType);
                     } else if (discountProduct.getCategoryId()!=null) {
                         //get all product under this category
@@ -139,7 +139,7 @@ public class HashmapLoader {
                                 discountDetails.discountEndTime = endLocalTime;
                                 discountDetails.lastUpdateTime = new Date();
                                 discountedItemMap.put(storeId+"|"+inventory.getItemCode(), discountDetails);
-                                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "itemCode:"+inventory.getItemCode()+" discountAmount:" + discountDetails.discountAmount + " calculationType:"+discountDetails.calculationType);
+                                //Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "itemCode:"+inventory.getItemCode()+" discountAmount:" + discountDetails.discountAmount + " calculationType:"+discountDetails.calculationType);
                                 //System.out.println("itemCode:"+discountProduct.getItemCode()+" discountAmount:" + discountDetails.discountAmount + " calculationType:"+discountDetails.calculationType);
                             }
                         }
@@ -157,7 +157,7 @@ public class HashmapLoader {
         return discountDetails;
     }
     
-    @Scheduled(fixedRate = 120000)
+    @Scheduled(fixedRate = 600000)
     public void ManageDiscountedItemMap() {
         String logprefix = "ManageDiscountedItemMap";
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Start process. hashmap size:"+discountedItemMap.size());        
@@ -167,14 +167,14 @@ public class HashmapLoader {
         
         while(itr.hasNext()) {
             HashMap.Entry<String, ItemDiscount> entry = itr.next();        
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Key = " + entry.getKey() +", Value = " + entry.getValue());
+            //Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Key = " + entry.getKey() +", Value = " + entry.getValue());
             ItemDiscount discountDetails = entry.getValue();
             Date lastUpdate = discountDetails.lastUpdateTime;
             // d1, d2 are dates
             long diff = new Date().getTime() - lastUpdate.getTime();
             long diffMinutes = diff / (60 * 1000) % 60;
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "LastUpdate:"+lastUpdate+" was "+diffMinutes+" minutes ago"); 
-            if (diffMinutes>5) {
+            //Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "LastUpdate:"+lastUpdate+" was "+diffMinutes+" minutes ago"); 
+            if (diffMinutes>10) {
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Remove from hashmap : "+entry.getKey());
                 itr.remove();                
             }
