@@ -401,6 +401,8 @@ public class StoreProductController {
         bodyProduct.setSeoUrl(seoUrl);
 
         bodyProduct.setSeoName(seoName);
+        if (bodyProduct.getIsPackage()==null) { bodyProduct.setIsPackage(Boolean.FALSE); }
+        
         Product savedProduct = productRepository.save(bodyProduct);
         Logger.application.info(ProductServiceApplication.VERSION, logprefix, "product added to store with storeId: {}, productId: {}" + storeId, savedProduct.getId());
 

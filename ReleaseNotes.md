@@ -1,8 +1,9 @@
 ##################################################
-# product-service-3.3.0 | 07-December-2021
+# product-service-3.3.0 | 08-December-2021
 ##################################################
 
 ##Code Changes
+Buf fix for product package. check if null, set to 0
 New function to manage item in store discount : StoreDiscountProduct -> POST, GET, PUT
 Add new response parameter in getStoreProducts() & getStoreProductById() to give discounted price on every item : productInventories->itemDiscount
 	

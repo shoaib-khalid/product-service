@@ -20,6 +20,9 @@ import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.repository.StoreDiscountProductRepository;
 import com.kalsym.product.service.repository.StoreRepository;
 import com.kalsym.product.service.repository.StoreDiscountRepository;
+import com.kalsym.product.service.repository.ProductInventoryRepository;
+import com.kalsym.product.service.repository.ProductRepository;
+import com.kalsym.product.service.repository.StoreCategoryRepository;
 import com.kalsym.product.service.enums.StoreDiscountType;
 
 import com.kalsym.product.service.utility.HttpResponse;
@@ -36,8 +39,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.http.HttpStatus;
 import com.kalsym.product.service.model.store.StoreDiscount;
 import com.kalsym.product.service.model.store.Store;
+import com.kalsym.product.service.model.store.StoreCategory;
 import com.kalsym.product.service.model.store.StoreDiscountProduct;
 import com.kalsym.product.service.model.ItemDiscount;
+import com.kalsym.product.service.model.product.ProductInventory;
+import com.kalsym.product.service.model.product.Product;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -63,6 +70,15 @@ public class StoreDiscountProductController {
 
     @Autowired
     StoreRepository storeRepository;
+    
+    @Autowired
+    ProductInventoryRepository productInventoryRepository;
+    
+    @Autowired
+    ProductRepository productRepository;
+    
+    @Autowired
+    StoreCategoryRepository storeCategoryRepository;
 
     @GetMapping(path = {""})
     public ResponseEntity<HttpResponse> getDiscountProductByDiscountId(HttpServletRequest request,
@@ -128,12 +144,38 @@ public class StoreDiscountProductController {
             return ResponseEntity.status(response.getStatus()).body(response);
         }        
         
-        //check if item code already exist
         if (optStoreDiscount.get().getDiscountType().equals(StoreDiscountType.ITEM)) {
             if (storeDiscountProduct.getItemCode()!=null) {
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "validate discountId: " + storeDiscountProduct.getStoreDiscountId()+" itemCode:"+storeDiscountProduct.getItemCode());
+                
+                //check if item exist 
+                Optional<ProductInventory> optItem = productInventoryRepository.findById(storeDiscountProduct.getItemCode());
+                if (!optItem.isPresent()) {
+                    Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "ItemCode Not Found");
+                    response.setStatus(HttpStatus.NOT_FOUND);
+                    response.setError("ItemCode not found");
+                    return ResponseEntity.status(response.getStatus()).body(response);
+                } 
+                
+                //check if item exist in store
+                Optional<Product> optProduct = productRepository.findById(optItem.get().getProductId());
+                if (!optProduct.isPresent()) {
+                    Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "ItemCode Product Not Found");
+                    response.setStatus(HttpStatus.NOT_FOUND);
+                    response.setError("Product not found");
+                    return ResponseEntity.status(response.getStatus()).body(response);
+                } 
+                
+                if (!optProduct.get().getStoreId().equals(storeId)) {
+                    Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Item code not belong to this storeId");
+                    response.setStatus(HttpStatus.CONFLICT);
+                    response.setError("ItemCode not authorized");
+                    return ResponseEntity.status(response.getStatus()).body(response);
+                }
+                
+                //check if item code already exist
                 Optional<StoreDiscountProduct> optdiscountItem = storeDiscountProductRepository.findByStoreDiscountIdAndItemCode(storeDiscountProduct.getStoreDiscountId(), storeDiscountProduct.getItemCode());
-                 if (optdiscountItem.isPresent()) {
+                if (optdiscountItem.isPresent()) {
                     Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "StoreDiscount Not Found");
                     response.setStatus(HttpStatus.CONFLICT);
                     response.setError("Item already exist");
@@ -141,8 +183,27 @@ public class StoreDiscountProductController {
                 } 
             } else if (storeDiscountProduct.getCategoryId()!=null) {        
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "validate categoryId: " + storeDiscountProduct.getCategoryId());
+                
+               
+                //check if item exist in store
+                Optional<StoreCategory> optCategory = storeCategoryRepository.findById(storeDiscountProduct.getCategoryId());
+                if (!optCategory.isPresent()) {
+                    Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "CategoryId Not Found");
+                    response.setStatus(HttpStatus.NOT_FOUND);
+                    response.setError("Category not found");
+                    return ResponseEntity.status(response.getStatus()).body(response);
+                } 
+                
+                if (!optCategory.get().getStoreId().equals(storeId)) {
+                    Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "CategoryId not belong to this storeId");
+                    response.setStatus(HttpStatus.CONFLICT);
+                    response.setError("Category not authorized");
+                    return ResponseEntity.status(response.getStatus()).body(response);
+                }
+                
+                //check if item code already exist
                 Optional<StoreDiscountProduct> optdiscountItem = storeDiscountProductRepository.findByCategoryId(storeDiscountProduct.getCategoryId());
-                 if (optdiscountItem.isPresent()) {
+                if (optdiscountItem.isPresent()) {
                     Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "StoreDiscount Not Found");
                     response.setStatus(HttpStatus.CONFLICT);
                     response.setError("Category already exist");

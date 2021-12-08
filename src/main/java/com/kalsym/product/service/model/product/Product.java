@@ -126,6 +126,10 @@ public class Product implements Serializable {
             packingSize = product.getPackingSize();
         }
         
+        if (null != product.getIsPackage()) {
+            isPackage = product.getIsPackage();
+        }
+        
 
     }
 
