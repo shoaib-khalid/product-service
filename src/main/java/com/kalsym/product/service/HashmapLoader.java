@@ -40,6 +40,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.Iterator;
+import java.text.SimpleDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -114,6 +116,7 @@ public class HashmapLoader {
                         discountDetails.discountLabel = discountAvailable.getDiscountName();
                         discountDetails.discountStartTime = startLocalTime;
                         discountDetails.discountEndTime = endLocalTime;
+                        discountDetails.lastUpdateTime = new Date();
                         discountedItemMap.put(storeId+"|"+discountProduct.getItemCode(), discountDetails);
                         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "itemCode:"+discountProduct.getItemCode()+" discountAmount:" + discountDetails.discountAmount + " calculationType:"+discountDetails.calculationType);
                        // System.out.println("itemCode:"+discountProduct.getItemCode()+" discountAmount:" + discountDetails.discountAmount + " calculationType:"+discountDetails.calculationType);
@@ -134,6 +137,7 @@ public class HashmapLoader {
                                 discountDetails.discountLabel = discountAvailable.getDiscountName();
                                 discountDetails.discountStartTime = startLocalTime;
                                 discountDetails.discountEndTime = endLocalTime;
+                                discountDetails.lastUpdateTime = new Date();
                                 discountedItemMap.put(storeId+"|"+inventory.getItemCode(), discountDetails);
                                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "itemCode:"+inventory.getItemCode()+" discountAmount:" + discountDetails.discountAmount + " calculationType:"+discountDetails.calculationType);
                                 //System.out.println("itemCode:"+discountProduct.getItemCode()+" discountAmount:" + discountDetails.discountAmount + " calculationType:"+discountDetails.calculationType);
@@ -144,13 +148,37 @@ public class HashmapLoader {
             }
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Finish process. loaded item:"+discountedItemMap.size());        
-   }
+    }
     
     
     public ItemDiscount GetDiscountedItemMap(String storeId, String itemCode) {
         ItemDiscount discountDetails = discountedItemMap.get(storeId+"|"+itemCode);
-        System.out.println("Find in map:"+storeId+"|"+itemCode+" -> "+discountDetails);
+        //System.out.println("Find in map:"+storeId+"|"+itemCode+" -> "+discountDetails);
         return discountDetails;
+    }
+    
+    @Scheduled(fixedRate = 120000)
+    public void ManageDiscountedItemMap() {
+        String logprefix = "ManageDiscountedItemMap";
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Start process. hashmap size:"+discountedItemMap.size());        
+       
+        // using iterators
+        Iterator<HashMap.Entry<String, ItemDiscount>> itr = discountedItemMap.entrySet().iterator();
+        
+        while(itr.hasNext()) {
+            HashMap.Entry<String, ItemDiscount> entry = itr.next();        
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Key = " + entry.getKey() +", Value = " + entry.getValue());
+            ItemDiscount discountDetails = entry.getValue();
+            Date lastUpdate = discountDetails.lastUpdateTime;
+            // d1, d2 are dates
+            long diff = new Date().getTime() - lastUpdate.getTime();
+            long diffMinutes = diff / (60 * 1000) % 60;
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "LastUpdate:"+lastUpdate+" was "+diffMinutes+" minutes ago"); 
+            if (diffMinutes>5) {
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Remove from hashmap : "+entry.getKey());
+                itr.remove();                
+            }
+        }
     }
    
 }

@@ -38,4 +38,6 @@ public class ItemDiscount {
     
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     public LocalDateTime discountEndTime;
+    
+    public Date lastUpdateTime;
 }
