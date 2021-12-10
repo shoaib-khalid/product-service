@@ -2,6 +2,7 @@
 # product-service-3.3.1 | 10-December-2021
 ##################################################
 Add maxDiscountAmount in request & response store discount controller
+Add new function to view QR code for store url 
 
 
 ##################################################
