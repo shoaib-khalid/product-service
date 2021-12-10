@@ -11,6 +11,7 @@ import com.kalsym.product.service.repository.RegionVerticalRepository;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.utility.Validation;
 import com.kalsym.product.service.utility.SessionInformation;
+import com.kalsym.product.service.utility.QrCodeGenerator;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,8 @@ import com.kalsym.product.service.service.WhatsappService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.awt.image.BufferedImage;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
@@ -643,5 +646,23 @@ public class StoreController {
         
         
     }
-
+    
+    
+    @GetMapping(path = {"/qrcode/{storeId}"}, name = "stores-get", produces = "image/png")
+    public ResponseEntity<BufferedImage> generateQrCode(HttpServletRequest request,
+            @PathVariable("storeId") String storeId)
+    throws Exception {
+        String logprefix = request.getRequestURI();
+        Optional<Store> optStore = storeRepository.findById(storeId);
+        if (optStore.isPresent()) {           
+            String url = "https://"+optStore.get().getDomain();
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Generating qrcode for "+url);
+            BufferedImage image = QrCodeGenerator.generateQRCodeImage(url);
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Image generated:"+image.toString());
+            return new ResponseEntity<>(image, HttpStatus.OK);
+        } else {
+            return null;
+        }
+    }
+    
 }
