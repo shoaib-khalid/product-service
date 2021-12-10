@@ -646,9 +646,9 @@ public class StoreController {
         
         
     }
-    
-    
+        
     @GetMapping(path = {"/qrcode/{storeId}"}, name = "stores-get", produces = "image/png")
+    @PreAuthorize("hasAnyAuthority('stores-get-by-id', 'all')")
     public ResponseEntity<BufferedImage> generateQrCode(HttpServletRequest request,
             @PathVariable("storeId") String storeId)
     throws Exception {
