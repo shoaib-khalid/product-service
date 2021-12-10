@@ -121,6 +121,8 @@ public class StoreDiscountController {
             discount.setIsActive(storeDiscount.getIsActive());
             discount.setStoreId(storeId);
             discount.setStoreDiscountTierList(storeDiscount.getStoreDiscountTierList());
+            discount.setMaxDiscountAmount(storeDiscount.getMaxDiscountAmount());
+            discount.setNormalPriceItemOnly(storeDiscount.getNormalPriceItemOnly());
             
             //convert time to merchant timezone
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "StartDate:"+storeDiscount.getStartDate().toString());
@@ -204,6 +206,8 @@ public class StoreDiscountController {
             discount.setIsActive(storeDiscount.getIsActive());
             discount.setStoreId(storeId);
             discount.setStoreDiscountTierList(storeDiscount.getStoreDiscountTierList());
+            discount.setMaxDiscountAmount(storeDiscount.getMaxDiscountAmount());
+            discount.setNormalPriceItemOnly(storeDiscount.getNormalPriceItemOnly());
             
             //convert time to merchant timezone
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, storeDiscount.getId()+" -> StartDate:"+storeDiscount.getStartDate().toString());
@@ -273,7 +277,9 @@ public class StoreDiscountController {
         discount.setIsActive(storeDiscount.getIsActive());
         discount.setStoreId(storeId);
         discount.setStoreDiscountTierList(storeDiscount.getStoreDiscountTierList());
-
+        discount.setNormalPriceItemOnly(storeDiscount.getNormalPriceItemOnly());
+        discount.setMaxDiscountAmount(storeDiscount.getMaxDiscountAmount());
+        
         //convert time to merchant timezone
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "StartDate:"+storeDiscount.getStartDate().toString());
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "EndDate:"+storeDiscount.getEndDate().toString());
@@ -369,6 +375,8 @@ public class StoreDiscountController {
         storeDiscount.setDiscountType(discount.getDiscountType());
         storeDiscount.setIsActive(discount.getIsActive());
         storeDiscount.setStoreId(storeId);
+        storeDiscount.setMaxDiscountAmount(discount.getMaxDiscountAmount());
+        storeDiscount.setNormalPriceItemOnly(discount.getNormalPriceItemOnly());
         
         //check for overlap date for active discount
         if (storeDiscount.getIsActive()) {
@@ -449,6 +457,8 @@ public class StoreDiscountController {
         storeDiscount.setDiscountType(discount.getDiscountType());
         storeDiscount.setIsActive(discount.getIsActive());
         storeDiscount.setStoreId(storeId);
+        storeDiscount.setMaxDiscountAmount(discount.getMaxDiscountAmount());
+        storeDiscount.setNormalPriceItemOnly(discount.getNormalPriceItemOnly());
         
         //check for overlap date for active discount
         if (storeDiscount.getIsActive()) {

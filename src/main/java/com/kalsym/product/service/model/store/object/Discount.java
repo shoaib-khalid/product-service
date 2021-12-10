@@ -38,6 +38,8 @@ public class Discount {
     private StoreDiscountType discountType;
     
     private Boolean isActive;
+    private Double maxDiscountAmount;
+    private Boolean normalPriceItemOnly;
     private List<StoreDiscountTier> storeDiscountTierList;
     
     @Temporal(javax.persistence.TemporalType.DATE)
