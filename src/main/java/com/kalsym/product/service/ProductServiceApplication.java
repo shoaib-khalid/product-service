@@ -10,6 +10,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.http.converter.BufferedImageHttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverter;
+import java.awt.image.BufferedImage;
 
 /**
  *
@@ -33,6 +36,11 @@ public class ProductServiceApplication {
     @Bean
     public RestTemplate getRestTemplate() {
         return new RestTemplate();
+    }
+    
+    @Bean
+    public HttpMessageConverter<BufferedImage> createImageHttpMessageConverter() {
+        return new BufferedImageHttpMessageConverter();
     }
 
 }

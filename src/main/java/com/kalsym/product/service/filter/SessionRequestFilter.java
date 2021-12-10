@@ -58,7 +58,8 @@ public class SessionRequestFilter extends OncePerRequestFilter {
         String accessToken = null;
 
         boolean tokenPresent = false;
-
+        boolean authorized = false;
+        
         // Token is in the form "Bearer token". Remove Bearer word and get only the Token
         if (null != authHeader && authHeader.startsWith("Bearer ")) {
             accessToken = authHeader.replace("Bearer ", "");
@@ -67,9 +68,8 @@ public class SessionRequestFilter extends OncePerRequestFilter {
             tokenPresent = true;
         } else {
             Logger.application.warn(Logger.pattern, VersionHolder.VERSION, logprefix, "token does not begin with Bearer String", "");
-        }
-
-        boolean authorized = false;
+        }       
+        
         if (accessToken != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             //Logger.application.info(Logger.pattern, VersionHolder.VERSION, logprefix, "sessionId: " + sessionId, "");
 

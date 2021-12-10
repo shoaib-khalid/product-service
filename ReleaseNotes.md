@@ -40,6 +40,7 @@ CREATE TABLE `store_discount_product` (
   CONSTRAINT `store_discount_product_ibfk_2` FOREIGN KEY (`itemCode`) REFERENCES `product_inventory` (`itemCode`),
   CONSTRAINT `store_discount_product_ibfk_3` FOREIGN KEY (`categoryId`) REFERENCES `store_category` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+>>>>>>> aaffef17b12e4c37171cd941c8ad06ac73828e0c
 
 
 ##################################################
@@ -250,7 +251,7 @@ New parameter for product : packingSize (possible value : S, M, L, XL, XXL)
 	
 	ALTER TABLE `store` ADD isSnooze TINYINT(1) DEFAULT 1 COMMENT 'to indicate snooze or not (temporary closed). This flag will take preference over the store timings';
 	
-	ALTER TABLE `store` ADD snoozeEndTime TINYINT(1) DEFAULT 1 COMMENT 'use by backend scheduler to set isSnooze=false when snoozeEndTime reach';
+	ALTER TABLE `store` ADD snoozeEndTime timestamp COMMENT 'use by backend scheduler to set isSnooze=false when snoozeEndTime reach';
 
 	ALTER TABLE `store` ADD snoozeReason VARCHAR(100);
 	
