@@ -13,12 +13,14 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import com.kalsym.product.service.model.ItemDiscount;
 
 /**
  *
@@ -56,4 +58,7 @@ public class ProductInventoryWithProductDetails implements Serializable {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "productId", insertable = false, updatable = false, nullable = true)
     private Product product;
+    
+    @Transient 
+    private ItemDiscount itemDiscount;
 }

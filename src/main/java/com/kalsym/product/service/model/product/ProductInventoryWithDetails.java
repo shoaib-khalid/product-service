@@ -2,6 +2,7 @@ package com.kalsym.product.service.model.product;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.kalsym.product.service.model.ItemDiscount;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.CascadeType;
@@ -13,6 +14,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -53,5 +55,7 @@ public class ProductInventoryWithDetails implements Serializable {
     @JoinColumn(name = "itemCode")
     private List<ProductInventoryItem> productInventoryItems;
     
+    @Transient 
+    private ItemDiscount itemDiscount;
 
 }

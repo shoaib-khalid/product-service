@@ -7,11 +7,14 @@ package com.kalsym.product.service.model.store.object;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.kalsym.product.service.enums.StoreDiscountType;
 import com.kalsym.product.service.model.store.StoreDiscountTier;
 import java.time.LocalTime;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Temporal;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,7 +33,10 @@ public class Discount {
     private String id;    
     private String storeId;
     private String discountName;
-    private String discountType;
+    
+    @Enumerated(EnumType.STRING)
+    private StoreDiscountType discountType;
+    
     private Boolean isActive;
     private List<StoreDiscountTier> storeDiscountTierList;
     
