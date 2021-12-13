@@ -190,7 +190,7 @@ public class StoreProductController {
                         discountedPrice = productInventory.getPrice() - (discountDetails.discountAmount / 100 * productInventory.getPrice());
                     }
                     discountDetails.discountedPrice = discountedPrice;
-                    discountDetails.normalPrice = productInventory.getPrice();
+                    discountDetails.normalPrice = productInventory.getPrice();                    
                     productInventory.setItemDiscount(discountDetails); 
                 }
             }

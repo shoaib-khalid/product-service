@@ -117,6 +117,7 @@ public class HashmapLoader {
                         discountDetails.discountStartTime = startLocalTime;
                         discountDetails.discountEndTime = endLocalTime;
                         discountDetails.lastUpdateTime = new Date();
+                        discountDetails.discountId = discountAvailable.getId();
                         discountedItemMap.put(storeId+"|"+discountProduct.getItemCode(), discountDetails);
                         //Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "itemCode:"+discountProduct.getItemCode()+" discountAmount:" + discountDetails.discountAmount + " calculationType:"+discountDetails.calculationType);
                        // System.out.println("itemCode:"+discountProduct.getItemCode()+" discountAmount:" + discountDetails.discountAmount + " calculationType:"+discountDetails.calculationType);
@@ -138,6 +139,7 @@ public class HashmapLoader {
                                 discountDetails.discountStartTime = startLocalTime;
                                 discountDetails.discountEndTime = endLocalTime;
                                 discountDetails.lastUpdateTime = new Date();
+                                discountDetails.discountId = discountAvailable.getId();
                                 discountedItemMap.put(storeId+"|"+inventory.getItemCode(), discountDetails);
                                 //Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "itemCode:"+inventory.getItemCode()+" discountAmount:" + discountDetails.discountAmount + " calculationType:"+discountDetails.calculationType);
                                 //System.out.println("itemCode:"+discountProduct.getItemCode()+" discountAmount:" + discountDetails.discountAmount + " calculationType:"+discountDetails.calculationType);

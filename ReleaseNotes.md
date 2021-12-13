@@ -1,4 +1,10 @@
 ##################################################
+# product-service-3.3.2 | 13-December-2021
+##################################################
+Add discount id in product discount details
+
+
+##################################################
 # product-service-3.3.1 | 10-December-2021
 ##################################################
 Add maxDiscountAmount in request & response store discount controller

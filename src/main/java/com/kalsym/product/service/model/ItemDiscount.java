@@ -31,6 +31,7 @@ public class ItemDiscount {
     public String discountLabel;
     public double discountAmount;    
     public boolean normalItemOnly;
+    public String discountId;
     public DiscountCalculationType calculationType;
     
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
