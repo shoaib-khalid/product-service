@@ -1,6 +1,9 @@
 package com.kalsym.product.service.controller;
 
+import com.kalsym.product.service.HashmapLoader;
 import com.kalsym.product.service.ProductServiceApplication;
+import com.kalsym.product.service.enums.DiscountCalculationType;
+import com.kalsym.product.service.model.ItemDiscount;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.model.product.Product;
 import com.kalsym.product.service.model.product.ProductInventoryWithDetails;
@@ -53,7 +56,10 @@ public class StoreProductInventoryController {
 
     @Autowired
     StoreRepository storeRepository;
-
+    
+    @Autowired
+    private HashmapLoader hashmapLoader;
+    
     @GetMapping(path = {""}, name = "store-product-inventory-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-product-inventory-get', 'all')")
     public ResponseEntity<HttpResponse> getStoreProductInventorys(HttpServletRequest request,
@@ -168,9 +174,25 @@ public class StoreProductInventoryController {
             response.setError("inventory not found");
             return ResponseEntity.status(response.getStatus()).body(response);
         }
-
+        
+        //retrieve discount info
+        ProductInventoryWithProductDetails productInventory = optProductInventory.get();                
+        //ItemDiscount discountDetails = discountedItemMap.get(productInventory.getItemCode());
+        ItemDiscount discountDetails = hashmapLoader.GetDiscountedItemMap(storeId, productInventory.getItemCode());
+        if (discountDetails!=null) {
+            double discountedPrice = productInventory.getPrice();
+            if (discountDetails.calculationType.equals(DiscountCalculationType.FIX)) {
+                discountedPrice = productInventory.getPrice() - discountDetails.discountAmount;
+            } else if (discountDetails.calculationType.equals(DiscountCalculationType.PERCENT)) {
+                discountedPrice = productInventory.getPrice() - (discountDetails.discountAmount / 100 * productInventory.getPrice());
+            }
+            discountDetails.discountedPrice = discountedPrice;
+            discountDetails.normalPrice = productInventory.getPrice();                    
+            productInventory.setItemDiscount(discountDetails);             
+        }        
+        
         response.setStatus(HttpStatus.OK);
-        response.setData(optProductInventory.get());
+        response.setData(productInventory);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 

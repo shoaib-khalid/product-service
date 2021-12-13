@@ -2,6 +2,7 @@
 # product-service-3.3.2 | 13-December-2021
 ##################################################
 Add discount id in product discount details
+Add discount details in response of getStoreProductInventorysById
 
 
 ##################################################
