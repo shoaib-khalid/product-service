@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.kalsym.product.service.model.store.Store;
 import com.kalsym.product.service.model.store.StoreWithDetails;
 import com.kalsym.product.service.model.store.StoreCommission;
@@ -36,14 +38,18 @@ import com.kalsym.product.service.repository.StoreWithDetailsRepository;
 import com.kalsym.product.service.repository.StoreCommissionRepository;
 import com.kalsym.product.service.repository.StoreAssetRepository;
 import com.kalsym.product.service.repository.ClientsRepository;
+import com.kalsym.product.service.service.FileStorageService;
 
 import com.kalsym.product.service.service.StoreLiveChatService;
 import com.kalsym.product.service.utility.Logger;
+import com.kalsym.product.service.utility.MultipartImage;
 import com.kalsym.product.service.service.WhatsappService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import javax.imageio.ImageIO;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
@@ -110,6 +116,9 @@ public class StoreController {
     @Autowired
     WhatsappService whatsappService;
     
+    @Autowired
+    FileStorageService fileStorageService;
+    
     @Value("${storeCommission.minChargeAmount:1.5}")
     private Double minChargeAmount;
     @Value("${storeCommission.rate:3.5}")
@@ -123,6 +132,9 @@ public class StoreController {
     
     @Value("${store.banner.fnb.default.url:https://symplified.ai/store-assets/banner-fnb.png}")
     private String storeBannerFnbDefaultUrl;  
+    
+    @Value("${store.assets.url:https://symplified.ai/store-assets}")
+    private String storeAssetsBaseUrl;
     
     @Value("${store.description.length:300}")
     private Integer storeDescriptionLength;
@@ -302,6 +314,22 @@ public class StoreController {
                     response.setError("domain could not be created");
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
                 }
+                
+                //generate qr code
+                String storeUrl = "https://"+savedStore.getDomain();
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Generating qrcode for "+storeUrl);
+                BufferedImage originalImage = QrCodeGenerator.generateQRCodeImage(storeUrl);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ImageIO.write( originalImage, "png", baos );
+                baos.flush();
+
+                MultipartFile multipartFile = new MultipartImage(baos.toByteArray(), savedStore.getId() + "-qrcode", "QRCODE", "PNG", 0);
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "banner Filename: " + multipartFile.getOriginalFilename());
+                String bannerStoragePath = fileStorageService.saveStoreAsset(multipartFile, savedStore.getId() + "-qrcode");
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "banner storagePath: " + bannerStoragePath);
+                StoreAsset storeAsset = new StoreAsset();
+                storeAsset.setStoreId(savedStore.getId());
+                storeAsset.setBannerUrl(storeAssetsBaseUrl + savedStore.getId() + "-qrcode");
   
                 StoreCreationResponse scrCsr = storeLiveChatService.createGroup(domain + "-csr");
 

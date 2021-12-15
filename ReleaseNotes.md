@@ -1,4 +1,13 @@
 ##################################################
+# product-service-3.3.3 | 15-December-2021
+##################################################
+Save qr code in db during create store & update store , instead of generate on the fly
+
+##DB Changes
+ALTER TABLE `store_asset` ADD qrCodeUrl VARCHAR(300);
+ 
+
+##################################################
 # product-service-3.3.2 | 13-December-2021
 ##################################################
 Add discount id in product discount details
