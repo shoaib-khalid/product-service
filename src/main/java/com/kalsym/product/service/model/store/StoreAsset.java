@@ -27,4 +27,5 @@ public class StoreAsset implements Serializable {
     private String logoUrl;
     private String bannerUrl;
     private String bannerMobileUrl;
+    private String qrCodeUrl;
 }

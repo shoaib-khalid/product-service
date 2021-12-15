@@ -329,8 +329,9 @@ public class StoreController {
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "banner storagePath: " + bannerStoragePath);
                 StoreAsset storeAsset = new StoreAsset();
                 storeAsset.setStoreId(savedStore.getId());
-                storeAsset.setBannerUrl(storeAssetsBaseUrl + savedStore.getId() + "-qrcode");
-  
+                storeAsset.setQrCodeUrl(storeAssetsBaseUrl + savedStore.getId() + "-qrcode");
+                storeAssetRepository.save(storeAsset);
+                
                 StoreCreationResponse scrCsr = storeLiveChatService.createGroup(domain + "-csr");
 
                 if (scrCsr == null) {
