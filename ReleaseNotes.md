@@ -48,7 +48,6 @@ CREATE TABLE `store_discount_product` (
   CONSTRAINT `store_discount_product_ibfk_2` FOREIGN KEY (`itemCode`) REFERENCES `product_inventory` (`itemCode`),
   CONSTRAINT `store_discount_product_ibfk_3` FOREIGN KEY (`categoryId`) REFERENCES `store_category` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
->>>>>>> aaffef17b12e4c37171cd941c8ad06ac73828e0c
 
 
 ##################################################
