@@ -316,6 +316,7 @@ public class StoreController {
                 }
                 
                 //generate qr code
+                /*
                 String storeUrl = "https://"+savedStore.getDomain();
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Generating qrcode for "+storeUrl);
                 BufferedImage originalImage = QrCodeGenerator.generateQRCodeImage(storeUrl);
@@ -324,13 +325,14 @@ public class StoreController {
                 baos.flush();
 
                 MultipartFile multipartFile = new MultipartImage(baos.toByteArray(), savedStore.getId() + "-qrcode", "QRCODE", "PNG", 0);
-                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "banner Filename: " + multipartFile.getOriginalFilename());
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Qrcode Filename: " + multipartFile.getOriginalFilename());
                 String bannerStoragePath = fileStorageService.saveStoreAsset(multipartFile, savedStore.getId() + "-qrcode");
-                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "banner storagePath: " + bannerStoragePath);
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Qrcode storagePath: " + bannerStoragePath);
                 StoreAsset storeAsset = new StoreAsset();
                 storeAsset.setStoreId(savedStore.getId());
                 storeAsset.setQrCodeUrl(storeAssetsBaseUrl + savedStore.getId() + "-qrcode");
                 storeAssetRepository.save(storeAsset);
+                */
                 
                 StoreCreationResponse scrCsr = storeLiveChatService.createGroup(domain + "-csr");
 
