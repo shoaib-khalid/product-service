@@ -18,8 +18,9 @@ package com.kalsym.product.service.utility;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
+import java.io.InputStream;
+import java.io.ByteArrayInputStream;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,7 +35,8 @@ public class MultipartImage implements MultipartFile, Serializable {
     String fieldName;
     boolean isEmpty;
     long size;
-
+    InputStream inputStream;
+            
     public MultipartImage(byte[] bytes, String fileName, String fieldName, String contentType, long size) {
         this.bytes = bytes;
         this.fileName = fileName;
@@ -42,6 +44,7 @@ public class MultipartImage implements MultipartFile, Serializable {
         this.contentType = contentType;
         this.size = size;
         this.isEmpty = false;
+        this.inputStream = new ByteArrayInputStream(bytes); 
     }
 
     public String getFileName() {
@@ -98,8 +101,7 @@ public class MultipartImage implements MultipartFile, Serializable {
 
     @Override
     public InputStream getInputStream() throws IOException {
-        // TODO Auto-generated method stub
-        return null;
+       return this.inputStream;
     }
 
     @Override
