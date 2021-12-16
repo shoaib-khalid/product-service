@@ -26,6 +26,7 @@ import com.google.zxing.oned.EAN13Writer;
 import com.google.zxing.oned.UPCAWriter;
 import com.google.zxing.pdf417.PDF417Writer;
 import com.google.zxing.qrcode.QRCodeWriter;
+import java.io.ByteArrayOutputStream;
 
 /**
  *
@@ -38,5 +39,13 @@ public class QrCodeGenerator {
         BitMatrix bitMatrix = barcodeWriter.encode(barcodeText, BarcodeFormat.QR_CODE, 200, 200);
         return MatrixToImageWriter.toBufferedImage(bitMatrix);
     }
-     
+    
+    public static ByteArrayOutputStream generateQRCodeAsOutputStream(String barcodeText) throws Exception {
+        QRCodeWriter barcodeWriter = new QRCodeWriter();
+        BitMatrix bitMatrix = barcodeWriter.encode(barcodeText, BarcodeFormat.QR_CODE, 200, 200);
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        MatrixToImageWriter.writeToStream(bitMatrix, "png", bos);
+        bos.close();
+        return bos;
+    }
 }
