@@ -703,6 +703,8 @@ public class StoreController {
         
     }
         
+    /*
+    //not used anymore, will be removed
     @GetMapping(path = {"/qrcode/{storeId}"}, name = "stores-get", produces = "image/png")
     @PreAuthorize("hasAnyAuthority('stores-get-by-id', 'all')")
     public ResponseEntity<BufferedImage> generateQrCode(HttpServletRequest request,
@@ -719,6 +721,6 @@ public class StoreController {
         } else {
             return null;
         }
-    }
+    }*/
     
 }
