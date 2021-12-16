@@ -253,6 +253,8 @@ public class StoreController {
 
         response.setStatus(HttpStatus.CREATED);
         Store savedStore = null;
+        StoreAsset storeAsset = new StoreAsset();
+                
         List<Store> stores = storeRepository.findAll();
 
         List<String> errors = new ArrayList<>();
@@ -325,9 +327,10 @@ public class StoreController {
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Qrcode Filename: " + multipartFile.getOriginalFilename());
                 String bannerStoragePath = fileStorageService.saveStoreAsset(multipartFile, savedStore.getId() + "-qrcode");
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Qrcode storagePath: " + bannerStoragePath);
-                StoreAsset storeAsset = new StoreAsset();
+                String qrCodeUrl = storeAssetsBaseUrl + savedStore.getId() + "-qrcode";
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Qrcode Url: " + qrCodeUrl);
                 storeAsset.setStoreId(savedStore.getId());
-                storeAsset.setQrCodeUrl(storeAssetsBaseUrl + savedStore.getId() + "-qrcode");
+                storeAsset.setQrCodeUrl(qrCodeUrl);
                 storeAssetRepository.save(storeAsset);
                                 
                 StoreCreationResponse scrCsr = storeLiveChatService.createGroup(domain + "-csr");
@@ -382,8 +385,7 @@ public class StoreController {
             storeComisssionRepository.save(sc);
             response.setData(savedStore);
             
-            //set default store asset
-            StoreAsset storeAsset = new StoreAsset();
+            //set default store asset            
             storeAsset.setStoreId(savedStore.getId());
             storeAsset.setLogoUrl(storeLogoDefaultUrl);
             if (savedStore.getVerticalCode()!=null) {                
@@ -460,7 +462,7 @@ public class StoreController {
                         response.setData("store domain already exists");
                         return ResponseEntity.status(response.getStatus()).body(response);
                     }
-                }                
+                }                 
             }
             
             Store store = optStore.get();
@@ -472,9 +474,36 @@ public class StoreController {
             }
             
             store.update(bodyStore);
-
+            store = storeRepository.save(store);
+            
+            //check if merchant change domain            
+            if (bodyStore.getDomain() != null) {
+                //regenerate qr code
+                String storeUrl = "https://"+store.getDomain();
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Generating qrcode for "+storeUrl);
+                ByteArrayOutputStream baos = QrCodeGenerator.generateQRCodeAsOutputStream(storeUrl);
+                
+                MultipartFile multipartFile = new MultipartImage(baos.toByteArray(), store.getId() + "-qrcode", "QRCODE", "PNG", 0);
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Qrcode Filename: " + multipartFile.getOriginalFilename());
+                String bannerStoragePath = fileStorageService.saveStoreAsset(multipartFile, store.getId() + "-qrcode");
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Qrcode storagePath: " + bannerStoragePath);
+                String qrCodeUrl = storeAssetsBaseUrl + store.getId() + "-qrcode";
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Qrcode Url: " + qrCodeUrl);
+                
+                
+                Optional<StoreAsset> storeAssetOpt = storeAssetRepository.findById(store.getId());
+                StoreAsset storeAsset = null;
+                if (storeAssetOpt.isPresent()) {
+                    storeAsset = storeAssetOpt.get();
+                } else {
+                    storeAsset = new StoreAsset();
+                }
+                storeAsset.setQrCodeUrl(qrCodeUrl);
+                storeAssetRepository.save(storeAsset);
+            }
+            
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "updated store with id: " + id);
-            response.setData(storeRepository.save(store));
+            response.setData(store);
             response.setStatus(HttpStatus.OK);
             return ResponseEntity.status(response.getStatus()).body(response);
         } catch (Exception e) {
