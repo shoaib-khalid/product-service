@@ -6,6 +6,9 @@ Bug fix for search store discount :
 -search discount by %discountName%
 -add order by, order column in request parameter
 
+Bug fix for store category :
+-add order by, order column in request parameter
+
 
 ##################################################
 # product-service-3.3.3 | 15-December-2021

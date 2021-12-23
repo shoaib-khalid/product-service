@@ -28,6 +28,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -61,6 +62,8 @@ public class StoreCategoryController {
     public ResponseEntity<HttpResponse> getCategory(HttpServletRequest request,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String storeId,
+            @RequestParam(required = false, defaultValue = "name") String sortByCol,
+            @RequestParam(required = false, defaultValue = "ASC") Sort.Direction sortingOrder,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int pageSize) {
 
@@ -79,9 +82,13 @@ public class StoreCategoryController {
                 .withIgnoreCase()
                 .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
         Example<StoreCategory> example = Example.of(storeCategory, matcher);
-
+        
         Pageable pageable = PageRequest.of(page, pageSize);
-
+        if (sortingOrder==Sort.Direction.ASC)
+            pageable = PageRequest.of(page, pageSize, Sort.by(sortByCol).ascending());
+        else if (sortingOrder==Sort.Direction.DESC)
+            pageable = PageRequest.of(page, pageSize, Sort.by(sortByCol).descending());
+        
         response.setStatus(HttpStatus.OK);
         response.setData(storeCategoryRepository.findAll(example, pageable));
         return ResponseEntity.status(response.getStatus()).body(response);
