@@ -590,9 +590,9 @@ public class StoreController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PutMapping(path = {"/{storeId}/store-categories"}, name = "store-categories-get-by-stores-id", produces = "application/json")
+    @GetMapping(path = {"/{storeId}/store-categories"}, name = "store-categories-get-by-stores-id", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-categories-get-by-stores-id', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
-    public ResponseEntity<HttpResponse> putStoreCategoryByStoreId(HttpServletRequest request,
+    public ResponseEntity<HttpResponse> getStoreCategoryByStoreId(HttpServletRequest request,
             @PathVariable String storeId) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
