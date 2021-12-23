@@ -77,7 +77,7 @@ public class StoreDiscountSearchSpecs {
               //NOTES : The SQL Server AND operator takes precedence over the SQL Server OR operator (just like a multiplication operation takes precedence over an addition operation).              
             }
             if (discountName!=null) {
-                predicates.add(builder.equal(root.get("discountName"), discountName));
+                predicates.add(builder.like(root.get("discountName"), "%"+discountName+"%"));
             } else if (discountType!=null) {
                 predicates.add(builder.equal(root.get("discountType"), discountType));
             } else if (isActive!=null) {

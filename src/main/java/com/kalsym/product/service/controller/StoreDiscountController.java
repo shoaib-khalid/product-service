@@ -54,6 +54,7 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -153,6 +154,8 @@ public class StoreDiscountController {
             @RequestParam(required = false) String discountName,
             @RequestParam(required = false) StoreDiscountType discountType,
             @RequestParam(required = false) Boolean isActive,
+            @RequestParam(required = false, defaultValue = "name") String sortByCol,
+            @RequestParam(required = false, defaultValue = "ASC") Sort.Direction sortingOrder,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int pageSize) {
 
@@ -184,6 +187,11 @@ public class StoreDiscountController {
         
         StoreDiscount discountMatch = new StoreDiscount();
         Pageable pageable = PageRequest.of(page, pageSize);
+        if (sortingOrder==Sort.Direction.ASC)
+            pageable = PageRequest.of(page, pageSize, Sort.by(sortByCol).ascending());
+        else if (sortingOrder==Sort.Direction.DESC)
+            pageable = PageRequest.of(page, pageSize, Sort.by(sortByCol).descending());
+        
         discountMatch.setStoreId(storeId);
         
         ExampleMatcher matcher = ExampleMatcher

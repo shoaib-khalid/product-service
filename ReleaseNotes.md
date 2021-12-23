@@ -1,4 +1,13 @@
 ##################################################
+# product-service-3.3.4 | 23-December-2021
+##################################################
+
+Bug fix for search store discount :
+-search discount by %discountName%
+-add order by, order column in request parameter
+
+
+##################################################
 # product-service-3.3.3 | 15-December-2021
 ##################################################
 Save qr code in db during create store & update store , instead of generate on the fly
@@ -279,11 +288,15 @@ New parameter for product : packingSize (possible value : S, M, L, XL, XXL)
 	
 	INSERT INTO `region_vertical` values ('e-commerce-b2b2c','E-commerce','E-commerce for Hero Runcit','SEA','https://symplified.biz/merchant.portal-assets/eCommerce.jpg');
 	
-	INSERT INTO `order_completion_status_config` SELECT id,'e-commerce-b2b2c',STATUS,storePickup,storeDeliveryType,
+	INSERT INTO `order_completion_status_config` SELECT id,'E-Commerece',STATUS,storePickup,storeDeliveryType,
+	paymentType,
 	statusSequence, emailToCustomer, emailToStore, requestDelivery, rcMessage, 
 	`pushNotificationToMerchat`, customerEmailContent, `storeEmailContent`,
-	`rcMessageContent`, `comments`, `created`, `updated`, `storePushNotificationContent`, `storePushNotificationTitle`
+	`rcMessageContent`, `comments`, `created`, `updated`, `storePushNotificationContent`, `storePushNotificationTitle`,
+	`nextActionText`,
+	`emailToFinance`, `financeEmailContent`
 	FROM `order_completion_status_config` WHERE `verticalId`='FnB';
+	
 
 3) new field in product :
 	ALTER TABLE `product` ADD packingSize VARCHAR(5);
