@@ -154,8 +154,8 @@ public class StoreDiscountController {
             @RequestParam(required = false) String discountName,
             @RequestParam(required = false) StoreDiscountType discountType,
             @RequestParam(required = false) Boolean isActive,
-            @RequestParam(required = false, defaultValue = "name") String sortByCol,
-            @RequestParam(required = false, defaultValue = "ASC") Sort.Direction sortingOrder,
+            @RequestParam(required = false, defaultValue = "startDate") String sortByCol,
+            @RequestParam(required = false, defaultValue = "DESC") Sort.Direction sortingOrder,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int pageSize) {
 
