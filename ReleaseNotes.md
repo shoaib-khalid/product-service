@@ -4,6 +4,7 @@
 
 Send request to delivery-service to create center code for Pakistan Store (with regionCountryId="PAK")
 Bug fix for search store by domain : match exact domain
+New function to update product asset : PUT /stores/{storeId}/products/{productId}/assets/update
 
 
 ##################################################

@@ -348,6 +348,100 @@ public class StoreProductAssetController {
         response.setData(productAsset);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
+    
+    @PutMapping(path = {"/update"}, name = "store-product-assets-put-by-id")
+    @PreAuthorize("hasAnyAuthority('store-product-assets-put-by-id', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
+    public ResponseEntity<HttpResponse> updateStoreProductAssetsById(HttpServletRequest request,
+            @PathVariable String storeId,
+            @PathVariable String productId,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(required = true) String id,
+            @RequestParam(required = false) String itemCode,
+            @RequestParam(required = false) Boolean isThumbnail) {
+        
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "storeId: " + storeId);
+
+        Optional<Store> optStore = storeRepository.findById(storeId);
+
+        if (!optStore.isPresent()) {
+            Logger.application.warn(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
+
+        Optional<Product> optProdcut = productRepository.findById(productId);
+
+        if (!optProdcut.isPresent()) {
+            Logger.application.warn(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product NOT_FOUND productId: " + productId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("product not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "FOUND productId: " + storeId);
+
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "OriginalFilename: " + file.getOriginalFilename());
+        
+         Optional<ProductAsset> optProductAssset = productAssetRepository.findById(id);
+
+        if (!optProductAssset.isPresent()) {
+            Logger.application.warn(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product asset NOT_FOUND id: " + id);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("product asset not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "FOUND product asset Id: " + id);
+        
+        String storagePath;
+        String generatedUrl;       
+        storagePath = fileStorageService.saveProductAsset(file, itemCode + file.getOriginalFilename().replaceAll("[^A-Za-z0-9]", ""));
+        generatedUrl = itemCode + file.getOriginalFilename().replaceAll("[^A-Za-z0-9]", "");
+        
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "storagePath: " + storagePath);
+
+        ProductAsset productAsset = new ProductAsset();
+        productAsset.setProductId(productId);
+        productAsset.setName(file.getOriginalFilename());
+        productAsset.setItemCode(itemCode);
+        productAsset.setUrl(productAssetsBaseUrl + generatedUrl);
+        productAsset.setId(optProductAssset.get().getId());
+        productAsset = productAssetRepository.save(productAsset);
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "saved image: " + productAsset.getId());
+
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "isThumbnail: " + isThumbnail);
+
+        Product product = optProdcut.get();
+        List<ProductAsset> productAssets = productAssetRepository.findByProductId(productId);
+        //if is thumbnail true then remove thumbnail true from all other assets
+        if (isThumbnail) {
+
+            product.setThumbnailUrl(productAsset.getUrl());
+            productRepository.save(product);
+
+            for (ProductAsset productA : productAssets) {
+                if (!productA.getId().equals(productAsset.getId())) {
+                    Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "isThumbnail: " + isThumbnail);
+
+                    productA.setIsThumbnail(false);
+                    productAssetRepository.save(productA);
+                } else {
+                    productA.setIsThumbnail(true);
+                    productAssetRepository.save(productA);
+                }
+            }
+        } else {
+            this.setDefaultThumbnail(productAssets, product);
+        }
+
+        response.setStatus(HttpStatus.OK);
+        response.setData(productAsset);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
 
     private void setDefaultThumbnail(List<ProductAsset> productAssets, Product product) {
         for (ProductAsset pA : productAssets) {
