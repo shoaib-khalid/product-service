@@ -7,7 +7,6 @@ import com.kalsym.product.service.model.RegionVertical;
 import com.kalsym.product.service.model.store.StoreCategory;
 import com.kalsym.product.service.repository.ProductRepository;
 import com.kalsym.product.service.repository.StoreRepository;
-import com.kalsym.product.service.repository.RegionVerticalRepository;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.utility.Validation;
 import com.kalsym.product.service.utility.SessionInformation;
@@ -38,24 +37,31 @@ import com.kalsym.product.service.repository.StoreWithDetailsRepository;
 import com.kalsym.product.service.repository.StoreCommissionRepository;
 import com.kalsym.product.service.repository.StoreAssetRepository;
 import com.kalsym.product.service.repository.ClientsRepository;
+import com.kalsym.product.service.repository.RegionVerticalRepository;
 import com.kalsym.product.service.service.FileStorageService;
 
 import com.kalsym.product.service.service.StoreLiveChatService;
 import com.kalsym.product.service.utility.Logger;
 import com.kalsym.product.service.utility.MultipartImage;
 import com.kalsym.product.service.service.WhatsappService;
+import com.kalsym.product.service.service.DeliveryService;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.util.Date;
 import javax.imageio.ImageIO;
+import javax.persistence.criteria.Predicate;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.convert.QueryByExamplePredicateBuilder;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -119,6 +125,9 @@ public class StoreController {
     @Autowired
     FileStorageService fileStorageService;
     
+    @Autowired
+    DeliveryService deliveryService;
+            
     @Value("${storeCommission.minChargeAmount:1.5}")
     private Double minChargeAmount;
     @Value("${storeCommission.rate:3.5}")
@@ -182,8 +191,7 @@ public class StoreController {
                         
             store.setCity(city);
             store.setName(name);
-            store.setVerticalCode(verticalCode);
-            store.setRegionCountry(null);
+            store.setVerticalCode(verticalCode);            
             store.setDomain(domain);
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store: " + store, "");
 
@@ -191,7 +199,7 @@ public class StoreController {
                     .matchingAll()
                     .withIgnoreCase()
                     .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
-            Example<StoreWithDetails> example = Example.of(store, matcher);
+            Example<StoreWithDetails> storeExample = Example.of(store, matcher);
 
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "page: " + page + " pageSize: " + pageSize, "");
             Pageable pageable = PageRequest.of(page, pageSize);
@@ -199,10 +207,9 @@ public class StoreController {
                 pageable = PageRequest.of(page, pageSize, Sort.by(sortByCol).ascending());
             else if (sortingOrder==Sort.Direction.DESC)
                 pageable = PageRequest.of(page, pageSize, Sort.by(sortByCol).descending());
-            Page<StoreWithDetails> fetchedPage = storeWithDetailsRepository.findAll(example, pageable);
-            //Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "elements: " + fetchedPage.getTotalElements(), "");
-            //Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "element 0: " + fetchedPage.iterator().next(), "");
-
+           
+            Page<StoreWithDetails> fetchedPage = storeWithDetailsRepository.findAll(getStoreSpec(verticalCode, domain, storeExample), pageable);
+                    
             response.setData(fetchedPage);
             response.setStatus(HttpStatus.OK);
             return ResponseEntity.status(response.getStatus()).body(response);
@@ -350,8 +357,7 @@ public class StoreController {
                     Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store group created", "");
 
                 }
-            
-           
+                       
                 StoreCreationResponse scrOrders = storeLiveChatService.createGroup(domain + "-orders");
 
                 if (scrOrders == null) {
@@ -396,6 +402,12 @@ public class StoreController {
                 storeAsset.setBannerUrl(storeBannerEcommerceDefaultUrl);
             }
             storeAssetRepository.save(storeAsset);
+            
+            //create center code for Pakistan Store
+            if (bodyStore.getRegionCountryId().equals("PAK")) {
+                deliveryService.createCenterCode(savedStore.getId());
+            }
+
             
             //send whatsapp notification to merchant
             Optional<Client> clientOpt = clientRepository.findById(savedStore.getClientId());
@@ -702,6 +714,25 @@ public class StoreController {
         
         
     }
+    
+    public Specification<StoreWithDetails> getStoreSpec(
+            String verticalCode, String domain, Example<StoreWithDetails> example) {
+
+        return (Specification<StoreWithDetails>) (root, query, builder) -> {
+            final List<Predicate> predicates = new ArrayList<>();
+
+            if (verticalCode != null) {
+                predicates.add(builder.equal(root.get("verticalCode"), verticalCode));
+            }
+            if (domain != null) {
+                predicates.add(builder.equal(root.get("domain"), domain));
+            }
+            predicates.add(QueryByExamplePredicateBuilder.getPredicate(root, builder, example));
+
+            return builder.and(predicates.toArray(new Predicate[predicates.size()]));
+        };
+    }
+    
         
     /*
     //not used anymore, will be removed
