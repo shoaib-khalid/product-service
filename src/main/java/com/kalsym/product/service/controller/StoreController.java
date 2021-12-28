@@ -724,9 +724,11 @@ public class StoreController {
             if (verticalCode != null) {
                 predicates.add(builder.equal(root.get("verticalCode"), verticalCode));
             }
+            /*
+            //ENABLE THIS TO search by exact full domain
             if (domain != null) {
                 predicates.add(builder.equal(root.get("domain"), domain));
-            }
+            }*/
             predicates.add(QueryByExamplePredicateBuilder.getPredicate(root, builder, example));
 
             return builder.and(predicates.toArray(new Predicate[predicates.size()]));

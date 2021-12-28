@@ -4,6 +4,7 @@ import com.kalsym.product.service.HashmapLoader;
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.enums.DiscountCalculationType;
 import com.kalsym.product.service.model.ItemDiscount;
+import com.kalsym.product.service.model.RegionCountry;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.model.product.Product;
 import com.kalsym.product.service.model.product.ProductInventoryWithDetails;
@@ -30,6 +31,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.kalsym.product.service.repository.ProductInventoryWithDetailsRepository;
 import com.kalsym.product.service.repository.ProductInventoryWithProductDetailsRepository;
+import com.kalsym.product.service.repository.RegionCountriesRepository;
+import com.kalsym.product.service.repository.StoreDiscountRepository;
+import com.kalsym.product.service.utility.ProductDiscount;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -58,7 +62,13 @@ public class StoreProductInventoryController {
     StoreRepository storeRepository;
     
     @Autowired
+    StoreDiscountRepository storeDiscountRepository;
+    
+    @Autowired
     private HashmapLoader hashmapLoader;
+    
+    @Autowired
+    RegionCountriesRepository regionCountriesRepository;
     
     @GetMapping(path = {""}, name = "store-product-inventory-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-product-inventory-get', 'all')")
@@ -175,10 +185,18 @@ public class StoreProductInventoryController {
             return ResponseEntity.status(response.getStatus()).body(response);
         }
         
+        //get reqion country for store
+        RegionCountry regionCountry = null;
+        Optional<RegionCountry> optRegion = regionCountriesRepository.findById(optStore.get().getRegionCountryId());
+        if (optRegion.isPresent()) {
+            regionCountry = optRegion.get();
+        }
+        
         //retrieve discount info
         ProductInventoryWithProductDetails productInventory = optProductInventory.get();                
         //ItemDiscount discountDetails = discountedItemMap.get(productInventory.getItemCode());
-        ItemDiscount discountDetails = hashmapLoader.GetDiscountedItemMap(storeId, productInventory.getItemCode());
+        //ItemDiscount discountDetails = hashmapLoader.GetDiscountedItemMap(storeId, productInventory.getItemCode());
+        ItemDiscount discountDetails = ProductDiscount.getItemDiscount(storeDiscountRepository, storeId, productInventory.getItemCode(), regionCountry);
         if (discountDetails!=null) {
             double discountedPrice = productInventory.getPrice();
             if (discountDetails.calculationType.equals(DiscountCalculationType.FIX)) {

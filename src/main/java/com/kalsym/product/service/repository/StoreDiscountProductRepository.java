@@ -42,4 +42,5 @@ public interface StoreDiscountProductRepository
         Optional<StoreDiscountProduct> findByStoreDiscountIdAndItemCode(@Param("storeDiscountId") String storeDiscountId, @Param("itemCode") String itemCode);
         
         Optional<StoreDiscountProduct> findByCategoryId(@Param("categoryId") String categoryId);
+       
 }

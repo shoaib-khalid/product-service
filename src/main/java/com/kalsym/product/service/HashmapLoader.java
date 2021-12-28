@@ -153,11 +153,11 @@ public class HashmapLoader {
     }
     
     
-    public ItemDiscount GetDiscountedItemMap(String storeId, String itemCode) {
+    /*public ItemDiscount GetDiscountedItemMap(String storeId, String itemCode) {
         ItemDiscount discountDetails = discountedItemMap.get(storeId+"|"+itemCode);
         //System.out.println("Find in map:"+storeId+"|"+itemCode+" -> "+discountDetails);
         return discountDetails;
-    }
+    }*/
     
     @Scheduled(fixedRate = 600000)
     public void ManageDiscountedItemMap() {

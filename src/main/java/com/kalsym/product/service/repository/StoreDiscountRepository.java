@@ -79,6 +79,8 @@ public interface StoreDiscountRepository
             @Param("discountId") String discountId
             );
     
-    
+     
+    @Query(value = "CALL getItemDiscount(:itemCode, :storeId);", nativeQuery = true)
+    List<Object[]> getItemDiscount(@Param("itemCode") String itemCode, @Param("storeId") String storeId);
     
 }

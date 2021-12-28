@@ -16,6 +16,7 @@ import com.kalsym.product.service.model.RegionCountry;
 import com.kalsym.product.service.model.product.ProductInventoryItem;
 import com.kalsym.product.service.model.store.StoreDiscountProduct;
 import com.kalsym.product.service.model.store.StoreDiscountTier;
+import com.kalsym.product.service.model.store.StoreWithDetails;
 import com.kalsym.product.service.model.store.object.CustomPageable;
 import com.kalsym.product.service.repository.ProductAssetRepository;
 import com.kalsym.product.service.repository.ProductInventoryItemRepository;
@@ -51,6 +52,7 @@ import com.kalsym.product.service.repository.RegionCountriesRepository;
 import com.kalsym.product.service.repository.StoreDiscountRepository;
 import com.kalsym.product.service.repository.StoreDiscountProductRepository;
 import com.kalsym.product.service.utility.DateTimeUtil;
+import com.kalsym.product.service.utility.ProductDiscount;
 import java.net.MalformedURLException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -58,9 +60,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.HashMap;
+import java.text.SimpleDateFormat; 
+import javax.persistence.criteria.Predicate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.convert.QueryByExamplePredicateBuilder;
+import org.springframework.data.jpa.domain.Specification;
 
 /**
  * @author 7cu
@@ -158,7 +164,8 @@ public class StoreProductController {
         }
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Pageable object created:" + sortingOrder);
-
+        
+        
         if (categoryId == null || categoryId.isEmpty()) {
             categoryId = "";
         }
@@ -171,7 +178,26 @@ public class StoreProductController {
             seoName = "";
         }
         
+        /*
+        ProductWithDetails productMatch = new ProductWithDetails();
+        productMatch.setStoreId(storeId);
+        ExampleMatcher matcher = ExampleMatcher
+                .matchingAll()
+                .withIgnoreCase()
+                .withIgnoreNullValues()
+                .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
+        Example<ProductWithDetails> productExample = Example.of(productMatch, matcher);
+        */
+        
+        //get reqion country for store
+        RegionCountry regionCountry = null;
+        Optional<RegionCountry> optRegion = regionCountriesRepository.findById(optStore.get().getRegionCountryId());
+        if (optRegion.isPresent()) {
+            regionCountry = optRegion.get();
+        }
+            
         Page<ProductWithDetails> productWithPage = productWithDetailsRepository.findByNameOrSeoNameAscendingOrderByPrice(storeId, name, seoName, status, categoryId, pageable);
+        //Page<ProductWithDetails> productWithPage = productWithDetailsRepository.findAll(getStoreProductSpec(name, seoName, categoryId, status, productExample), pageable);
         List<ProductWithDetails> productList = productWithPage.getContent();
         
         ProductWithDetails[] productWithDetailsList = new ProductWithDetails[productList.size()];
@@ -181,8 +207,9 @@ public class StoreProductController {
             for (int i=0;i<productDetails.getProductInventories().size();i++) {
                 ProductInventoryWithDetails productInventory = productDetails.getProductInventories().get(i);
                 //ItemDiscount discountDetails = discountedItemMap.get(productInventory.getItemCode());
-                ItemDiscount discountDetails = hashmapLoader.GetDiscountedItemMap(storeId, productInventory.getItemCode());
-                if (discountDetails!=null) {
+                /*ItemDiscount discountDetails = hashmapLoader.GetDiscountedItemMap(storeId, productInventory.getItemCode());*/
+                ItemDiscount discountDetails = ProductDiscount.getItemDiscount(storeDiscountRepository, storeId, productInventory.getItemCode(), regionCountry);
+                if (discountDetails != null) {                    
                     double discountedPrice = productInventory.getPrice();
                     if (discountDetails.calculationType.equals(DiscountCalculationType.FIX)) {
                         discountedPrice = productInventory.getPrice() - discountDetails.discountAmount;
@@ -261,7 +288,7 @@ public class StoreProductController {
         for (int i=0;i<productDetails.getProductInventories().size();i++) {
             ProductInventoryWithDetails productInventory = productDetails.getProductInventories().get(i);
             //ItemDiscount discountDetails = discountedItemMap.get(productInventory.getItemCode());
-            ItemDiscount discountDetails = hashmapLoader.GetDiscountedItemMap(storeId, productInventory.getItemCode());
+            ItemDiscount discountDetails = ProductDiscount.getItemDiscount(storeDiscountRepository, storeId, productInventory.getItemCode(), regionCountry);
             if (discountDetails!=null) {
                 double discountedPrice = productInventory.getPrice();
                 if (discountDetails.calculationType.equals(DiscountCalculationType.FIX)) {
@@ -424,6 +451,39 @@ public class StoreProductController {
         name = name.replace("(", "%28");
         name = name.replace(")", "%29");
         return name;
+    }
+    
+    
+    public Specification<ProductWithDetails> getStoreProductSpec(
+            String name, String seoName, String categoryId, 
+            List<String> statusList, Example<ProductWithDetails> example) {
+
+        return (Specification<ProductWithDetails>) (root, query, builder) -> {
+            final List<Predicate> predicates = new ArrayList<>();
+
+            if (name != null) {
+                predicates.add(builder.equal(root.get("name"), name));
+            }
+            if (seoName != null) {
+                predicates.add(builder.equal(root.get("seoName"), seoName));
+            }
+            if (categoryId != null) {
+                predicates.add(builder.equal(root.get("categoryId"), categoryId));
+            }
+            if (statusList!=null) {
+                int statusCount = statusList.size();
+                List<Predicate> statusPredicatesList = new ArrayList<>();
+                for (int i=0;i<statusList.size();i++) {
+                    Predicate predicateForCompletionStatus = builder.equal(root.get("status"), statusList.get(i));
+                    statusPredicatesList.add(predicateForCompletionStatus);
+                }
+                Predicate finalPredicate = builder.or(statusPredicatesList.toArray(new Predicate[statusCount]));
+                predicates.add(finalPredicate);
+            }
+            predicates.add(QueryByExamplePredicateBuilder.getPredicate(root, builder, example));
+
+            return builder.and(predicates.toArray(new Predicate[predicates.size()]));
+        };
     }
 
 }

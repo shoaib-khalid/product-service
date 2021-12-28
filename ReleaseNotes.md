@@ -1,10 +1,105 @@
 ##################################################
-# product-service-3.3.5 | 27-December-2021
+# product-service-3.3.5 | 28-December-2021
 ##################################################
 
-Send request to delivery-service to create center code for Pakistan Store (with regionCountryId="PAK")
-Bug fix for search store by domain : match exact domain
-New function to update product asset : PUT /stores/{storeId}/products/{productId}/assets/update
+1. Send request to delivery-service to create center code for Pakistan Store (with regionCountryId="PAK")
+2. Bug fix for search store by domain : match exact domain -> disabled, waiting for new SF to be deploy
+3. New function to update product asset : PUT /stores/{storeId}/products/{productId}/assets/update
+4. Load item discount using mysql stored procedure
+
+##DB Changes
+
+-------------------------------------
+ALTER TABLE `store` ADD costCenterCode VARCHAR(100);
+
+-------------------------------------
+DELIMITER $$
+
+USE `symplified`$$
+
+DROP PROCEDURE IF EXISTS `getItemDiscount`$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getItemDiscount`(IN searchItemCode VARCHAR(50), IN searchStoreId VARCHAR(50))
+BEGIN
+	
+	DECLARE isDone INT DEFAULT 0;
+	DECLARE discountId VARCHAR(50);
+	DECLARE foundDiscount VARCHAR(50);
+	DECLARE checkDiscount VARCHAR(50);
+	
+	DECLARE cur1 CURSOR FOR SELECT id FROM store_discount WHERE storeId=searchStoreId AND isActive=1 AND startDate<NOW() AND endDate>NOW() AND discountType='ITEM';
+	DECLARE CONTINUE HANDLER FOR NOT FOUND SET  isDone=1;
+
+	OPEN cur1; 
+	
+	read_loop: LOOP
+		   FETCH cur1 INTO discountId;
+		   SET checkDiscount = fnGetItemDiscount(searchItemCode, discountId);
+		   IF checkDiscount <> 'NOTFOUND' THEN
+			SET foundDiscount = checkDiscount;
+		   END IF;
+		   IF isDone = 1 THEN 
+			LEAVE read_loop;
+		   END IF;
+	      END LOOP;
+	CLOSE cur1;
+	
+	IF (foundDiscount IS NOT NULL) THEN
+		SELECT discountName, startDate, endDate, normalPriceItemOnly, discountAmount, calculationType, storeDiscountId  
+		FROM store_discount A INNER JOIN store_discount_tier B ON A.id=B.storeDiscountId WHERE A.id=foundDiscount;
+	ELSE
+		SELECT "NOTFOUND";
+	END IF;
+	
+	END$$
+
+DELIMITER ;
+
+-------------------------------------
+DELIMITER $$
+
+USE `symplified`$$
+
+DROP FUNCTION IF EXISTS `fnGetItemDiscount`$$
+
+CREATE DEFINER=`root`@`localhost` FUNCTION `fnGetItemDiscount`(searchItemCode VARCHAR(50), searchDiscountId VARCHAR(50) ) RETURNS VARCHAR(50) CHARSET utf8mb4
+    DETERMINISTIC
+BEGIN
+    
+    DECLARE foundItemId VARCHAR(50);
+    DECLARE foundProductId VARCHAR(50);
+    DECLARE foundCategoryId VARCHAR(50); 
+    DECLARE foundDiscount VARCHAR(50);
+    DECLARE foundSubItemId VARCHAR(50);
+    
+    SET foundDiscount = "NOTFOUND";
+            
+			#get item inside the product
+			SELECT id INTO foundItemId FROM store_discount_product WHERE itemCode=searchItemCode AND storeDiscountId=searchDiscountId;
+			#return concat("test",itemId);
+			
+			IF foundItemId IS NOT NULL THEN
+				#RETURN searchDiscountId;
+				SET foundDiscount = searchDiscountId;
+			ELSE
+				#get item inside categoryId
+				SELECT productId, categoryId INTO foundProductId, foundCategoryId FROM product_inventory A 
+					INNER JOIN product B ON A.productId=B.id WHERE itemCode=searchItemCode;
+					
+				IF (foundCategoryId IS NOT NULL) THEN
+					SELECT id INTO foundSubItemId FROM store_discount_product WHERE categoryId=foundCategoryId AND storeDiscountId=searchDiscountId;
+					
+					IF foundSubItemId IS NOT NULL THEN
+						#RETURN searchDiscountId;
+						SET foundDiscount = searchDiscountId;
+					END IF;
+				END IF;
+			END IF;
+			RETURN foundDiscount;
+    END$$
+
+DELIMITER ;
+---------------------------
 
 
 ##################################################
