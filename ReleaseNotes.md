@@ -26,7 +26,7 @@ USE `symplified`$$
 
 DROP PROCEDURE IF EXISTS `getItemDiscount`$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getItemDiscount`(IN searchItemCode VARCHAR(50), IN searchStoreId VARCHAR(50))
+CREATE PROCEDURE `getItemDiscount`(IN searchItemCode VARCHAR(50), IN searchStoreId VARCHAR(50))
 BEGIN
 	
 	DECLARE isDone INT DEFAULT 0;
