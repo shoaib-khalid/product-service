@@ -62,12 +62,12 @@ public class StoreTiming implements Serializable {
         if (null != storeTiming.getIsOff()) {
             this.isOff = storeTiming.getIsOff();
         }
-        if (null != storeTiming.getBreakStartTime()) {
+        //if (null != storeTiming.getBreakStartTime()) {
             this.breakStartTime = storeTiming.getBreakStartTime();
-        }
-        if (null != storeTiming.getBreakEndTime()) {
+       // }
+        //if (null != storeTiming.getBreakEndTime()) {
             this.breakEndTime = storeTiming.getBreakEndTime();
-        }
+        //}
     }
 
 }

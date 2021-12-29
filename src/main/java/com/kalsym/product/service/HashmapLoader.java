@@ -75,6 +75,7 @@ public class HashmapLoader {
     
     HashMap<String, ItemDiscount> discountedItemMap = new HashMap<String, ItemDiscount>();
     
+    /*
     @Scheduled(fixedRate = 120000)
     public void LoadDiscountedItemMap() {
         String logprefix = "LoadDiscountedItemMap";        
@@ -153,11 +154,11 @@ public class HashmapLoader {
     }
     
     
-    /*public ItemDiscount GetDiscountedItemMap(String storeId, String itemCode) {
+    public ItemDiscount GetDiscountedItemMap(String storeId, String itemCode) {
         ItemDiscount discountDetails = discountedItemMap.get(storeId+"|"+itemCode);
         //System.out.println("Find in map:"+storeId+"|"+itemCode+" -> "+discountDetails);
         return discountDetails;
-    }*/
+    }
     
     @Scheduled(fixedRate = 600000)
     public void ManageDiscountedItemMap() {
@@ -182,5 +183,5 @@ public class HashmapLoader {
             }
         }
     }
-   
+    */
 }

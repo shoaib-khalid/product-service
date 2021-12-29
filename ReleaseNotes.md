@@ -1,4 +1,11 @@
 ##################################################
+# product-service-3.3.6 | 29-December-2021
+##################################################
+
+Bug fix for store timings, if breakStartTime & breakEndTime=null, then update null in db
+
+
+##################################################
 # product-service-3.3.5 | 28-December-2021
 ##################################################
 
