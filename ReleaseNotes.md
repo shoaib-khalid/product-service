@@ -5,6 +5,7 @@
 Add new function putStoreProductVariantsById & putStoreProductVariantAvailableById
 Allow search by multiple discountType in searchDiscountByStoreId
 Bug fix for create cost center code after creating store
+Allow search by multiple verticalCode in getStore
 
 #DB Changes:
 Insert new permission role, only execute after product-service patched :

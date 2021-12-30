@@ -167,7 +167,7 @@ public class StoreController {
     @PreAuthorize("hasAnyAuthority('stores-get', 'all')")
     public ResponseEntity<HttpResponse> getStore(HttpServletRequest request,
             @RequestParam(required = false) String clientId,
-            @RequestParam(required = false) String verticalCode,
+            @RequestParam(required = false) String[] verticalCode,
             @RequestParam(required = false) String city,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String domain,
@@ -191,7 +191,6 @@ public class StoreController {
                         
             store.setCity(city);
             store.setName(name);
-            store.setVerticalCode(verticalCode);            
             store.setDomain(domain);
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store: " + store, "");
 
@@ -716,14 +715,23 @@ public class StoreController {
     }
     
     public Specification<StoreWithDetails> getStoreSpec(
-            String verticalCode, String domain, Example<StoreWithDetails> example) {
+            String[] verticalCodeList, String domain, Example<StoreWithDetails> example) {
 
         return (Specification<StoreWithDetails>) (root, query, builder) -> {
             final List<Predicate> predicates = new ArrayList<>();
 
-            if (verticalCode != null) {
-                predicates.add(builder.equal(root.get("verticalCode"), verticalCode));
+            if (verticalCodeList!=null) {
+                int typeCount = verticalCodeList.length;
+                List<Predicate> typePredicatesList = new ArrayList<>();
+                for (int i=0;i<verticalCodeList.length;i++) {
+                    Predicate predicateForCompletionStatus = builder.equal(root.get("verticalCode"), verticalCodeList[i]);
+                    typePredicatesList.add(predicateForCompletionStatus);
+                }
+
+                Predicate finalPredicate = builder.or(typePredicatesList.toArray(new Predicate[typeCount]));
+                predicates.add(finalPredicate);
             }
+            
             /*
             //ENABLE THIS TO search by exact full domain
             if (domain != null) {
