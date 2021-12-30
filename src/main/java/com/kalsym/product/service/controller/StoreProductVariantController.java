@@ -22,6 +22,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -173,7 +174,7 @@ public class StoreProductVariantController {
         if (!optProductVariant.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "varaint NOT_FOUND varaintId: " + id);
             response.setStatus(HttpStatus.NOT_FOUND);
-            response.setError("varaint not found");
+            response.setError("varint not found");
             return ResponseEntity.status(response.getStatus()).body(response);
         }
         productVariantRepository.delete(optProductVariant.get());
@@ -213,6 +214,51 @@ public class StoreProductVariantController {
         }
 
         productVariant.setProduct(optProdcut.get());
+
+        response.setStatus(HttpStatus.OK);
+        response.setData(productVariantRepository.save(productVariant));
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+    
+    @PutMapping(path = {"/{id}"}, name = "store-product-variants-put-by-id", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-product-variants-put-by-id', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
+    public ResponseEntity<HttpResponse> putStoreProductVariantsById(HttpServletRequest request,
+            @PathVariable String storeId,
+            @PathVariable String productId,
+            @PathVariable String id,
+            @RequestBody ProductVariant productVariant) {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "storeId: " + storeId);
+
+        Optional<Store> optStore = storeRepository.findById(storeId);
+
+        if (!optStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
+
+        Optional<Product> optProdcut = productRepository.findById(productId);
+
+        if (!optProdcut.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product NOT_FOUND storeId: " + productId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("product not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        
+        Optional<ProductVariant> optProductVariant = productVariantRepository.findById(id);
+
+        if (!optProductVariant.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "varaint NOT_FOUND varaintId: " + id);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("varint not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
 
         response.setStatus(HttpStatus.OK);
         response.setData(productVariantRepository.save(productVariant));

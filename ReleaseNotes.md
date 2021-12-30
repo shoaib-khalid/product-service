@@ -1,4 +1,11 @@
 ##################################################
+# product-service-3.3.7 | 30-December-2021
+##################################################
+
+Add new function putStoreProductVariantsById & putStoreProductVariantAvailableById
+
+
+##################################################
 # product-service-3.3.6 | 29-December-2021
 ##################################################
 
@@ -69,7 +76,7 @@ USE `symplified`$$
 
 DROP FUNCTION IF EXISTS `fnGetItemDiscount`$$
 
-CREATE DEFINER=`root`@`localhost` FUNCTION `fnGetItemDiscount`(searchItemCode VARCHAR(50), searchDiscountId VARCHAR(50) ) RETURNS VARCHAR(50) CHARSET utf8mb4
+CREATE FUNCTION `fnGetItemDiscount`(searchItemCode VARCHAR(50), searchDiscountId VARCHAR(50) ) RETURNS VARCHAR(50) CHARSET utf8mb4
     DETERMINISTIC
 BEGIN
     
