@@ -50,4 +50,19 @@ public class ProductVariant implements Serializable {
     
     
     private Integer sequenceNumber;
+    
+    
+    public void update(ProductVariant productVariant) {
+        if (null != productVariant.getName()) {
+            name = productVariant.getName();
+        }        
+
+        if (null != productVariant.getDescription()) {
+            description = productVariant.getDescription();
+        }
+        
+        if (null != productVariant.getSequenceNumber()) {
+            sequenceNumber = productVariant.getSequenceNumber();
+        }
+    }
 }

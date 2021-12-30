@@ -45,4 +45,18 @@ public class ProductVariantAvailable implements Serializable {
 //    @OnDelete(action = OnDeleteAction.CASCADE)
 //    @JsonIgnore
 //    private ProductVariant productVariant;
+    
+    public void update(ProductVariantAvailable productVariant) {
+        if (null != productVariant.getValue()) {
+            value = productVariant.getValue();
+        }        
+
+        if (null != productVariant.getSequenceNumber()) {
+            sequenceNumber = productVariant.getSequenceNumber();
+        }
+        
+        if (null != productVariant.getProductVariantId()) {
+            productVariantId = productVariant.getProductVariantId();
+        }
+    }
 }

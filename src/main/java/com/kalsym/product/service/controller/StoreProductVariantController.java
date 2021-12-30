@@ -4,6 +4,7 @@ import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.model.product.Product;
 import com.kalsym.product.service.model.product.ProductVariant;
+import com.kalsym.product.service.model.product.ProductVariantAvailable;
 import com.kalsym.product.service.model.store.Store;
 import com.kalsym.product.service.repository.ProductAssetRepository;
 import com.kalsym.product.service.repository.ProductInventoryItemRepository;
@@ -226,7 +227,7 @@ public class StoreProductVariantController {
             @PathVariable String storeId,
             @PathVariable String productId,
             @PathVariable String id,
-            @RequestBody ProductVariant productVariant) {
+            @RequestBody ProductVariant bodyProductVariant) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
@@ -259,7 +260,11 @@ public class StoreProductVariantController {
             response.setError("varint not found");
             return ResponseEntity.status(response.getStatus()).body(response);
         }
-
+        
+        ProductVariant productVariant = optProductVariant.get();
+        
+        productVariant.update(bodyProductVariant);
+        
         response.setStatus(HttpStatus.OK);
         response.setData(productVariantRepository.save(productVariant));
         return ResponseEntity.status(response.getStatus()).body(response);

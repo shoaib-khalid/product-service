@@ -4,6 +4,11 @@
 
 Add new function putStoreProductVariantsById & putStoreProductVariantAvailableById
 
+#DB Changes:
+Insert new permission role, only execute after product-service patched :
+INSERT INTO role_authority VALUES ('STORE_OWNER','store-product-variants-put-by-id','product-service');
+INSERT INTO role_authority VALUES ('STORE_OWNER','store-product-variant-available-put-by-id','product-service');
+
 
 ##################################################
 # product-service-3.3.6 | 29-December-2021

@@ -225,7 +225,7 @@ public class StoreProductVariantAvailableController {
             @PathVariable String storeId,
             @PathVariable String productId,
             @PathVariable String id,
-            @RequestBody ProductVariantAvailable variantAvailable) {
+            @RequestBody ProductVariantAvailable bodyVariantAvailable) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
@@ -259,8 +259,12 @@ public class StoreProductVariantAvailableController {
             return ResponseEntity.status(response.getStatus()).body(response);
         }
         
+        ProductVariantAvailable productVariantAvailable = optProductVariantAvailable.get();
+        
+        productVariantAvailable.update(bodyVariantAvailable);
+        
         response.setStatus(HttpStatus.OK);
-        response.setData(productVariantAvailableRepository.save(variantAvailable));
+        response.setData(productVariantAvailableRepository.save(productVariantAvailable));
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 }
