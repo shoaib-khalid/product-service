@@ -152,7 +152,7 @@ public class StoreDiscountController {
             @RequestParam(required = false) @DateTimeFormat(pattern="yyyy-MM-dd") Date startDate,
             @RequestParam(required = false) @DateTimeFormat(pattern="yyyy-MM-dd") Date endDate,
             @RequestParam(required = false) String discountName,
-            @RequestParam(required = false) StoreDiscountType discountType,
+            @RequestParam(required = false) StoreDiscountType[] discountTypeList,
             @RequestParam(required = false) Boolean isActive,
             @RequestParam(required = false, defaultValue = "startDate") String sortByCol,
             @RequestParam(required = false, defaultValue = "DESC") Sort.Direction sortingOrder,
@@ -199,7 +199,7 @@ public class StoreDiscountController {
                 .withIgnoreCase()
                 .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
         Example<StoreDiscount> example = Example.of(discountMatch, matcher);
-        Specification discountSpec = StoreDiscountSearchSpecs.getSpecWithDatesBetween(startDate, endDate, discountName, discountType, isActive, example );
+        Specification discountSpec = StoreDiscountSearchSpecs.getSpecWithDatesBetween(startDate, endDate, discountName, discountTypeList, isActive, example );
         Page<StoreDiscount> storeDiscountWithPage = storeDiscountRepository.findAll(discountSpec, pageable);
         storeDiscountList = storeDiscountWithPage.getContent();
         

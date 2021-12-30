@@ -41,7 +41,7 @@ public class StoreDiscountSearchSpecs {
     public static Specification<StoreDiscount> getSpecWithDatesBetween(
             Date from, Date to, 
             String discountName, 
-            StoreDiscountType discountType,
+            StoreDiscountType[] discountTypeList,
             Boolean isActive, 
             Example<StoreDiscount> example) {
 
@@ -76,13 +76,27 @@ public class StoreDiscountSearchSpecs {
 
               //NOTES : The SQL Server AND operator takes precedence over the SQL Server OR operator (just like a multiplication operation takes precedence over an addition operation).              
             }
+            
             if (discountName!=null) {
                 predicates.add(builder.like(root.get("discountName"), "%"+discountName+"%"));
-            } else if (discountType!=null) {
-                predicates.add(builder.equal(root.get("discountType"), discountType));
-            } else if (isActive!=null) {
+            } 
+            
+            if (isActive!=null) {
                 predicates.add(builder.equal(root.get("isActive"), isActive));
             }
+            
+            if (discountTypeList!=null) {
+                int typeCount = discountTypeList.length;
+                List<Predicate> typePredicatesList = new ArrayList<>();
+                for (int i=0;i<discountTypeList.length;i++) {
+                    Predicate predicateForCompletionStatus = builder.equal(root.get("discountType"), discountTypeList[i]);
+                    typePredicatesList.add(predicateForCompletionStatus);
+                }
+
+                Predicate finalPredicate = builder.or(typePredicatesList.toArray(new Predicate[typeCount]));
+                predicates.add(finalPredicate);
+            }
+            
             predicates.add(QueryByExamplePredicateBuilder.getPredicate(root, builder, example));
 
             return builder.and(predicates.toArray(new Predicate[predicates.size()]));

@@ -3,6 +3,7 @@
 ##################################################
 
 Add new function putStoreProductVariantsById & putStoreProductVariantAvailableById
+Allow search by multiple discountType in searchDiscountByStoreId
 
 #DB Changes:
 Insert new permission role, only execute after product-service patched :
