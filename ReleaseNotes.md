@@ -2,6 +2,7 @@
 # product-service-3.3.9 | 7-Jan-2022
 ##################################################
 Bug fix for update store details
+Bug fix for discount product
 
 
 ##################################################

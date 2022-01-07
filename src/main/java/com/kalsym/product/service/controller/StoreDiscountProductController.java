@@ -202,9 +202,9 @@ public class StoreDiscountProductController {
                 }
                 
                 //check if item code already exist
-                Optional<StoreDiscountProduct> optdiscountItem = storeDiscountProductRepository.findByCategoryId(storeDiscountProduct.getCategoryId());
+                Optional<StoreDiscountProduct> optdiscountItem = storeDiscountProductRepository.findByStoreDiscountIdAndCategoryId(storeDiscountProduct.getStoreDiscountId(), storeDiscountProduct.getCategoryId());
                 if (optdiscountItem.isPresent()) {
-                    Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "StoreDiscount Not Found");
+                    Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Category already exist");
                     response.setStatus(HttpStatus.CONFLICT);
                     response.setError("Category already exist");
                     return ResponseEntity.status(response.getStatus()).body(response);
