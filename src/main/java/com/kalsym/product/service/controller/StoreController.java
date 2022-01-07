@@ -479,9 +479,11 @@ public class StoreController {
             Store store = optStore.get();
             
             //limit store desription to 100 characters
-            if (bodyStore.getStoreDescription().length()>storeDescriptionLength) {
-                String shortDescription = bodyStore.getStoreDescription().substring(0, storeDescriptionLength);
-                bodyStore.setStoreDescription(shortDescription);
+            if (bodyStore.getStoreDescription()!=null) { 
+                if (bodyStore.getStoreDescription().length()>storeDescriptionLength) {
+                    String shortDescription = bodyStore.getStoreDescription().substring(0, storeDescriptionLength);
+                    bodyStore.setStoreDescription(shortDescription);
+                }
             }
             
             store.update(bodyStore);
