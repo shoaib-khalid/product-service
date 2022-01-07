@@ -22,6 +22,7 @@ import org.springframework.stereotype.Repository;
 import com.kalsym.product.service.model.store.StateDeliveryCharge;
 import java.util.List;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  *
@@ -32,5 +33,6 @@ public interface StateDeliveryChargeRepository extends PagingAndSortingRepositor
 
     List<StateDeliveryCharge> findByStoreId(@Param("storeId") String storeId);
     
-    List<StateDeliveryCharge> deleteByStoreId(@Param("storeId") String storeId);
+    @Transactional
+    void deleteByStoreId(@Param("storeId") String storeId);
 }
