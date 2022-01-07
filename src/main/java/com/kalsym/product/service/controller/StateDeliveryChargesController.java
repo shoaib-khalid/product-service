@@ -227,8 +227,7 @@ public class StateDeliveryChargesController {
     
     @DeleteMapping(path = {"/all"})
     public ResponseEntity<HttpResponse> deleteAllStateDeliveryCharge(HttpServletRequest request,
-            @PathVariable(required = true) String storeId,
-            @PathVariable(required = true) String id) {
+            @PathVariable(required = true) String storeId) {
 
         HttpResponse response = new HttpResponse(request.getRequestURI());
         String logprefix = request.getRequestURI();
