@@ -31,4 +31,6 @@ import org.springframework.data.repository.query.Param;
 public interface StateDeliveryChargeRepository extends PagingAndSortingRepository<StateDeliveryCharge, String>, JpaRepository<StateDeliveryCharge, String> {
 
     List<StateDeliveryCharge> findByStoreId(@Param("storeId") String storeId);
+    
+    List<StateDeliveryCharge> deleteByStoreId(@Param("storeId") String storeId);
 }

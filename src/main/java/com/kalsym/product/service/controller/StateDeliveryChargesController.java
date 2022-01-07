@@ -106,6 +106,37 @@ public class StateDeliveryChargesController {
         response.setStatus(HttpStatus.CREATED);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
+    
+     @PostMapping(path = {"/bulk"})
+    public ResponseEntity<HttpResponse> postBulkStoreDeliveryCharge(HttpServletRequest request,
+            @PathVariable(required = true) String storeId,
+            @RequestBody List<StateDeliveryCharge> stateDeliveryList) {
+
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+        String logprefix = request.getRequestURI();
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Id recieved: " + storeId);
+
+        Optional<Store> optStore = storeRepository.findById(storeId);
+
+        if (!optStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Not Found");
+            response.setStatus(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Found Object:" + optStore);
+        
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Save all stateDeliveryList size:"+stateDeliveryList.size());        
+        for (int i=0; i<stateDeliveryList.size(); i++) {
+            StateDeliveryCharge stateDelivery = stateDeliveryList.get(i);
+            stateDelivery.setStoreId(storeId);
+            stateDeliveryChargeRepository.save(stateDelivery);
+        }
+        
+        List<StateDeliveryCharge> stateChargesStore = stateDeliveryChargeRepository.findByStoreId(storeId);
+        response.setData(stateChargesStore);
+        response.setStatus(HttpStatus.CREATED);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
 
     @PutMapping(path = {"{id}"})
     public ResponseEntity<HttpResponse> putStoreDeliveryCharge(HttpServletRequest request,
@@ -188,6 +219,34 @@ public class StateDeliveryChargesController {
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix,
                 "State Charge with id: " + id + " deleted successfully.");
+
+        response.setStatus(HttpStatus.OK);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+    
+    
+    @DeleteMapping(path = {"/all"})
+    public ResponseEntity<HttpResponse> deleteAllStateDeliveryCharge(HttpServletRequest request,
+            @PathVariable(required = true) String storeId,
+            @PathVariable(required = true) String id) {
+
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+        String logprefix = request.getRequestURI();
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Id recieved: " + storeId);
+
+        Optional<Store> optStore = storeRepository.findById(storeId);
+
+        if (!optStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Not Found");
+            response.setStatus(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Found");
+
+        stateDeliveryChargeRepository.deleteByStoreId(storeId);
+
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix,
+                "State Charge with storeId: " + storeId + " deleted successfully.");
 
         response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);

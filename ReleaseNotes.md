@@ -3,6 +3,9 @@
 ##################################################
 Bug fix for update store details
 Bug fix for discount product
+Add new function for state delivery charges :  
+1. postBulkStoreDeliveryCharge() 
+2. deleteAllStateDeliveryCharge()
 
 
 ##################################################
