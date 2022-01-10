@@ -97,7 +97,10 @@ public class StoreCategoryController {
     @PostMapping(path = {""}, name = "store-categories-post")
     @PreAuthorize("hasAnyAuthority('store-categories-post','all')  and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> postStoreCategoryByStoreId(HttpServletRequest request,
-            @RequestParam() String name, @RequestParam() String storeId, @RequestParam(name = "file", required = false) MultipartFile file) {
+            @RequestParam() String name, 
+            @RequestParam() Integer displaySequence, 
+            @RequestParam() String storeId, 
+            @RequestParam(name = "file", required = false) MultipartFile file) {
 
         HttpResponse response = new HttpResponse(request.getRequestURI());
         String logprefix = request.getRequestURI();
@@ -123,6 +126,7 @@ public class StoreCategoryController {
 
         StoreCategory bodyStoreCategory = new StoreCategory();
         bodyStoreCategory.setName(name);
+        bodyStoreCategory.setDisplaySequence(displaySequence);
         bodyStoreCategory.setStoreId(storeId);
         storeCategoryRepository.save(bodyStoreCategory);
         if (file != null) {
@@ -188,6 +192,7 @@ public class StoreCategoryController {
     public ResponseEntity<HttpResponse> putStoreProductAssetsById(HttpServletRequest request,
             @PathVariable String storeCategoryId,
             @RequestParam(name = "name", required = true) String name,
+            @RequestParam(name = "displaySequence", required = false) Integer displaySequence,
             @RequestParam(name = "storeId", required = true) String storeId,
             @RequestParam(name = "file", required = false) MultipartFile file) {
         String logprefix = request.getRequestURI();
@@ -213,6 +218,10 @@ public class StoreCategoryController {
 //        }
         if (name != null) {
             optStoreCategory.get().setName(name);
+        }
+        
+        if (displaySequence != null) {
+            optStoreCategory.get().setDisplaySequence(displaySequence);
         }
 
         if (file != null) {
