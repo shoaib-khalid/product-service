@@ -98,7 +98,7 @@ public class StoreCategoryController {
     @PreAuthorize("hasAnyAuthority('store-categories-post','all')  and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> postStoreCategoryByStoreId(HttpServletRequest request,
             @RequestParam() String name, 
-            @RequestParam() Integer displaySequence, 
+            @RequestParam(required = false) Integer displaySequence, 
             @RequestParam() String storeId, 
             @RequestParam(name = "file", required = false) MultipartFile file) {
 
