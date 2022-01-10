@@ -292,6 +292,8 @@ public class StoreAssetController {
             if (storeInfo.getVerticalCode()!=null) {                
                 if (storeInfo.getVerticalCode().toUpperCase().contains("FNB")) {
                     storeAsset.setBannerUrl(storeBannerFnbDefaultUrl);
+                } else {
+                   storeAsset.setBannerUrl(storeBannerEcommerceDefaultUrl);
                 }
             } else {
                 storeAsset.setBannerUrl(storeBannerEcommerceDefaultUrl);
@@ -300,8 +302,8 @@ public class StoreAssetController {
         
         if (null != bannerMobile) {
             //user upload new banner mobile
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "banner Filename: " + banner.getOriginalFilename());
-            String bannerStoragePath = fileStorageService.saveStoreAsset(banner, storeId + "-banner-mobile");
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "banner Filename: " + bannerMobile.getOriginalFilename());
+            String bannerStoragePath = fileStorageService.saveStoreAsset(bannerMobile, storeId + "-banner-mobile");
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "banner storagePath: " + bannerStoragePath);
             storeAsset.setBannerMobileUrl(storeAssetsBaseUrl + storeId + "-banner-mobile");
         } else if (storeAsset.getBannerMobileUrl()==null) {
@@ -310,6 +312,8 @@ public class StoreAssetController {
             if (storeInfo.getVerticalCode()!=null) {                
                 if (storeInfo.getVerticalCode().toUpperCase().contains("FNB")) {
                     storeAsset.setBannerMobileUrl(storeBannerFnbDefaultUrl);
+                } else {
+                    storeAsset.setBannerMobileUrl(storeBannerEcommerceDefaultUrl);
                 }
             } else {
                 storeAsset.setBannerMobileUrl(storeBannerEcommerceDefaultUrl);
