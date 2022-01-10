@@ -153,18 +153,65 @@ public class StoreAssetController {
         Store storeInfo = optStore.get();
         if (storeInfo.getVerticalCode()!=null) {                
             if (storeInfo.getVerticalCode().toUpperCase().contains("FNB")) {
-                storeAsset.setBannerUrl(storeBannerFnbDefaultUrl);
-                storeAsset.setBannerMobileUrl(storeBannerFnbDefaultUrl);
+                storeAsset.setBannerUrl(storeBannerFnbDefaultUrl);                
+            } else {
+                storeAsset.setBannerUrl(storeBannerEcommerceDefaultUrl);                
             }
         } else {
-            storeAsset.setBannerMobileUrl(storeBannerEcommerceDefaultUrl);
+            storeAsset.setBannerUrl(storeBannerEcommerceDefaultUrl);            
         }
         storeAssetRepository.save(storeAsset);
         
         response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
+    
+    
+    @DeleteMapping(path = {"/bannermobile"}, name = "store-assets-banner-delete-by-id", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-assets-delete-by-id', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
+    public ResponseEntity<HttpResponse> deleteStoreBannerMobileById(HttpServletRequest request,
+            @PathVariable String storeId) {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
 
+        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "storeId: " + storeId);
+
+        Optional<Store> optStore = storeRepository.findById(storeId);
+
+        if (!optStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
+
+        Optional<StoreAsset> optStoreAsset = storeAssetRepository.findById(storeId);
+
+        if (!optStoreAsset.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store asset NOT_FOUND store assetId: " + storeId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store asset not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+
+        StoreAsset storeAsset = optStoreAsset.get();
+        //set default value
+        Store storeInfo = optStore.get();
+        if (storeInfo.getVerticalCode()!=null) {                
+            if (storeInfo.getVerticalCode().toUpperCase().contains("FNB")) {
+                storeAsset.setBannerMobileUrl(storeBannerFnbDefaultUrl);
+            } else {
+                storeAsset.setBannerMobileUrl(storeBannerEcommerceDefaultUrl);
+            }
+        } else {
+           storeAsset.setBannerMobileUrl(storeBannerEcommerceDefaultUrl);
+        }
+        storeAssetRepository.save(storeAsset);
+        
+        response.setStatus(HttpStatus.OK);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }    
     
     
     @DeleteMapping(path = {"/logo"}, name = "store-assets-logo-delete-by-id", produces = "application/json")

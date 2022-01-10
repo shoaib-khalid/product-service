@@ -34,4 +34,6 @@ public class StoreCategory implements Serializable {
     private String name;
 
     private String thumbnailUrl;
+    
+    private Integer displaySequence;
 }

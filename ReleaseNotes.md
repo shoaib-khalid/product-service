@@ -1,4 +1,14 @@
 ##################################################
+# product-service-3.4.0 | 10-Jan-2022
+##################################################
+Add new field : displaySequence in store_category to allow category to be sorted by specific sequence
+New function deleteStoreBannerMobileById
+
+#DB Changes:
+ALTER TABLE store_category ADD displaySequence INT;
+
+
+##################################################
 # product-service-3.3.9 | 7-Jan-2022
 ##################################################
 Bug fix for update store details
