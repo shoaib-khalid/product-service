@@ -254,7 +254,12 @@ public class StoreDiscountProductController {
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "StoreDiscountProduct Object:" + optStoreDiscountProduct);
         storeDiscountProduct = storeDiscountProductRepository.save(storeDiscountProduct);
-        response.setData(storeDiscountProduct);
+        storeDiscountProductRepository.refresh(storeDiscountProduct);
+        
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Query back product info");
+        Optional<StoreDiscountProduct> storeDiscountProductData = storeDiscountProductRepository.findById(storeDiscountProduct.getId());
+        
+        response.setData(storeDiscountProductData.get());
         response.setStatus(HttpStatus.CREATED);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
