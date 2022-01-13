@@ -212,10 +212,15 @@ public class StoreDiscountProductController {
             }
         }
         
-        storeDiscountProduct = storeDiscountProductRepository.save(storeDiscountProduct);
+        storeDiscountProductRepository.saveAndFlush(storeDiscountProduct);
         
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "storeDiscountProduct Object:" + storeDiscountProduct);
-        response.setData(storeDiscountProduct);
+        //retrieve back data with all relationship
+        storeDiscountProductRepository.refresh(storeDiscountProduct);
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Query back product info");
+        Optional<StoreDiscountProduct> storeDiscountProductData = storeDiscountProductRepository.findById(storeDiscountProduct.getId());
+        
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "storeDiscountProductData Object:" + storeDiscountProductData.get());
+        response.setData(storeDiscountProductData.get());
         response.setStatus(HttpStatus.CREATED);
         return ResponseEntity.status(response.getStatus()).body(response);
     }

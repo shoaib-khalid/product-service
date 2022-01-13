@@ -35,7 +35,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface StoreDiscountProductRepository
-        extends PagingAndSortingRepository<StoreDiscountProduct, String>, JpaRepository<StoreDiscountProduct, String> {
+        extends PagingAndSortingRepository<StoreDiscountProduct, String>, JpaRepository<StoreDiscountProduct, String>, CustomRepository<StoreDiscountProduct, String> {
         
         List<StoreDiscountProduct> findByStoreDiscountId(@Param("storeDiscountId") String storeDiscountId);
         

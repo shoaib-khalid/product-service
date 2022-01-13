@@ -13,13 +13,15 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.http.converter.BufferedImageHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import java.awt.image.BufferedImage;
-
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import com.kalsym.product.service.repository.CustomRepositoryImpl;
 /**
  *
  * @author 7cu
  */
 @SpringBootApplication
 @EnableScheduling
+@EnableJpaRepositories(repositoryBaseClass = CustomRepositoryImpl.class)
 
 public class ProductServiceApplication {
 

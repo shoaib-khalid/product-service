@@ -1,8 +1,16 @@
 ##################################################
+# product-service-3.4.1 | 13-Jan-2022
+##################################################
+Bug fix for add product into discount
+Add CustomRepository class to access entity manager refresh function to allow non-cache query
+
+
+##################################################
 # product-service-3.4.0 | 10-Jan-2022
 ##################################################
 Add new field : displaySequence in store_category to allow category to be sorted by specific sequence
 New function deleteStoreBannerMobileById
+Bug fix for POST banner mobile
 
 #DB Changes:
 ALTER TABLE store_category ADD displaySequence INT;
