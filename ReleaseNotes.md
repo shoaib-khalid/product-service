@@ -1,4 +1,14 @@
 ##################################################
+# product-service-3.4.2 | 17-Jan-2022
+##################################################
+Add discount calculationType, discountAmount in store_discount_product table
+
+#DB Changes:
+ALTER TABLE store_discount_product ADD calculationType ENUM ('PERCENTAGE','FIX');
+ALTER TABLE store_discount_product ADD discountAmount DECIMAL(10,2);
+
+
+##################################################
 # product-service-3.4.1 | 13-Jan-2022
 ##################################################
 Bug fix for add product into discount

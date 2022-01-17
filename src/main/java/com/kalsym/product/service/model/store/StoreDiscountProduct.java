@@ -44,6 +44,8 @@ public class StoreDiscountProduct implements Serializable {
     private String storeDiscountId;
     private String itemCode;
     private String categoryId;
+    private String calculationType;
+    private Double discountAmount;
     
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "itemCode", insertable = false, updatable = false, nullable = true)
