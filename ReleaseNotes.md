@@ -1,4 +1,12 @@
 ##################################################
+# product-service-3.4.3 | 19-Jan-2022
+##################################################
+Add new API for product variant :
+postStoreProductVariantsByBulk
+putStoreProductVariantsByBulk
+
+
+##################################################
 # product-service-3.4.2 | 17-Jan-2022
 ##################################################
 Add discount calculationType, discountAmount in store_discount_product table
@@ -6,6 +14,9 @@ Add discount calculationType, discountAmount in store_discount_product table
 #DB Changes:
 ALTER TABLE store_discount_product ADD calculationType ENUM ('PERCENTAGE','FIX');
 ALTER TABLE store_discount_product ADD discountAmount DECIMAL(10,2);
+
+Modify mysql function : fnGetItemDiscount()
+Modify mysql stored procedure : getItemDiscount()
 
 
 ##################################################
