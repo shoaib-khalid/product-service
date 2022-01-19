@@ -222,7 +222,7 @@ public class StoreProductVariantController {
     }
     
     
-    @PostMapping(path = {""}, name = "store-product-variants-post", produces = "application/json")
+    @PostMapping(path = {"/bulk"}, name = "store-product-variants-post", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-product-variants-post', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> postStoreProductVariantsByBulk(HttpServletRequest request,
             @PathVariable String storeId,
@@ -311,7 +311,7 @@ public class StoreProductVariantController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
     
-    @PutMapping(path = {""}, name = "store-product-variants-put-by-id", produces = "application/json")
+    @PutMapping(path = {"/bulk"}, name = "store-product-variants-put-by-id", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-product-variants-put-by-id', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> putStoreProductVariantsByBulk(HttpServletRequest request,
             @PathVariable String storeId,
