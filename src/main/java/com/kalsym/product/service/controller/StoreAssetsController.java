@@ -166,7 +166,7 @@ public class StoreAssetsController {
     }
     
     
-    @PutMapping(path = {"/id"}, name = "store-assets-put-by-id")
+    @PutMapping(path = {"/{id}"}, name = "store-assets-put-by-id")
     @PreAuthorize("hasAnyAuthority('store-assets-post', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> putStoreAssetsById(HttpServletRequest request,
             @PathVariable String storeId,
