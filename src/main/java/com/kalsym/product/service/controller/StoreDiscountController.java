@@ -17,6 +17,7 @@
 package com.kalsym.product.service.controller;
 
 import com.kalsym.product.service.ProductServiceApplication;
+import com.kalsym.product.service.enums.StoreAssetType;
 import com.kalsym.product.service.enums.StoreDiscountType;
 import com.kalsym.product.service.model.product.Product;
 import com.kalsym.product.service.model.RegionCountry;
@@ -48,7 +49,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.http.HttpStatus;
 import com.kalsym.product.service.model.store.StoreDiscount;
 import com.kalsym.product.service.model.store.Store;
+import com.kalsym.product.service.model.store.StoreAssets;
 import com.kalsym.product.service.model.store.object.Discount;
+import com.kalsym.product.service.repository.StoreAssetsRepository;
+import com.kalsym.product.service.service.FileStorageService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
@@ -81,6 +86,15 @@ public class StoreDiscountController {
     
     @Autowired
     RegionCountriesRepository regionCountriesRepository;
+    
+    @Autowired
+    StoreAssetsRepository storeAssetsRepository;
+    
+    @Autowired
+    FileStorageService fileStorageService;
+    
+    @Value("${store.assets.url:https://symplified.ai/store-assets}")
+    private String storeAssetsBaseUrl;
     
     @GetMapping(path = {""})
     public ResponseEntity<HttpResponse> getDiscountByStoreId(HttpServletRequest request,
@@ -124,6 +138,7 @@ public class StoreDiscountController {
             discount.setStoreDiscountTierList(storeDiscount.getStoreDiscountTierList());
             discount.setMaxDiscountAmount(storeDiscount.getMaxDiscountAmount());
             discount.setNormalPriceItemOnly(storeDiscount.getNormalPriceItemOnly());
+            discount.setDiscountBanner(storeDiscount.getDiscountBanner());
             
             //convert time to merchant timezone
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "StartDate:"+storeDiscount.getStartDate().toString());
@@ -216,6 +231,7 @@ public class StoreDiscountController {
             discount.setStoreDiscountTierList(storeDiscount.getStoreDiscountTierList());
             discount.setMaxDiscountAmount(storeDiscount.getMaxDiscountAmount());
             discount.setNormalPriceItemOnly(storeDiscount.getNormalPriceItemOnly());
+            discount.setDiscountBanner(storeDiscount.getDiscountBanner());
             
             //convert time to merchant timezone
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, storeDiscount.getId()+" -> StartDate:"+storeDiscount.getStartDate().toString());
@@ -287,6 +303,7 @@ public class StoreDiscountController {
         discount.setStoreDiscountTierList(storeDiscount.getStoreDiscountTierList());
         discount.setNormalPriceItemOnly(storeDiscount.getNormalPriceItemOnly());
         discount.setMaxDiscountAmount(storeDiscount.getMaxDiscountAmount());
+        discount.setDiscountBanner(storeDiscount.getDiscountBanner());
         
         //convert time to merchant timezone
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "StartDate:"+storeDiscount.getStartDate().toString());
@@ -404,6 +421,18 @@ public class StoreDiscountController {
         storeDiscountRepository.save(storeDiscount);
         discount.setId(storeDiscount.getId());
         
+        //save discount banner if uploaded
+        if (discount.getBannerFile()!=null) {
+            StoreAssets discountBanner = new StoreAssets();             
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Discount Banner Filename: " + discount.getBannerFile().getOriginalFilename());
+            String logoStoragePath = fileStorageService.saveStoreAsset(discount.getBannerFile(), storeId + "-" + StoreAssetType.DiscountBannerUrl);
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Asset storagePath: " + logoStoragePath);
+            discountBanner.setAssetUrl(storeAssetsBaseUrl + storeDiscount.getId() + "-" + StoreAssetType.DiscountBannerUrl);                
+            discountBanner.setStoreId(storeId);
+            discountBanner.setAssetType(StoreAssetType.DiscountBannerUrl);
+            storeAssetsRepository.save(discountBanner);
+        }
+            
         response.setData(discount);
         response.setStatus(HttpStatus.CREATED);
         return ResponseEntity.status(response.getStatus()).body(response);

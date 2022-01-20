@@ -8,6 +8,7 @@ package com.kalsym.product.service.model.store.object;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.kalsym.product.service.enums.StoreDiscountType;
+import com.kalsym.product.service.model.store.StoreAssets;
 import com.kalsym.product.service.model.store.StoreDiscountTier;
 import java.time.LocalTime;
 import java.time.LocalDate;
@@ -19,6 +20,7 @@ import javax.persistence.Temporal;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
@@ -54,5 +56,9 @@ public class Discount {
     private LocalDate endDate;
     
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
-    private LocalTime  endTime;        
+    private LocalTime  endTime; 
+    
+    private StoreAssets discountBanner;
+    
+    private MultipartFile bannerFile;
 }

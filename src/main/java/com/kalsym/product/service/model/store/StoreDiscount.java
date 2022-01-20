@@ -19,6 +19,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
 import javax.persistence.EnumType;
@@ -52,6 +53,7 @@ public class StoreDiscount implements Serializable {
     private Boolean isActive;
     private Double maxDiscountAmount;
     private Boolean normalPriceItemOnly;
+    private String bannerId;
     
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
@@ -64,5 +66,10 @@ public class StoreDiscount implements Serializable {
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "storeDiscountId", insertable = false, updatable = false, nullable = true)    
     private List<StoreDiscountTier> storeDiscountTierList;
+    
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "bannerId", insertable = false, updatable = false, nullable = true)    
+    private StoreAssets discountBanner;
+ 
 
 }

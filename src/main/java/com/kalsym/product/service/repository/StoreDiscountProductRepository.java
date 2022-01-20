@@ -23,6 +23,8 @@ import com.kalsym.product.service.model.store.StoreDiscount;
 import com.kalsym.product.service.model.store.StoreDiscountProduct;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -43,4 +45,5 @@ public interface StoreDiscountProductRepository
         
         Optional<StoreDiscountProduct> findByStoreDiscountIdAndCategoryId(@Param("storeDiscountId") String storeDiscountId, @Param("categoryId") String categoryId);
        
+        <S extends Object> Page<S> findByStoreDiscountId(@Param("storeDiscountId") String storeDiscountId,  Pageable pgbl);
 }

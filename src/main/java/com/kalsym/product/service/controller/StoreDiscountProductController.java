@@ -44,15 +44,21 @@ import com.kalsym.product.service.model.store.StoreDiscountProduct;
 import com.kalsym.product.service.model.ItemDiscount;
 import com.kalsym.product.service.model.product.ProductInventory;
 import com.kalsym.product.service.model.product.Product;
+import com.kalsym.product.service.model.product.ProductWithDetails;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  *
@@ -83,18 +89,28 @@ public class StoreDiscountProductController {
     @GetMapping(path = {""})
     public ResponseEntity<HttpResponse> getDiscountProductByDiscountId(HttpServletRequest request,
             @PathVariable(required = true) String storeId,
-            @PathVariable(required = true) String discountId) {
+            @PathVariable(required = true) String discountId,
+            @RequestParam(required = false, defaultValue = "productInventory.product.name") String sortByCol,
+            @RequestParam(required = false, defaultValue = "ASC") Sort.Direction sortingOrder,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int pageSize ) {
 
         HttpResponse response = new HttpResponse(request.getRequestURI());
         String logprefix = request.getRequestURI();
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Discount Id recieved: " + discountId);
-
+        
+        /*
         List<StoreDiscountProduct> storeDiscountProductList = storeDiscountProductRepository.findByStoreDiscountId(discountId);
         if (storeDiscountProductList == null) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "StoreDiscountProduct Not Found");
             response.setStatus(HttpStatus.NOT_FOUND);
             return ResponseEntity.status(response.getStatus()).body(response);
-        }
+        }*/
+        
+        Pageable pageable = null;
+        pageable = PageRequest.of(page, pageSize, sortingOrder, sortByCol);                
+        Page<StoreDiscountProduct> storeDiscountProductList = storeDiscountProductRepository.findByStoreDiscountId(discountId, pageable);
+        
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "StoreDiscountProduct Found");
         response.setData(storeDiscountProductList);
         response.setStatus(HttpStatus.OK);

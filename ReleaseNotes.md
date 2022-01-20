@@ -1,9 +1,27 @@
 ##################################################
-# product-service-3.4.3 | 19-Jan-2022
+# product-service-3.4.3 | 20-Jan-2022
 ##################################################
-Add new API for product variant :
-postStoreProductVariantsByBulk
-putStoreProductVariantsByBulk
+
+1. Add new API for product variant :
+	postStoreProductVariantsByBulk
+	putStoreProductVariantsByBulk
+
+2. New structure for store asset to support multiple store banner
+
+3. New API for storeAssets
+
+4. Function to add discount banner
+
+#DB Changes:
+CREATE TABLE store_assets (
+id VARCHAR(50) PRIMARY KEY,
+storeId VARCHAR(50),
+assetUrl VARCHAR(200),
+assetDescription VARCHAR(200),
+assetType ENUM ('BannerDesktopUrl','BannerMobileUrl','FaviconUrl','DiscountBannerUrl','QrcodeUrl')
+);
+
+ALTER TABLE store_discount ADD bannerId VARCHAR(50);
 
 
 ##################################################
