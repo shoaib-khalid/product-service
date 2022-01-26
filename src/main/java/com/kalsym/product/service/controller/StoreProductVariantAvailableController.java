@@ -3,6 +3,7 @@ package com.kalsym.product.service.controller;
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.model.product.Product;
+import com.kalsym.product.service.model.product.ProductVariant;
 import com.kalsym.product.service.model.product.ProductVariantAvailable;
 import com.kalsym.product.service.model.store.Store;
 import com.kalsym.product.service.repository.ProductAssetRepository;
@@ -183,6 +184,48 @@ public class StoreProductVariantAvailableController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
+    @DeleteMapping(path = {"/bulk"}, name = "store-product-variant-available-delete-by-id", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-product-variant-available-delete-by-id', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
+    public ResponseEntity<HttpResponse> deleteStoreProductVariantAvailableByBulk(HttpServletRequest request,
+            @PathVariable String storeId,
+            @PathVariable String productId,
+            @RequestBody ProductVariantAvailable[] bodyProductVariantAvailableList) {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "storeId: " + storeId);
+
+        Optional<Store> optStore = storeRepository.findById(storeId);
+
+        if (!optStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
+
+        Optional<Product> optProdcut = productRepository.findById(productId);
+
+        if (!optProdcut.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product NOT_FOUND productId: " + productId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("product not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+
+        for (int i=0;i<bodyProductVariantAvailableList.length;i++) {
+            ProductVariantAvailable bodyProductVariant = bodyProductVariantAvailableList[i];
+            Optional<ProductVariantAvailable> optProductVariant = productVariantAvailableRepository.findById(bodyProductVariant.getId());
+            if (optProductVariant.isPresent()) {
+                productVariantAvailableRepository.delete(optProductVariant.get());                
+            }
+        }
+        
+        response.setStatus(HttpStatus.OK);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
     @PostMapping(path = {""}, name = "store-product-variant-available-post", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-product-variant-available-post', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> postStoreProductVariantAvailable(HttpServletRequest request,
@@ -207,7 +250,7 @@ public class StoreProductVariantAvailableController {
         Optional<Product> optProdcut = productRepository.findById(productId);
 
         if (!optProdcut.isPresent()) {
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product NOT_FOUND storeId: " + productId);
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product NOT_FOUND productId: " + productId);
             response.setStatus(HttpStatus.NOT_FOUND);
             response.setError("product not found");
             return ResponseEntity.status(response.getStatus()).body(response);
@@ -216,6 +259,46 @@ public class StoreProductVariantAvailableController {
         variantAvailable.setProductId(productId);
         response.setStatus(HttpStatus.OK);
         response.setData(productVariantAvailableRepository.save(variantAvailable));
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+        
+    @PostMapping(path = {"/bulk"}, name = "store-product-variant-available-post", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-product-variant-available-post', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
+    public ResponseEntity<HttpResponse> postStoreProductVariantAvailableByBulk(HttpServletRequest request,
+            @PathVariable String storeId,
+            @PathVariable String productId,
+            @RequestBody ProductVariantAvailable[] productVariantList) {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "storeId: " + storeId);
+
+        Optional<Store> optStore = storeRepository.findById(storeId);
+
+        if (!optStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
+
+        Optional<Product> optProdcut = productRepository.findById(productId);
+
+        if (!optProdcut.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product NOT_FOUND productId: " + productId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("product not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        
+        for (int i=0;i<productVariantList.length;i++) {
+            ProductVariantAvailable variantAvailable = productVariantList[i];
+            variantAvailable.setProductId(productId);
+            productVariantAvailableRepository.save(variantAvailable);
+        }
+        
+        response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
     
@@ -265,6 +348,48 @@ public class StoreProductVariantAvailableController {
         
         response.setStatus(HttpStatus.OK);
         response.setData(productVariantAvailableRepository.save(productVariantAvailable));
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+        
+    @PutMapping(path = {"/bulk"}, name = "store-product-variant-available-put-by-id", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-product-variant-available-put-by-id', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
+    public ResponseEntity<HttpResponse> putStoreProductVariantAvailableByBulk(HttpServletRequest request,
+            @PathVariable String storeId,
+            @PathVariable String productId,
+            @RequestBody ProductVariantAvailable[] bodyVariantAvailableList) {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "storeId: " + storeId);
+
+        Optional<Store> optStore = storeRepository.findById(storeId);
+
+        if (!optStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
+
+        Optional<Product> optProdcut = productRepository.findById(productId);
+
+        if (!optProdcut.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product NOT_FOUND productId: " + productId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("product not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+
+        for (int i=0;i<bodyVariantAvailableList.length;i++) {
+            ProductVariantAvailable bodyVariantAvailable = bodyVariantAvailableList[i];
+            Optional<ProductVariantAvailable> optProductVariantAvailable = productVariantAvailableRepository.findById(bodyVariantAvailable.getId());
+            ProductVariantAvailable productVariantAvailable = optProductVariantAvailable.get();        
+            productVariantAvailable.update(bodyVariantAvailable);
+            productVariantAvailableRepository.save(productVariantAvailable);
+        }       
+        
+        response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 }

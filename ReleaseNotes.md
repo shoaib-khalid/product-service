@@ -1,4 +1,16 @@
 ##################################################
+# product-service-3.4.4 | 26-Jan-2022
+##################################################
+1. Add new API for product variant :
+	deleteStoreProductVariantsByBulk
+	
+1. Add new API for product variant available :
+	postStoreProductVariantsAvailableByBulk
+	putStoreProductVariantsAvailableByBulk
+	deleteStoreProductVariantsAvailableByBulk
+	
+	
+##################################################
 # product-service-3.4.3 | 20-Jan-2022
 ##################################################
 
