@@ -65,7 +65,7 @@ public class StoreAssetsController {
     @PreAuthorize("hasAnyAuthority('store-assets-post', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> postStoreAssets(HttpServletRequest request,
             @PathVariable String storeId,
-            @RequestParam(required = true) StoreAssets[] storeAssetsList
+            @RequestParam(required = true) StoreAssets storeAsset
             ) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
@@ -81,24 +81,16 @@ public class StoreAssetsController {
             return ResponseEntity.status(response.getStatus()).body(response);
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
+                
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Asset Filename: " + storeAsset.getAssetFile().getOriginalFilename());
+        String logoStoragePath = fileStorageService.saveStoreAsset(storeAsset.getAssetFile(), storeId + "-" + storeAsset.getAssetType());
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Asset storagePath: " + logoStoragePath);
+        storeAsset.setAssetUrl(storeAssetsBaseUrl + storeId + "-" + storeAsset.getAssetType());                
+        storeAsset.setStoreId(storeId);
+        storeAssetsRepository.save(storeAsset);
         
-        List<StoreAssets> savedStoreAssetsList = new ArrayList();
-        for (int i=0;i<storeAssetsList.length;i++) {
-            StoreAssets storeAsset = storeAssetsList[i];
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Asset Filename: " + storeAsset.getAssetFile().getOriginalFilename());
-            String logoStoragePath = fileStorageService.saveStoreAsset(storeAsset.getAssetFile(), storeId + "-" + storeAsset.getAssetType());
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Asset storagePath: " + logoStoragePath);
-            storeAsset.setAssetUrl(storeAssetsBaseUrl + storeId + "-" + storeAsset.getAssetType());                
-            storeAsset.setStoreId(storeId);
-            storeAssetsRepository.save(storeAsset);
-            savedStoreAssetsList.add(storeAsset);
-        }
-        
-        //set default banner & logo if not exist in db
-        savedStoreAssetsList = SetDefaultAsset(optStore.get(), storeId, savedStoreAssetsList);
-       
         response.setStatus(HttpStatus.OK);
-        response.setData(savedStoreAssetsList);
+        response.setData(storeAsset);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
     
