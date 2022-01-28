@@ -98,6 +98,7 @@ public class StoreAssetsController {
         storeAssetsRepository.save(storeAsset);
         
         response.setStatus(HttpStatus.OK);
+        storeAsset.setAssetFile(null);
         response.setData(storeAsset);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
