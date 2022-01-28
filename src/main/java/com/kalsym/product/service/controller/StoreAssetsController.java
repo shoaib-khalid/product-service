@@ -65,7 +65,9 @@ public class StoreAssetsController {
     @PreAuthorize("hasAnyAuthority('store-assets-post', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> postStoreAssets(HttpServletRequest request,
             @PathVariable String storeId,
-            @RequestParam(required = true) StoreAssets storeAsset
+            @RequestParam(name = "assetFile", required = true) MultipartFile assetFile,
+            @RequestParam(name = "assetType", required = true) StoreAssetType assetType,
+            @RequestParam(name = "assetDescription", required = true) String assetDescription
             ) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
@@ -81,12 +83,18 @@ public class StoreAssetsController {
             return ResponseEntity.status(response.getStatus()).body(response);
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
-                
+        
+        StoreAssets storeAsset = new StoreAssets();
+        storeAsset.setAssetFile(assetFile);
+        storeAsset.setAssetType(assetType);
+        storeAsset.setAssetDescription(assetDescription);
+        storeAsset.setStoreId(storeId);
+        
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Asset Filename: " + storeAsset.getAssetFile().getOriginalFilename());
         String logoStoragePath = fileStorageService.saveStoreAsset(storeAsset.getAssetFile(), storeId + "-" + storeAsset.getAssetType());
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Asset storagePath: " + logoStoragePath);
         storeAsset.setAssetUrl(storeAssetsBaseUrl + storeId + "-" + storeAsset.getAssetType());                
-        storeAsset.setStoreId(storeId);
+        
         storeAssetsRepository.save(storeAsset);
         
         response.setStatus(HttpStatus.OK);
