@@ -12,7 +12,9 @@ import com.kalsym.product.service.enums.StoreAssetType;
 import com.kalsym.product.service.model.ItemDiscount;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Transient;
+import org.hibernate.annotations.GenericGenerator;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -28,6 +30,8 @@ import org.springframework.web.multipart.MultipartFile;
 public class StoreAssets implements Serializable {
 
     @Id
+    @GeneratedValue(generator = "uuid2")
+    @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")   
     private String id;
     
     private String storeId;
