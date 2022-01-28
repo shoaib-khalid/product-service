@@ -10,6 +10,8 @@ import lombok.Setter;
 import lombok.ToString;
 import com.kalsym.product.service.enums.StoreAssetType;
 import com.kalsym.product.service.model.ItemDiscount;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Transient;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,6 +34,8 @@ public class StoreAssets implements Serializable {
 
     private String assetUrl;
     private String assetDescription;
+    
+    @Enumerated(EnumType.STRING)
     private StoreAssetType assetType;
     
     @Transient 
