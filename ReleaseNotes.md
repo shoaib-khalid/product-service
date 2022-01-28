@@ -2,7 +2,7 @@
 # product-service-3.4.5 | 268Jan-2022
 ##################################################
 Bug fix for store assets
-
+Bug fix for product variant by bulk
 
 ##################################################
 # product-service-3.4.4 | 26-Jan-2022

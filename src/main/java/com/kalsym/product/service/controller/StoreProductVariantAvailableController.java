@@ -222,6 +222,7 @@ public class StoreProductVariantAvailableController {
             }
         }
         
+        response.setData(productVariantAvailableRepository.findByProductId(productId));
         response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
@@ -298,6 +299,7 @@ public class StoreProductVariantAvailableController {
             productVariantAvailableRepository.save(variantAvailable);
         }
         
+        response.setData(productVariantAvailableRepository.findByProductId(productId));
         response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
@@ -389,6 +391,7 @@ public class StoreProductVariantAvailableController {
             productVariantAvailableRepository.save(productVariantAvailable);
         }       
         
+        response.setData(productVariantAvailableRepository.findByProductId(productId));
         response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
