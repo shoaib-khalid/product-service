@@ -89,11 +89,14 @@ public class StoreAssetsController {
         storeAsset.setAssetType(assetType);
         storeAsset.setAssetDescription(assetDescription);
         storeAsset.setStoreId(storeId);
-        
+                
+        String generatedUrl;       
+        generatedUrl = storeId + fileStorageService.generateRandomName();
+        String logoStoragePath = fileStorageService.saveMultipleStoreAssets(storeAsset.getAssetFile(), generatedUrl);
+                
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Asset Filename: " + storeAsset.getAssetFile().getOriginalFilename());
-        String logoStoragePath = fileStorageService.saveStoreAsset(storeAsset.getAssetFile(), storeId + "-" + storeAsset.getAssetType());
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Asset storagePath: " + logoStoragePath);
-        storeAsset.setAssetUrl(storeAssetsBaseUrl + storeId + "-" + storeAsset.getAssetType());                
+        storeAsset.setAssetUrl(storeAssetsBaseUrl + generatedUrl);                
         
         storeAssetsRepository.save(storeAsset);
         

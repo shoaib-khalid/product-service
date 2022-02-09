@@ -85,12 +85,45 @@ public class FileStorageService {
 
     }
     
-        public String getFileExtension(MultipartFile file) {
+    public String saveMultipleStoreAssets(MultipartFile file, String name) {
+        String logprefix = "saveStoreAssets";
+
+        try {
+            this.storeAssetStorageaPath = Paths.get(storeAssetStorageLocation).toAbsolutePath().normalize();
+            Files.createDirectories(this.storeAssetStorageaPath);
+        } catch (IOException e) {
+            Logger.application.error(ProductServiceApplication.VERSION, logprefix, "IOException: ", e);
+        }
+
+        // Normalize file name
+        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+
+        try {
+
+            // Copy file to the target location (Replacing existing file with the same name)
+            Path targetLocation = this.storeAssetStorageaPath.resolve(name);
+            long result = Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+            Logger.application.info(ProductServiceApplication.VERSION, logprefix, "result: " + result);
+
+            return fileName;
+        } catch (IOException e) {
+            Logger.application.error(ProductServiceApplication.VERSION, logprefix, "could not store file: ", e);
+            return null;
+        }
+
+    }
+    
+    public String getFileExtension(MultipartFile file) {
         String name = file.getOriginalFilename();
         int lastIndexOf = name.lastIndexOf(".");
         if (lastIndexOf == -1) {
             return ""; // empty extension
         }
         return name.substring(lastIndexOf);
+    }
+    
+    public String generateRandomName() {
+        String s = String.valueOf(System.currentTimeMillis());
+        return s;
     }
 }
