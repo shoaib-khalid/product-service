@@ -1,5 +1,11 @@
 ##################################################
-# product-service-3.4.5 | 268Jan-2022
+# product-service-3.4.6 | 9-Feb-2022
+##################################################
+Bug fix for delete store by id
+
+
+##################################################
+# product-service-3.4.5 | 28-Jan-2022
 ##################################################
 Bug fix for store assets
 Bug fix for product variant by bulk

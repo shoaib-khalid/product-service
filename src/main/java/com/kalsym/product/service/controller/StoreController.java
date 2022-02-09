@@ -557,7 +557,7 @@ public class StoreController {
         
         storeLiveChatService.deleteGroup(optStore.get().getLiveChatCsrGroupId());
         storeLiveChatService.deleteGroup(optStore.get().getLiveChatOrdersGroupId());
-
+        storeAssetRepository.deleteByStoreId(id);
         storeRepository.deleteById(id);
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "deleted store with id: " + id);
