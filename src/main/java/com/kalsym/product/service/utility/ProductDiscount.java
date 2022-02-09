@@ -46,7 +46,7 @@ public class ProductDiscount {
                 discountDetails = new ItemDiscount();
                 try {
                     //discountName, startDate, endDate, normalPriceItemOnly, discountAmount, calculationType, discountId
-                    Logger.application.error(Logger.pattern, ProductServiceApplication.VERSION, "discountDetails:"+itemDiscount.toString());
+                    Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, "discountDetails:"+itemDiscount.toString());
                     discountDetails.discountLabel = String.valueOf(itemDiscount[0]);
                     Date date1=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(String.valueOf(itemDiscount[1]));  
                     LocalDateTime startLocalTime = DateTimeUtil.convertToLocalDateTimeViaInstant(date1, ZoneId.of(regionCountry.getTimezone()) );

@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  *
@@ -21,4 +22,7 @@ public interface StoreAssetsRepository extends PagingAndSortingRepository<StoreA
     List<StoreAssets> findByStoreId(@Param("storeId") String storeId);
     
     List<StoreAssets> findByStoreIdAndAssetType(@Param("storeId") String storeId, @Param("storeAssetType") StoreAssetType storeAssetType);
+    
+    @Transactional
+    String deleteByStoreId(@Param("storeId") String storeId);
 }
