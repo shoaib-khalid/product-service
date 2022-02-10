@@ -60,6 +60,9 @@ public class StoreAssetsController {
     
     @Value("${store.banner.fnb.default.url:https://symplified.ai/store-assets/banner-fnb.png}")
     private String storeBannerFnbDefaultUrl;
+    
+    @Value("${store.banner.fnb.default.url:https://symplified.ai/store-assets/logo_symplified_bg.png}")
+    private String storeFavIconUrl;
             
     @PostMapping(path = {""}, name = "store-assets-post")
     @PreAuthorize("hasAnyAuthority('store-assets-post', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
@@ -100,9 +103,11 @@ public class StoreAssetsController {
         
         storeAssetsRepository.save(storeAsset);
         
+        List<StoreAssets> storeAssetsList = storeAssetsRepository.findByStoreId(storeId);        
+        storeAssetsList = SetDefaultAsset(optStore.get(), storeId, storeAssetsList);        
         response.setStatus(HttpStatus.OK);
-        storeAsset.setAssetFile(null);
-        response.setData(storeAsset);
+        response.setData(storeAssetsList);
+        
         return ResponseEntity.status(response.getStatus()).body(response);
     }
     
@@ -258,6 +263,16 @@ public class StoreAssetsController {
             defaultLogo.setAssetType(StoreAssetType.LogoUrl);
             defaultLogo.setStoreId(storeId);
             storeAssetsList.add(defaultLogo);
+        }
+        
+        List<StoreAssets> FavIconList = storeAssetsRepository.findByStoreIdAndAssetType(storeId, StoreAssetType.FaviconUrl);
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, "SetDefaultAsset", "FavIconList found:"+FavIconList.toString());        
+        if (FavIconList.isEmpty()) {
+            StoreAssets defaultFavIcon = new StoreAssets();
+            defaultFavIcon.setAssetUrl(storeFavIconUrl);                        
+            defaultFavIcon.setAssetType(StoreAssetType.FaviconUrl);
+            defaultFavIcon.setStoreId(storeId);
+            storeAssetsList.add(defaultFavIcon);
         }
         
         return storeAssetsList;

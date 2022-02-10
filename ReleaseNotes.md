@@ -1,4 +1,10 @@
 ##################################################
+# product-service-3.4.7 | 10-Feb-2022
+##################################################
+Bug fix for POST store assets
+
+
+##################################################
 # product-service-3.4.6 | 9-Feb-2022
 ##################################################
 Bug fix for delete store by id
@@ -42,7 +48,7 @@ id VARCHAR(50) PRIMARY KEY,
 storeId VARCHAR(50),
 assetUrl VARCHAR(200),
 assetDescription VARCHAR(200),
-assetType ENUM ('BannerDesktopUrl','BannerMobileUrl','FaviconUrl','DiscountBannerUrl','QrcodeUrl')
+assetType ENUM ('BannerDesktopUrl','BannerMobileUrl','FaviconUrl','DiscountBannerUrl','QrcodeUrl','LogoUrl')
 );
 
 ALTER TABLE store_discount ADD bannerId VARCHAR(50);
@@ -54,7 +60,7 @@ ALTER TABLE store_discount ADD bannerId VARCHAR(50);
 Add discount calculationType, discountAmount in store_discount_product table
 
 #DB Changes:
-ALTER TABLE store_discount_product ADD calculationType ENUM ('PERCENTAGE','FIX');
+ALTER TABLE store_discount_product ADD calculationType ENUM ('PERCENT','FIX');
 ALTER TABLE store_discount_product ADD discountAmount DECIMAL(10,2);
 
 Modify mysql function : fnGetItemDiscount()
