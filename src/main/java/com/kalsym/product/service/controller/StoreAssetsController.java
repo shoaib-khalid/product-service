@@ -61,14 +61,14 @@ public class StoreAssetsController {
     @Value("${store.banner.fnb.default.url:https://symplified.ai/store-assets/banner-fnb.png}")
     private String storeBannerFnbDefaultUrl;
     
-    @Value("${store.banner.fnb.default.url:https://symplified.ai/store-assets/logo_symplified_bg.png}")
+    @Value("${store.favicon.fnb.default.url:https://symplified.ai/store-assets/logo_symplified_bg.png}")
     private String storeFavIconUrl;
             
     @PostMapping(path = {""}, name = "store-assets-post")
     @PreAuthorize("hasAnyAuthority('store-assets-post', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> postStoreAssets(HttpServletRequest request,
             @PathVariable String storeId,
-            @RequestParam(name = "assetFile", required = true) MultipartFile assetFile,
+            @RequestParam(name = "assetFile", required = false) MultipartFile assetFile,
             @RequestParam(name = "assetType", required = true) StoreAssetType assetType,
             @RequestParam(name = "assetDescription", required = true) String assetDescription
             ) {
@@ -87,21 +87,23 @@ public class StoreAssetsController {
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
         
-        StoreAssets storeAsset = new StoreAssets();
-        storeAsset.setAssetFile(assetFile);
-        storeAsset.setAssetType(assetType);
-        storeAsset.setAssetDescription(assetDescription);
-        storeAsset.setStoreId(storeId);
-                
-        String generatedUrl;       
-        generatedUrl = storeId + fileStorageService.generateRandomName();
-        String logoStoragePath = fileStorageService.saveMultipleStoreAssets(storeAsset.getAssetFile(), generatedUrl);
-                
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Asset Filename: " + storeAsset.getAssetFile().getOriginalFilename());
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Asset storagePath: " + logoStoragePath);
-        storeAsset.setAssetUrl(storeAssetsBaseUrl + generatedUrl);                
-        
-        storeAssetsRepository.save(storeAsset);
+        if (assetFile!=null) {
+            StoreAssets storeAsset = new StoreAssets();
+            storeAsset.setAssetFile(assetFile);
+            storeAsset.setAssetType(assetType);
+            storeAsset.setAssetDescription(assetDescription);
+            storeAsset.setStoreId(storeId);
+
+            String generatedUrl;       
+            generatedUrl = storeId + fileStorageService.generateRandomName();
+            String logoStoragePath = fileStorageService.saveMultipleStoreAssets(storeAsset.getAssetFile(), generatedUrl);
+
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Asset Filename: " + storeAsset.getAssetFile().getOriginalFilename());
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Asset storagePath: " + logoStoragePath);
+            storeAsset.setAssetUrl(storeAssetsBaseUrl + generatedUrl);                
+
+            storeAssetsRepository.save(storeAsset);
+        }
         
         List<StoreAssets> storeAssetsList = storeAssetsRepository.findByStoreId(storeId);        
         storeAssetsList = SetDefaultAsset(optStore.get(), storeId, storeAssetsList);        
