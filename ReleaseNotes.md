@@ -1,7 +1,12 @@
 ##################################################
-# product-service-3.4.7 | 10-Feb-2022
+# product-service-3.4.7 | 11-Feb-2022
 ##################################################
 Bug fix for POST store assets
+
+##New config :
+store.favicon.easydukan.default.url=https://symplified.ai/store-assets/fav-icon-easydukan.png
+store.favicon.deliverin.default.url=https://symplified.ai/store-assets/fav-icon-deliverin.png
+store.favicon.symplified.default.url=https://symplified.ai/store-assets/fav-icon-symplified.png
 
 
 ##################################################

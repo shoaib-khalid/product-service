@@ -4,10 +4,12 @@ import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.model.store.StoreAssets;
 import com.kalsym.product.service.model.store.Store;
+import com.kalsym.product.service.model.RegionVertical;
 import com.kalsym.product.service.enums.StoreAssetType;
 import com.kalsym.product.service.repository.StoreAssetsRepository;
 import com.kalsym.product.service.repository.StoreRepository;
 import com.kalsym.product.service.repository.ProductRepository;
+import com.kalsym.product.service.repository.RegionVerticalRepository;
 import com.kalsym.product.service.service.FileStorageService;
 import com.kalsym.product.service.utility.Logger;
 import java.util.Optional;
@@ -49,6 +51,9 @@ public class StoreAssetsController {
     @Autowired
     StoreRepository storeRepository;
     
+    @Autowired
+    RegionVerticalRepository regionVerticalRepository;
+    
     @Value("${store.assets.url:https://symplified.ai/store-assets}")
     private String storeAssetsBaseUrl;
     
@@ -61,14 +66,20 @@ public class StoreAssetsController {
     @Value("${store.banner.fnb.default.url:https://symplified.ai/store-assets/banner-fnb.png}")
     private String storeBannerFnbDefaultUrl;
     
-    @Value("${store.favicon.fnb.default.url:https://symplified.ai/store-assets/logo_symplified_bg.png}")
-    private String storeFavIconUrl;
+    @Value("${store.favicon.pk.default.url:https://symplified.ai/store-assets/fav-icon-easydukan.png}")
+    private String storeFavIconUrlEasydukan;
+    
+    @Value("${store.favicon.my.default.url:https://symplified.ai/store-assets/fav-icon-deliverin.png}")
+    private String storeFavIconUrlDeliverin;
+    
+    @Value("${store.favicon.my.default.url:https://symplified.ai/store-assets/fav-icon-symplified.png}")
+    private String storeFavIconUrlSymplified;
             
     @PostMapping(path = {""}, name = "store-assets-post")
     @PreAuthorize("hasAnyAuthority('store-assets-post', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> postStoreAssets(HttpServletRequest request,
             @PathVariable String storeId,
-            @RequestParam(name = "assetFile", required = false) MultipartFile assetFile,
+            @RequestParam(name = "assetFile", required = true) MultipartFile assetFile,
             @RequestParam(name = "assetType", required = true) StoreAssetType assetType,
             @RequestParam(name = "assetDescription", required = true) String assetDescription
             ) {
@@ -87,23 +98,21 @@ public class StoreAssetsController {
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
         
-        if (assetFile!=null) {
-            StoreAssets storeAsset = new StoreAssets();
-            storeAsset.setAssetFile(assetFile);
-            storeAsset.setAssetType(assetType);
-            storeAsset.setAssetDescription(assetDescription);
-            storeAsset.setStoreId(storeId);
+        StoreAssets storeAsset = new StoreAssets();
+        storeAsset.setAssetFile(assetFile);
+        storeAsset.setAssetType(assetType);
+        storeAsset.setAssetDescription(assetDescription);
+        storeAsset.setStoreId(storeId);
 
-            String generatedUrl;       
-            generatedUrl = storeId + fileStorageService.generateRandomName();
-            String logoStoragePath = fileStorageService.saveMultipleStoreAssets(storeAsset.getAssetFile(), generatedUrl);
+        String generatedUrl;       
+        generatedUrl = storeId + fileStorageService.generateRandomName();
+        String logoStoragePath = fileStorageService.saveMultipleStoreAssets(storeAsset.getAssetFile(), generatedUrl);
 
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Asset Filename: " + storeAsset.getAssetFile().getOriginalFilename());
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Asset storagePath: " + logoStoragePath);
-            storeAsset.setAssetUrl(storeAssetsBaseUrl + generatedUrl);                
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Asset Filename: " + storeAsset.getAssetFile().getOriginalFilename());
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Asset storagePath: " + logoStoragePath);
+        storeAsset.setAssetUrl(storeAssetsBaseUrl + generatedUrl);                
 
-            storeAssetsRepository.save(storeAsset);
-        }
+        storeAssetsRepository.save(storeAsset);
         
         List<StoreAssets> storeAssetsList = storeAssetsRepository.findByStoreId(storeId);        
         storeAssetsList = SetDefaultAsset(optStore.get(), storeId, storeAssetsList);        
@@ -271,7 +280,21 @@ public class StoreAssetsController {
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, "SetDefaultAsset", "FavIconList found:"+FavIconList.toString());        
         if (FavIconList.isEmpty()) {
             StoreAssets defaultFavIcon = new StoreAssets();
-            defaultFavIcon.setAssetUrl(storeFavIconUrl);                        
+            Optional<RegionVertical> regionOpt = regionVerticalRepository.findById(storeInfo.getVerticalCode());
+            if (regionOpt.isPresent()) {  
+                RegionVertical regionVertical = regionOpt.get();
+                if (regionVertical.getDomain().contains("symplified")) {
+                    defaultFavIcon.setAssetUrl(storeFavIconUrlSymplified);                
+                } else if (regionVertical.getDomain().contains("deliverin")) {
+                    defaultFavIcon.setAssetUrl(storeFavIconUrlDeliverin);
+                } else if (regionVertical.getDomain().contains("easydukan")) {
+                    defaultFavIcon.setAssetUrl(storeFavIconUrlEasydukan);
+                } else {
+                    defaultFavIcon.setAssetUrl(storeFavIconUrlDeliverin);                
+                }
+            } else {
+                defaultFavIcon.setAssetUrl(storeFavIconUrlDeliverin);            
+            }
             defaultFavIcon.setAssetType(StoreAssetType.FaviconUrl);
             defaultFavIcon.setStoreId(storeId);
             storeAssetsList.add(defaultFavIcon);
