@@ -3,10 +3,12 @@ package com.kalsym.product.service.repository;
 import com.kalsym.product.service.enums.StoreAssetType;
 import com.kalsym.product.service.model.store.StoreAssets;
 import com.kalsym.product.service.model.product.ProductInventoryItem;
+import com.kalsym.product.service.model.store.StoreWithDetails;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -25,4 +27,17 @@ public interface StoreAssetsRepository extends PagingAndSortingRepository<StoreA
     
     @Transactional
     String deleteByStoreId(@Param("storeId") String storeId);
+    
+    
+    @Query(
+            " SELECT sa "
+            + "FROM StoreAssets sa "
+                    + " INNER JOIN Store s ON sa.storeId=s.id "
+            + "WHERE s.regionCountryId = :searchCountry AND sa.assetType = 'LogoUrl' "
+            + "ORDER BY s.created DESC"
+    )
+    Page<StoreAssets> findByCountry(
+            @Param("searchCountry") String searchCountry,
+            Pageable pageable
+    );
 }

@@ -31,8 +31,10 @@ import com.kalsym.product.service.model.store.StoreCommission;
 import com.kalsym.product.service.model.store.Client;
 
 import com.kalsym.product.service.model.livechatgroup.StoreCreationResponse;
+import com.kalsym.product.service.model.product.ProductWithDetails;
 import com.kalsym.product.service.model.store.StoreAsset;
 import com.kalsym.product.service.model.store.StoreAssets;
+import com.kalsym.product.service.model.store.object.TopStore;
 import com.kalsym.product.service.repository.StoreCategoryRepository;
 import com.kalsym.product.service.repository.StoreWithDetailsRepository;
 import com.kalsym.product.service.repository.StoreCommissionRepository;
@@ -772,7 +774,44 @@ public class StoreController {
         };
     }
     
-        
+    @GetMapping(path = {"/top"}, name = "stores-get", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('stores-get', 'all')")
+    public ResponseEntity<HttpResponse> getTopStore(HttpServletRequest request,
+            @RequestParam(required = false) String countryId) {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "", "");
+
+        try {            
+            
+            StoreWithDetails store = new StoreWithDetails();
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "countryId: " + countryId, "");
+            
+            int totalStore = storeRepository.getTotalStore(countryId);           
+            int page=0;
+            int pageSize=5;
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "page:0 pageSize:5" , "");
+            Pageable pageable = PageRequest.of(page, pageSize);
+           
+            Page<StoreAssets> fetchedPage = storeAssetsRepository.findByCountry(countryId, pageable);
+            List<StoreAssets> storeAssetList = fetchedPage.getContent();
+            
+            TopStore topStore = new TopStore();
+            topStore.setTotalStore(totalStore);
+            topStore.setTopStoreAsset(storeAssetList);
+            response.setData(topStore);
+            response.setStatus(HttpStatus.OK);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        } catch (Exception e) {
+            Logger.application.error(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Error fetching stores", "", e);
+
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+            response.setError(e.toString());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+
+    }
+    
     /*
     //not used anymore, will be removed
     @GetMapping(path = {"/qrcode/{storeId}"}, name = "stores-get", produces = "image/png")

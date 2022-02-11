@@ -3,11 +3,16 @@
 ##################################################
 Bug fix for POST store assets
 Bug fix for GET /stores/{storeId}/products to return all product even without inventories & category
+New function to get top store : GET /stores/top
 
 ##New config :
 store.favicon.easydukan.default.url=https://symplified.it/store-assets/fav-icon-easydukan.png
 store.favicon.deliverin.default.url=https://symplified.it/store-assets/fav-icon-deliverin.png
 store.favicon.symplified.default.url=https://symplified.it/store-assets/fav-icon-symplified.png
+
+##Database changes :
+ALTER TABLE `store` ADD created TIMESTAMP DEFAULT NOW();
+ALTER TABLE `store` ADD updated TIMESTAMP  DEFAULT NOW();
 
 
 ##################################################
