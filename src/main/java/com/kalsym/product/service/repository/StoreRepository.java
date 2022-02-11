@@ -33,6 +33,6 @@ public interface StoreRepository extends PagingAndSortingRepository<Store, Strin
     //public List<Store> getSnoozeExpired(
     //);
 
-    @Query(value = "SELECT COUNT(*) FROM Store WHERE regionCountryId = :searchCountryId", nativeQuery = true)
+    @Query(value = "SELECT COUNT(*) FROM store WHERE regionCountryId = :searchCountryId", nativeQuery = true)
     Integer getTotalStore(@Param("searchCountryId") String searchCountryId);
 }
