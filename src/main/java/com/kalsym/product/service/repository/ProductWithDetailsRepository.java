@@ -32,7 +32,7 @@ public interface ProductWithDetailsRepository extends PagingAndSortingRepository
 
     @Query(
             " SELECT pwd "
-            + "FROM ProductWithDetails pwd INNER JOIN "
+            + "FROM ProductWithDetails pwd LEFT JOIN "
             + "ProductInventoryWithDetails pi ON pwd.id = pi.productId "
             + "WHERE pwd.name LIKE CONCAT('%', :name ,'%') "
             + "AND pwd.seoName LIKE CONCAT('%', :seoName ,'%') "
@@ -41,12 +41,30 @@ public interface ProductWithDetailsRepository extends PagingAndSortingRepository
             + "AND pwd.categoryId LIKE CONCAT('%', :categoryId, '%') "
             + "GROUP BY pwd.id"
     )
-    Page<ProductWithDetails> findByNameOrSeoNameAscendingOrderByPrice(
+    Page<ProductWithDetails> findByNameOrSeoNameOrCategoryIdAscendingOrderByPrice(
             @Param("storeId") String storeId,
             @Param("name") String name,
             @Param("seoName") String seoName,
             @Param("status") List<String> status,
             @Param("categoryId") String categoryId,
+            Pageable pageable
+    );
+    
+    @Query(
+            " SELECT pwd "
+            + "FROM ProductWithDetails pwd LEFT JOIN "
+            + "ProductInventoryWithDetails pi ON pwd.id = pi.productId "
+            + "WHERE pwd.name LIKE CONCAT('%', :name ,'%') "
+            + "AND pwd.seoName LIKE CONCAT('%', :seoName ,'%') "
+            + "AND pwd.status IN :status "
+            + "AND pwd.storeId = :storeId "
+            + "GROUP BY pwd.id"
+    )
+    Page<ProductWithDetails> findByNameOrSeoNameAscendingOrderByPrice(
+            @Param("storeId") String storeId,
+            @Param("name") String name,
+            @Param("seoName") String seoName,
+            @Param("status") List<String> status,
             Pageable pageable
     );
 }

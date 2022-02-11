@@ -2,6 +2,7 @@
 # product-service-3.4.7 | 11-Feb-2022
 ##################################################
 Bug fix for POST store assets
+Bug fix for GET /stores/{storeId}/products to return all product even without inventories & category
 
 ##New config :
 store.favicon.easydukan.default.url=https://symplified.it/store-assets/fav-icon-easydukan.png

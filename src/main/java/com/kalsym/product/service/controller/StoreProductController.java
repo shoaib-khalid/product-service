@@ -131,7 +131,7 @@ public class StoreProductController {
             @RequestParam(defaultValue = "20") int pageSize) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " STATUS: " + status);
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " STATUS: " + status+" categoryId:"+categoryId);
 
         if (status == null) {
             status = new ArrayList();
@@ -195,8 +195,12 @@ public class StoreProductController {
         if (optRegion.isPresent()) {
             regionCountry = optRegion.get();
         }
-            
-        Page<ProductWithDetails> productWithPage = productWithDetailsRepository.findByNameOrSeoNameAscendingOrderByPrice(storeId, name, seoName, status, categoryId, pageable);
+        
+        Page<ProductWithDetails> productWithPage = null;
+        if (!categoryId.equals(""))
+            productWithPage = productWithDetailsRepository.findByNameOrSeoNameOrCategoryIdAscendingOrderByPrice(storeId, name, seoName, status, categoryId, pageable);        
+        else
+            productWithPage = productWithDetailsRepository.findByNameOrSeoNameAscendingOrderByPrice(storeId, name, seoName, status, pageable);        
         //Page<ProductWithDetails> productWithPage = productWithDetailsRepository.findAll(getStoreProductSpec(name, seoName, categoryId, status, productExample), pageable);
         List<ProductWithDetails> productList = productWithPage.getContent();
         
