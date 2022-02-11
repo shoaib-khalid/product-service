@@ -4,9 +4,9 @@
 Bug fix for POST store assets
 
 ##New config :
-store.favicon.easydukan.default.url=https://symplified.ai/store-assets/fav-icon-easydukan.png
-store.favicon.deliverin.default.url=https://symplified.ai/store-assets/fav-icon-deliverin.png
-store.favicon.symplified.default.url=https://symplified.ai/store-assets/fav-icon-symplified.png
+store.favicon.easydukan.default.url=https://symplified.ai/store-assets/fav-icon-easydukan.ico
+store.favicon.deliverin.default.url=https://symplified.ai/store-assets/fav-icon-deliverin.ico
+store.favicon.symplified.default.url=https://symplified.ai/store-assets/fav-icon-symplified.ico
 
 
 ##################################################
