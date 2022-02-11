@@ -67,13 +67,13 @@ public class StoreAssetsController {
     @Value("${store.banner.fnb.default.url:https://symplified.ai/store-assets/banner-fnb.png}")
     private String storeBannerFnbDefaultUrl;
     
-    @Value("${store.favicon.easydukan.default.url:https://symplified.ai/store-assets/fav-icon-easydukan.ico}")
+    @Value("${store.favicon.easydukan.default.url:https://symplified.it/store-assets/fav-icon-easydukan.png}")
     private String storeFavIconUrlEasydukan;
     
-    @Value("${store.favicon.deliverin.default.url:https://symplified.ai/store-assets/fav-icon-deliverin.ico}")
+    @Value("${store.favicon.deliverin.default.url:https://symplified.it/store-assets/fav-icon-deliverin.png}")
     private String storeFavIconUrlDeliverin;
     
-    @Value("${store.favicon.symplified.default.url:https://symplified.ai/store-assets/fav-icon-symplified.ico}")
+    @Value("${store.favicon.symplified.default.url:https://symplified.it/store-assets/fav-icon-symplified.png}")
     private String storeFavIconUrlSymplified;
             
     @PostMapping(path = {""}, name = "store-assets-post")
