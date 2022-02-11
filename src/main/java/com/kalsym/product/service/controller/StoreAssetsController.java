@@ -2,6 +2,7 @@ package com.kalsym.product.service.controller;
 
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.utility.HttpResponse;
+import com.kalsym.product.service.utility.StoreAssetsUtility;
 import com.kalsym.product.service.model.store.StoreAssets;
 import com.kalsym.product.service.model.store.Store;
 import com.kalsym.product.service.model.RegionVertical;
@@ -115,7 +116,11 @@ public class StoreAssetsController {
         storeAssetsRepository.save(storeAsset);
         
         List<StoreAssets> storeAssetsList = storeAssetsRepository.findByStoreId(storeId);        
-        storeAssetsList = SetDefaultAsset(optStore.get(), storeId, storeAssetsList);        
+        storeAssetsList = StoreAssetsUtility.SetDefaultAsset(optStore.get().getVerticalCode(), storeId, storeAssetsList,
+                storeAssetsRepository, regionVerticalRepository, 
+                storeBannerFnbDefaultUrl, storeBannerEcommerceDefaultUrl,
+                storeLogoDefaultUrl, 
+                storeFavIconUrlSymplified, storeFavIconUrlDeliverin, storeFavIconUrlEasydukan);        
         response.setStatus(HttpStatus.OK);
         response.setData(storeAssetsList);
         
@@ -143,7 +148,11 @@ public class StoreAssetsController {
         
         List<StoreAssets> storeAssetsList = storeAssetsRepository.findByStoreId(storeId);
         
-        storeAssetsList = SetDefaultAsset(optStore.get(), storeId, storeAssetsList);
+        storeAssetsList = StoreAssetsUtility.SetDefaultAsset(optStore.get().getVerticalCode(), storeId, storeAssetsList,
+                storeAssetsRepository, regionVerticalRepository, 
+                storeBannerFnbDefaultUrl, storeBannerEcommerceDefaultUrl,
+                storeLogoDefaultUrl, 
+                storeFavIconUrlSymplified, storeFavIconUrlDeliverin, storeFavIconUrlEasydukan); 
         
         response.setStatus(HttpStatus.OK);
         response.setData(storeAssetsList);
@@ -226,81 +235,6 @@ public class StoreAssetsController {
         response.setStatus(HttpStatus.OK);
         response.setData(storeAssetsRepository.save(storeAsset));
         return ResponseEntity.status(response.getStatus()).body(response);
-    }
-    
-    
-    private List<StoreAssets> SetDefaultAsset(Store storeInfo, String storeId, List<StoreAssets> storeAssetsList) {
-        List<StoreAssets> desktopBannerList = storeAssetsRepository.findByStoreIdAndAssetType(storeId, StoreAssetType.BannerDesktopUrl);
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, "SetDefaultAsset", "desktopBannerList found:"+desktopBannerList.toString());
-        if (desktopBannerList.isEmpty()) {
-            StoreAssets defaultBanner = new StoreAssets();
-            if (storeInfo.getVerticalCode()!=null) {                
-                if (storeInfo.getVerticalCode().toUpperCase().contains("FNB")) {
-                    defaultBanner.setAssetUrl(storeBannerFnbDefaultUrl);                
-                } else {
-                    defaultBanner.setAssetUrl(storeBannerEcommerceDefaultUrl);                
-                }
-            } else {
-                defaultBanner.setAssetUrl(storeBannerEcommerceDefaultUrl);            
-            }
-            defaultBanner.setAssetType(StoreAssetType.BannerDesktopUrl);
-            defaultBanner.setStoreId(storeId);
-            storeAssetsList.add(defaultBanner);
-        }
-        
-        List<StoreAssets> mobileBannerList = storeAssetsRepository.findByStoreIdAndAssetType(storeId, StoreAssetType.BannerMobileUrl);
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, "SetDefaultAsset", "mobileBannerList found:"+mobileBannerList.toString());        
-        if (mobileBannerList.isEmpty()) {
-            StoreAssets defaultBanner = new StoreAssets();
-            if (storeInfo.getVerticalCode()!=null) {                
-                if (storeInfo.getVerticalCode().toUpperCase().contains("FNB")) {
-                    defaultBanner.setAssetUrl(storeBannerFnbDefaultUrl);                
-                } else {
-                    defaultBanner.setAssetUrl(storeBannerEcommerceDefaultUrl);                
-                }
-            } else {
-                defaultBanner.setAssetUrl(storeBannerEcommerceDefaultUrl);            
-            }
-            defaultBanner.setAssetType(StoreAssetType.BannerMobileUrl);
-            defaultBanner.setStoreId(storeId);
-            storeAssetsList.add(defaultBanner);
-        }
-        
-        List<StoreAssets> logoList = storeAssetsRepository.findByStoreIdAndAssetType(storeId, StoreAssetType.LogoUrl);
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, "SetDefaultAsset", "logoList found:"+logoList.toString());        
-        if (logoList.isEmpty()) {
-            StoreAssets defaultLogo = new StoreAssets();
-            defaultLogo.setAssetUrl(storeLogoDefaultUrl);                        
-            defaultLogo.setAssetType(StoreAssetType.LogoUrl);
-            defaultLogo.setStoreId(storeId);
-            storeAssetsList.add(defaultLogo);
-        }
-        
-        List<StoreAssets> FavIconList = storeAssetsRepository.findByStoreIdAndAssetType(storeId, StoreAssetType.FaviconUrl);
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, "SetDefaultAsset", "FavIconList found:"+FavIconList.toString());        
-        if (FavIconList.isEmpty()) {
-            StoreAssets defaultFavIcon = new StoreAssets();
-            Optional<RegionVertical> regionOpt = regionVerticalRepository.findById(storeInfo.getVerticalCode());
-            if (regionOpt.isPresent()) {  
-                RegionVertical regionVertical = regionOpt.get();
-                if (regionVertical.getDomain().contains("symplified")) {
-                    defaultFavIcon.setAssetUrl(storeFavIconUrlSymplified);                
-                } else if (regionVertical.getDomain().contains("deliverin")) {
-                    defaultFavIcon.setAssetUrl(storeFavIconUrlDeliverin);
-                } else if (regionVertical.getDomain().contains("easydukan")) {
-                    defaultFavIcon.setAssetUrl(storeFavIconUrlEasydukan);
-                } else {
-                    defaultFavIcon.setAssetUrl(storeFavIconUrlDeliverin);                
-                }
-            } else {
-                defaultFavIcon.setAssetUrl(storeFavIconUrlDeliverin);            
-            }
-            defaultFavIcon.setAssetType(StoreAssetType.FaviconUrl);
-            defaultFavIcon.setStoreId(storeId);
-            storeAssetsList.add(defaultFavIcon);
-        }
-        
-        return storeAssetsList;
-    }
+    }        
 
 }

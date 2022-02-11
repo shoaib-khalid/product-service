@@ -32,6 +32,7 @@ import com.kalsym.product.service.model.store.Client;
 
 import com.kalsym.product.service.model.livechatgroup.StoreCreationResponse;
 import com.kalsym.product.service.model.store.StoreAsset;
+import com.kalsym.product.service.model.store.StoreAssets;
 import com.kalsym.product.service.repository.StoreCategoryRepository;
 import com.kalsym.product.service.repository.StoreWithDetailsRepository;
 import com.kalsym.product.service.repository.StoreCommissionRepository;
@@ -46,6 +47,7 @@ import com.kalsym.product.service.utility.Logger;
 import com.kalsym.product.service.utility.MultipartImage;
 import com.kalsym.product.service.service.WhatsappService;
 import com.kalsym.product.service.service.DeliveryService;
+import com.kalsym.product.service.utility.StoreAssetsUtility;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -167,6 +169,15 @@ public class StoreController {
     @Autowired
     RegionVerticalRepository regionVerticalRepository;
     
+    @Value("${store.favicon.pk.default.url:https://symplified.ai/store-assets/fav-icon-easydukan.ico}")
+    private String storeFavIconUrlEasydukan;
+    
+    @Value("${store.favicon.my.default.url:https://symplified.ai/store-assets/fav-icon-deliverin.ico}")
+    private String storeFavIconUrlDeliverin;
+    
+    @Value("${store.favicon.my.default.url:https://symplified.ai/store-assets/fav-icon-symplified.ico}")
+    private String storeFavIconUrlSymplified;
+    
     @GetMapping(path = {""}, name = "stores-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('stores-get', 'all')")
     public ResponseEntity<HttpResponse> getStore(HttpServletRequest request,
@@ -243,9 +254,19 @@ public class StoreController {
             response.setStatus(HttpStatus.NOT_FOUND);
             return ResponseEntity.status(response.getStatus()).body(response);
         }
-       
+        
+        StoreWithDetails storeWithDetails = optStore.get();       
+        List<StoreAssets> storeAssetsList = storeAssetsRepository.findByStoreId(id);
+        
+        storeAssetsList = StoreAssetsUtility.SetDefaultAsset(storeWithDetails.getVerticalCode(), id, storeAssetsList,
+                storeAssetsRepository, regionVerticalRepository, 
+                storeBannerFnbDefaultUrl, storeBannerEcommerceDefaultUrl,
+                storeLogoDefaultUrl, 
+                storeFavIconUrlSymplified, storeFavIconUrlDeliverin, storeFavIconUrlEasydukan);        
+        storeWithDetails.setStoreAssets(storeAssetsList);
+        
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND id: " + id);
-        response.setData(optStore.get());
+        response.setData(storeWithDetails);
         response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
