@@ -2,6 +2,7 @@ package com.kalsym.product.service.repository;
 
 import com.kalsym.product.service.enums.StoreAssetType;
 import com.kalsym.product.service.model.store.StoreAssets;
+import com.kalsym.product.service.model.store.Store;
 import com.kalsym.product.service.model.product.ProductInventoryItem;
 import com.kalsym.product.service.model.store.StoreWithDetails;
 import java.util.List;
@@ -32,7 +33,7 @@ public interface StoreAssetsRepository extends PagingAndSortingRepository<StoreA
     @Query(
             " SELECT sa "
             + "FROM StoreAssets sa "
-                    + " INNER JOIN store s ON sa.storeId=s.id "
+                    + " INNER JOIN Store s ON sa.storeId=s.id "
             + "WHERE s.regionCountryId = :searchCountry AND sa.assetType = 'LogoUrl' "
             + "ORDER BY s.created DESC"
     )
