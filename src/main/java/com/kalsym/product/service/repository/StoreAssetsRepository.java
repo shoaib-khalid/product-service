@@ -32,7 +32,7 @@ public interface StoreAssetsRepository extends PagingAndSortingRepository<StoreA
     @Query(
             " SELECT sa "
             + "FROM StoreAssets sa "
-                    + " INNER JOIN Store s ON sa.storeId=s.id "
+                    + " INNER JOIN store s ON sa.storeId=s.id "
             + "WHERE s.regionCountryId = :searchCountry AND sa.assetType = 'LogoUrl' "
             + "ORDER BY s.created DESC"
     )
