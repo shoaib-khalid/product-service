@@ -120,9 +120,15 @@ public class StoreAssetsController {
                 storeAssetsRepository, regionVerticalRepository, 
                 storeBannerFnbDefaultUrl, storeBannerEcommerceDefaultUrl,
                 storeLogoDefaultUrl, 
-                storeFavIconUrlSymplified, storeFavIconUrlDeliverin, storeFavIconUrlEasydukan);        
+                storeFavIconUrlSymplified, storeFavIconUrlDeliverin, storeFavIconUrlEasydukan); 
+        List<StoreAssets> storeAssetsListWithoutFile = new ArrayList<>();
+        for (int i=0;i<storeAssetsList.size();i++) {
+            StoreAssets storeAssetsWithoutFile = storeAssetsList.get(i);
+            storeAssetsWithoutFile.setAssetFile(null);
+            storeAssetsListWithoutFile.add(storeAssetsWithoutFile);
+        }
         response.setStatus(HttpStatus.OK);
-        response.setData(storeAssetsList);
+        response.setData(storeAssetsListWithoutFile);
         
         return ResponseEntity.status(response.getStatus()).body(response);
     }
@@ -154,8 +160,15 @@ public class StoreAssetsController {
                 storeLogoDefaultUrl, 
                 storeFavIconUrlSymplified, storeFavIconUrlDeliverin, storeFavIconUrlEasydukan); 
         
+        List<StoreAssets> storeAssetsListWithoutFile = new ArrayList<>();
+        for (int i=0;i<storeAssetsList.size();i++) {
+            StoreAssets storeAssetsWithoutFile = storeAssetsList.get(i);
+            storeAssetsWithoutFile.setAssetFile(null);
+            storeAssetsListWithoutFile.add(storeAssetsWithoutFile);
+        }
         response.setStatus(HttpStatus.OK);
-        response.setData(storeAssetsList);
+        response.setData(storeAssetsListWithoutFile);
+        
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 

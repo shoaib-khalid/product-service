@@ -15,6 +15,7 @@ ALTER TABLE `store` ADD created TIMESTAMP DEFAULT NOW();
 ALTER TABLE `store` ADD updated TIMESTAMP  DEFAULT NOW();
 ALTER TABLE `product` ADD vehicleType ENUM('MOTORCYCLE','CAR','VAN','PICKUP','LARGEVAN','SMALLLORRY','MEDIUMLORRY','LARGELORRY');
 
+
 ##################################################
 # product-service-3.4.6 | 9-Feb-2022
 ##################################################
