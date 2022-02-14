@@ -1,5 +1,5 @@
 ##################################################
-# product-service-3.4.7 | 11-Feb-2022
+# product-service-3.4.7 | 14-Feb-2022
 ##################################################
 Bug fix for POST store assets
 Bug fix for GET /stores/{storeId}/products to return all product even without inventories & category
@@ -13,7 +13,7 @@ store.favicon.symplified.default.url=https://symplified.it/store-assets/fav-icon
 ##Database changes :
 ALTER TABLE `store` ADD created TIMESTAMP DEFAULT NOW();
 ALTER TABLE `store` ADD updated TIMESTAMP  DEFAULT NOW();
-
+ALTER TABLE `product` ADD vehicleType ENUM('MOTORCYCLE','CAR','VAN','PICKUP','LARGEVAN','SMALLLORRY','MEDIUMLORRY','LARGELORRY');
 
 ##################################################
 # product-service-3.4.6 | 9-Feb-2022

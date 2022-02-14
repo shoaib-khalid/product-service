@@ -19,6 +19,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import com.kalsym.product.service.enums.VehicleType;
 
 /**
  *
@@ -74,7 +75,9 @@ public class Product implements Serializable {
 
     @UpdateTimestamp
     private LocalDateTime updated;
-
+    
+    private VehicleType vehicleType;
+     
     public void update(Product product) {
         if (null != product.getName()) {
             name = product.getName();
@@ -130,7 +133,9 @@ public class Product implements Serializable {
             isPackage = product.getIsPackage();
         }
         
-
+         if (null != product.getVehicleType()) {
+            vehicleType = product.getVehicleType();
+        }
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.kalsym.product.service.model.product;
 
+import com.kalsym.product.service.enums.VehicleType;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -78,7 +79,9 @@ public class ProductWithDetails implements Serializable {
 
     @UpdateTimestamp
     private LocalDateTime updated;
-
+    
+    private VehicleType vehicleType;
+    
     @OneToMany(cascade = CascadeType.ALL,
             fetch = FetchType.LAZY)
     @JoinColumn(name = "productId")
