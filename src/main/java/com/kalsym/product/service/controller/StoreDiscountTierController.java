@@ -144,22 +144,27 @@ public class StoreDiscountTierController {
                  response.setMessage(errorMsg);
                  return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(response);
             }
-            allDiscountTier = storeDiscountTierRepository.findByStoreDiscountId(discountId);                        
+            allDiscountTier = storeDiscountTierRepository.findByStoreDiscountId(discountId); 
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Current discount tier:"+allDiscountTier);
             //add into existing record and sort
-            allDiscountTier.add(storeDiscountTier);
-            Collections.sort(allDiscountTier);
+            if (allDiscountTier!=null) {
+                allDiscountTier.add(storeDiscountTier);
+                Collections.sort(allDiscountTier);            
             
-            //save again all tier after sort
-            for (int i=0;i<allDiscountTier.size();i++) {
-                StoreDiscountTier currentTier = allDiscountTier.get(i);
-                currentTier.setEndTotalSalesAmount(9999999.00);
-                storeDiscountTierRepository.save(currentTier);
-                if (i>0) {
-                    StoreDiscountTier prevtier = allDiscountTier.get(i-1);
-                    Double endAmount = currentTier.getStartTotalSalesAmount()-0.01;
-                    prevtier.setEndTotalSalesAmount(endAmount);
-                    storeDiscountTierRepository.save(prevtier);
+                //save again all tier after sort
+                for (int i=0;i<allDiscountTier.size();i++) {
+                    StoreDiscountTier currentTier = allDiscountTier.get(i);
+                    currentTier.setEndTotalSalesAmount(9999999.00);
+                    storeDiscountTierRepository.save(currentTier);
+                    if (i>0) {
+                        StoreDiscountTier prevtier = allDiscountTier.get(i-1);
+                        Double endAmount = currentTier.getStartTotalSalesAmount()-0.01;
+                        prevtier.setEndTotalSalesAmount(endAmount);
+                        storeDiscountTierRepository.save(prevtier);
+                    }
                 }
+            } else {
+                storeDiscountTierRepository.save(storeDiscountTier);
             }
         } else {        
             //check for overlap
