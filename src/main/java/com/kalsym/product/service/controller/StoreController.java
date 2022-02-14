@@ -261,8 +261,10 @@ public class StoreController {
             customPageable.numberOfElements = fetchedPage.getNumberOfElements();
             customPageable.first  = fetchedPage.isFirst();
             customPageable.empty = fetchedPage.isEmpty();
-        
+            
+            response.setData(customPageable);
             response.setStatus(HttpStatus.OK);
+            
             return ResponseEntity.status(response.getStatus()).body(response);
         } catch (Exception e) {
             Logger.application.error(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Error fetching stores", "", e);
