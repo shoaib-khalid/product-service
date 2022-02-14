@@ -16,6 +16,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -23,6 +24,7 @@ import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
@@ -123,6 +125,9 @@ public class StoreWithDetails implements Serializable {
             fetch = FetchType.LAZY)
     @JoinColumn(name = "storeId", insertable = false, updatable = false, nullable = true)
     private List<StoreAssets> storeAssets;
+    
+    @Transient 
+    private Integer completionPercentage;
     
     public void update(StoreWithDetails store) {
 

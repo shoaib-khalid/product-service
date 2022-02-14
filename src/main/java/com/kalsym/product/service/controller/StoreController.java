@@ -2,6 +2,8 @@ package com.kalsym.product.service.controller;
 
 import com.kalsym.product.service.service.StoreSubdomainHandler;
 import com.kalsym.product.service.ProductServiceApplication;
+import com.kalsym.product.service.enums.DiscountCalculationType;
+import com.kalsym.product.service.model.ItemDiscount;
 import com.kalsym.product.service.model.MySQLUserDetails;
 import com.kalsym.product.service.model.RegionVertical;
 import com.kalsym.product.service.model.store.StoreCategory;
@@ -31,9 +33,11 @@ import com.kalsym.product.service.model.store.StoreCommission;
 import com.kalsym.product.service.model.store.Client;
 
 import com.kalsym.product.service.model.livechatgroup.StoreCreationResponse;
+import com.kalsym.product.service.model.product.ProductInventoryWithDetails;
 import com.kalsym.product.service.model.product.ProductWithDetails;
 import com.kalsym.product.service.model.store.StoreAsset;
 import com.kalsym.product.service.model.store.StoreAssets;
+import com.kalsym.product.service.model.store.object.CustomPageable;
 import com.kalsym.product.service.model.store.object.TopStore;
 import com.kalsym.product.service.repository.StoreCategoryRepository;
 import com.kalsym.product.service.repository.StoreWithDetailsRepository;
@@ -49,6 +53,7 @@ import com.kalsym.product.service.utility.Logger;
 import com.kalsym.product.service.utility.MultipartImage;
 import com.kalsym.product.service.service.WhatsappService;
 import com.kalsym.product.service.service.DeliveryService;
+import com.kalsym.product.service.utility.ProductDiscount;
 import com.kalsym.product.service.utility.StoreAssetsUtility;
 
 import java.util.ArrayList;
@@ -225,8 +230,38 @@ public class StoreController {
                 pageable = PageRequest.of(page, pageSize, Sort.by(sortByCol).descending());
            
             Page<StoreWithDetails> fetchedPage = storeWithDetailsRepository.findAll(getStoreSpec(verticalCode, domain, storeExample), pageable);
-                    
-            response.setData(fetchedPage);
+
+            //extract result to set default assets
+            List<StoreWithDetails> storeList = fetchedPage.getContent();        
+            StoreWithDetails[] storeWithDetailsList = new StoreWithDetails[storeList.size()];
+            for (int x=0;x<storeList.size();x++) {
+                //check for item discount in hashmap
+                StoreWithDetails storeWithDetails = storeList.get(x);
+                List<StoreAssets> storeAssetsList = storeAssetsRepository.findByStoreId(storeWithDetails.getId());
+                storeAssetsList = StoreAssetsUtility.SetDefaultAsset(storeWithDetails.getVerticalCode(), storeWithDetails.getId(), storeAssetsList,
+                storeAssetsRepository, regionVerticalRepository, 
+                storeBannerFnbDefaultUrl, storeBannerEcommerceDefaultUrl,
+                storeLogoDefaultUrl, 
+                storeFavIconUrlSymplified, storeFavIconUrlDeliverin, storeFavIconUrlEasydukan);        
+                storeWithDetails.setStoreAssets(storeAssetsList);
+                
+                storeWithDetailsList[x]=storeWithDetails;
+            }
+
+            //create custom pageable object with modified content
+            CustomPageable customPageable = new CustomPageable();
+            customPageable.content = storeWithDetailsList;
+            customPageable.pageable = fetchedPage.getPageable();
+            customPageable.totalPages = fetchedPage.getTotalPages();
+            customPageable.totalElements = fetchedPage.getTotalElements();
+            customPageable.last = fetchedPage.isLast();
+            customPageable.size = fetchedPage.getSize();
+            customPageable.number = fetchedPage.getNumber();
+            customPageable.sort = fetchedPage.getSort();        
+            customPageable.numberOfElements = fetchedPage.getNumberOfElements();
+            customPageable.first  = fetchedPage.isFirst();
+            customPageable.empty = fetchedPage.isEmpty();
+        
             response.setStatus(HttpStatus.OK);
             return ResponseEntity.status(response.getStatus()).body(response);
         } catch (Exception e) {
