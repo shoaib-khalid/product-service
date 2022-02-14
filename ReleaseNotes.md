@@ -4,6 +4,7 @@
 Bug fix for POST store assets
 Bug fix for GET /stores/{storeId}/products to return all product even without inventories & category
 New function to get top store : GET /stores/top
+Bug fix for POST store assets :  generateRandomName() filename
 
 ##New config :
 store.favicon.easydukan.default.url=https://symplified.it/store-assets/fav-icon-easydukan.png

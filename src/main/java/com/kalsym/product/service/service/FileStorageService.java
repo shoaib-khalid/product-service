@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Random;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -123,7 +124,15 @@ public class FileStorageService {
     }
     
     public String generateRandomName() {
-        String s = String.valueOf(System.currentTimeMillis());
+        int min = 273; // hex equivalant 1
+        int max = 4095; // hex equivalant f
+
+        Random r = new Random();
+        int decRand = r.nextInt(max - min + 1) + min;
+        //    System.err.println(decRand);
+        String hexRand = Integer.toHexString(decRand);
+        
+        String s = String.valueOf(System.currentTimeMillis()) + hexRand;
         return s;
     }
 }
