@@ -53,9 +53,16 @@ public class StoreDeliveryDetailsController {
             return ResponseEntity.status(response.getStatus()).body(response);
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
-
+        
+        Optional<StoreDeliveryDetail> storeDeliveryDetails = storeTimingsRepository.findById(storeId);
+        if (storeDeliveryDetails.isPresent()) {
+            if (storeDeliveryDetails.get().getStoreDeliveryPeriodList().isEmpty()) {
+                storeDeliveryDetails.get().setStoreDeliveryPeriodList(StoreDeliveryPeriodsController.SetDefaultDeliveryOptions(storeId));
+            }
+        }   
+        
         response.setStatus(HttpStatus.OK);
-        response.setData(storeTimingsRepository.findById(storeId));
+        response.setData(storeDeliveryDetails.get());
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 

@@ -1,4 +1,24 @@
 ##################################################
+# product-service-3.5.0 | 17-Feb-2022
+##################################################
+New function to get store supported delivery period:
+GET & POST /stores/{storeId}/deliveryperiods
+
+delivery period available:
+EXPRESS - within 2 hours
+FOURHOURS - within 4 hours
+NEXYTDAY - - next day delivery
+FOURDAYS - within 4 days
+
+##Database changes :
+CREATE store_delivery_period (
+id varchar(50),
+storeId varchar(50),
+deliveryPeriod ENUM('EXPRESS','FOURHOURS','NEXTDAY','FOURDAYS');
+);
+
+
+##################################################
 # product-service-3.4.7 | 14-Feb-2022
 ##################################################
 Bug fix for POST store assets
