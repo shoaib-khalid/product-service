@@ -14,7 +14,8 @@ FOURDAYS - within 4 days
 CREATE TABLE store_delivery_period (
 id VARCHAR(50),
 storeId VARCHAR(50),
-deliveryPeriod ENUM('EXPRESS','FOURHOURS','NEXTDAY','FOURDAYS')
+deliveryPeriod ENUM('EXPRESS','FOURHOURS','NEXTDAY','FOURDAYS'),
+enabled TINYINT(1)
 );
 
 
