@@ -11,10 +11,10 @@ NEXYTDAY - - next day delivery
 FOURDAYS - within 4 days
 
 ##Database changes :
-CREATE store_delivery_period (
-id varchar(50),
-storeId varchar(50),
-deliveryPeriod ENUM('EXPRESS','FOURHOURS','NEXTDAY','FOURDAYS');
+CREATE TABLE store_delivery_period (
+id VARCHAR(50),
+storeId VARCHAR(50),
+deliveryPeriod ENUM('EXPRESS','FOURHOURS','NEXTDAY','FOURDAYS')
 );
 
 

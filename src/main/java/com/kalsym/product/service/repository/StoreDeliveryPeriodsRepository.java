@@ -24,7 +24,7 @@ public interface StoreDeliveryPeriodsRepository extends PagingAndSortingReposito
     
     @Transactional 
     @Modifying
-    @Query("UPDATE StoreDeliveryOption m SET m.enabled = :searchDeliveryEnabled WHERE m.storeId = :searchStoreId AND m.deliveryOption = :searchDeliveryOption") 
+    @Query("UPDATE StoreDeliveryPeriod m SET m.enabled = :searchDeliveryEnabled WHERE m.storeId = :searchStoreId AND m.deliveryPeriod = :searchDeliveryOption") 
     void UpdateStoreDeliveryOption(
             @Param("searchStoreId") String searchStoreId,
             @Param("searchDeliveryOption") DeliveryPeriod searchDeliveryOption,
