@@ -1,8 +1,13 @@
 ##################################################
 # product-service-3.5.1 | 18-Feb-2022
 ##################################################
-add new field in discount : isExpired
+1. add new field in discount : isExpired
 if discount end date < current date, then isExpired=true
+
+2. Add new field : displayAddress in store table
+
+##Database changes :
+ALTER TABLE `store` ADD displayAddress VARCHAR(1000);
 
 
 ##################################################
