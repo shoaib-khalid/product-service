@@ -140,6 +140,13 @@ public class StoreDiscountController {
             discount.setNormalPriceItemOnly(storeDiscount.getNormalPriceItemOnly());
             discount.setDiscountBanner(storeDiscount.getDiscountBanner());
             
+            Date currentDate = new Date();
+            if (currentDate.after(storeDiscount.getEndDate())) {
+                discount.setIsExpired(Boolean.TRUE);
+            } else {
+                discount.setIsExpired(Boolean.FALSE);
+            }
+            
             //convert time to merchant timezone
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "StartDate:"+storeDiscount.getStartDate().toString());
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "EndDate:"+storeDiscount.getEndDate().toString());
@@ -233,6 +240,13 @@ public class StoreDiscountController {
             discount.setNormalPriceItemOnly(storeDiscount.getNormalPriceItemOnly());
             discount.setDiscountBanner(storeDiscount.getDiscountBanner());
             
+            Date currentDate = new Date();
+            if (currentDate.after(storeDiscount.getEndDate())) {
+                discount.setIsExpired(Boolean.TRUE);
+            } else {
+                discount.setIsExpired(Boolean.FALSE);
+            }
+            
             //convert time to merchant timezone
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, storeDiscount.getId()+" -> StartDate:"+storeDiscount.getStartDate().toString());
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, storeDiscount.getId()+" -> EndDate:"+storeDiscount.getEndDate().toString());
@@ -305,6 +319,13 @@ public class StoreDiscountController {
         discount.setMaxDiscountAmount(storeDiscount.getMaxDiscountAmount());
         discount.setDiscountBanner(storeDiscount.getDiscountBanner());
         
+        Date currentDate = new Date();
+        if (currentDate.after(storeDiscount.getEndDate())) {
+            discount.setIsExpired(Boolean.TRUE);
+        } else {
+            discount.setIsExpired(Boolean.FALSE);
+        }
+            
         //convert time to merchant timezone
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "StartDate:"+storeDiscount.getStartDate().toString());
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "EndDate:"+storeDiscount.getEndDate().toString());

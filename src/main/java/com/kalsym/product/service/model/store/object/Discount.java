@@ -61,4 +61,6 @@ public class Discount {
     private StoreAssets discountBanner;
     
     private MultipartFile bannerFile;
+    
+    private Boolean isExpired;
 }

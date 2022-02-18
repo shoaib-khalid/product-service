@@ -1,4 +1,11 @@
 ##################################################
+# product-service-3.5.1 | 18-Feb-2022
+##################################################
+add new field in discount : isExpired
+if discount end date < current date, then isExpired=true
+
+
+##################################################
 # product-service-3.5.0 | 17-Feb-2022
 ##################################################
 New function to get store supported delivery period:
