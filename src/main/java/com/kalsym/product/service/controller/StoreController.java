@@ -390,7 +390,7 @@ public class StoreController {
                 
                 MultipartFile multipartFile = new MultipartImage(baos.toByteArray(), savedStore.getId() + "-qrcode", "QRCODE", "PNG", 0);
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Qrcode Filename: " + multipartFile.getOriginalFilename());
-                String qrCodeUrl = storeAssetsBaseUrl + savedStore.getId() + "-qrcode";
+                String qrCodeUrl = savedStore.getId() + "-qrcode";
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Qrcode Url: " + qrCodeUrl);
                 
                 StoreAssets storeAsset = new StoreAssets();
@@ -401,7 +401,7 @@ public class StoreController {
 
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Asset Filename: " + storeAsset.getAssetFile().getOriginalFilename());
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Asset storagePath: " + qrCodeStoragePath);
-                storeAsset.setAssetUrl(qrCodeUrl);                
+                storeAsset.setAssetUrl(storeAssetsBaseUrl + qrCodeUrl);                
                 storeAssetsRepository.save(storeAsset);
                               
                 StoreCreationResponse scrCsr = storeLiveChatService.createGroup(domain + "-csr");
@@ -551,7 +551,7 @@ public class StoreController {
                  
                 MultipartFile multipartFile = new MultipartImage(baos.toByteArray(), store.getId() + "-qrcode", "QRCODE", "PNG", 0);
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Qrcode Filename: " + multipartFile.getOriginalFilename());
-                String qrCodeUrl = storeAssetsBaseUrl + store.getId() + "-qrcode";
+                String qrCodeUrl = store.getId() + "-qrcode";
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Qrcode Url: " + qrCodeUrl);
                 
                 List<StoreAssets> storeAssetList = storeAssetsRepository.findByStoreIdAndAssetType(store.getId(), StoreAssetType.QrcodeUrl);
@@ -564,8 +564,11 @@ public class StoreController {
                     storeAsset.setAssetType(StoreAssetType.QrcodeUrl);
                 }
                 storeAsset.setAssetFile(multipartFile);
-                storeAsset.setAssetUrl(qrCodeUrl);
+                storeAsset.setAssetUrl(storeAssetsBaseUrl + qrCodeUrl);
                 storeAssetsRepository.save(storeAsset);
+                
+                String qrCodeStoragePath = fileStorageService.saveMultipleStoreAssets(storeAsset.getAssetFile(), qrCodeUrl);
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "qrCodeStoragePath: " + qrCodeStoragePath);
             }
             
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "updated store with id: " + id);
