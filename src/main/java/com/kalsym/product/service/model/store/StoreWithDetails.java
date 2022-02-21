@@ -195,6 +195,10 @@ public class StoreWithDetails implements Serializable {
         if (null != store.getLongitude()) {
             longitude = store.getLongitude();
         }
+        
+        if (null != store.getDisplayAddress()) {
+            displayAddress = store.getDisplayAddress();
+        }
 
     }
 }

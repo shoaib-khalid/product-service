@@ -169,6 +169,10 @@ public class Store implements Serializable {
         if (null != store.getGoogleAnalyticId()) {
             googleAnalyticId = store.getGoogleAnalyticId();
         }
+        
+        if (null != store.getDisplayAddress()) {
+            displayAddress = store.getDisplayAddress();
+        }
     }
 
 }
