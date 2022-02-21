@@ -7,6 +7,7 @@ import com.kalsym.product.service.model.ItemDiscount;
 import com.kalsym.product.service.model.MySQLUserDetails;
 import com.kalsym.product.service.model.RegionVertical;
 import com.kalsym.product.service.model.store.StoreCategory;
+import com.kalsym.product.service.enums.StoreAssetType;
 import com.kalsym.product.service.repository.ProductRepository;
 import com.kalsym.product.service.repository.StoreRepository;
 import com.kalsym.product.service.utility.HttpResponse;
@@ -35,14 +36,12 @@ import com.kalsym.product.service.model.store.Client;
 import com.kalsym.product.service.model.livechatgroup.StoreCreationResponse;
 import com.kalsym.product.service.model.product.ProductInventoryWithDetails;
 import com.kalsym.product.service.model.product.ProductWithDetails;
-import com.kalsym.product.service.model.store.StoreAsset;
 import com.kalsym.product.service.model.store.StoreAssets;
 import com.kalsym.product.service.model.store.object.CustomPageable;
 import com.kalsym.product.service.model.store.object.TopStore;
 import com.kalsym.product.service.repository.StoreCategoryRepository;
 import com.kalsym.product.service.repository.StoreWithDetailsRepository;
 import com.kalsym.product.service.repository.StoreCommissionRepository;
-import com.kalsym.product.service.repository.StoreAssetRepository;
 import com.kalsym.product.service.repository.StoreAssetsRepository;
 import com.kalsym.product.service.repository.ClientsRepository;
 import com.kalsym.product.service.repository.RegionVerticalRepository;
@@ -163,10 +162,7 @@ public class StoreController {
     
     @Autowired
     StoreCommissionRepository storeComisssionRepository;
-    
-    @Autowired
-    StoreAssetRepository storeAssetRepository;
-    
+   
     @Autowired
     StoreAssetsRepository storeAssetsRepository;
     
@@ -323,7 +319,6 @@ public class StoreController {
 
         response.setStatus(HttpStatus.CREATED);
         Store savedStore = null;
-        StoreAsset storeAsset = new StoreAsset();
                 
         List<Store> stores = storeRepository.findAll();
 
@@ -395,14 +390,20 @@ public class StoreController {
                 
                 MultipartFile multipartFile = new MultipartImage(baos.toByteArray(), savedStore.getId() + "-qrcode", "QRCODE", "PNG", 0);
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Qrcode Filename: " + multipartFile.getOriginalFilename());
-                String bannerStoragePath = fileStorageService.saveStoreAsset(multipartFile, savedStore.getId() + "-qrcode");
-                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Qrcode storagePath: " + bannerStoragePath);
                 String qrCodeUrl = storeAssetsBaseUrl + savedStore.getId() + "-qrcode";
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Qrcode Url: " + qrCodeUrl);
+                
+                StoreAssets storeAsset = new StoreAssets();
+                storeAsset.setAssetFile(multipartFile);
+                storeAsset.setAssetType(StoreAssetType.QrcodeUrl);
                 storeAsset.setStoreId(savedStore.getId());
-                storeAsset.setQrCodeUrl(qrCodeUrl);
-                storeAssetRepository.save(storeAsset);
-                                
+                String qrCodeStoragePath = fileStorageService.saveMultipleStoreAssets(storeAsset.getAssetFile(), qrCodeUrl);
+
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Asset Filename: " + storeAsset.getAssetFile().getOriginalFilename());
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Asset storagePath: " + qrCodeStoragePath);
+                storeAsset.setAssetUrl(qrCodeUrl);                
+                storeAssetsRepository.save(storeAsset);
+                              
                 StoreCreationResponse scrCsr = storeLiveChatService.createGroup(domain + "-csr");
 
                 if (scrCsr == null) {
@@ -453,18 +454,6 @@ public class StoreController {
             sc.setSettlementDays(5);
             storeComisssionRepository.save(sc);
             response.setData(savedStore);
-            
-            //set default store asset            
-            storeAsset.setStoreId(savedStore.getId());
-            storeAsset.setLogoUrl(storeLogoDefaultUrl);
-            if (savedStore.getVerticalCode()!=null) {                
-                if (savedStore.getVerticalCode().toUpperCase().contains("FNB")) {
-                    storeAsset.setBannerUrl(storeBannerFnbDefaultUrl);
-                }
-            } else {
-                storeAsset.setBannerUrl(storeBannerEcommerceDefaultUrl);
-            }
-            storeAssetRepository.save(storeAsset);
             
             //create center code for Pakistan Store
             if (bodyStore.getRegionCountryId().equals("PAK")) {
@@ -559,24 +548,24 @@ public class StoreController {
                 String storeUrl = "https://"+store.getDomain();
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Generating qrcode for "+storeUrl);
                 ByteArrayOutputStream baos = QrCodeGenerator.generateQRCodeAsOutputStream(storeUrl);
-                
+                 
                 MultipartFile multipartFile = new MultipartImage(baos.toByteArray(), store.getId() + "-qrcode", "QRCODE", "PNG", 0);
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Qrcode Filename: " + multipartFile.getOriginalFilename());
-                String bannerStoragePath = fileStorageService.saveStoreAsset(multipartFile, store.getId() + "-qrcode");
-                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Qrcode storagePath: " + bannerStoragePath);
                 String qrCodeUrl = storeAssetsBaseUrl + store.getId() + "-qrcode";
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Qrcode Url: " + qrCodeUrl);
                 
-                
-                Optional<StoreAsset> storeAssetOpt = storeAssetRepository.findById(store.getId());
-                StoreAsset storeAsset = null;
-                if (storeAssetOpt.isPresent()) {
-                    storeAsset = storeAssetOpt.get();
+                List<StoreAssets> storeAssetList = storeAssetsRepository.findByStoreIdAndAssetType(store.getId(), StoreAssetType.QrcodeUrl);
+                StoreAssets storeAsset;
+                if (!storeAssetList.isEmpty()) {
+                    storeAsset = storeAssetList.get(0);
                 } else {
-                    storeAsset = new StoreAsset();
+                    storeAsset = new StoreAssets();
+                    storeAsset.setStoreId(store.getId());
+                    storeAsset.setAssetType(StoreAssetType.QrcodeUrl);
                 }
-                storeAsset.setQrCodeUrl(qrCodeUrl);
-                storeAssetRepository.save(storeAsset);
+                storeAsset.setAssetFile(multipartFile);
+                storeAsset.setAssetUrl(qrCodeUrl);
+                storeAssetsRepository.save(storeAsset);
             }
             
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "updated store with id: " + id);
@@ -621,7 +610,6 @@ public class StoreController {
         
         storeLiveChatService.deleteGroup(optStore.get().getLiveChatCsrGroupId());
         storeLiveChatService.deleteGroup(optStore.get().getLiveChatOrdersGroupId());
-        storeAssetRepository.deleteByStoreId(id);
         storeAssetsRepository.deleteByStoreId(id);
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Assets deleted for storeId:"+id);
         storeRepository.deleteById(id);
@@ -696,7 +684,7 @@ public class StoreController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
     
-    @GetMapping(path = {"/asset/{clientId}"}, name = "store-assets-get-by-client-id", produces = "application/json")
+    /*@/GetMapping(path = {"/asset/{clientId}"}, name = "store-assets-get-by-client-id", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-assets-get', 'all')")
     public ResponseEntity<HttpResponse> getStoreAssetsByClientId(HttpServletRequest request,
             @PathVariable String clientId) {
@@ -726,7 +714,7 @@ public class StoreController {
         response.setStatus(HttpStatus.OK);
         response.setData(storeAssetList);
         return ResponseEntity.status(response.getStatus()).body(response);
-    }
+    }*/
     
     
     @GetMapping(path = {"/checkdomain"}, name = "stores-check-domain-availability", produces = "application/json")

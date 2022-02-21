@@ -117,12 +117,7 @@ public class StoreWithDetails implements Serializable {
             fetch = FetchType.EAGER)
     @JoinColumn(name = "storeId", insertable = false, updatable = false, nullable = true)
     private List<StoreTiming> storeTiming;
-    
-    @OneToOne(cascade = CascadeType.ALL,
-            fetch = FetchType.EAGER)
-    @JoinColumn(name = "id", referencedColumnName = "storeId", insertable = false, updatable = false, nullable = true)
-    private StoreAsset storeAsset;
-    
+   
     @OneToMany(cascade = CascadeType.ALL,
             fetch = FetchType.LAZY)
     @JoinColumn(name = "storeId", insertable = false, updatable = false, nullable = true)

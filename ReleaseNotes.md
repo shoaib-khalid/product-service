@@ -1,4 +1,14 @@
 ##################################################
+# product-service-3.6.0 | 21-Feb-2022
+##################################################
+Remove store_asset table
+Remove API /store/asset 
+
+##Database changes :
+DROP TABLE `store_asset`;
+
+
+##################################################
 # product-service-3.5.2 | 21-Feb-2022
 ##################################################
 Bug fix for update store displayAddress

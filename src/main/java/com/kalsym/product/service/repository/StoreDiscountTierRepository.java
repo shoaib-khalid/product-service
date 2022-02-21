@@ -17,7 +17,6 @@
 package com.kalsym.product.service.repository;
 
 import com.kalsym.product.service.model.product.ProductAsset;
-import com.kalsym.product.service.model.store.StoreAsset;
 import com.kalsym.product.service.model.store.StoreCategory;
 import com.kalsym.product.service.model.store.StoreDiscount;
 import com.kalsym.product.service.model.store.StoreDiscountTier;
