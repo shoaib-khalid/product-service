@@ -59,6 +59,11 @@ public class StoreDeliveryPeriodsController {
         List<StoreDeliveryPeriod> storeDeliveryOptionList = storeOptionsRepository.findByStoreId(storeId);
         if (storeDeliveryOptionList.isEmpty()) {                     
             storeDeliveryOptionList = SetDefaultDeliveryOptions(storeId);
+        } else {
+            for (int i=0;i<storeDeliveryOptionList.size();i++) {
+                StoreDeliveryPeriod storeDeliveryPeriod = storeDeliveryOptionList.get(i);
+                storeDeliveryPeriod.setDescription(SetDeliveryPeriodDescription(storeDeliveryPeriod.getDeliveryPeriod()));
+            }
         }
         response.setStatus(HttpStatus.OK);
         response.setData(storeDeliveryOptionList);
@@ -115,24 +120,28 @@ public class StoreDeliveryPeriodsController {
         deliveryOption.setDeliveryPeriod(DeliveryPeriod.EXPRESS);
         deliveryOption.setStoreId(storeId);
         deliveryOption.setEnabled(Boolean.FALSE);
+        deliveryOption.setDescription(SetDeliveryPeriodDescription(DeliveryPeriod.EXPRESS));
         storeDeliveryList.add(deliveryOption);
         
         StoreDeliveryPeriod deliveryOption2 = new StoreDeliveryPeriod();
         deliveryOption2.setDeliveryPeriod(DeliveryPeriod.FOURHOURS);
         deliveryOption2.setStoreId(storeId);
         deliveryOption2.setEnabled(Boolean.FALSE);
+        deliveryOption.setDescription(SetDeliveryPeriodDescription(DeliveryPeriod.FOURHOURS));
         storeDeliveryList.add(deliveryOption2);
         
         StoreDeliveryPeriod deliveryOption3 = new StoreDeliveryPeriod();
         deliveryOption3.setDeliveryPeriod(DeliveryPeriod.NEXTDAY);
         deliveryOption3.setStoreId(storeId);
         deliveryOption3.setEnabled(Boolean.FALSE);
+        deliveryOption.setDescription(SetDeliveryPeriodDescription(DeliveryPeriod.NEXTDAY));
         storeDeliveryList.add(deliveryOption3);
         
         StoreDeliveryPeriod deliveryOption4 = new StoreDeliveryPeriod();
         deliveryOption4.setDeliveryPeriod(DeliveryPeriod.FOURDAYS);
         deliveryOption4.setStoreId(storeId);
         deliveryOption4.setEnabled(Boolean.FALSE);
+        deliveryOption.setDescription(SetDeliveryPeriodDescription(DeliveryPeriod.FOURDAYS));
         storeDeliveryList.add(deliveryOption4);
        
         /*for (int i=0;i<storeDeliveryList.size();i++) {
@@ -144,6 +153,20 @@ public class StoreDeliveryPeriodsController {
             }
         }*/
         return storeDeliveryList;
+    }
+    
+    private static String SetDeliveryPeriodDescription(DeliveryPeriod deliveryPeriod) {
+        if (deliveryPeriod==DeliveryPeriod.EXPRESS) {
+            return "Express";
+        } else if (deliveryPeriod==DeliveryPeriod.FOURHOURS) {
+           return "Four Hours"; 
+        } else if (deliveryPeriod==DeliveryPeriod.NEXTDAY) {
+           return "Next Day"; 
+        } else if (deliveryPeriod==DeliveryPeriod.FOURDAYS) {
+           return "Four Days"; 
+        } else {
+            return "";
+        }                
     }
 
 }
