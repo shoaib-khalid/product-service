@@ -37,7 +37,7 @@ public class StoreDeliveryPeriodsController {
 
     @Autowired
     StoreRepository storeRepository;
-
+    
     @GetMapping(path = {""}, name = "store-deliveryoptions-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-deliveryoptions-get', 'all')")
     public ResponseEntity<HttpResponse> getStoreDeliveryOptions(HttpServletRequest request,
@@ -46,23 +46,29 @@ public class StoreDeliveryPeriodsController {
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
         Logger.application.info(ProductServiceApplication.VERSION, logprefix, "storeId: " + storeId);
-
-        Optional<Store> optStore = storeRepository.findById(storeId);
-
-        if (!optStore.isPresent()) {
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
-            response.setStatus(HttpStatus.NOT_FOUND);
-            response.setError("store not found");
-            return ResponseEntity.status(response.getStatus()).body(response);
-        }
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
-        List<StoreDeliveryPeriod> storeDeliveryOptionList = storeOptionsRepository.findByStoreId(storeId);
-        if (storeDeliveryOptionList.isEmpty()) {                     
+        
+        List<StoreDeliveryPeriod> storeDeliveryOptionList = null;
+        if (storeId.equals("null")) {
             storeDeliveryOptionList = SetDefaultDeliveryOptions(storeId);
         } else {
-            for (int i=0;i<storeDeliveryOptionList.size();i++) {
-                StoreDeliveryPeriod storeDeliveryPeriod = storeDeliveryOptionList.get(i);
-                storeDeliveryPeriod.setDescription(SetDeliveryPeriodDescription(storeDeliveryPeriod.getDeliveryPeriod()));
+        
+            Optional<Store> optStore = storeRepository.findById(storeId);
+
+            if (!optStore.isPresent()) {
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
+                response.setStatus(HttpStatus.NOT_FOUND);
+                response.setError("store not found");
+                return ResponseEntity.status(response.getStatus()).body(response);
+            }
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
+            storeDeliveryOptionList = storeOptionsRepository.findByStoreId(storeId);
+            if (storeDeliveryOptionList.isEmpty()) {                     
+                storeDeliveryOptionList = SetDefaultDeliveryOptions(storeId);
+            } else {
+                for (int i=0;i<storeDeliveryOptionList.size();i++) {
+                    StoreDeliveryPeriod storeDeliveryPeriod = storeDeliveryOptionList.get(i);
+                    storeDeliveryPeriod.setDescription(SetDeliveryPeriodDescription(storeDeliveryPeriod.getDeliveryPeriod()));
+                }
             }
         }
         response.setStatus(HttpStatus.OK);
