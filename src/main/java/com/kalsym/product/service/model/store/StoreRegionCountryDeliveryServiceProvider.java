@@ -16,7 +16,10 @@
  */
 package com.kalsym.product.service.model.store;
 
+import com.kalsym.product.service.enums.DeliveryPeriod;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -44,5 +47,8 @@ public class StoreRegionCountryDeliveryServiceProvider {
     private String deliverySpId;
 
     private String storeId;
+    
+    @Enumerated(EnumType.STRING)
+    private DeliveryPeriod fulfilment; 
 
 }

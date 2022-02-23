@@ -1,4 +1,13 @@
 ##################################################
+# product-service-3.5.5 | 23-Feb-2022
+##################################################
+Add fulfilment in store delivery sp (to store deliveryType = ADHOC)
+
+##Database changes :
+ALTER TABLE `store_delivery_sp` ADD fulfilment ENUM('EXPRESS','FOURHOURS','NEXTDAY','FOURDAYS');
+
+
+##################################################
 # product-service-3.5.4 | 22-Feb-2022
 ##################################################
 Add description in store delivery period
