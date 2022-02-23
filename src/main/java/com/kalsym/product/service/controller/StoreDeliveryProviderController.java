@@ -88,6 +88,7 @@ public class StoreDeliveryProviderController {
         List<StoreDeliveryServiceProvider> storeDeliveryServiceProvider = new ArrayList<StoreDeliveryServiceProvider>();
         for (int i=0;i<deliveryProviderTypeList.size();i++) {            
             StoreDeliveryServiceProvider provider = deliveryProviderTypeList.get(i).getStoreDeliveryServiceProvider();
+            provider.setDeliveryProviderType(deliveryProviderTypeList.get(i));
             storeDeliveryServiceProvider.add(provider);
         }
         response.setStatus(HttpStatus.OK);
