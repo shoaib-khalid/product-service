@@ -85,14 +85,14 @@ public class StoreDeliveryProviderController {
         else
             deliveryProviderTypeList = deliveryProviderTypeRepository.findByRegionCountryAndDeliveryType(regionCountryId, deliveryType);
         
-        List<StoreDeliveryServiceProvider> storeDeliveryServiceProvider = new ArrayList<StoreDeliveryServiceProvider>();
+        /*List<StoreDeliveryServiceProvider> storeDeliveryServiceProvider = new ArrayList<StoreDeliveryServiceProvider>();
         for (int i=0;i<deliveryProviderTypeList.size();i++) {            
             StoreDeliveryServiceProvider provider = deliveryProviderTypeList.get(i).getStoreDeliveryServiceProvider();
             provider.setDeliveryProviderType(deliveryProviderTypeList.get(i));
             storeDeliveryServiceProvider.add(provider);
-        }
+        }*/
         response.setStatus(HttpStatus.OK);
-        response.setData(storeDeliveryServiceProvider);
+        response.setData(deliveryProviderTypeList);
         
         //response.setStatus(HttpStatus.OK);
         //response.setData(deliveryProviderTypeList);

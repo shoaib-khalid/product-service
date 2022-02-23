@@ -70,8 +70,5 @@ public class StoreDeliveryServiceProvider implements Serializable {
     private String providerImage;
             
     private String regionCountryId;
-    
-    @Transient
-    private StoreDeliveryServiceProviderType deliveryProviderType;
-
+  
 }
