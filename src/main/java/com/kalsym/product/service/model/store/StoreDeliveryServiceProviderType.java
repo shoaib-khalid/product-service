@@ -17,9 +17,12 @@
 package com.kalsym.product.service.model.store;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.kalsym.product.service.enums.DeliveryPeriod;
 import com.kalsym.product.service.model.product.Product;
 import java.io.Serializable;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -54,7 +57,9 @@ public class StoreDeliveryServiceProviderType implements Serializable {
     private String deliveryType;
 
     private String regionCountry;
-
+    
+    @Enumerated(EnumType.STRING)
+    private DeliveryPeriod fulfilment;
     
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "deliverySpId", insertable = false, updatable = false, nullable = true)

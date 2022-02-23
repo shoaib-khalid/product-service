@@ -2,6 +2,7 @@
 # product-service-3.5.5 | 23-Feb-2022
 ##################################################
 Add fulfilment in store delivery sp (to store deliveryType = ADHOC)
+Add fulfilment in delivery_sp_type (to store deliveryType = ADHOC)
 
 ##Database changes :
 ALTER TABLE `store_delivery_sp` ADD fulfilment ENUM('EXPRESS','FOURHOURS','NEXTDAY','FOURDAYS');
