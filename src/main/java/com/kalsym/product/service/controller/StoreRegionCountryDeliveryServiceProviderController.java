@@ -17,6 +17,7 @@
 package com.kalsym.product.service.controller;
 
 import com.kalsym.product.service.ProductServiceApplication;
+import com.kalsym.product.service.enums.DeliveryPeriod;
 import com.kalsym.product.service.model.store.Store;
 import com.kalsym.product.service.utility.Logger;
 import javax.servlet.http.HttpServletRequest;
@@ -58,11 +59,13 @@ public class StoreRegionCountryDeliveryServiceProviderController {
     @Autowired
     StoreRegionCountryDeliveryServiceProviderRepository sdspr;
 
-    @PostMapping(path = "{deliverySpId}", name = "post-store-region-delivery-service-provider", produces = "application/json")
+    @PostMapping(path = "{deliverySpId}/{deliveryPeriod}", name = "post-store-region-delivery-service-provider", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-product-variants-get', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> postStoreRegionCountryDeliveryServiceProvider(HttpServletRequest request,
             @PathVariable String storeId,
-            @PathVariable String deliverySpId) {
+            @PathVariable String deliverySpId,
+            @PathVariable DeliveryPeriod deliveryPeriod
+            ) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
         Optional<Store> optStore = storeRepository.findById(storeId);
@@ -76,12 +79,13 @@ public class StoreRegionCountryDeliveryServiceProviderController {
         StoreRegionCountryDeliveryServiceProvider sdsp = new StoreRegionCountryDeliveryServiceProvider();
         sdsp.setStoreId(storeId);
         sdsp.setDeliverySpId(deliverySpId);
+        sdsp.setFulfilment(deliveryPeriod);
         response.setStatus(HttpStatus.OK);
         response.setData(sdspr.save(sdsp));
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @DeleteMapping(path = "{deliverySpId}", name = "delete-store-region-delivery-service-provider", produces = "application/json")
+    @DeleteMapping(path = "{deliverySpId}/{deliveryPeriod}", name = "delete-store-region-delivery-service-provider", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-product-variants-get', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> deleteStoreRegionCountryDeliveryServiceProviderController(HttpServletRequest request,
             @PathVariable String storeId,
@@ -139,7 +143,8 @@ public class StoreRegionCountryDeliveryServiceProviderController {
     public ResponseEntity<HttpResponse> updateStoreRegionCountryDeliveryServiceProviderController(HttpServletRequest request,
             @PathVariable String storeId,
             @PathVariable(required = false) String id,
-            @RequestParam String deliverySpId) {
+            @RequestParam String deliverySpId,
+            @RequestParam DeliveryPeriod deliveryPeriod) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
         Optional<Store> optStore = storeRepository.findById(storeId);
@@ -155,6 +160,7 @@ public class StoreRegionCountryDeliveryServiceProviderController {
         sdsp.setId(id);
         sdsp.setDeliverySpId(deliverySpId);
         sdsp.setStoreId(storeId);
+        sdsp.setFulfilment(deliveryPeriod);
         response.setData(sdspr.save(sdsp));
         response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);
@@ -175,11 +181,11 @@ public class StoreRegionCountryDeliveryServiceProviderController {
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
         List<StoreRegionCountryDeliveryServiceProvider> sdsps = sdspr.findByStoreId(storeId);
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Deleting previous delivery providers linked to store");
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Deleting all previous delivery providers linked to store");
         for (StoreRegionCountryDeliveryServiceProvider sdsp : sdsps) {
             sdspr.deleteById(sdsp.getId());
         }
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Successfully deleted previous delivery providers linked to store");
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Successfully deleted all previous delivery providers linked to store");
         response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
