@@ -578,7 +578,8 @@ public class StoreController {
                     storeAsset = storeAssetOpt.get();
                 } else {
                     storeAsset = new StoreAsset();
-                }
+                    storeAsset.setStoreId(store.getId());
+                }               
                 storeAsset.setQrCodeUrl(qrCodeUrl);
                 storeAssetRepository.save(storeAsset);
             }
