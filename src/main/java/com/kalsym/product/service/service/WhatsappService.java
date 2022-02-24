@@ -40,17 +40,27 @@ public class WhatsappService {
     @Value("${whatsapp.service.push.url:https://waw.symplified.it/360dialog/callback/templatemessage/push}")
     private String whatsappServiceUrl;
     
-    public boolean sendWhatsappMessage(String[] recipients, String username, String password) throws Exception {
+    @Value("${whatsapp.service.template.new.store:symplified_new_store_notification}")
+    private String whatsappServiceNewStoreTemplate;
+    
+    @Value("${whatsapp.service.push.url:60133429331}")
+    private String whatsappServiceReferenceId;
+    
+    public boolean sendWhatsappMessage(String[] recipients, String username, String password, String event) throws Exception {
+        String templateName = whatsappServiceNewStoreTemplate;
         String logprefix = "sendWhatsappMessage";
+        if (event.equals("NEWSTORE")) {
+            templateName = whatsappServiceNewStoreTemplate;
+        }
         RestTemplate restTemplate = new RestTemplate();        
         HttpHeaders headers = new HttpHeaders();
         WhatsappMessage request = new WhatsappMessage();
         request.setGuest(false);
         request.setRecipientIds(recipients);
         request.setRefId(recipients[0]);
-        request.setReferenceId("60133429331");
+        request.setReferenceId(whatsappServiceReferenceId);
         Template template = new Template();
-        template.setName("welcome_to_symplified_7");
+        template.setName(templateName);
         String[] message = {username, password};
         template.setParameters(message);
         request.setTemplate(template);

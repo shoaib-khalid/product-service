@@ -489,7 +489,7 @@ public class StoreController {
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Password already changed");
             }
             String[] recipients = {savedStore.getPhoneNumber()};            
-            whatsappService.sendWhatsappMessage(recipients, client.getUsername(), password);
+            whatsappService.sendWhatsappMessage(recipients, client.getUsername(), password, "NEWSTORE");
             
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {

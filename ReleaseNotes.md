@@ -2,6 +2,7 @@
 # product-service-3.5.6 | 24-Feb-2022
 ##################################################
 Delete storeDeliveryPeriods during delete store 
+Change WA template to 'symplified_new_store_notification' for new store creation
 
 
 ##################################################
