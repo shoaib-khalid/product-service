@@ -46,6 +46,7 @@ import com.kalsym.product.service.repository.StoreAssetRepository;
 import com.kalsym.product.service.repository.StoreAssetsRepository;
 import com.kalsym.product.service.repository.ClientsRepository;
 import com.kalsym.product.service.repository.RegionVerticalRepository;
+import com.kalsym.product.service.repository.StoreDeliveryPeriodsRepository;
 import com.kalsym.product.service.service.FileStorageService;
 
 import com.kalsym.product.service.service.StoreLiveChatService;
@@ -169,6 +170,9 @@ public class StoreController {
     
     @Autowired
     StoreAssetsRepository storeAssetsRepository;
+    
+    @Autowired
+    StoreDeliveryPeriodsRepository storeDeliveryPeriodsRepository;
     
     @Autowired
     private PasswordEncoder bcryptEncoder;
@@ -623,6 +627,7 @@ public class StoreController {
         storeLiveChatService.deleteGroup(optStore.get().getLiveChatOrdersGroupId());
         storeAssetRepository.deleteByStoreId(id);
         storeAssetsRepository.deleteByStoreId(id);
+        storeDeliveryPeriodsRepository.deleteByStoreId(id);
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Assets deleted for storeId:"+id);
         storeRepository.deleteById(id);
 

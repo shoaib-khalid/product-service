@@ -30,4 +30,7 @@ public interface StoreDeliveryPeriodsRepository extends PagingAndSortingReposito
             @Param("searchDeliveryOption") DeliveryPeriod searchDeliveryOption,
             @Param("searchDeliveryEnabled") Boolean searchDeliveryEnabled
             );
+    
+    @Transactional
+    String deleteByStoreId(@Param("storeId") String storeId);
 }

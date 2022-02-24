@@ -1,4 +1,10 @@
 ##################################################
+# product-service-3.5.6 | 24-Feb-2022
+##################################################
+Delete storeDeliveryPeriods during delete store 
+
+
+##################################################
 # product-service-3.5.5 | 23-Feb-2022
 ##################################################
 Add fulfilment in store delivery sp (to store deliveryType = ADHOC)
