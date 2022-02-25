@@ -14,6 +14,8 @@ import javax.persistence.Table;
 import java.util.Objects;
 import java.util.Set;
 import javax.persistence.CascadeType;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
@@ -80,6 +82,7 @@ public class ProductWithDetails implements Serializable {
     @UpdateTimestamp
     private LocalDateTime updated;
     
+    @Enumerated(EnumType.STRING)
     private VehicleType vehicleType;
     
     @OneToMany(cascade = CascadeType.ALL,

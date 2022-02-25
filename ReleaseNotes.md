@@ -2,6 +2,7 @@
 # product-service-3.5.7 | 25-Feb-2022
 ##################################################
 For logo & favicon, if front-end POST new asset, backend will overwrite
+Bug fix for vehicleType in product
 
 
 ##################################################

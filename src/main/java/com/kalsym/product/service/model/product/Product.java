@@ -20,6 +20,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import com.kalsym.product.service.enums.VehicleType;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 
 /**
  *
@@ -76,6 +78,7 @@ public class Product implements Serializable {
     @UpdateTimestamp
     private LocalDateTime updated;
     
+    @Enumerated(EnumType.STRING)
     private VehicleType vehicleType;
      
     public void update(Product product) {
