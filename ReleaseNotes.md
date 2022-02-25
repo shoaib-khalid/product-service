@@ -1,4 +1,10 @@
 ##################################################
+# product-service-3.5.7 | 25-Feb-2022
+##################################################
+For logo & favicon, if front-end POST new asset, backend will overwrite
+
+
+##################################################
 # product-service-3.5.6 | 24-Feb-2022
 ##################################################
 Delete storeDeliveryPeriods during delete store 

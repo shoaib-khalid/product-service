@@ -100,6 +100,22 @@ public class StoreAssetsController {
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
         
         StoreAssets storeAsset = new StoreAssets();
+        
+        //check duplicate for logo & favicon
+        if (assetType.equals(StoreAssetType.LogoUrl)) {
+            List<StoreAssets> storeLogoList = storeAssetsRepository.findByStoreIdAndAssetType(storeId, StoreAssetType.LogoUrl);
+            if (!storeLogoList.isEmpty()) {
+                Logger.application.warn(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " Logo already found for storeId: " + storeId);
+                storeAsset = storeLogoList.get(0);
+            }
+        } else if (assetType.equals(StoreAssetType.FaviconUrl)) {
+            List<StoreAssets> storeLogoList = storeAssetsRepository.findByStoreIdAndAssetType(storeId, StoreAssetType.FaviconUrl);
+            if (!storeLogoList.isEmpty()) {
+                Logger.application.warn(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " Favicon already found for storeId: " + storeId);
+                storeAsset = storeLogoList.get(0);
+            }
+        } 
+        
         storeAsset.setAssetFile(assetFile);
         storeAsset.setAssetType(assetType);
         storeAsset.setAssetDescription(assetDescription);
