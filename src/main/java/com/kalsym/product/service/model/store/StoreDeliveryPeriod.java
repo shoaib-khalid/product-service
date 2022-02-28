@@ -44,5 +44,8 @@ public class StoreDeliveryPeriod implements Serializable {
     
     @Transient
     private String description;
+    
+    @Transient
+    private String name;
 
 }

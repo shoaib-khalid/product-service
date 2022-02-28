@@ -67,6 +67,7 @@ public class StoreDeliveryPeriodsController {
             } else {
                 for (int i=0;i<storeDeliveryOptionList.size();i++) {
                     StoreDeliveryPeriod storeDeliveryPeriod = storeDeliveryOptionList.get(i);
+                    storeDeliveryPeriod.setName(SetDeliveryPeriodName(storeDeliveryPeriod.getDeliveryPeriod()));
                     storeDeliveryPeriod.setDescription(SetDeliveryPeriodDescription(storeDeliveryPeriod.getDeliveryPeriod()));
                 }
             }
@@ -126,6 +127,7 @@ public class StoreDeliveryPeriodsController {
         deliveryOption.setDeliveryPeriod(DeliveryPeriod.EXPRESS);
         deliveryOption.setStoreId(storeId);
         deliveryOption.setEnabled(Boolean.FALSE);
+        deliveryOption.setName(SetDeliveryPeriodName(DeliveryPeriod.EXPRESS));
         deliveryOption.setDescription(SetDeliveryPeriodDescription(DeliveryPeriod.EXPRESS));
         storeDeliveryList.add(deliveryOption);
         
@@ -133,6 +135,7 @@ public class StoreDeliveryPeriodsController {
         deliveryOption2.setDeliveryPeriod(DeliveryPeriod.FOURHOURS);
         deliveryOption2.setStoreId(storeId);
         deliveryOption2.setEnabled(Boolean.FALSE);
+        deliveryOption2.setName(SetDeliveryPeriodName(DeliveryPeriod.FOURHOURS));
         deliveryOption2.setDescription(SetDeliveryPeriodDescription(DeliveryPeriod.FOURHOURS));
         storeDeliveryList.add(deliveryOption2);
         
@@ -140,6 +143,7 @@ public class StoreDeliveryPeriodsController {
         deliveryOption3.setDeliveryPeriod(DeliveryPeriod.NEXTDAY);
         deliveryOption3.setStoreId(storeId);
         deliveryOption3.setEnabled(Boolean.FALSE);
+        deliveryOption3.setName(SetDeliveryPeriodName(DeliveryPeriod.NEXTDAY));
         deliveryOption3.setDescription(SetDeliveryPeriodDescription(DeliveryPeriod.NEXTDAY));
         storeDeliveryList.add(deliveryOption3);
         
@@ -147,6 +151,7 @@ public class StoreDeliveryPeriodsController {
         deliveryOption4.setDeliveryPeriod(DeliveryPeriod.FOURDAYS);
         deliveryOption4.setStoreId(storeId);
         deliveryOption4.setEnabled(Boolean.FALSE);
+        deliveryOption4.setName(SetDeliveryPeriodName(DeliveryPeriod.FOURDAYS));
         deliveryOption4.setDescription(SetDeliveryPeriodDescription(DeliveryPeriod.FOURDAYS));
         storeDeliveryList.add(deliveryOption4);
        
@@ -161,15 +166,29 @@ public class StoreDeliveryPeriodsController {
         return storeDeliveryList;
     }
     
-    private static String SetDeliveryPeriodDescription(DeliveryPeriod deliveryPeriod) {
+    private static String SetDeliveryPeriodName(DeliveryPeriod deliveryPeriod) {
         if (deliveryPeriod==DeliveryPeriod.EXPRESS) {
             return "Express";
         } else if (deliveryPeriod==DeliveryPeriod.FOURHOURS) {
-           return "Four Hours"; 
+           return "2-4 Hours"; 
         } else if (deliveryPeriod==DeliveryPeriod.NEXTDAY) {
            return "Next Day"; 
         } else if (deliveryPeriod==DeliveryPeriod.FOURDAYS) {
-           return "Four Days"; 
+           return "3-5 Days"; 
+        } else {
+            return "";
+        }                
+    }
+    
+    private static String SetDeliveryPeriodDescription(DeliveryPeriod deliveryPeriod) {
+        if (deliveryPeriod==DeliveryPeriod.EXPRESS) {
+            return "Pickup between 30 min - 2 hours";
+        } else if (deliveryPeriod==DeliveryPeriod.FOURHOURS) {
+           return "Pickup & Drop-off between 2 - 4 hours"; 
+        } else if (deliveryPeriod==DeliveryPeriod.NEXTDAY) {
+           return "Pickup & Delivery next day"; 
+        } else if (deliveryPeriod==DeliveryPeriod.FOURDAYS) {
+           return "Within city 2 days, intercity up to 5 days"; 
         } else {
             return "";
         }                
