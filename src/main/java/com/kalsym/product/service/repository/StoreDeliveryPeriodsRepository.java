@@ -1,7 +1,6 @@
 package com.kalsym.product.service.repository;
 
 import com.kalsym.product.service.model.product.ProductInventory;
-import com.kalsym.product.service.enums.DeliveryPeriod;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
@@ -27,7 +26,7 @@ public interface StoreDeliveryPeriodsRepository extends PagingAndSortingReposito
     @Query("UPDATE StoreDeliveryPeriod m SET m.enabled = :searchDeliveryEnabled WHERE m.storeId = :searchStoreId AND m.deliveryPeriod = :searchDeliveryOption") 
     void UpdateStoreDeliveryOption(
             @Param("searchStoreId") String searchStoreId,
-            @Param("searchDeliveryOption") DeliveryPeriod searchDeliveryOption,
+            @Param("searchDeliveryOption") String searchDeliveryOption,
             @Param("searchDeliveryEnabled") Boolean searchDeliveryEnabled
             );
     

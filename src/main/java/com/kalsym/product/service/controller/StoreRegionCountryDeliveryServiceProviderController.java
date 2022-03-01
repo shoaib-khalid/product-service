@@ -17,7 +17,6 @@
 package com.kalsym.product.service.controller;
 
 import com.kalsym.product.service.ProductServiceApplication;
-import com.kalsym.product.service.enums.DeliveryPeriod;
 import com.kalsym.product.service.model.store.Store;
 import com.kalsym.product.service.utility.Logger;
 import javax.servlet.http.HttpServletRequest;
@@ -64,7 +63,7 @@ public class StoreRegionCountryDeliveryServiceProviderController {
     public ResponseEntity<HttpResponse> postStoreRegionCountryDeliveryServiceProvider(HttpServletRequest request,
             @PathVariable String storeId,
             @PathVariable String deliverySpId,
-            @PathVariable DeliveryPeriod deliveryPeriod
+            @PathVariable String deliveryPeriod
             ) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
@@ -144,7 +143,7 @@ public class StoreRegionCountryDeliveryServiceProviderController {
             @PathVariable String storeId,
             @PathVariable(required = false) String id,
             @RequestParam String deliverySpId,
-            @RequestParam DeliveryPeriod deliveryPeriod) {
+            @RequestParam String deliveryPeriod) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
         Optional<Store> optStore = storeRepository.findById(storeId);

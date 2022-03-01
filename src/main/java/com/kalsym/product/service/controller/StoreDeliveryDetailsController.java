@@ -4,6 +4,7 @@ import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.model.store.StoreDeliveryDetail;
 import com.kalsym.product.service.model.store.Store;
+import com.kalsym.product.service.repository.DeliveryPeriodRepository;
 import com.kalsym.product.service.repository.StoreRepository;
 import com.kalsym.product.service.repository.StoreDeliveryDetailsRepository;
 import com.kalsym.product.service.utility.Logger;
@@ -34,7 +35,10 @@ public class StoreDeliveryDetailsController {
 
     @Autowired
     StoreRepository storeRepository;
-
+    
+    @Autowired
+    DeliveryPeriodRepository deliveryPeriodRepository;
+    
     @GetMapping(path = {""}, name = "store-deliverydetails-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-deliverydetails-get', 'all')")
     public ResponseEntity<HttpResponse> getStoreDeliveryDetails(HttpServletRequest request,
@@ -57,7 +61,7 @@ public class StoreDeliveryDetailsController {
         Optional<StoreDeliveryDetail> storeDeliveryDetails = storeTimingsRepository.findById(storeId);
         if (storeDeliveryDetails.isPresent()) {
             if (storeDeliveryDetails.get().getStoreDeliveryPeriodList().isEmpty()) {
-                storeDeliveryDetails.get().setStoreDeliveryPeriodList(StoreDeliveryPeriodsController.SetDefaultDeliveryOptions(storeId));
+                storeDeliveryDetails.get().setStoreDeliveryPeriodList(StoreDeliveryPeriodsController.SetDefaultDeliveryOptions(storeId, deliveryPeriodRepository));
             }
         }   
         

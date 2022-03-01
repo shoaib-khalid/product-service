@@ -1,11 +1,12 @@
 package com.kalsym.product.service.controller;
 
 import com.kalsym.product.service.ProductServiceApplication;
-import com.kalsym.product.service.enums.DeliveryPeriod;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.model.store.StoreDeliveryPeriod;
 import com.kalsym.product.service.model.store.Store;
+import com.kalsym.product.service.model.store.DeliveryPeriod;
 import com.kalsym.product.service.repository.StoreRepository;
+import com.kalsym.product.service.repository.DeliveryPeriodRepository;
 import com.kalsym.product.service.utility.Logger;
 import java.util.Optional;
 import java.util.List;
@@ -38,6 +39,9 @@ public class StoreDeliveryPeriodsController {
     @Autowired
     StoreRepository storeRepository;
     
+    @Autowired
+    DeliveryPeriodRepository deliveryPeriodRepository;
+    
     @GetMapping(path = {""}, name = "store-deliveryoptions-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-deliveryoptions-get', 'all')")
     public ResponseEntity<HttpResponse> getStoreDeliveryOptions(HttpServletRequest request,
@@ -49,7 +53,7 @@ public class StoreDeliveryPeriodsController {
         
         List<StoreDeliveryPeriod> storeDeliveryOptionList = null;
         if (storeId.equals("null")) {
-            storeDeliveryOptionList = SetDefaultDeliveryOptions(storeId);
+            storeDeliveryOptionList = SetDefaultDeliveryOptions(storeId, deliveryPeriodRepository);
         } else {
         
             Optional<Store> optStore = storeRepository.findById(storeId);
@@ -63,14 +67,8 @@ public class StoreDeliveryPeriodsController {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
             storeDeliveryOptionList = storeOptionsRepository.findByStoreId(storeId);
             if (storeDeliveryOptionList.isEmpty()) {                     
-                storeDeliveryOptionList = SetDefaultDeliveryOptions(storeId);
-            } else {
-                for (int i=0;i<storeDeliveryOptionList.size();i++) {
-                    StoreDeliveryPeriod storeDeliveryPeriod = storeDeliveryOptionList.get(i);
-                    storeDeliveryPeriod.setName(SetDeliveryPeriodName(storeDeliveryPeriod.getDeliveryPeriod()));
-                    storeDeliveryPeriod.setDescription(SetDeliveryPeriodDescription(storeDeliveryPeriod.getDeliveryPeriod()));
-                }
-            }
+                storeDeliveryOptionList = SetDefaultDeliveryOptions(storeId, deliveryPeriodRepository);
+            } 
         }
         response.setStatus(HttpStatus.OK);
         response.setData(storeDeliveryOptionList);
@@ -112,7 +110,7 @@ public class StoreDeliveryPeriodsController {
         
         List<StoreDeliveryPeriod> newStoreDeliveryOptionList = storeOptionsRepository.findByStoreId(storeId);
         if (newStoreDeliveryOptionList.isEmpty()) {                     
-            newStoreDeliveryOptionList = SetDefaultDeliveryOptions(storeId);
+            newStoreDeliveryOptionList = SetDefaultDeliveryOptions(storeId, deliveryPeriodRepository);
         }
         response.setData(newStoreDeliveryOptionList);        
         response.setStatus(HttpStatus.CREATED);
@@ -120,78 +118,22 @@ public class StoreDeliveryPeriodsController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
     
-    public static List<StoreDeliveryPeriod> SetDefaultDeliveryOptions(String storeId) {
+    public static List<StoreDeliveryPeriod> SetDefaultDeliveryOptions(String storeId, DeliveryPeriodRepository deliveryPeriodRepository) {
         List<StoreDeliveryPeriod> storeDeliveryList = new ArrayList<>();
         
-        StoreDeliveryPeriod deliveryOption = new StoreDeliveryPeriod();
-        deliveryOption.setDeliveryPeriod(DeliveryPeriod.EXPRESS);
-        deliveryOption.setStoreId(storeId);
-        deliveryOption.setEnabled(Boolean.FALSE);
-        deliveryOption.setName(SetDeliveryPeriodName(DeliveryPeriod.EXPRESS));
-        deliveryOption.setDescription(SetDeliveryPeriodDescription(DeliveryPeriod.EXPRESS));
-        storeDeliveryList.add(deliveryOption);
+        List<DeliveryPeriod> deliveryPeriodList = deliveryPeriodRepository.findAll();
+        for (int i=0;i<deliveryPeriodList.size();i++) {
+            DeliveryPeriod deliveryPeriod = deliveryPeriodList.get(i);
+            
+            StoreDeliveryPeriod deliveryOption = new StoreDeliveryPeriod();
+            deliveryOption.setDeliveryPeriod(deliveryPeriod.getId());
+            deliveryOption.setStoreId(storeId);
+            deliveryOption.setEnabled(Boolean.FALSE);
+            deliveryOption.setDeliveryPeriodDetails(deliveryPeriod);
+            storeDeliveryList.add(deliveryOption);
+        }
         
-        StoreDeliveryPeriod deliveryOption2 = new StoreDeliveryPeriod();
-        deliveryOption2.setDeliveryPeriod(DeliveryPeriod.FOURHOURS);
-        deliveryOption2.setStoreId(storeId);
-        deliveryOption2.setEnabled(Boolean.FALSE);
-        deliveryOption2.setName(SetDeliveryPeriodName(DeliveryPeriod.FOURHOURS));
-        deliveryOption2.setDescription(SetDeliveryPeriodDescription(DeliveryPeriod.FOURHOURS));
-        storeDeliveryList.add(deliveryOption2);
-        
-        StoreDeliveryPeriod deliveryOption3 = new StoreDeliveryPeriod();
-        deliveryOption3.setDeliveryPeriod(DeliveryPeriod.NEXTDAY);
-        deliveryOption3.setStoreId(storeId);
-        deliveryOption3.setEnabled(Boolean.FALSE);
-        deliveryOption3.setName(SetDeliveryPeriodName(DeliveryPeriod.NEXTDAY));
-        deliveryOption3.setDescription(SetDeliveryPeriodDescription(DeliveryPeriod.NEXTDAY));
-        storeDeliveryList.add(deliveryOption3);
-        
-        StoreDeliveryPeriod deliveryOption4 = new StoreDeliveryPeriod();
-        deliveryOption4.setDeliveryPeriod(DeliveryPeriod.FOURDAYS);
-        deliveryOption4.setStoreId(storeId);
-        deliveryOption4.setEnabled(Boolean.FALSE);
-        deliveryOption4.setName(SetDeliveryPeriodName(DeliveryPeriod.FOURDAYS));
-        deliveryOption4.setDescription(SetDeliveryPeriodDescription(DeliveryPeriod.FOURDAYS));
-        storeDeliveryList.add(deliveryOption4);
-       
-        /*for (int i=0;i<storeDeliveryList.size();i++) {
-            StoreDeliveryOption defaultOption = storeDeliveryList.get(i);
-            for (int x=0;x<availableDeliveryOption.size();x++) {
-                if (defaultOption.getDeliveryOption()==availableDeliveryOption.get(x).getDeliveryOption()) {
-                    defaultOption.setEnabled(Boolean.TRUE);
-                }
-            }
-        }*/
         return storeDeliveryList;
     }
     
-    private static String SetDeliveryPeriodName(DeliveryPeriod deliveryPeriod) {
-        if (deliveryPeriod==DeliveryPeriod.EXPRESS) {
-            return "Express";
-        } else if (deliveryPeriod==DeliveryPeriod.FOURHOURS) {
-           return "2-4 Hours"; 
-        } else if (deliveryPeriod==DeliveryPeriod.NEXTDAY) {
-           return "Next Day"; 
-        } else if (deliveryPeriod==DeliveryPeriod.FOURDAYS) {
-           return "3-5 Days"; 
-        } else {
-            return "";
-        }                
-    }
-    
-    private static String SetDeliveryPeriodDescription(DeliveryPeriod deliveryPeriod) {
-        if (deliveryPeriod==DeliveryPeriod.EXPRESS) {
-            return "Pickup between 30 min - 2 hours";
-        } else if (deliveryPeriod==DeliveryPeriod.FOURHOURS) {
-           return "Pickup & Drop-off between 2 - 4 hours"; 
-        } else if (deliveryPeriod==DeliveryPeriod.NEXTDAY) {
-           return "Pickup & Delivery next day"; 
-        } else if (deliveryPeriod==DeliveryPeriod.FOURDAYS) {
-           return "Within city 2 days, intercity up to 5 days"; 
-        } else {
-            return "";
-        }                
-    }
-
 }

@@ -17,7 +17,6 @@
 package com.kalsym.product.service.model.store;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.kalsym.product.service.enums.DeliveryPeriod;
 import com.kalsym.product.service.model.product.Product;
 import java.io.Serializable;
 import javax.persistence.Entity;
@@ -28,6 +27,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -58,8 +58,9 @@ public class StoreDeliveryServiceProviderType implements Serializable {
 
     private String regionCountry;
     
-    @Enumerated(EnumType.STRING)
-    private DeliveryPeriod fulfilment;
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "fulfilment", insertable = false, updatable = false, nullable = true)    
+    private DeliveryPeriod deliveryPeriod;
     
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "deliverySpId", insertable = false, updatable = false, nullable = true)

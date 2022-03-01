@@ -1,7 +1,14 @@
 ##################################################
-# product-service-3.5.9 | 28-Feb-2022
+# product-service-3.5.9 | 01-Mar-2022
 ##################################################
-Bug fix for delivery period
+1. Bug fix for delivery period
+2. Put delivery_period name & desciption in table
+
+CREATE TABLE delivery_period (
+id VARCHAR(20) PRIMARY KEY,
+NAME VARCHAR(50),
+DESCRIPTION VARCHAR(100)
+);
 
 
 ##################################################

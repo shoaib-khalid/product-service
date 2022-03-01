@@ -16,16 +16,14 @@
  */
 package com.kalsym.product.service.model.store;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import java.io.Serializable;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.GenericGenerator;
@@ -35,25 +33,19 @@ import org.hibernate.annotations.GenericGenerator;
  * @author mohsi
  */
 @Entity
-@Table(name = "store_delivery_sp")
+@Table(name = "delivery_period")
 @Getter
 @Setter
+@NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @ToString
-public class StoreRegionCountryDeliveryServiceProvider {
+public class DeliveryPeriod implements Serializable {
 
     @Id
-    @GeneratedValue(generator = "uuid2")
-    @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
     private String id;
 
-    private String deliverySpId;
+    private String name;
 
-    private String storeId;
+    private String description;
     
-    private String fulfilment;
-     
-    @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "fulfilment", insertable = false, updatable = false, nullable = true)    
-    private DeliveryPeriod deliveryPeriod;
-
 }

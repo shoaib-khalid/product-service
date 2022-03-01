@@ -1,7 +1,6 @@
 package com.kalsym.product.service.model.store;
 
-import com.kalsym.product.service.model.product.*;
-import com.kalsym.product.service.enums.DeliveryPeriod;
+import com.kalsym.product.service.model.store.*;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.io.Serializable;
 import javax.persistence.Entity;
@@ -11,6 +10,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.OneToOne;
+import javax.persistence.JoinColumn;
+import javax.persistence.FetchType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -35,17 +37,14 @@ public class StoreDeliveryPeriod implements Serializable {
     @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
     private String id;
     
-    @Enumerated(EnumType.STRING)
-    private DeliveryPeriod deliveryPeriod;
-    
     private String storeId;
     
     private Boolean enabled;
     
-    @Transient
-    private String description;
+    private String deliveryPeriod;
     
-    @Transient
-    private String name;
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "deliveryPeriod", insertable = false, updatable = false, nullable = true)    
+    private DeliveryPeriod deliveryPeriodDetails;
 
 }
