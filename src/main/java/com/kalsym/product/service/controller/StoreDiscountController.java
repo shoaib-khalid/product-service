@@ -365,12 +365,22 @@ public class StoreDiscountController {
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Id recieved: " + storeId);
 
         List<StoreDiscount> storeDiscountList = storeDiscountRepository.findAvailableDiscount(storeId, new Date());
-
+               
         if (storeDiscountList == null) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Discount Not Found");
             response.setStatus(HttpStatus.NOT_FOUND);
             return ResponseEntity.status(response.getStatus()).body(response);
         }
+        
+        List<StoreDiscount> storeDiscountArrayList = new ArrayList<>();
+        for (int i=0;i<storeDiscountList.size();i++) {
+            StoreDiscount storeDiscount = storeDiscountList.get(i);
+            List<StoreDiscountTier> storeDiscountTierList = storeDiscount.getStoreDiscountTierList();
+            Collections.sort(storeDiscountTierList);
+            storeDiscount.setStoreDiscountTierList(storeDiscountTierList);
+            storeDiscountArrayList.add(storeDiscount);
+        }
+        
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Discount Found");
         response.setData(storeDiscountList);
         response.setStatus(HttpStatus.OK);
