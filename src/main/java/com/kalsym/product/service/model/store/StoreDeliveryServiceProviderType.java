@@ -58,6 +58,8 @@ public class StoreDeliveryServiceProviderType implements Serializable {
 
     private String regionCountry;
     
+    private String fulfilment;
+    
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "fulfilment", insertable = false, updatable = false, nullable = true)    
     private DeliveryPeriod deliveryPeriod;
