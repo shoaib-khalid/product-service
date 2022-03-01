@@ -28,6 +28,7 @@ import com.kalsym.product.service.repository.StoreDiscountSearchSpecs;
 import com.kalsym.product.service.repository.StoreRepository;
 import com.kalsym.product.service.repository.RegionCountriesRepository;
 import com.kalsym.product.service.utility.DateTimeUtil;
+import com.kalsym.product.service.model.store.object.ValidationResult;
 
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.utility.Logger;
@@ -578,5 +579,78 @@ public class StoreDiscountController {
         response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
+    
+    
+    @PostMapping(path = {"/validate"})
+    @PreAuthorize("@customOwnerVerifier.VerifyStore(#storeId)")    
+    public ResponseEntity<HttpResponse> validateStoreDiscount(HttpServletRequest request,
+            @PathVariable(required = true) String storeId,
+            @RequestBody Discount discount) {
+
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+        String logprefix = request.getRequestURI();
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Id recieved: " + storeId);
+
+        Optional<Store> optStore = storeRepository.findById(storeId);
+
+        if (!optStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Not Found");
+            response.setStatus(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store Object:" + optStore);
+        discount.setStoreId(storeId);
+        
+        if (discount.getStartTime()==null) {
+            discount.setStartTime(LocalTime.parse("00:00:00"));
+        }
+        if (discount.getEndTime()==null) {
+            discount.setEndTime(LocalTime.parse("23:59:59"));
+        }
+        
+        //convert date & time to merchant timezone
+        StoreDiscount storeDiscount = new StoreDiscount();
+        Store store = optStore.get();
+        Optional<RegionCountry> t = regionCountriesRepository.findById(store.getRegionCountryId());
+        if (t.isPresent()) {
+            RegionCountry regionCountry = t.get();
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store timezone:"+regionCountry.getTimezone());
+            LocalDateTime startDt = LocalDateTime.of(discount.getStartDate(), discount.getStartTime());
+            Date startDate = DateTimeUtil.convertToDateViaInstant(startDt, ZoneId.of(regionCountry.getTimezone()));
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "StartDateTime in store timezone:"+startDate.toString());            
+            storeDiscount.setStartDate(startDate);
+            LocalDateTime endDt = LocalDateTime.of(discount.getEndDate(), discount.getEndTime());
+            Date endDate = DateTimeUtil.convertToDateViaInstant(endDt, ZoneId.of(regionCountry.getTimezone()));
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "EndDateTime in store timezone:"+endDate.toString());
+            storeDiscount.setEndDate(endDate);
+        }
+        
+        storeDiscount.setDiscountName(discount.getDiscountName());
+        storeDiscount.setDiscountType(discount.getDiscountType());
+        storeDiscount.setIsActive(discount.getIsActive());
+        storeDiscount.setStoreId(storeId);
+        storeDiscount.setMaxDiscountAmount(discount.getMaxDiscountAmount());
+        storeDiscount.setNormalPriceItemOnly(discount.getNormalPriceItemOnly());
+        
+        //check for overlap date for active discount
+        if (storeDiscount.getIsActive()) {
+            List<StoreDiscount> storeDiscountList = storeDiscountRepository.findAvailableDiscountDateRange(storeId, storeDiscount.getDiscountType(), storeDiscount.getStartDate(), storeDiscount.getEndDate());
+            if (storeDiscountList.size()>0) {
+                StoreDiscount activeDiscount = storeDiscountList.get(0);
+                List<String> errors = new ArrayList<>();
+                String errorMsg = "Overlap active discount. Please deactivate : "+activeDiscount.getDiscountName();
+                errors.add(errorMsg);
+                response.setData(errors);
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Overlap discount Id:"+activeDiscount.getId()+" StartDate:"+activeDiscount.getStartDate()+" EndDate:"+activeDiscount.getEndDate());
+                response.setMessage(errorMsg);
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+            }
+        }
+        
+        response.setStatus(HttpStatus.OK);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
 
 }

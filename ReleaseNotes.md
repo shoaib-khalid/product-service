@@ -3,6 +3,7 @@
 ##################################################
 1. Bug fix for delivery period
 2. Put delivery_period name & desciption in table
+3. Add new function validateStoreDiscount() to check overlap
 
 CREATE TABLE delivery_period (
 id VARCHAR(20) PRIMARY KEY,
