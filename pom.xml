@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.kalsym</groupId>
     <artifactId>product-service</artifactId>
-    <version>3.5.10</version>
+    <version>3.5.11</version>
     <name>product-service</name>
     <description>Product service</description>
     

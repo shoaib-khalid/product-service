@@ -1,4 +1,10 @@
 ##################################################
+# product-service-3.5.11 | 02-Mar-2022
+##################################################
+Bug fix for validate discount overlap
+
+
+##################################################
 # product-service-3.5.10 | 02-Mar-2022
 ##################################################
 Add inactiveDiscount in product inventory response

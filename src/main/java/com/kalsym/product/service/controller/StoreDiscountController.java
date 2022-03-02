@@ -658,7 +658,7 @@ public class StoreDiscountController {
                 response.setData(errors);
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Overlap discount Id:"+activeDiscount.getId()+" StartDate:"+activeDiscount.getStartDate()+" EndDate:"+activeDiscount.getEndDate());
                 response.setMessage(errorMsg);
-                return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+                return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(response);
             }
         }
         
