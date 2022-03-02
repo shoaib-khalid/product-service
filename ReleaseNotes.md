@@ -1,7 +1,7 @@
 ##################################################
 # product-service-3.5.11 | 02-Mar-2022
 ##################################################
-Bug fix for validate discount overlap
+Bug fix for validate discount overlap, return http error 417 if overlap
 
 
 ##################################################
