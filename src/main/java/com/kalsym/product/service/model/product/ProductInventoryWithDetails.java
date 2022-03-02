@@ -3,6 +3,7 @@ package com.kalsym.product.service.model.product;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.kalsym.product.service.model.ItemDiscount;
+import com.kalsym.product.service.model.store.StoreDiscountProduct;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.CascadeType;
@@ -57,5 +58,7 @@ public class ProductInventoryWithDetails implements Serializable {
     
     @Transient 
     private ItemDiscount itemDiscount;
-
+    
+    @Transient
+    ItemDiscount itemDiscountInactive;
 }

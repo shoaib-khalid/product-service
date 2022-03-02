@@ -46,4 +46,6 @@ public interface StoreDiscountProductRepository
         Optional<StoreDiscountProduct> findByStoreDiscountIdAndCategoryId(@Param("storeDiscountId") String storeDiscountId, @Param("categoryId") String categoryId);
        
         <S extends Object> Page<S> findByStoreDiscountId(@Param("storeDiscountId") String storeDiscountId,  Pageable pgbl);
+        
+        List<StoreDiscountProduct> findByItemCode(@Param("itemCode") String itemCode);
 }

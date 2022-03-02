@@ -223,6 +223,15 @@ public class StoreProductController {
                     discountDetails.discountedPrice = discountedPrice;
                     discountDetails.normalPrice = productInventory.getPrice();                    
                     productInventory.setItemDiscount(discountDetails); 
+                } else {
+                    //get inactive discount if any
+                    List<StoreDiscountProduct> discountList = storeDiscountProductRepository.findByItemCode(productInventory.getItemCode());
+                    if (!discountList.isEmpty()) {
+                        StoreDiscountProduct storeDiscountProduct = discountList.get(0);
+                        ItemDiscount inactiveDiscount = new ItemDiscount();
+                        inactiveDiscount.discountId = storeDiscountProduct.getStoreDiscountId();
+                        productInventory.setItemDiscountInactive(inactiveDiscount);
+                    }
                 }
             }
             productWithDetailsList[x]=productDetails;
@@ -303,6 +312,15 @@ public class StoreProductController {
                 discountDetails.discountedPrice = discountedPrice;
                 discountDetails.normalPrice = productInventory.getPrice();
                 productInventory.setItemDiscount(discountDetails); 
+            } else {
+                //get inactive discount if any
+                List<StoreDiscountProduct> discountList = storeDiscountProductRepository.findByItemCode(productInventory.getItemCode());
+                if (!discountList.isEmpty()) {
+                    StoreDiscountProduct storeDiscountProduct = discountList.get(0);
+                    ItemDiscount inactiveDiscount = new ItemDiscount();
+                    inactiveDiscount.discountId = storeDiscountProduct.getStoreDiscountId();
+                    productInventory.setItemDiscountInactive(inactiveDiscount);                    
+                }
             }
         }
         response.setStatus(HttpStatus.OK);
