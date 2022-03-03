@@ -58,7 +58,7 @@ public class StoreRegionCountryDeliveryServiceProviderController {
     @Autowired
     StoreRegionCountryDeliveryServiceProviderRepository sdspr;
 
-    @PostMapping(path = "{deliverySpId}/{deliveryPeriod}", name = "post-store-region-delivery-service-provider", produces = "application/json")
+    @PostMapping(path = "{deliverySpId}/{deliveryPeriod}/{deliverySpTypeId}", name = "post-store-region-delivery-service-provider", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-product-variants-get', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> postStoreRegionCountryDeliveryServiceProvider(HttpServletRequest request,
             @PathVariable String storeId,
@@ -90,7 +90,9 @@ public class StoreRegionCountryDeliveryServiceProviderController {
     @PreAuthorize("hasAnyAuthority('store-product-variants-get', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> deleteStoreRegionCountryDeliveryServiceProviderController(HttpServletRequest request,
             @PathVariable String storeId,
-            @PathVariable String deliverySpId) {
+            @PathVariable String deliverySpId,
+            @PathVariable String deliveryPeriod
+    ) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
         Optional<Store> optStore = storeRepository.findById(storeId);
