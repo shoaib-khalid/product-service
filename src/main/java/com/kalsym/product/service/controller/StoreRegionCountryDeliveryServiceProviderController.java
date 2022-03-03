@@ -63,7 +63,8 @@ public class StoreRegionCountryDeliveryServiceProviderController {
     public ResponseEntity<HttpResponse> postStoreRegionCountryDeliveryServiceProvider(HttpServletRequest request,
             @PathVariable String storeId,
             @PathVariable String deliverySpId,
-            @PathVariable String deliveryPeriod
+            @PathVariable String deliveryPeriod,
+            @PathVariable Integer deliverySpTypeId            
             ) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
@@ -79,6 +80,7 @@ public class StoreRegionCountryDeliveryServiceProviderController {
         sdsp.setStoreId(storeId);
         sdsp.setDeliverySpId(deliverySpId);
         sdsp.setFulfilment(deliveryPeriod);
+        sdsp.setDeliverySpTypeId(deliverySpTypeId);
         response.setStatus(HttpStatus.OK);
         response.setData(sdspr.save(sdsp));
         return ResponseEntity.status(response.getStatus()).body(response);
@@ -143,7 +145,8 @@ public class StoreRegionCountryDeliveryServiceProviderController {
             @PathVariable String storeId,
             @PathVariable(required = false) String id,
             @RequestParam String deliverySpId,
-            @RequestParam String deliveryPeriod) {
+            @RequestParam String deliveryPeriod,
+            @RequestParam Integer deliverySpTypeId) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
         Optional<Store> optStore = storeRepository.findById(storeId);
@@ -160,6 +163,7 @@ public class StoreRegionCountryDeliveryServiceProviderController {
         sdsp.setDeliverySpId(deliverySpId);
         sdsp.setStoreId(storeId);
         sdsp.setFulfilment(deliveryPeriod);
+        sdsp.setDeliverySpTypeId(deliverySpTypeId);
         response.setData(sdspr.save(sdsp));
         response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);

@@ -51,6 +51,8 @@ public class StoreRegionCountryDeliveryServiceProvider {
     private String storeId;
     
     private String fulfilment;
+    
+    private Integer deliverySpTypeId;
      
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "fulfilment", insertable = false, updatable = false, nullable = true)    

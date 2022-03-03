@@ -1,4 +1,13 @@
 ##################################################
+# product-service-3.5.12 | 03-Mar-2022
+##################################################
+Add new field in store_delivery_sp : deliverySpTypeId integer
+
+##DB Changes:
+ALTER TABLE store_delivery_sp ADD deliverySpTypeId INT;
+
+
+##################################################
 # product-service-3.5.11 | 02-Mar-2022
 ##################################################
 Bug fix for validate discount overlap, return http error 417 if overlap
