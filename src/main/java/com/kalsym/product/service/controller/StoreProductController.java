@@ -459,6 +459,30 @@ public class StoreProductController {
         response.setData(savedProduct);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+    
+    @GetMapping(path = {"/checkname"}, name = "store-products-get", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-products-get', 'all')")
+    public ResponseEntity<HttpResponse> checkNameAvailability(HttpServletRequest request,
+            @RequestParam(required = true) String productName
+    ) {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "checkname productName: " + productName, "");
+
+        List<Product> productList = productRepository.findByName(productName);
+
+        if (productList.isEmpty()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " Name: " + productName+" IS available");
+            response.setStatus(HttpStatus.OK);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        } else {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " Name: " + productName+" NOT available");
+            response.setStatus(HttpStatus.CONFLICT);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }               
+        
+    }
 
     private String generateSeoName(String name) throws MalformedURLException {
         name = name.replace(" ", "-");

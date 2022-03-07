@@ -3,6 +3,7 @@
 ##################################################
 Bug fix for validateStoreDiscount()
 Store commission based on vertical
+New function to check product name : checkNameAvailability()
 
 ##DB Changes:
 ALTER TABLE region_vertical ADD commissionPercentage DECIMAL(7,2);
