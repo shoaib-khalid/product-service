@@ -2,6 +2,13 @@
 # product-service-3.5.13 | 07-Mar-2022
 ##################################################
 Bug fix for validateStoreDiscount()
+Store commission based on vertical
+
+##DB Changes:
+ALTER TABLE region_vertical ADD commissionPercentage DECIMAL(7,2);
+ALTER TABLE region_vertical ADD minChargeAmount DECIMAL(7,2);
+
+UPDATE region_vertical SET commissionPercentage=15.00, minChargeAmount=1.50 ;
 
 
 ##################################################

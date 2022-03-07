@@ -328,7 +328,8 @@ public class StoreController {
         response.setStatus(HttpStatus.CREATED);
         Store savedStore = null;
         StoreAsset storeAsset = new StoreAsset();
-                
+        RegionVertical storeRegionVertical = null;
+        
         List<Store> stores = storeRepository.findAll();
 
         List<String> errors = new ArrayList<>();
@@ -371,6 +372,7 @@ public class StoreController {
                 Optional<RegionVertical> regionVertical = regionVerticalRepository.findById(bodyStore.getVerticalCode());
                 if (regionVertical.isPresent()) {
                     baseDomain = regionVertical.get().getDomain();
+                    storeRegionVertical = regionVertical.get();
                 }
                 
                 //skip create domain in godaddy & nginx
@@ -449,7 +451,13 @@ public class StoreController {
                 savedStore = storeRepository.save(bodyStore);
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store created with id: " + savedStore.getId(), "");
             }
-
+            
+            if (storeRegionVertical.getCommissionPercentage()!=null) {
+                rate = storeRegionVertical.getCommissionPercentage();
+            }
+            if (storeRegionVertical.getMinChargeAmount()!=null) {
+                minChargeAmount = storeRegionVertical.getMinChargeAmount();
+            }
             StoreCommission sc = new StoreCommission();
             sc.setRate(rate);
             sc.setMinChargeAmount(minChargeAmount);
