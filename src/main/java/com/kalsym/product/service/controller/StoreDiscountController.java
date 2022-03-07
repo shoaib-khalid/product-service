@@ -649,7 +649,12 @@ public class StoreDiscountController {
         
         //check for overlap date for active discount
         if (storeDiscount.getIsActive()) {
-            List<StoreDiscount> storeDiscountList = storeDiscountRepository.findAvailableDiscountDateRange(storeId, storeDiscount.getDiscountType(), storeDiscount.getStartDate(), storeDiscount.getEndDate());
+            List<StoreDiscount> storeDiscountList = null;
+            if (discount.getId()==null) {
+                storeDiscountList = storeDiscountRepository.findAvailableDiscountDateRange(storeId, storeDiscount.getDiscountType(), storeDiscount.getStartDate(), storeDiscount.getEndDate());
+            } else {
+                storeDiscountList = storeDiscountRepository.findOtherAvailableDiscountDateRange(storeId, storeDiscount.getDiscountType(), storeDiscount.getStartDate(), storeDiscount.getEndDate(), discount.getId());
+            }
             if (storeDiscountList.size()>0) {
                 StoreDiscount activeDiscount = storeDiscountList.get(0);
                 List<String> errors = new ArrayList<>();

@@ -1,4 +1,10 @@
 ##################################################
+# product-service-3.5.13 | 07-Mar-2022
+##################################################
+Bug fix for validateStoreDiscount()
+
+
+##################################################
 # product-service-3.5.12 | 03-Mar-2022
 ##################################################
 Add new field in store_delivery_sp : deliverySpTypeId integer
