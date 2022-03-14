@@ -21,6 +21,8 @@ import org.springframework.stereotype.Repository;
 public interface ProductRepository extends PagingAndSortingRepository<Product, String>, JpaRepository<Product, String> {
 
     List<Product> findByName(@Param("name") String name);
+    
+    List<Product> findByNameAndStoreIdAndStatusNot(@Param("name") String name, @Param("storeId") String storeId, @Param("status") String status);
 
     List<Product> findByStoreId(@Param("storeId") String storeId);
 

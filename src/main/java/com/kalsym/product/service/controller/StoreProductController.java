@@ -463,6 +463,7 @@ public class StoreProductController {
     @GetMapping(path = {"/checkname"}, name = "store-products-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-products-get', 'all')")
     public ResponseEntity<HttpResponse> checkNameAvailability(HttpServletRequest request,
+            @PathVariable String storeId,
             @RequestParam(required = true) String productName
     ) {
         String logprefix = request.getRequestURI();
@@ -470,7 +471,7 @@ public class StoreProductController {
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "checkname productName: " + productName, "");
 
-        List<Product> productList = productRepository.findByName(productName);
+        List<Product> productList = productRepository.findByNameAndStoreIdAndStatusNot(productName, storeId, "DELETED");
 
         if (productList.isEmpty()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " Name: " + productName+" IS available");
