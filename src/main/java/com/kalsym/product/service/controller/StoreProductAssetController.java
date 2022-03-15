@@ -299,12 +299,11 @@ public class StoreProductAssetController {
                 productAssetRepository.deleteById(optProdAsset.get().getId());
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Existing asset deleted successfully");
             }
-            storagePath = fileStorageService.saveProductAsset(file, itemCode + "-inventory-asset");
-            generatedUrl = itemCode + "-inventory-asset";
+            generatedUrl = itemCode + fileStorageService.generateRandomName();
+            storagePath = fileStorageService.saveProductAsset(file, generatedUrl);            
         } else {
-            storagePath = fileStorageService.saveProductAsset(file, itemCode + file.getOriginalFilename().replaceAll("[^A-Za-z0-9]", ""));
-            generatedUrl = itemCode + file.getOriginalFilename().replaceAll("[^A-Za-z0-9]", "");
-
+            generatedUrl = itemCode + fileStorageService.generateRandomName();
+            storagePath = fileStorageService.saveProductAsset(file, generatedUrl);            
         }
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "storagePath: " + storagePath);
