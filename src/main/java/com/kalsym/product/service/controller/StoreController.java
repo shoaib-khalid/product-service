@@ -431,7 +431,7 @@ public class StoreController {
 
                 if (scrOrders == null) {
                     Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "orders group could not created", "");
-                    storeLiveChatService.deleteGroup(scrOrders.get_id());
+                    //storeLiveChatService.deleteGroup(scrOrders.get_id());
                     //storeRepository.delete(savedStore);
                     Logger.application.error(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store group could not be created", "");
                     //response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
