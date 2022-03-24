@@ -413,11 +413,11 @@ public class StoreController {
 
                 if (scrCsr == null) {
                     Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "csr group could not created", "");
-                    storeRepository.delete(savedStore);
+                    //storeRepository.delete(savedStore);
                     Logger.application.error(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store group could not be created", "");
-                    response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-                    response.setError("store group could not be created");
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+                    //response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+                    //response.setError("store group could not be created");
+                    //return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
                 } else {
                     Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "csr group id: " + scrCsr.get_id(), "");
                     savedStore.setLiveChatCsrGroupId(scrCsr.get_id());
@@ -432,11 +432,11 @@ public class StoreController {
                 if (scrOrders == null) {
                     Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "orders group could not created", "");
                     storeLiveChatService.deleteGroup(scrOrders.get_id());
-                    storeRepository.delete(savedStore);
+                    //storeRepository.delete(savedStore);
                     Logger.application.error(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store group could not be created", "");
-                    response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-                    response.setError("store group could not be created");
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+                    //response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+                    //response.setError("store group could not be created");
+                    //return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
                 } else {
                     Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "orders group id: " + scrOrders.get_id(), "");
                     savedStore.setLiveChatOrdersGroupId(scrOrders.get_id());

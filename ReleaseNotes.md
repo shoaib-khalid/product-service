@@ -1,4 +1,10 @@
 ##################################################
+# product-service-3.5.16 | 24-Mar-2022
+##################################################
+Return success even cannot create live chat group during create new store
+
+
+##################################################
 # product-service-3.5.15 | 15-Mar-2022
 ##################################################
 Bug fix for product asset file upload
