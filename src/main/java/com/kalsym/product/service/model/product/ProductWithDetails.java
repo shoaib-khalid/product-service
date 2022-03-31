@@ -75,6 +75,10 @@ public class ProductWithDetails implements Serializable {
     private String packingSize;
     
     private Boolean isPackage;
+    
+    private Boolean isNoteOptional;
+    
+    private String customNote;
      
     @CreationTimestamp
     private Date created;
