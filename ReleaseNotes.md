@@ -1,4 +1,11 @@
 ##################################################
+# product-service-3.5.17 | 31-Mar-2022
+##################################################
+ALTER TABLE product ADD isNoteOptional TINYINT(1) DEFAULT 0;
+ALTER TABLE product ADD customNote VARCHAR(255);
+
+
+##################################################
 # product-service-3.5.16 | 24-Mar-2022
 ##################################################
 Return success even cannot create live chat group during create new store

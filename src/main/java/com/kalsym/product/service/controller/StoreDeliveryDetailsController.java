@@ -63,7 +63,12 @@ public class StoreDeliveryDetailsController {
             if (storeDeliveryDetails.get().getStoreDeliveryPeriodList().isEmpty()) {
                 storeDeliveryDetails.get().setStoreDeliveryPeriodList(StoreDeliveryPeriodsController.SetDefaultDeliveryOptions(storeId, deliveryPeriodRepository));
             }
-        }   
+        } else {
+            Logger.application.warn(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND store deliveryDetail: " + storeId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("deliveryDetail not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }  
         
         response.setStatus(HttpStatus.OK);
         response.setData(storeDeliveryDetails.get());
