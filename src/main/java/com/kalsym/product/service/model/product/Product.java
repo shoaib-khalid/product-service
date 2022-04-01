@@ -140,8 +140,16 @@ public class Product implements Serializable {
             isPackage = product.getIsPackage();
         }
         
-         if (null != product.getVehicleType()) {
+        if (null != product.getVehicleType()) {
             vehicleType = product.getVehicleType();
+        }
+        
+        if (null != product.getIsNoteOptional()) {
+            isNoteOptional = product.getIsNoteOptional();
+        }
+        
+        if (null != product.getCustomNote()) {
+            customNote = product.getCustomNote();
         }
     }
 
