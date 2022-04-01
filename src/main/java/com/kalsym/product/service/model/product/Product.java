@@ -145,12 +145,11 @@ public class Product implements Serializable {
         }
         
         if (null != product.getIsNoteOptional()) {
-            isNoteOptional = product.getIsNoteOptional();
+            isNoteOptional = product.getIsNoteOptional();            
         }
         
-        if (null != product.getCustomNote()) {
-            customNote = product.getCustomNote();
-        }
+        customNote = product.getCustomNote();
+        
     }
 
     @Override
