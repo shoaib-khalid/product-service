@@ -118,10 +118,11 @@ public class StoreWithDetails implements Serializable {
     @JoinColumn(name = "storeId", insertable = false, updatable = false, nullable = true)
     private List<StoreTiming> storeTiming;
     
-    @OneToOne(cascade = CascadeType.ALL,
+    /*@OneToOne(cascade = CascadeType.ALL,
             fetch = FetchType.EAGER)
     @JoinColumn(name = "id", referencedColumnName = "storeId", insertable = false, updatable = false, nullable = true)
     private StoreAsset storeAsset;
+    */
     
     @OneToMany(cascade = CascadeType.ALL,
             fetch = FetchType.LAZY)
@@ -129,7 +130,7 @@ public class StoreWithDetails implements Serializable {
     private List<StoreAssets> storeAssets;
     
     @Transient 
-    private Integer completionPercentage;
+    private Integer completionPercentage;   
     
     public void update(StoreWithDetails store) {
 
@@ -201,4 +202,5 @@ public class StoreWithDetails implements Serializable {
         }
 
     }
+    
 }
