@@ -1,4 +1,10 @@
 ##################################################
+# product-service-3.5.19 | 06-Apr-2022
+##################################################
+Bug fix for store discount normalPriceItemOnly null in db
+
+
+##################################################
 # product-service-3.5.18 | 01-Apr-2022
 ##################################################
 Bug fix for update product customNote 

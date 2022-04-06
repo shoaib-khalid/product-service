@@ -437,8 +437,11 @@ public class StoreDiscountController {
         storeDiscount.setIsActive(discount.getIsActive());
         storeDiscount.setStoreId(storeId);
         storeDiscount.setMaxDiscountAmount(discount.getMaxDiscountAmount());
-        storeDiscount.setNormalPriceItemOnly(discount.getNormalPriceItemOnly());
-        
+        if (discount.getNormalPriceItemOnly()==null) {
+            storeDiscount.setNormalPriceItemOnly(false);
+        } else {
+            storeDiscount.setNormalPriceItemOnly(discount.getNormalPriceItemOnly());
+        }
         //check for overlap date for active discount
         if (storeDiscount.getIsActive()) {
             List<StoreDiscount> storeDiscountList = storeDiscountRepository.findAvailableDiscountDateRange(storeId, storeDiscount.getDiscountType(), storeDiscount.getStartDate(), storeDiscount.getEndDate());
@@ -531,7 +534,11 @@ public class StoreDiscountController {
         storeDiscount.setIsActive(discount.getIsActive());
         storeDiscount.setStoreId(storeId);
         storeDiscount.setMaxDiscountAmount(discount.getMaxDiscountAmount());
-        storeDiscount.setNormalPriceItemOnly(discount.getNormalPriceItemOnly());
+        if (discount.getNormalPriceItemOnly()==null) {
+            storeDiscount.setNormalPriceItemOnly(false);
+        } else {
+            storeDiscount.setNormalPriceItemOnly(discount.getNormalPriceItemOnly());
+        }
         
         //check for overlap date for active discount
         if (storeDiscount.getIsActive()) {
