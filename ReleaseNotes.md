@@ -1,4 +1,24 @@
 ##################################################
+# product-service-3.5.20 | 06-Apr-2022
+##################################################
+New API to retrieve data from platformConfig table
+
+##DB Changes:
+CREATE TABLE platform_config (
+platformId VARCHAR(50) PRIMARY KEY,
+platformName VARCHAR(255),
+platformLogo VARCHAR(255),
+platformLogoDark VARCHAR(255),
+platformFavIcon VARCHAR(255),
+platformType VARCHAR(50),
+platformCountry VARCHAR(50),
+domain VARCHAR(50)
+);
+
+need to copy data for this table from staging to production
+
+
+##################################################
 # product-service-3.5.19 | 06-Apr-2022
 ##################################################
 Bug fix for store discount normalPriceItemOnly null in db
