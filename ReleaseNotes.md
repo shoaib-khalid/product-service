@@ -2,6 +2,7 @@
 # product-service-3.5.21 | 07-Apr-2022
 ##################################################
 New API for voucher
+New field for platformConfig
 
 ##DB Changes:
 CREATE TABLE `voucher` (
@@ -23,6 +24,9 @@ CREATE TABLE `voucher` (
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+ALTER TABLE platform_config ADD gaCode VARCHAR(50);
+ALTER TABLE platform_config ADD platformFavIcon32 VARCHAR(255);
 
 
 ##################################################
