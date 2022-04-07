@@ -74,14 +74,6 @@ public class Voucher implements Serializable {
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private Date endDate;
-    
-    @OneToMany(fetch = FetchType.EAGER)
-    @JoinColumn(name = "storeDiscountId", insertable = false, updatable = false, nullable = true)    
-    private List<StoreDiscountTier> storeDiscountTierList;
-    
-    @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "bannerId", insertable = false, updatable = false, nullable = true)    
-    private StoreAssets discountBanner;
- 
+   
 
 }
