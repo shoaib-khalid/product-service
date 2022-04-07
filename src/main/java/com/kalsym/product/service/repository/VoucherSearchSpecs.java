@@ -67,8 +67,6 @@ public class VoucherSearchSpecs {
                 predicates.add(builder.equal(root.get("storeId"), storeId));
             } 
             
-            predicates.add(builder.equal(root.get("status"), VoucherStatus.ACTIVE));                        
-            
             predicates.add(QueryByExamplePredicateBuilder.getPredicate(root, builder, example));
 
             return builder.and(predicates.toArray(new Predicate[predicates.size()]));

@@ -60,7 +60,7 @@ Bug fix for update product customNote
 ##################################################
 # product-service-3.5.17 | 31-Mar-2022
 ##################################################
-ALTER TABLE product ADD isNoteOptional TINYINT(1) DEFAULT 0;
+ALTER TABLE product ADD isNoteOptional TINYINT(1) DEFAULT 1;
 ALTER TABLE product ADD customNote VARCHAR(255);
 
 

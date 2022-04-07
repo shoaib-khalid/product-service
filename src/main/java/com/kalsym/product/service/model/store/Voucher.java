@@ -51,7 +51,7 @@ public class Voucher implements Serializable {
     private String storeId;    
     private Double discountValue;
     private Double maxDiscountAmount;
-    private Double voucherCode;
+    private String voucherCode;
     private Integer totalQuantity;
     private Integer totalRedeem;
     

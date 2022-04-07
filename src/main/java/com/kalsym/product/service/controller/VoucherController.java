@@ -81,9 +81,10 @@ public class VoucherController {
 
         HttpResponse response = new HttpResponse(request.getRequestURI());
         String logprefix = request.getRequestURI();
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "voucherType:" + voucherType);
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "voucherType:" + voucherType+" storeId:"+storeId);
       
         Voucher voucherMatch = new Voucher();
+        voucherMatch.setStatus(VoucherStatus.ACTIVE);
         Pageable pageable = PageRequest.of(page, pageSize);
         ExampleMatcher matcher = ExampleMatcher
                 .matchingAll()
