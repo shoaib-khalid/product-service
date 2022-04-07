@@ -27,8 +27,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Table(name = "platform_config")
 @Getter
 @Setter
-@NoArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
 @ToString
 public class PlatformConfig implements Serializable {
     
