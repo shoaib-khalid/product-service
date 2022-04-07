@@ -83,11 +83,17 @@ public class StoreAssetsUtility {
         List<com.kalsym.product.service.model.store.StoreAssets> logoList = storeAssetsRepository.findByStoreIdAndAssetType(storeId, StoreAssetType.LogoUrl);
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, "SetDefaultAsset", "logoList found:"+logoList.toString());        
         if (logoList.isEmpty()) {
+            Optional<RegionVertical> regionOpt = regionVerticalRepository.findById(verticalCode);
+            if (regionOpt.isPresent()) {  
+                storeLogoDefaultUrl = regionOpt.get().getDefaultLogoUrl();
+            }
+            
             com.kalsym.product.service.model.store.StoreAssets defaultLogo = new com.kalsym.product.service.model.store.StoreAssets();
             defaultLogo.setAssetUrl(storeLogoDefaultUrl);                        
             defaultLogo.setAssetType(StoreAssetType.LogoUrl);
             defaultLogo.setStoreId(storeId);
             storeAssetsList.add(defaultLogo);
+
         }
         
         List<com.kalsym.product.service.model.store.StoreAssets> FavIconList = storeAssetsRepository.findByStoreIdAndAssetType(storeId, StoreAssetType.FaviconUrl);

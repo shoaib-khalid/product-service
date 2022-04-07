@@ -1,4 +1,31 @@
 ##################################################
+# product-service-3.5.21 | 07-Apr-2022
+##################################################
+New API for voucher
+
+##DB Changes:
+CREATE TABLE `voucher` (
+  `id` varchar(50) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `status` enum('ACTIVE','INACTIVE') DEFAULT NULL,
+  `startDate` date DEFAULT NULL,
+  `endDate` date DEFAULT NULL,
+  `voucherType` enum('DELIVERIN','EASYDUKAN','STORE') DEFAULT NULL,
+  `storeId` varchar(50) DEFAULT NULL,
+  `discountType` enum('TOTALSALES','SHIPPING') DEFAULT NULL,
+  `calculationType` enum('PERCENT','FIX','SHIPAMT') DEFAULT NULL,
+  `discountValue` decimal(10,2) DEFAULT NULL,
+  `maxDiscountAmount` decimal(10,2) DEFAULT NULL,
+  `voucherCode` varchar(50) DEFAULT NULL,
+  `totalQuantity` int DEFAULT NULL,
+  `totalRedeem` int DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+
+##################################################
 # product-service-3.5.20 | 06-Apr-2022
 ##################################################
 New API to retrieve data from platformConfig table
