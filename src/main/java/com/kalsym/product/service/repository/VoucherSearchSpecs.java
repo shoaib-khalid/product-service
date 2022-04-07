@@ -51,8 +51,8 @@ public class VoucherSearchSpecs {
             if (currentDate != null) {
                 
                 //date1
-                Predicate predicateForStartDate1 = builder.greaterThanOrEqualTo(root.get("startDate"), currentDate);
-                Predicate predicateForEndDate1 = builder.lessThanOrEqualTo(root.get("endDate"), currentDate); 
+                Predicate predicateForStartDate1 = builder.greaterThanOrEqualTo(root.get("endDate"), currentDate);
+                Predicate predicateForEndDate1 = builder.lessThanOrEqualTo(root.get("startDate"), currentDate); 
                 Predicate predicateForDate1 = builder.and(predicateForStartDate1, predicateForEndDate1);
                 predicates.add(predicateForDate1);
                 
