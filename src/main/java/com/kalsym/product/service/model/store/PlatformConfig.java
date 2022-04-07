@@ -49,4 +49,7 @@ public class PlatformConfig implements Serializable {
 
     private String domain;
     
+    private String gaCode;
+    
+    private String platformFavIcon32;
 }

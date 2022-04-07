@@ -16,7 +16,7 @@
  */
 package com.kalsym.product.service.repository;
 
-import com.kalsym.product.service.enums.StoreDiscountType;
+import com.kalsym.product.service.enums.VoucherStatus;
 import com.kalsym.product.service.enums.VoucherType;
 import com.kalsym.product.service.model.store.Voucher;
 import java.util.ArrayList;
@@ -67,7 +67,7 @@ public class VoucherSearchSpecs {
                 predicates.add(builder.equal(root.get("storeId"), storeId));
             } 
             
-            predicates.add(builder.equal(root.get("status"), "ACTIVE"));                        
+            predicates.add(builder.equal(root.get("status"), VoucherStatus.ACTIVE));                        
             
             predicates.add(QueryByExamplePredicateBuilder.getPredicate(root, builder, example));
 
