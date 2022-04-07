@@ -38,7 +38,7 @@ import javax.persistence.TemporalType;
 @Setter
 @ToString
 @Entity
-@Table(name = "store_discount")
+@Table(name = "voucher")
 @NoArgsConstructor
 public class Voucher implements Serializable {
 
@@ -65,7 +65,7 @@ public class Voucher implements Serializable {
     private StoreDiscountType discountType;
     
     @Enumerated(EnumType.STRING)
-    private DiscountCalculationType calculationType;
+    private DiscountCalculationType calculationType;    
     
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
