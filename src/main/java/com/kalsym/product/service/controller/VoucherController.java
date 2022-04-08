@@ -39,7 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.http.HttpStatus;
-import com.kalsym.product.service.model.store.Voucher;
+import com.kalsym.product.service.model.product.Voucher;
 import com.kalsym.product.service.repository.VoucherRepository;
 import java.util.Collections;
 import org.springframework.beans.factory.annotation.Value;

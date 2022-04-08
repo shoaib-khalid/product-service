@@ -1,7 +1,7 @@
 package com.kalsym.product.service.repository;
 
 import com.kalsym.product.service.model.store.StoreDiscount;
-import com.kalsym.product.service.model.store.Voucher;
+import com.kalsym.product.service.model.product.Voucher;
 import java.util.List;
 import java.util.Date;
 import org.springframework.data.domain.Page;

@@ -136,6 +136,8 @@ public class StoreProductController {
         if (status == null) {
             status = new ArrayList();
             status.add("ACTIVE");
+            status.add("INACTIVE");
+            status.add("OUTOFSTOCK");
         }
 
         Logger.application.info(ProductServiceApplication.VERSION, logprefix, "storeId: " + storeId);

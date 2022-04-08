@@ -18,7 +18,7 @@ package com.kalsym.product.service.repository;
 
 import com.kalsym.product.service.enums.VoucherStatus;
 import com.kalsym.product.service.enums.VoucherType;
-import com.kalsym.product.service.model.store.Voucher;
+import com.kalsym.product.service.model.product.Voucher;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;

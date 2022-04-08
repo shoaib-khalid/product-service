@@ -1,4 +1,4 @@
-package com.kalsym.product.service.model.store;
+package com.kalsym.product.service.model.product;
 
 import com.kalsym.product.service.enums.StoreDiscountType;
 import com.kalsym.product.service.enums.DiscountCalculationType;
