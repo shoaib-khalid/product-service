@@ -1,38 +1,9 @@
 ##################################################
-# product-service-3.5.21 | 08-Apr-2022
+# product-service-3.5.21 | 11-Apr-2022
 ##################################################
-New API for voucher
 New field for platformConfig
 
 ##DB Changes:
-CREATE TABLE `voucher` (
-  `id` varchar(50) NOT NULL,
-  `name` varchar(255) DEFAULT NULL,
-  `status` enum('ACTIVE','INACTIVE') DEFAULT NULL,
-  `startDate` date DEFAULT NULL,
-  `endDate` date DEFAULT NULL,
-  `voucherType` enum('DELIVERIN','EASYDUKAN','STORE') DEFAULT NULL,
-  `storeId` varchar(50) DEFAULT NULL,
-  `discountType` enum('TOTALSALES','SHIPPING') DEFAULT NULL,
-  `calculationType` enum('PERCENT','FIX','SHIPAMT') DEFAULT NULL,
-  `discountValue` decimal(10,2) DEFAULT NULL,
-  `maxDiscountAmount` decimal(10,2) DEFAULT NULL,
-  `voucherCode` varchar(50) DEFAULT NULL,
-  `totalQuantity` int DEFAULT NULL,
-  `totalRedeem` int DEFAULT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
-
-
-CREATE TABLE customer_voucher (
-customerId VARCHAR(50),
-voucherId VARCHAR(50),
-created DATETIME,
-isUsed TINYINT(1) NOT NULL DEFAULT 0
-);
-
 ALTER TABLE platform_config ADD gaCode VARCHAR(50);
 ALTER TABLE platform_config ADD platformFavIcon32 VARCHAR(255);
 
