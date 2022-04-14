@@ -1,4 +1,13 @@
 ##################################################
+# product-service-3.5.22 | 14-Apr-2022
+##################################################
+Put sequence in region_country_state
+
+##DB Changes:
+ALTER TABLE region_country_state ADD sequence INT(1);
+
+
+##################################################
 # product-service-3.5.21 | 11-Apr-2022
 ##################################################
 New field for platformConfig

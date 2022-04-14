@@ -20,6 +20,7 @@ import com.kalsym.product.service.utility.Logger;
 import java.util.Optional;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -79,7 +80,7 @@ public class RegionCountryStatesController {
         Example<RegionCountryState> example = Example.of(regionCountry, matcher);
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "page: " + page + " pageSize: " + pageSize, "");
-        Pageable pageable = PageRequest.of(page, pageSize);
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.by("sequence").ascending());
         response.setData(regionCountryStatesRepository.findAll(example, pageable));
         response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);

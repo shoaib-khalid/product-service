@@ -26,10 +26,15 @@ public class RegionCountryState implements Serializable {
 
     private String name;
     private String regionCountryId;
-
+    private Integer sequence;
+    
     public void update(RegionCountryState regionCountryState) {
         if (null != regionCountryState.getName()) {
             name = regionCountryState.getName();
+        }
+        
+        if (null != regionCountryState.getSequence()) {
+            sequence = regionCountryState.getSequence();
         }
 
     }
