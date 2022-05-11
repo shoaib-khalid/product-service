@@ -101,7 +101,8 @@ public class StoreCategoryController {
     @PostMapping(path = {""}, name = "store-categories-post")
     @PreAuthorize("hasAnyAuthority('store-categories-post','all')  and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> postStoreCategoryByStoreId(HttpServletRequest request,
-            @RequestParam() String name, 
+            @RequestParam() String name,
+            @RequestParam() String parentCategoryId, 
             @RequestParam(required = false) Integer displaySequence, 
             @RequestParam() String storeId, 
             @RequestParam(name = "file", required = false) MultipartFile file) {
@@ -130,6 +131,7 @@ public class StoreCategoryController {
 
         StoreCategory bodyStoreCategory = new StoreCategory();
         bodyStoreCategory.setName(name);
+        bodyStoreCategory.setParentCategoryId(parentCategoryId);
         bodyStoreCategory.setDisplaySequence(displaySequence);
         bodyStoreCategory.setStoreId(storeId);
         storeCategoryRepository.save(bodyStoreCategory);
@@ -196,6 +198,7 @@ public class StoreCategoryController {
     public ResponseEntity<HttpResponse> putStoreProductAssetsById(HttpServletRequest request,
             @PathVariable String storeCategoryId,
             @RequestParam(name = "name", required = true) String name,
+            @RequestParam(name = "parentCategoryId") String parentCategoryId, 
             @RequestParam(name = "displaySequence", required = false) Integer displaySequence,
             @RequestParam(name = "storeId", required = true) String storeId,
             @RequestParam(name = "file", required = false) MultipartFile file) {
@@ -222,6 +225,10 @@ public class StoreCategoryController {
 //        }
         if (name != null) {
             optStoreCategory.get().setName(name);
+        }
+
+        if (parentCategoryId != null) {
+            optStoreCategory.get().setParentCategoryId(parentCategoryId);
         }
         
         if (displaySequence != null) {
