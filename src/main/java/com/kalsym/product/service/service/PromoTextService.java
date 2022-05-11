@@ -34,16 +34,8 @@ public class PromoTextService {
     // Get By Query WITH Pagination
     public Page<PromoText> getByQueryPromoText(int page, int pageSize){
     
-        PromoText PromoTextMatcher = new PromoText();
-    
-        ExampleMatcher matcher = ExampleMatcher
-                .matchingAll()
-                .withIgnoreCase()
-                .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
-        Example<PromoText> example = Example.of(PromoTextMatcher, matcher);
-
         Pageable pageable = PageRequest.of(page, pageSize);
 
-        return promoTextRepository.findAll(example,pageable);
+        return promoTextRepository.findAll(pageable);
     }
 }

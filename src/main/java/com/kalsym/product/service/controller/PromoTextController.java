@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,7 +28,9 @@ public class PromoTextController {
     PromoTextService promoTextService;
 
     //Get By Query WITH Pagination
-    @GetMapping(value={""})
+    // @GetMapping(value={""})
+    @GetMapping(path = {""}, name = "promo-text-get", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('promo-text-get', 'all')")
     public ResponseEntity<HttpResponse> getPromoText(
         HttpServletRequest request,
         @RequestParam(defaultValue = "0") int page,
@@ -39,14 +42,15 @@ public class PromoTextController {
         HttpResponse response = new HttpResponse(request.getRequestURI());
         response.setData(body);
         response.setStatus(HttpStatus.OK);
-        System.out.println("Checking ResponseEntity.status(response.getStatus()).body(response):::"+ResponseEntity.status(response.getStatus()).body(response));
         return ResponseEntity.status(response.getStatus()).body(response);
 
     }
 
     
     /// Get By Id
-    @GetMapping(value="/{eventId}")
+    // @GetMapping(value="/{eventId}")
+    @GetMapping(path = {"/{eventId}"}, name = "promo-text-get-by-id", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('promo-text-get-by-id', 'all')")
     public ResponseEntity<HttpResponse> getPromoByEventId(
         HttpServletRequest request,
         @PathVariable(value = "eventId") String eventId) {
