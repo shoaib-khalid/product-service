@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.ExampleMatcher.GenericPropertyMatcher;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -62,6 +63,7 @@ public class StoreCategoryController {
     public ResponseEntity<HttpResponse> getCategory(HttpServletRequest request,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String storeId,
+            @RequestParam(required = false) String verticalCode,
             @RequestParam(required = false, defaultValue = "name") String sortByCol,
             @RequestParam(required = false, defaultValue = "ASC") Sort.Direction sortingOrder,
             @RequestParam(defaultValue = "0") int page,
@@ -76,11 +78,13 @@ public class StoreCategoryController {
 
         storeCategory.setName(name);
         storeCategory.setStoreId(storeId);
+        storeCategory.setVerticalCode(verticalCode);
 
         ExampleMatcher matcher = ExampleMatcher
                 .matchingAll()
                 .withIgnoreCase()
-                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
+                .withMatcher("verticalCode", new GenericPropertyMatcher().exact()) // .withMatcher("storeId", new GenericPropertyMatcher().exact())
+                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);//ExampleMatcher.StringMatcher.CONTAINING
         Example<StoreCategory> example = Example.of(storeCategory, matcher);
         
         Pageable pageable = PageRequest.of(page, pageSize);
