@@ -1,4 +1,104 @@
 ##################################################
+# product-service-3.6.0 | 12-May-2022
+##################################################
+
+1. Add new column for store category
+2. Insert data for top category based on vertical code
+3. Create new endpoint {GET /promo-text, produces [application/json]} , {GET /promo-text/{eventId}, produces [application/json]}
+4. Create new table for promo-text
+5. add permission of the endpoint {GET /promo-text, produces [application/json]} , {GET /promo-text/{eventId}, produces [application/json]} into table authority
+6. assign role permission into table role_authority
+
+
+##DB Changes:
+
+ALTER TABLE store_category ADD verticalCode VARCHAR(50);
+
+INSERT INTO `store_category` (`id`,`name`, `verticalCode`) VALUES
+('AutomotiveECommercePK','Automative','ECommerce_PK'),
+('BabiesToysECommerce_PK','Babies & Toys','ECommerce_PK'),
+('BeautyHealthCareECommercePK','Beauty & Health Care','ECommerce_PK'),
+('ElectronicAccessoriesECommercePK','Electronic Accessories','ECommerce_PK'),
+('ElectronicDevicesECommercePK','Electronic Devices','ECommerce_PK'),
+('FashionAccessoriesECommercePK','Fashion Accessories','ECommerce_PK'),
+('GamesHobbiesECommercePK','Games & Hobbies','ECommerce_PK'),
+('GroceriesECommercePK','Groceries','ECommerce_PK'),
+('HomeLivingECommercePK','Home & Living','ECommerce_PK'),
+('HomeAppliancesECommercePK','Home Appliances','ECommerce_PK'),
+('MenFashionECommercePK','Men Fashion','ECommerce_PK'),
+('WomenFashionECommercePK','Women Fashion','ECommerce_PK'),
+('OthersECommercePK','Others','ECommerce_PK'),
+('PetsSuppliesECommercePK','Pets & Supplies','ECommerce_PK'),
+('SportOutdoorECommercePK','Sport & Outdoor','ECommerce_PK')
+;
+
+INSERT INTO `store_category` (`id`,`name`, `verticalCode`) VALUES
+('AutomotiveECommerce','Automative','E-Commerce'),
+('BabiesToysECommerce','Babies & Toys','E-Commerce'),
+('BeautyHealthCareECommerce','Beauty & Health Care','E-Commerce'),
+('ElectronicAccessoriesECommerce','Electronic Accessories','E-Commerce'),
+('ElectronicDevicesECommerce','Electronic Devices','E-Commerce'),
+('FashionAccessoriesECommerce','Fashion Accessories','E-Commerce'),
+('GamesHobbiesECommerce','Games & Hobbies','E-Commerce'),
+('GroceriesECommerce','Groceries','E-Commerce'),
+('HomeLivingECommerce','Home & Living','E-Commerce'),
+('HomeAppliancesECommerce','Home Appliances','E-Commerce'),
+('MenFashionECommerce','Men Fashion','E-Commerce'),
+('WomenFashionECommerce','Women Fashion','E-Commerce'),
+('OthersECommerce','Others','E-Commerce'),
+('PetsSuppliesECommerce','Pets & Supplies','E-Commerce'),
+('SportOutdoorECommerce','Sport & Outdoor','E-Commerce')
+;
+
+INSERT INTO `store_category` (`id`,`name`, `verticalCode`) VALUES
+('BeveragesFnBPK','Beverages','FnB_PK'),
+('ChineseCuisineFnBPK','Chinese Cuisine','FnB_PK'),
+('DessertSnacksFnBPK','Dessert & Snacks','FnB_PK'),
+('FastFoodFnBPK','Fast Food','FnB_PK'),
+('IndianCuisineFnBPK','Indian Cuisine','FnB_PK'),
+('IndonesianCuisineFnBPK','Indonesian Cuisine','FnB_PK'),
+('JapaneseCuisineFnBPK','Japanese Cuisine','FnB_PK'),
+('KoreanCuisineFnBPK','Korean Cuisine','FnB_PK'),
+('MalayCuisineFnBPK','Malay Cuisine','FnB_PK'),
+('ThailandCuisineFnBPK','Thailand Cuisine','FnB_PK'),
+('VegetarianFnBPK','Vegetarian','FnB_PK'),
+('WesternCuisineFnBPK','Western Cuisine','FnB_PK')
+;
+
+INSERT INTO `store_category` (`id`,`name`, `verticalCode`) VALUES
+('BeveragesFnB','Beverages','FnB'),
+('ChineseCuisineFnB','Chinese Cuisine','FnB'),
+('DessertSnacksFnB','Dessert & Snacks','FnB'),
+('FastFoodFnB','Fast Food','FnB'),
+('IndianCuisineFnB','Indian Cuisine','FnB'),
+('IndonesianCuisineFnB','Indonesian Cuisine','FnB'),
+('JapaneseCuisineFnB','Japanese Cuisine','FnB'),
+('KoreanCuisineFnB','Korean Cuisine','FnB'),
+('MalayCuisineFnB','Malay Cuisine','FnB'),
+('ThailandCuisineFnB','Thailand Cuisine','FnB'),
+('VegetarianFnB','Vegetarian','FnB'),
+('WesternCuisineFnB','Western Cuisine','FnB')
+;
+
+CREATE TABLE `promo_text` (
+  `eventId` varchar(100) NOT NULL,
+  `displayText` text,
+  PRIMARY KEY (`eventId`)
+)
+
+INSERT INTO `authority` (`id`, `serviceId`, `name`, `description`) VALUES
+('promo-text-get', 'product-service', 'getPromoText', '{GET /promo-text, produces [application/json]}'),
+('promo-text-get-by-id', 'product-service', 'getPromoByEventId', '{GET /promo-text/{eventId}, produces [application/json]}')
+;
+
+INSERT INTO `role_authority` (`roleId`, `authorityId`, `serviceId`) VALUES
+('STORE_OWNER', 'promo-text-get', 'product-service'),
+('SUPER_USER', 'promo-text-get', 'product-service'),
+('STORE_OWNER', 'promo-text-get-by-id', 'product-service'),
+('SUPER_USER', 'promo-text-get-by-id', 'product-service')
+;
+
+##################################################
 # product-service-3.5.22 | 14-Apr-2022
 ##################################################
 Put sequence in region_country_state
