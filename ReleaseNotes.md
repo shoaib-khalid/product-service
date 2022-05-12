@@ -81,10 +81,14 @@ INSERT INTO `store_category` (`id`,`name`, `verticalCode`) VALUES
 ;
 
 CREATE TABLE `promo_text` (
+  `id` int NOT NULL AUTO_INCREMENT,
   `eventId` varchar(100) NOT NULL,
   `displayText` text,
-  PRIMARY KEY (`eventId`)
-)
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `eventId` (`eventId`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3;
 
 INSERT INTO `authority` (`id`, `serviceId`, `name`, `description`) VALUES
 ('promo-text-get', 'product-service', 'getPromoText', '{GET /promo-text, produces [application/json]}'),
