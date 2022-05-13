@@ -36,13 +36,20 @@ public class RegionCountryStateCityController {
         @RequestParam(required = false) String city,
         @RequestParam(required = false, defaultValue = "city") String sortByCol,
         @RequestParam(required = false, defaultValue = "ASC") Sort.Direction sortingOrder
-    ) {
+    ) throws Exception {
 
-        Page<RegionCountryStateCity> body = regionCountryStateCityService.getByQueryRegionCountryStateCity(page,pageSize,country,state,city,sortByCol,sortingOrder);
-        
         HttpResponse response = new HttpResponse(request.getRequestURI());
-        response.setData(body);
-        response.setStatus(HttpStatus.OK);
+
+        try{
+            Page<RegionCountryStateCity> body = regionCountryStateCityService.getByQueryRegionCountryStateCity(page,pageSize,country,state,city,sortByCol,sortingOrder);
+        
+            response.setData(body);
+            response.setStatus(HttpStatus.OK);
+
+        } catch (Throwable e) {
+            // response.setData(e.getMessage());
+            response.setStatus(HttpStatus.BAD_REQUEST);
+        }
         return ResponseEntity.status(response.getStatus()).body(response);
 
     }
