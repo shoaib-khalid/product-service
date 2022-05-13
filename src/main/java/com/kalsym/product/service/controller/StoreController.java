@@ -71,6 +71,7 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.ExampleMatcher.GenericPropertyMatcher;
 import org.springframework.data.jpa.convert.QueryByExamplePredicateBuilder;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -197,6 +198,7 @@ public class StoreController {
             @RequestParam(required = false) String city,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String domain,
+            @RequestParam(required = false) String regionCountryId,
             @RequestParam(required = false, defaultValue = "name") String sortByCol,
             @RequestParam(required = false, defaultValue = "ASC") Sort.Direction sortingOrder,
             @RequestParam(defaultValue = "0") int page,
@@ -218,11 +220,13 @@ public class StoreController {
             store.setCity(city);
             store.setName(name);
             store.setDomain(domain);
+            store.setRegionCountryId(regionCountryId);
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "store: " + store, "");
 
             ExampleMatcher matcher = ExampleMatcher
                     .matchingAll()
                     .withIgnoreCase()
+                    .withMatcher("regionCountryId", new GenericPropertyMatcher().exact())
                     .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
             Example<StoreWithDetails> storeExample = Example.of(store, matcher);
 
