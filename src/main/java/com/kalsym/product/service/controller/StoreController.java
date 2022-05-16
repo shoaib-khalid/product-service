@@ -364,6 +364,10 @@ public class StoreController {
                 bodyStore.setStoreDescription(shortDescription);
             }
             
+            //set isDisplayMap to false
+            if (bodyStore.getIsDisplayMap()==null) {
+            bodyStore.setIsDisplayMap(isDisplayMap);
+            }
             if (bodyStore.getIsBranch()==null) {
                 bodyStore.setIsBranch(false);
             }
@@ -487,7 +491,6 @@ public class StoreController {
                 deliveryService.createCenterCode(savedStore.getId());
             }
 
-            
             //send whatsapp notification to merchant
             Optional<Client> clientOpt = clientRepository.findById(savedStore.getClientId());
             Client client = clientOpt.get();

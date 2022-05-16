@@ -71,7 +71,9 @@ public class Store implements Serializable {
     private String googleAnalyticId;
     
     private String displayAddress;
-
+    
+    private Boolean isDisplayMap;
+    
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private Date snoozeStartTime;
