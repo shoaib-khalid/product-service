@@ -105,7 +105,7 @@ public class StoreCategoryController {
     @PreAuthorize("hasAnyAuthority('store-categories-post','all')  and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> postStoreCategoryByStoreId(HttpServletRequest request,
             @RequestParam() String name,
-            @RequestParam(required = true) String parentCategoryId, 
+            @RequestParam(required = false) String parentCategoryId, 
             @RequestParam(required = false) Integer displaySequence, 
             @RequestParam() String storeId, 
             @RequestParam(name = "file", required = false) MultipartFile file) {
@@ -201,7 +201,7 @@ public class StoreCategoryController {
     public ResponseEntity<HttpResponse> putStoreProductAssetsById(HttpServletRequest request,
             @PathVariable String storeCategoryId,
             @RequestParam(name = "name", required = true) String name,
-            @RequestParam(name = "parentCategoryId" ,required = true) String parentCategoryId, 
+            @RequestParam(name = "parentCategoryId" ,required = false) String parentCategoryId, 
             @RequestParam(name = "displaySequence", required = false) Integer displaySequence,
             @RequestParam(name = "storeId", required = true) String storeId,
             @RequestParam(name = "file", required = false) MultipartFile file) {
