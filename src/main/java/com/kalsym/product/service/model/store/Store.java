@@ -175,6 +175,10 @@ public class Store implements Serializable {
         if (null != store.getDisplayAddress()) {
             displayAddress = store.getDisplayAddress();
         }
+
+        if (null != store.getIsDisplayMap()) {
+            isDisplayMap = store.getIsDisplayMap();
+        }
     }
 
 }

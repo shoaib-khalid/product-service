@@ -366,7 +366,7 @@ public class StoreController {
             
             //set isDisplayMap to false
             if (bodyStore.getIsDisplayMap()==null) {
-            bodyStore.setIsDisplayMap(isDisplayMap);
+            bodyStore.setIsDisplayMap(false);
             }
             if (bodyStore.getIsBranch()==null) {
                 bodyStore.setIsBranch(false);
