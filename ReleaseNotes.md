@@ -1,4 +1,17 @@
 ##################################################
+# product-service-3.7.1 | 19-May-2022
+##################################################
+
+1. Alter table for promo text 
+2. Add new request param
+
+##DB Changes:
+
+ALTER TABLE promo_text ADD 
+verticaCode VARCHAR(50),
+;
+
+##################################################
 # product-service-3.7.0 | 13-May-2022
 ##################################################
 1. Alter table delivery_zone_city
