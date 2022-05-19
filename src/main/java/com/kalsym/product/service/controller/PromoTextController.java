@@ -33,11 +33,13 @@ public class PromoTextController {
     @PreAuthorize("hasAnyAuthority('promo-text-get', 'all')")
     public ResponseEntity<HttpResponse> getPromoText(
         HttpServletRequest request,
+        @RequestParam(required = false) String verticalCode,
+        @RequestParam(required = false) String eventId,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int pageSize
     ) {
 
-        Page<PromoText> body = promoTextService.getByQueryPromoText(page,pageSize);
+        Page<PromoText> body = promoTextService.getByQueryPromoText(page,pageSize,verticalCode,eventId);
         
         HttpResponse response = new HttpResponse(request.getRequestURI());
         response.setData(body);
@@ -49,15 +51,15 @@ public class PromoTextController {
     
     /// Get By Id
     // @GetMapping(value="/{eventId}")
-    @GetMapping(path = {"/{eventId}"}, name = "promo-text-get-by-id", produces = "application/json")
+    @GetMapping(path = {"/{id}"}, name = "promo-text-get-by-id", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('promo-text-get-by-id', 'all')")
     public ResponseEntity<HttpResponse> getPromoByEventId(
         HttpServletRequest request,
-        @PathVariable(value = "eventId") String eventId) {
+        @PathVariable(value = "id") String id) {
 
             HttpResponse response = new HttpResponse(request.getRequestURI());
 
-        Optional<PromoText> body = promoTextService.getPromoTextById(eventId);
+        Optional<PromoText> body = promoTextService.getPromoTextById(id);
         if(body.isPresent()){
 
             response.setData(body);

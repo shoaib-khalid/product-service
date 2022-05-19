@@ -23,8 +23,12 @@ public class PromoText implements Serializable{
     @Id
     @GeneratedValue(generator = "uuid2")
     @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
+    private String id;
+
     private String eventId;
 
     private String displayText;
+
+    private String verticalCode;
 
 }
