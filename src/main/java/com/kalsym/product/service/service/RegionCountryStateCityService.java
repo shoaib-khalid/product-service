@@ -1,4 +1,6 @@
 package com.kalsym.product.service.service;
+import java.util.List;
+
 import com.kalsym.product.service.model.RegionCountryStateCity;
 import com.kalsym.product.service.repository.RegionCountryStateCityRepository;
 
@@ -21,7 +23,7 @@ public class RegionCountryStateCityService {
     RegionCountryStateCityRepository regionCountryStateCityRepository; 
 
     // Get By Query WITH Pagination
-    public Page<RegionCountryStateCity> getByQueryRegionCountryStateCity(int page, int pageSize, String country, String state, String city,String sortByCol,Sort.Direction sortingOrder){
+    public List<RegionCountryStateCity> getByQueryRegionCountryStateCity(String country, String state, String city,String sortByCol,Sort.Direction sortingOrder){
 
         RegionCountryStateCity RegionCountryStateCityMatch = new RegionCountryStateCity();
         RegionCountryStateCityMatch.setCountry(country);
@@ -36,18 +38,15 @@ public class RegionCountryStateCityService {
                 .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
         Example<RegionCountryStateCity> example = Example.of(RegionCountryStateCityMatch, matcher);
 
-        Pageable pageable;
-        if (sortingOrder==Sort.Direction.ASC){
-            pageable = PageRequest.of(page, pageSize, Sort.by(sortByCol).ascending());
+        Sort sort;
 
-        }
-        else if (sortingOrder==Sort.Direction.DESC){
-            pageable = PageRequest.of(page, pageSize, Sort.by(sortByCol).descending());
+        if (sortingOrder==Sort.Direction.DESC){
+            sort = Sort.by(sortByCol).descending();
         }
         else{
-            pageable = PageRequest.of(page, pageSize);
+            sort = Sort.by(sortByCol).ascending();//Default ascending
         }
         
-        return regionCountryStateCityRepository.findAll(example,pageable);
+        return regionCountryStateCityRepository.findAll(example,sort);
     }
 }

@@ -1,5 +1,7 @@
 package com.kalsym.product.service.controller;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import com.kalsym.product.service.model.RegionCountryStateCity;
@@ -29,8 +31,6 @@ public class RegionCountryStateCityController {
     @PreAuthorize("hasAnyAuthority('region-country-state-city-get', 'all')")
     public ResponseEntity<HttpResponse> getRegionCountryStateCity(
         HttpServletRequest request,
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int pageSize,
         @RequestParam(required = false) String country,
         @RequestParam(required = false) String state,
         @RequestParam(required = false) String city,
@@ -41,7 +41,7 @@ public class RegionCountryStateCityController {
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
         try{
-            Page<RegionCountryStateCity> body = regionCountryStateCityService.getByQueryRegionCountryStateCity(page,pageSize,country,state,city,sortByCol,sortingOrder);
+            List<RegionCountryStateCity> body = regionCountryStateCityService.getByQueryRegionCountryStateCity(country,state,city,sortByCol,sortingOrder);
         
             response.setData(body);
             response.setStatus(HttpStatus.OK);
