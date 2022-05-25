@@ -34,6 +34,7 @@ public class RegionCountryStateCityController {
         @RequestParam(required = false) String country,
         @RequestParam(required = false) String state,
         @RequestParam(required = false) String city,
+        @RequestParam(required = false) String stateId,
         @RequestParam(required = false, defaultValue = "name") String sortByCol,
         @RequestParam(required = false, defaultValue = "ASC") Sort.Direction sortingOrder
     ) throws Exception {
@@ -43,7 +44,7 @@ public class RegionCountryStateCityController {
         try{
             System.out.println("IMAN CHECKING :::"+state);
 
-            List<RegionCountryStateCity> body = regionCountryStateCityService.getByQueryRegionCountryStateCity(country,state,city,sortByCol,sortingOrder);
+            List<RegionCountryStateCity> body = regionCountryStateCityService.getByQueryRegionCountryStateCity(country,state,city,stateId,sortByCol,sortingOrder);
         
             response.setData(body);
             response.setStatus(HttpStatus.OK);

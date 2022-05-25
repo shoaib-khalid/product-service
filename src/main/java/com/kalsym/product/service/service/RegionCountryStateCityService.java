@@ -24,10 +24,11 @@ public class RegionCountryStateCityService {
     RegionCountryStateCityRepository regionCountryStateCityRepository; 
 
     // Get By Query WITH Pagination
-    public List<RegionCountryStateCity> getByQueryRegionCountryStateCity(String country, String state, String city,String sortByCol,Sort.Direction sortingOrder){
+    public List<RegionCountryStateCity> getByQueryRegionCountryStateCity(String country, String state, String city,String stateId,String sortByCol,Sort.Direction sortingOrder){
 
         RegionCountryState regionCountryStateMatch = new RegionCountryState();
         regionCountryStateMatch.setName(state);
+        regionCountryStateMatch.setId(stateId);
         regionCountryStateMatch.setRegionCountryId(country);
 
         RegionCountryStateCity RegionCountryStateCityMatch = new RegionCountryStateCity();
@@ -41,6 +42,7 @@ public class RegionCountryStateCityService {
                 .withIgnoreCase()
                 .withMatcher("country", new GenericPropertyMatcher().exact())
                 .withMatcher("state", new GenericPropertyMatcher().exact())
+                .withMatcher("stateId", new GenericPropertyMatcher().exact())
                 .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
         Example<RegionCountryStateCity> example = Example.of(RegionCountryStateCityMatch, matcher);
 
