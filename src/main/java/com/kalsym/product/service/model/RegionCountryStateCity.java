@@ -8,6 +8,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import javax.persistence.OneToOne;
+import javax.persistence.JoinColumn;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  *
@@ -16,16 +19,19 @@ import lombok.ToString;
 @Getter
 @Setter
 @Entity
-@Table(name = "delivery_zone_city")
+@Table(name = "region_city")
 @ToString
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.ALWAYS)
+
 public class RegionCountryStateCity {
     
     @Id
-    private String city;
-    private String zone;
-    private String costCenterCode;
-    private String country;
-    private String state;
+    private String id;
+    private String name;
+
+    @OneToOne()
+    @JoinColumn(name = "regionStateId",referencedColumnName="id")
+    private RegionCountryState regionCountryState; 
 
 }

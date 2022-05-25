@@ -1,6 +1,7 @@
 package com.kalsym.product.service.service;
 import java.util.List;
 
+import com.kalsym.product.service.model.RegionCountryState;
 import com.kalsym.product.service.model.RegionCountryStateCity;
 import com.kalsym.product.service.repository.RegionCountryStateCityRepository;
 
@@ -25,10 +26,15 @@ public class RegionCountryStateCityService {
     // Get By Query WITH Pagination
     public List<RegionCountryStateCity> getByQueryRegionCountryStateCity(String country, String state, String city,String sortByCol,Sort.Direction sortingOrder){
 
+        RegionCountryState regionCountryStateMatch = new RegionCountryState();
+        regionCountryStateMatch.setName(state);
+        regionCountryStateMatch.setRegionCountryId(country);
+
         RegionCountryStateCity RegionCountryStateCityMatch = new RegionCountryStateCity();
-        RegionCountryStateCityMatch.setCountry(country);
-        RegionCountryStateCityMatch.setState(state);
-        RegionCountryStateCityMatch.setCity(city);
+        RegionCountryStateCityMatch.setName(city);
+        RegionCountryStateCityMatch.setRegionCountryState(regionCountryStateMatch);
+
+
 
         ExampleMatcher matcher = ExampleMatcher
                 .matchingAll()

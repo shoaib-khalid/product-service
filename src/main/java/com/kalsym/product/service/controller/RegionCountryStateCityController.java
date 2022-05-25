@@ -34,13 +34,15 @@ public class RegionCountryStateCityController {
         @RequestParam(required = false) String country,
         @RequestParam(required = false) String state,
         @RequestParam(required = false) String city,
-        @RequestParam(required = false, defaultValue = "city") String sortByCol,
+        @RequestParam(required = false, defaultValue = "name") String sortByCol,
         @RequestParam(required = false, defaultValue = "ASC") Sort.Direction sortingOrder
     ) throws Exception {
 
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
         try{
+            System.out.println("IMAN CHECKING :::"+state);
+
             List<RegionCountryStateCity> body = regionCountryStateCityService.getByQueryRegionCountryStateCity(country,state,city,sortByCol,sortingOrder);
         
             response.setData(body);
@@ -48,6 +50,7 @@ public class RegionCountryStateCityController {
 
         } catch (Throwable e) {
             // response.setData(e.getMessage());
+            System.out.println("ERRROR:::"+e.getMessage());
             response.setStatus(HttpStatus.BAD_REQUEST);
         }
         return ResponseEntity.status(response.getStatus()).body(response);
