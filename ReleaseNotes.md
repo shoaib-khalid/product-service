@@ -1,4 +1,10 @@
 ##################################################
+# product-service-3.8.0 | 21-May-2022
+##################################################
+
+1. Create new endpoint to get all products based on parentCategoryId get :/products/parent-category
+
+##################################################
 # product-service-3.7.3 | 25-May-2022
 ##################################################
 
