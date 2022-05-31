@@ -3,10 +3,12 @@ package com.kalsym.product.service.controller;
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.model.product.Product;
+import com.kalsym.product.service.model.product.ProductMain;
 import com.kalsym.product.service.model.product.ProductWithDetails;
 import com.kalsym.product.service.repository.ProductAssetRepository;
 import com.kalsym.product.service.repository.ProductInventoryItemRepository;
 import com.kalsym.product.service.repository.StoreRepository;
+import com.kalsym.product.service.service.ProductCategoryService;
 import com.kalsym.product.service.repository.ProductRepository;
 import com.kalsym.product.service.repository.ProductVariantRepository;
 import com.kalsym.product.service.repository.ProductVariantAvailableRepository;
@@ -20,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -70,6 +73,9 @@ public class ProductController {
 
     @Autowired
     StoreRepository storeRepository;
+
+    @Autowired
+    ProductCategoryService productCategoryService;
 
     /**
      * Get product by store or category or productId
@@ -247,6 +253,27 @@ public class ProductController {
         response.setStatus(HttpStatus.ACCEPTED);
         response.setData(productRepository.save(product));
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+    }
+
+    @GetMapping(path = {"/parent-category"}, name = "promo-text-get", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('promo-text-get', 'all')")
+    public ResponseEntity<HttpResponse> getProductByParentCategory(
+        HttpServletRequest request,
+        @RequestParam(required = false) String parentCategoryId,
+        @RequestParam(required = true) String regionCountryId,
+        @RequestParam(required = false) List<String> status,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int pageSize
+    ) {
+
+
+        Page<ProductMain> body = productCategoryService.getRawQueryProductCountryIdAndParentCategoryId(regionCountryId,parentCategoryId,status,page,pageSize);
+        
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+        response.setData(body);
+        response.setStatus(HttpStatus.OK);
+        return ResponseEntity.status(response.getStatus()).body(response);
+
     }
 
 }
