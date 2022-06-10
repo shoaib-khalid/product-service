@@ -1,4 +1,23 @@
 ##################################################
+# product-service-3.9.0 | 10-June-2022
+##################################################
+
+1. Create new endpoint to get all marketplace banner image ( get :/banner-config?regionCountryId=:? )
+2. DB Changes : Create new table for market place banner
+
+
+##DB Changes:
+
+CREATE TABLE `marketplace_banner_config` (
+	id bigint auto_increment NOT NULL,
+	bannerUrl varchar(500) NULL,
+	regionCountryId varchar(3) NULL,
+	CONSTRAINT marketplace_banner_config_PK PRIMARY KEY (id),
+	CONSTRAINT marketplace_banner_config_FK FOREIGN KEY (regionCountryId) REFERENCES symplified.region_country(id) ON DELETE RESTRICT ON UPDATE RESTRICT
+);
+
+
+##################################################
 # product-service-3.8.0 | 21-May-2022
 ##################################################
 
