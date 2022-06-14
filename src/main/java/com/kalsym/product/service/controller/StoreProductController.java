@@ -114,7 +114,7 @@ public class StoreProductController {
     @Autowired
     private HashmapLoader hashmapLoader;
             
-    @Value("${product.seo.url:https://{{store-domain}}.symplified.store/products/name/{{product-name}}}")
+    @Value("${product.seo.url:https://{{store-domain}}/product/{{product-name}}}")
     private String productSeoUrl;
 
     @GetMapping(path = {""}, name = "store-products-get", produces = "application/json")
