@@ -6,6 +6,7 @@ import com.kalsym.product.service.enums.DiscountCalculationType;
 import com.kalsym.product.service.model.ItemDiscount;
 import com.kalsym.product.service.model.MySQLUserDetails;
 import com.kalsym.product.service.model.RegionVertical;
+import com.kalsym.product.service.model.ReserveDomain;
 import com.kalsym.product.service.model.store.StoreCategory;
 import com.kalsym.product.service.repository.ProductRepository;
 import com.kalsym.product.service.repository.StoreRepository;
@@ -46,6 +47,7 @@ import com.kalsym.product.service.repository.StoreAssetRepository;
 import com.kalsym.product.service.repository.StoreAssetsRepository;
 import com.kalsym.product.service.repository.ClientsRepository;
 import com.kalsym.product.service.repository.RegionVerticalRepository;
+import com.kalsym.product.service.repository.ReserveDomainRepository;
 import com.kalsym.product.service.repository.StoreDeliveryPeriodsRepository;
 import com.kalsym.product.service.service.FileStorageService;
 
@@ -124,6 +126,9 @@ public class StoreController {
 
     @Autowired
     StoreCategoryRepository storeCategoryRepository;
+
+    @Autowired
+    ReserveDomainRepository reserveDomainRepository;
 
     @Autowired
     StoreSubdomainHandler storeSubdomainHandler;
@@ -759,7 +764,19 @@ public class StoreController {
 
         Optional<StoreWithDetails> optStore = storeWithDetailsRepository.findByDomain(domain);
 
-        if (!optStore.isPresent()) {
+        //split string to get subdomain
+        Integer i = domain.indexOf('.');
+        String subdomain;
+
+        if(i == -1){
+            subdomain = domain;
+        }else{
+            subdomain = domain.substring(0,i);
+        }
+
+        Optional<ReserveDomain> optReserveDomain = reserveDomainRepository.getReserveDomain(subdomain);
+
+        if (!optStore.isPresent() && !optReserveDomain.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " Domain: " + domain+" IS available");
             response.setStatus(HttpStatus.OK);
             return ResponseEntity.status(response.getStatus()).body(response);
