@@ -1,4 +1,21 @@
 ##################################################
+# product-service-3.10.0 | 23-June-2022
+##################################################
+
+1. Check domain name of store with reservde domain name
+2. DB Changes : Create new table 'reserved_domain'
+
+
+##DB Changes:
+
+ CREATE TABLE symplified.reserved_domain (
+ 	id bigint auto_increment NOT NULL,
+ 	`domain` varchar(300) NULL,
+ 	CONSTRAINT reserved_domain_PK PRIMARY KEY (id)
+ );
+
+
+##################################################
 # product-service-3.9.0 | 10-June-2022
 ##################################################
 
