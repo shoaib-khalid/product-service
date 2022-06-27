@@ -45,6 +45,10 @@ CREATE TABLE `marketplace_banner_config` (
 
 1. Create new endpoint to get all products based on parentCategoryId get :/products/parent-category
 
+# product-service-3.7.4 | 14-Jun-2022
+##################################################
+
+1. Fix seoUrl in store product
 ##################################################
 # product-service-3.7.3 | 25-May-2022
 ##################################################
