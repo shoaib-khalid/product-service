@@ -18,7 +18,7 @@ public interface MarketplaceBannerConfigRepository extends JpaRepository<Marketp
         " SELECT * "
         +"FROM marketplace_banner_config mbc "
         +"WHERE regionCountryId = :regionCountryId "
-        +"AND type = :type "
+        +"AND type LIKE CONCAT('%', :type ,'%') "
         +"LIMIT 10", 
         nativeQuery = true
     )

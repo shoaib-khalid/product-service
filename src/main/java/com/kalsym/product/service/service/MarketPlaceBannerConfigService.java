@@ -18,6 +18,10 @@ public class MarketPlaceBannerConfigService {
     MarketplaceBannerConfigRepository marketplaceBannerConfigRepository;
     
     public List<MarketplaceBannerConfig> getQueryRegionCountryId(String regionCountryId, String type){
+
+        if(type == null){
+            type = "";
+        }
      
         Collection<MarketplaceBannerConfig> result = marketplaceBannerConfigRepository.getBannerByCountryId(regionCountryId,type);
 
