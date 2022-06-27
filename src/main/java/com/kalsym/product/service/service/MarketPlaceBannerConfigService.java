@@ -17,9 +17,9 @@ public class MarketPlaceBannerConfigService {
     @Autowired
     MarketplaceBannerConfigRepository marketplaceBannerConfigRepository;
     
-    public List<MarketplaceBannerConfig> getQueryRegionCountryId(String regionCountryId){
+    public List<MarketplaceBannerConfig> getQueryRegionCountryId(String regionCountryId, String type){
      
-        Collection<MarketplaceBannerConfig> result = marketplaceBannerConfigRepository.getBannerByCountryId(regionCountryId);
+        Collection<MarketplaceBannerConfig> result = marketplaceBannerConfigRepository.getBannerByCountryId(regionCountryId,type);
 
         List<MarketplaceBannerConfig> output = new ArrayList<MarketplaceBannerConfig>(result);
 

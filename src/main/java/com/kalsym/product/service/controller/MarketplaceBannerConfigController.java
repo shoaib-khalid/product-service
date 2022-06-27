@@ -28,10 +28,11 @@ public class MarketplaceBannerConfigController {
     @PreAuthorize("hasAnyAuthority('store-customers-get', 'all')")
     public ResponseEntity<HttpResponse> getBannerConfig(
         HttpServletRequest request,
-        @RequestParam(required = false) String regionCountryId
+        @RequestParam(required = false) String regionCountryId,
+        @RequestParam(required = false) String type
     ) {
 
-        List<MarketplaceBannerConfig> body = marketPlaceBannerConfigService.getQueryRegionCountryId(regionCountryId);
+        List<MarketplaceBannerConfig> body = marketPlaceBannerConfigService.getQueryRegionCountryId(regionCountryId,type);
         
         HttpResponse response = new HttpResponse(request.getRequestURI());
         response.setData(body);

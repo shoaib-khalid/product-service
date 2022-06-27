@@ -25,4 +25,7 @@ public class MarketplaceBannerConfig implements Serializable {
 
     private String regionCountryId;
 
+    private String type;
+
+
 }
