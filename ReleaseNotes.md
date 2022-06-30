@@ -1,4 +1,9 @@
 ##################################################
+# product-service-3.10.2 | 30-June-2022 
+##################################################
+1. Remove code for version 3.8.0 since it is already implemented in location service
+
+##################################################
 # product-service-3.10.1 | 27-June-2022 
 ##################################################
 1. add request param type('DESKTOP'|'MOBILE') for banner-config endpoint 
