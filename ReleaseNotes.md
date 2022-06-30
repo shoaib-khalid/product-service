@@ -1,4 +1,9 @@
 ##################################################
+# product-service-3.10.3 | 30-June-2022 
+##################################################
+1. Plaform service set url service for images url
+
+##################################################
 # product-service-3.10.2 | 30-June-2022 
 ##################################################
 1. Remove code for version 3.8.0 since it is already implemented in location service
