@@ -1,7 +1,37 @@
 ##################################################
+# product-service-3.10.4 | 30-June-2022 
+##################################################
+1. Market place banner set url service for images url
+
+##DB Changes:
+
+	UPDATE marketplace_banner_config 
+	SET bannerUrl = REPLACE(bannerUrl, 'https://symplified.it', '') 
+	WHERE bannerUrl  LIKE '%https://symplified.it%';
+
+##################################################
 # product-service-3.10.3 | 30-June-2022 
 ##################################################
 1. Plaform service set url service for images url
+2. Update db in platform config
+
+##DB Changes:
+
+	UPDATE platform_config 
+	SET platformLogo = REPLACE(platformLogo, 'https://symplified.it', '') 
+	WHERE platformLogo  LIKE '%https://symplified.it%';
+
+	UPDATE platform_config 
+	SET platformLogoDark = REPLACE(platformLogoDark, 'https://symplified.it', '') 
+	WHERE platformLogoDark  LIKE '%https://symplified.it%';
+
+	UPDATE platform_config 
+	SET platformFavIcon = REPLACE(platformFavIcon, 'https://symplified.it', '') 
+	WHERE platformFavIcon  LIKE '%https://symplified.it%';
+
+	UPDATE platform_config 
+	SET platformFavIcon32 = REPLACE(platformFavIcon32, 'https://symplified.it', '') 
+	WHERE platformFavIcon32  LIKE '%https://symplified.it%'
 
 ##################################################
 # product-service-3.10.2 | 30-June-2022 

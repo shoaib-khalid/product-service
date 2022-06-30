@@ -4,6 +4,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,6 +25,9 @@ public class MarketplaceBannerConfigController {
     @Autowired
     MarketPlaceBannerConfigService marketPlaceBannerConfigService;
 
+    @Value("${asset.service.url}")
+    String assetServiceUrl;
+
     @GetMapping(path = {""}, name = "store-customers-get")
     @PreAuthorize("hasAnyAuthority('store-customers-get', 'all')")
     public ResponseEntity<HttpResponse> getBannerConfig(
@@ -33,6 +37,13 @@ public class MarketplaceBannerConfigController {
     ) {
 
         List<MarketplaceBannerConfig> body = marketPlaceBannerConfigService.getQueryRegionCountryId(regionCountryId,type);
+
+        //to set the asset url 
+        for(MarketplaceBannerConfig mbc : body){
+
+            mbc.setBannerUrl(assetServiceUrl+mbc.getBannerUrl());
+     
+        }
         
         HttpResponse response = new HttpResponse(request.getRequestURI());
         response.setData(body);
