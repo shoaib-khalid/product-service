@@ -4,6 +4,7 @@ import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.HashmapLoader;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.model.product.Product;
+import com.kalsym.product.service.model.product.ProductAsset;
 import com.kalsym.product.service.model.product.ProductInventoryWithDetails;
 import com.kalsym.product.service.model.product.ProductSpecs;
 import com.kalsym.product.service.model.product.ProductWithDetails;
@@ -117,6 +118,9 @@ public class StoreProductController {
     @Value("${product.seo.url:https://{{store-domain}}/product/{{product-name}}}")
     private String productSeoUrl;
 
+    @Value("${asset.service.url}")
+    String assetServiceUrl;
+
     @GetMapping(path = {""}, name = "store-products-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-products-get', 'all')")
     public ResponseEntity<HttpResponse> getStoreProducts(HttpServletRequest request,
@@ -210,6 +214,15 @@ public class StoreProductController {
         for (int x=0;x<productList.size();x++) {
             //check for item discount in hashmap
             ProductWithDetails productDetails = productList.get(x);
+
+            //set asset url for List of products asset and thumnailurl
+            List<ProductAsset> productAssets = productDetails.getProductAssets();
+            for(ProductAsset pa : productAssets){
+                pa.setUrl(assetServiceUrl+pa.getUrl());
+            }
+            productDetails.setProductAssets(productAssets);
+            productDetails.setThumbnailUrl(assetServiceUrl+productDetails.getThumbnailUrl());
+            
             for (int i=0;i<productDetails.getProductInventories().size();i++) {
                 ProductInventoryWithDetails productInventory = productDetails.getProductInventories().get(i);
                 //ItemDiscount discountDetails = discountedItemMap.get(productInventory.getItemCode());
@@ -300,6 +313,15 @@ public class StoreProductController {
                 
         //check for item discount in hashmap
         ProductWithDetails productDetails = optProdcut.get();
+
+        //set asset url for List of products asset and thumnailurl
+        List<ProductAsset> productAssets = optProdcut.get().getProductAssets();
+        for(ProductAsset pa : productAssets){
+            pa.setUrl(assetServiceUrl+pa.getUrl());
+        }
+        productDetails.setProductAssets(productAssets);
+        productDetails.setThumbnailUrl(assetServiceUrl+optProdcut.get().getThumbnailUrl());
+        
         for (int i=0;i<productDetails.getProductInventories().size();i++) {
             ProductInventoryWithDetails productInventory = productDetails.getProductInventories().get(i);
             //ItemDiscount discountDetails = discountedItemMap.get(productInventory.getItemCode());
@@ -453,6 +475,9 @@ public class StoreProductController {
 
         bodyProduct.setSeoName(seoName);
         if (bodyProduct.getIsPackage()==null) { bodyProduct.setIsPackage(Boolean.FALSE); }
+
+        //set image url 
+
 
         Product savedProduct = productRepository.save(bodyProduct);
         Logger.application.info(ProductServiceApplication.VERSION, logprefix, "product added to store with storeId: {}, productId: {}" + storeId, savedProduct.getId());

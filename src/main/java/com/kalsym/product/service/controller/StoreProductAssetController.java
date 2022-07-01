@@ -49,6 +49,9 @@ public class StoreProductAssetController {
     @Autowired
     StoreRepository storeRepository;
 
+    @Value("${asset.service.url}")
+    String assetServiceUrl;
+
     @GetMapping(path = {""}, name = "store-product-assets-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-product-assets-get', 'all')")
     public ResponseEntity<HttpResponse> getStoreProductAssets(HttpServletRequest request,
@@ -78,8 +81,14 @@ public class StoreProductAssetController {
             return ResponseEntity.status(response.getStatus()).body(response);
         }
 
+        //to append the asset url
+        List<ProductAsset> productAssetList = productAssetRepository.findByProductId(productId);
+        for (ProductAsset p : productAssetList ){
+            p.setUrl(assetServiceUrl+p.getUrl());
+        }
+
         response.setStatus(HttpStatus.OK);
-        response.setData(productAssetRepository.findByProductId(productId));
+        response.setData(productAssetList);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
@@ -121,6 +130,9 @@ public class StoreProductAssetController {
             response.setError("inventory not found");
             return ResponseEntity.status(response.getStatus()).body(response);
         }
+
+        //to append the asset url
+        optProductAsset.get().setUrl(assetServiceUrl+optProductAsset.get().getUrl());
 
         response.setStatus(HttpStatus.OK);
         response.setData(optProductAsset.get());
@@ -252,8 +264,8 @@ public class StoreProductAssetController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @Value("${product.assets.url:https://symplified.ai/product-assets/}")
-    private String productAssetsBaseUrl;
+    // @Value("${product.assets.url:https://symplified.ai/product-assets/}")
+    // private String productAssetsBaseUrl;
 
     @PostMapping(path = {""}, name = "store-product-assets-post")
     @PreAuthorize("hasAnyAuthority('store-product-assets-post', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
@@ -313,7 +325,7 @@ public class StoreProductAssetController {
         productAsset.setName(file.getOriginalFilename());
         productAsset.setItemCode(itemCode);
         //productAsset.setIsThumbnail(isThumbnail);
-        productAsset.setUrl(productAssetsBaseUrl + generatedUrl);
+        productAsset.setUrl("/product-assets/"+generatedUrl);
 
         productAsset = productAssetRepository.save(productAsset);
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "saved image: " + productAsset.getId());
@@ -407,7 +419,7 @@ public class StoreProductAssetController {
         productAsset.setProductId(productId);
         productAsset.setName(file.getOriginalFilename());
         productAsset.setItemCode(itemCode);
-        productAsset.setUrl(productAssetsBaseUrl + generatedUrl);
+        productAsset.setUrl("/product-assets/" + generatedUrl);
         productAsset.setId(optProductAssset.get().getId());
         productAsset = productAssetRepository.save(productAsset);
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "saved image: " + productAsset.getId());
