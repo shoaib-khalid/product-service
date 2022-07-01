@@ -60,6 +60,7 @@ import com.kalsym.product.service.utility.ProductDiscount;
 import com.kalsym.product.service.utility.StoreAssetsUtility;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 import java.awt.image.BufferedImage;
@@ -257,6 +258,19 @@ public class StoreController {
                 storeLogoDefaultUrl, 
                 storeFavIconUrlSymplified, storeFavIconUrlDeliverin, storeFavIconUrlEasydukan);        
                 storeWithDetails.setStoreAssets(storeAssetsList);
+
+                if (storeWithDetails.getSnoozeStartTime()!=null && storeWithDetails.getSnoozeEndTime()!=null) {
+                    int resultSnooze = storeWithDetails.getSnoozeEndTime().compareTo(Calendar.getInstance().getTime());
+                    if (resultSnooze < 0) {
+                        storeWithDetails.setIsSnooze(false);
+                    } else {
+                
+                        storeWithDetails.setIsSnooze(true);
+             
+                    }
+                } else {
+                    storeWithDetails.setIsSnooze(true);
+                }   
                 
                 storeWithDetailsList[x]=storeWithDetails;
             }

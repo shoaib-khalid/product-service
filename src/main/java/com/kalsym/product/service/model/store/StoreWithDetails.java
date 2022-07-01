@@ -92,6 +92,9 @@ public class StoreWithDetails implements Serializable {
     private Date snoozeEndTime;
     
     private String snoozeReason;
+
+    @Transient
+    Boolean isSnooze;
         
     private Boolean isBranch;
             
