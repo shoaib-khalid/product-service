@@ -161,7 +161,7 @@ public class StoreAssetsController {
                 storeAssetsRepository, regionVerticalRepository, 
                 storeBannerFnbDefaultUrl, storeBannerEcommerceDefaultUrl,
                 storeLogoDefaultUrl, 
-                storeFavIconUrlSymplified, storeFavIconUrlDeliverin, storeFavIconUrlEasydukan); 
+                storeFavIconUrlSymplified, storeFavIconUrlDeliverin, storeFavIconUrlEasydukan,assetServiceUrl); 
         List<StoreAssets> storeAssetsListWithoutFile = new ArrayList<>();
         for (int i=0;i<storeAssetsList.size();i++) {
             StoreAssets storeAssetsWithoutFile = storeAssetsList.get(i);
@@ -195,14 +195,11 @@ public class StoreAssetsController {
         
         List<StoreAssets> storeAssetsList = storeAssetsRepository.findByStoreId(storeId);
 
-        System.out.println("Checing storeLogoDefault ::::::::"+storeLogoDefaultPath);
-        System.out.println("Checing assetServiceUrl ::::::::"+assetServiceUrl);
-
         storeAssetsList = StoreAssetsUtility.SetDefaultAsset(optStore.get().getVerticalCode(), storeId, storeAssetsList,
                 storeAssetsRepository, regionVerticalRepository, 
                 storeBannerFnbDefaultPath, storeBannerEcommerceDefaultPath,
                 storeLogoDefaultPath, 
-                storeFavIconSymplifiedPath, storeFavIconDeliverinPath, storeFavIconEasydukanPath); 
+                storeFavIconSymplifiedPath, storeFavIconDeliverinPath, storeFavIconEasydukanPath,assetServiceUrl); 
 
         List<StoreAssets> storeAssetsListWithoutFile = new ArrayList<>();
         for (int i=0;i<storeAssetsList.size();i++) {
@@ -288,9 +285,15 @@ public class StoreAssetsController {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Asset storagePath: " + logoStoragePath);
             storeAsset.setAssetUrl("/store-assets/" + storeId + "-"+storeAsset.getAssetType());
         } 
+
+        //TO SAVE DATA 
+        storeAssetsRepository.save(storeAsset);
+
+        //TO SET THE URL SERVICE
+        storeAsset.setAssetUrl(assetServiceUrl+storeAsset.getAssetUrl());
         
         response.setStatus(HttpStatus.OK);
-        response.setData(storeAssetsRepository.save(storeAsset));
+        response.setData(storeAsset);
         return ResponseEntity.status(response.getStatus()).body(response);
     }        
 

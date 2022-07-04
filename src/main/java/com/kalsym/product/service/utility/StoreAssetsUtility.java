@@ -20,17 +20,20 @@ import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.enums.StoreAssetType;
 import com.kalsym.product.service.model.RegionVertical;
 import com.kalsym.product.service.model.store.Store;
+import com.kalsym.product.service.model.store.StoreAssets;
+
 import java.util.List;
 import java.util.Optional;
 import com.kalsym.product.service.repository.StoreAssetsRepository;
 import com.kalsym.product.service.repository.RegionVerticalRepository;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  *
  * @author taufik
  */
 public class StoreAssetsUtility {
-    
+
     public static List<com.kalsym.product.service.model.store.StoreAssets> SetDefaultAsset(
             String verticalCode, 
             String storeId, 
@@ -42,9 +45,18 @@ public class StoreAssetsUtility {
             String storeLogoDefaultUrl,
             String storeFavIconUrlSymplified,
             String storeFavIconUrlDeliverin,
-            String storeFavIconUrlEasydukan) {
+            String storeFavIconUrlEasydukan,
+            String assetServiceUrl
+            ) {
         
+        System.out.println("CHECKING THE ASSET URL"+assetServiceUrl);
+        //to set the url asset for existing data  
+        for(StoreAssets s:storeAssetsList ){
+            s.setAssetUrl(assetServiceUrl+s.getAssetUrl());
+        }
+
         List<com.kalsym.product.service.model.store.StoreAssets> desktopBannerList = storeAssetsRepository.findByStoreIdAndAssetType(storeId, StoreAssetType.BannerDesktopUrl);
+
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, "SetDefaultAsset", "desktopBannerList found:"+desktopBannerList.toString());
         if (desktopBannerList.isEmpty()) {
             com.kalsym.product.service.model.store.StoreAssets defaultBanner = new com.kalsym.product.service.model.store.StoreAssets();
