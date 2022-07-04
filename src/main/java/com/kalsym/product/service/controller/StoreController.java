@@ -269,7 +269,7 @@ public class StoreController {
              
                     }
                 } else {
-                    storeWithDetails.setIsSnooze(true);
+                    storeWithDetails.setIsSnooze(false);
                 }   
                 
                 storeWithDetailsList[x]=storeWithDetails;
