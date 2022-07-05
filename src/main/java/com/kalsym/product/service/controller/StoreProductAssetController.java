@@ -343,8 +343,7 @@ public class StoreProductAssetController {
         productAsset.setUrl("/product-assets/"+generatedUrl);
 
         productAsset = productAssetRepository.save(productAsset);
-        //to display data full url after save
-        productAsset.setUrl(assetServiceUrl+productAsset.getUrl());
+
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "saved image: " + productAsset.getId());
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "isThumbnail: " + isThumbnail);
@@ -371,6 +370,9 @@ public class StoreProductAssetController {
         } else {
             this.setDefaultThumbnail(productAssets, product);
         }
+
+        //to display data full url after save
+        productAsset.setUrl(assetServiceUrl+productAsset.getUrl());
 
         response.setStatus(HttpStatus.OK);
         response.setData(productAsset);
