@@ -1,4 +1,42 @@
 ##################################################
+# product-service-3.10.6 | 5-July-2022 
+##################################################
+1. set url service for image url 
+##DB Changes:
+
+	UPDATE product 
+	SET thumbnailUrl = REPLACE(thumbnailUrl, 'https://symplified.it', '') 
+	WHERE thumbnailUrl LIKE '%https://symplified.it%';
+
+	UPDATE product 
+	SET thumbnailUrl = REPLACE(thumbnailUrl, 'https://symplified.biz', '') 
+	WHERE thumbnailUrl  LIKE '%https://symplified.biz%';
+
+	UPDATE product_asset
+	SET url = REPLACE(url, 'https://symplified.it', '') 
+	WHERE url LIKE '%https://symplified.it%';
+
+	UPDATE product_asset
+	SET url = REPLACE(url, 'https://symplified.biz', '') 
+	WHERE url LIKE '%https://symplified.biz%';
+
+	UPDATE store_assets
+	SET assetUrl = REPLACE(assetUrl, 'https://symplified.it', '') 
+	WHERE assetUrl LIKE '%https://symplified.it%';
+
+	UPDATE store_assets
+	SET assetUrl = REPLACE(assetUrl, 'https://symplified.biz', '') 
+	WHERE assetUrl LIKE '%https://symplified.biz%';
+
+	UPDATE store_category
+	SET thumbnailUrl = REPLACE(thumbnailUrl, 'https://symplified.it', '') 
+	WHERE thumbnailUrl LIKE '%https://symplified.it%';
+
+	UPDATE store_category
+	SET thumbnailUrl = REPLACE(thumbnailUrl, 'https://symplified.biz', '') 
+	WHERE thumbnailUrl LIKE '%https://symplified.biz%';
+
+##################################################
 # product-service-3.10.5 | 1-July-2022 
 ##################################################
 1. Add isSnooze for /stores endpoint
