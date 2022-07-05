@@ -302,7 +302,7 @@ public class StoreController {
                         LocalDateTime endTime = DateTimeUtil.convertToLocalDateTimeViaInstant(storeWithDetails.getSnoozeEndTime(), ZoneId.of(t.getTimezone()));
                         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Snooze End Time in store timezone:"+endTime);
                         
-                        if(storeWithDetails.getStoreSnoozeTiming()== null){
+                        if(storeWithDetails.getStoreSnooze()== null){
 
                             StoreSnooze st = new StoreSnooze();
                             st.snoozeStartTime = startTime;
@@ -310,7 +310,7 @@ public class StoreController {
                             st.isSnooze = true;
                             st.snoozeReason = storeWithDetails.getSnoozeReason();
                      
-                            storeWithDetails.setStoreSnoozeTiming(st);
+                            storeWithDetails.setStoreSnooze(st);
                         }
                             
              

@@ -99,7 +99,7 @@ public class StoreWithDetails implements Serializable {
     Boolean isSnooze;
 
     @Transient
-    StoreSnooze storeSnoozeTiming;
+    StoreSnooze storeSnooze;
         
     private Boolean isBranch;
             
