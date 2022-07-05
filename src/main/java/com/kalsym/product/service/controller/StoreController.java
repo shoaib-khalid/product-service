@@ -288,10 +288,20 @@ public class StoreController {
                 storeFavIconSymplifiedPath, storeFavIconDeliverinPath, storeFavIconEasydukanPath,assetServiceUrl);        
                 storeWithDetails.setStoreAssets(storeAssetsList);
 
+                StoreSnooze st = new StoreSnooze();
+
                 if (storeWithDetails.getSnoozeStartTime()!=null && storeWithDetails.getSnoozeEndTime()!=null) {
                     int resultSnooze = storeWithDetails.getSnoozeEndTime().compareTo(Calendar.getInstance().getTime());
                     if (resultSnooze < 0) {
                         storeWithDetails.setIsSnooze(false);
+
+                        st.snoozeStartTime = null;
+                        st.snoozeEndTime = null;
+                        st.isSnooze = false;
+                        st.snoozeReason = null;
+                        storeWithDetails.setStoreSnooze(st);
+
+
                     } else {
                 
                         storeWithDetails.setIsSnooze(true);
@@ -302,21 +312,24 @@ public class StoreController {
                         LocalDateTime endTime = DateTimeUtil.convertToLocalDateTimeViaInstant(storeWithDetails.getSnoozeEndTime(), ZoneId.of(t.getTimezone()));
                         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Snooze End Time in store timezone:"+endTime);
                         
-                        if(storeWithDetails.getStoreSnooze()== null){
-
-                            StoreSnooze st = new StoreSnooze();
                             st.snoozeStartTime = startTime;
                             st.snoozeEndTime = endTime;
                             st.isSnooze = true;
                             st.snoozeReason = storeWithDetails.getSnoozeReason();
                      
                             storeWithDetails.setStoreSnooze(st);
-                        }
+                        
                             
              
                     }
                 } else {
                     storeWithDetails.setIsSnooze(false);
+                    st.snoozeStartTime = null;
+                    st.snoozeEndTime = null;
+                    st.isSnooze = false;
+                    st.snoozeReason = null;
+                    storeWithDetails.setStoreSnooze(st);
+                    
                 }   
                 
                 storeWithDetailsList[x]=storeWithDetails;
