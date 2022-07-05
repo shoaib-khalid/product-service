@@ -8,7 +8,7 @@ import com.kalsym.product.service.model.MySQLUserDetails;
 import com.kalsym.product.service.model.RegionCountry;
 import com.kalsym.product.service.model.RegionVertical;
 import com.kalsym.product.service.model.ReserveDomain;
-import com.kalsym.product.service.model.SnoozeTiming;
+import com.kalsym.product.service.model.StoreSnooze;
 import com.kalsym.product.service.model.store.StoreCategory;
 import com.kalsym.product.service.repository.ProductRepository;
 import com.kalsym.product.service.repository.StoreRepository;
@@ -301,16 +301,18 @@ public class StoreController {
                         LocalDateTime startTime = DateTimeUtil.convertToLocalDateTimeViaInstant(storeWithDetails.getSnoozeStartTime(), ZoneId.of(t.getTimezone()));
                         LocalDateTime endTime = DateTimeUtil.convertToLocalDateTimeViaInstant(storeWithDetails.getSnoozeEndTime(), ZoneId.of(t.getTimezone()));
                         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Snooze End Time in store timezone:"+endTime);
-                        System.out.println("Checking::::::"+storeWithDetails.getStoreSnoozeTimingLocalFormat());
-                        if(storeWithDetails.getStoreSnoozeTimingLocalFormat()== null){
+                        
+                        if(storeWithDetails.getStoreSnoozeTiming()== null){
 
-                            SnoozeTiming st = new SnoozeTiming();
-                            st.setSnoozeStartTime(startTime);
-                            st.setSnoozeEndTime(endTime);
-                            storeWithDetails.setStoreSnoozeTimingLocalFormat(st);
+                            StoreSnooze st = new StoreSnooze();
+                            st.snoozeStartTime = startTime;
+                            st.snoozeEndTime = endTime;
+                            st.isSnooze = true;
+                            st.snoozeReason = storeWithDetails.getSnoozeReason();
+                     
+                            storeWithDetails.setStoreSnoozeTiming(st);
                         }
-                        // storeWithDetails.getStoreSnoozeTiming().snoozeStartTime= startTime;
-                        // storeWithDetails.getStoreSnoozeTiming().snoozeEndTime= endTime;          
+                            
              
                     }
                 } else {

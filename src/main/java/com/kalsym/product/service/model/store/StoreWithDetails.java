@@ -2,7 +2,7 @@ package com.kalsym.product.service.model.store;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.kalsym.product.service.model.RegionCountry;
-import com.kalsym.product.service.model.SnoozeTiming;
+import com.kalsym.product.service.model.StoreSnooze;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -99,7 +99,7 @@ public class StoreWithDetails implements Serializable {
     Boolean isSnooze;
 
     @Transient
-    SnoozeTiming storeSnoozeTimingLocalFormat;
+    StoreSnooze storeSnoozeTiming;
         
     private Boolean isBranch;
             
