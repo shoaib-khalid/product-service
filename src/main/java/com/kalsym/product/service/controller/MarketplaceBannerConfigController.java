@@ -40,10 +40,13 @@ public class MarketplaceBannerConfigController {
 
         //to set the asset url 
         for(MarketplaceBannerConfig mbc : body){
-
-            mbc.setBannerUrl(assetServiceUrl+mbc.getBannerUrl());
+            
             //handle null
-            if(mbc.getBannerUrl() == null){
+            if(mbc.getBannerUrl() != null){
+                mbc.setBannerUrl(assetServiceUrl+mbc.getBannerUrl());
+
+            }
+            else{
                 mbc.setBannerUrl(null);
             }
      

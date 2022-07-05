@@ -218,16 +218,22 @@ public class StoreProductController {
             //set asset url for List of products asset and thumnailurl
             List<ProductAsset> productAssets = productDetails.getProductAssets();
             for(ProductAsset pa : productAssets){
-                pa.setUrl(assetServiceUrl+pa.getUrl());
                 //handle null
-                if(pa.getUrl() == null){
+                if(pa.getUrl() != null){
+                    pa.setUrl(assetServiceUrl+pa.getUrl());
+
+                } else{
                     pa.setUrl(null);
+
                 }
             }
             productDetails.setProductAssets(productAssets);
-            productDetails.setThumbnailUrl(assetServiceUrl+productDetails.getThumbnailUrl());
             //handle null
-            if(productDetails.getThumbnailUrl() == null){
+            if(productDetails.getThumbnailUrl() != null){
+                productDetails.setThumbnailUrl(assetServiceUrl+productDetails.getThumbnailUrl());
+
+
+            } else{
                 productDetails.setThumbnailUrl(null);
 
             }
@@ -326,17 +332,23 @@ public class StoreProductController {
         //set asset url for List of products asset and thumnailurl
         List<ProductAsset> productAssets = optProdcut.get().getProductAssets();
         for(ProductAsset pa : productAssets){
-            pa.setUrl(assetServiceUrl+pa.getUrl());
             //handle null
-                if(pa.getUrl() == null){
+            if(pa.getUrl() != null){
+                pa.setUrl(assetServiceUrl+pa.getUrl());
+
+            } else {
                 pa.setUrl(null);
+
             }
             
         }
         productDetails.setProductAssets(productAssets);
-        productDetails.setThumbnailUrl(assetServiceUrl+optProdcut.get().getThumbnailUrl());
         //handle null
-        if(optProdcut.get().getThumbnailUrl() == null){
+        if(optProdcut.get().getThumbnailUrl() != null){
+            productDetails.setThumbnailUrl(assetServiceUrl+optProdcut.get().getThumbnailUrl());
+
+
+        } else{
             productDetails.setThumbnailUrl(null);
 
         }

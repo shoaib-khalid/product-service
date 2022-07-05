@@ -52,10 +52,13 @@ public class StoreAssetsUtility {
         System.out.println("CHECKING THE ASSET URL"+assetServiceUrl);
         //to set the url asset for existing data  
         for(StoreAssets s:storeAssetsList ){
-            s.setAssetUrl(assetServiceUrl+s.getAssetUrl());
             //handle null
-            if(s.getAssetUrl() == null){
+            if(s.getAssetUrl() != null){
+                s.setAssetUrl(assetServiceUrl+s.getAssetUrl());
+
+            } else{
                 s.setAssetUrl(null);
+
             }
         }
 

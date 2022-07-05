@@ -944,10 +944,13 @@ public class StoreController {
 
             for(StoreAssets sa : storeAssetList){
 
-                sa.setAssetUrl(assetServiceUrl+sa.getAssetUrl());
                 //handle null
-                if(sa.getAssetUrl() == null){
+                if(sa.getAssetUrl() != null){
+                    sa.setAssetUrl(assetServiceUrl+sa.getAssetUrl());
+
+                } else{
                     sa.setAssetUrl(null);
+
                 }
             }
             
