@@ -468,6 +468,9 @@ public class StoreProductAssetController {
             this.setDefaultThumbnail(productAssets, product);
         }
 
+        //to display data full url after save
+        productAsset.setUrl(assetServiceUrl+productAsset.getUrl());
+
         response.setStatus(HttpStatus.OK);
         response.setData(productAsset);
         return ResponseEntity.status(response.getStatus()).body(response);
