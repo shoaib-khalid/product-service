@@ -250,6 +250,8 @@ public class StoreProductAssetController {
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "FOUND product asset Id: " + id);
 
         ProductAsset productAsset = optProductAssset.get();
+        //HANDLIN PRODUCT ASSET FOR PAYLOAD
+        productAssetBody.setUrl(productAsset.getUrl());
         productAsset.update(productAssetBody);
 
         productAsset = productAssetRepository.save(productAsset);
@@ -274,6 +276,9 @@ public class StoreProductAssetController {
             }
         }
 
+        //to display data full url after save
+        productAsset.setUrl(assetServiceUrl+productAsset.getUrl());
+        
         response.setStatus(HttpStatus.OK);
         response.setData(productAsset);
         return ResponseEntity.status(response.getStatus()).body(response);
