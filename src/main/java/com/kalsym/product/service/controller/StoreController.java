@@ -5,11 +5,14 @@ import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.enums.DiscountCalculationType;
 import com.kalsym.product.service.model.ItemDiscount;
 import com.kalsym.product.service.model.MySQLUserDetails;
+import com.kalsym.product.service.model.RegionCountry;
 import com.kalsym.product.service.model.RegionVertical;
 import com.kalsym.product.service.model.ReserveDomain;
+import com.kalsym.product.service.model.SnoozeTiming;
 import com.kalsym.product.service.model.store.StoreCategory;
 import com.kalsym.product.service.repository.ProductRepository;
 import com.kalsym.product.service.repository.StoreRepository;
+import com.kalsym.product.service.utility.DateTimeUtil;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.utility.Validation;
 import com.kalsym.product.service.utility.SessionInformation;
@@ -65,6 +68,8 @@ import java.util.List;
 import java.util.Optional;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 
 import javax.annotation.PostConstruct;
@@ -290,6 +295,22 @@ public class StoreController {
                     } else {
                 
                         storeWithDetails.setIsSnooze(true);
+                        RegionCountry t = storeWithDetails.getRegionCountry();
+                
+                        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store timezone:"+t.getTimezone());
+                        LocalDateTime startTime = DateTimeUtil.convertToLocalDateTimeViaInstant(storeWithDetails.getSnoozeStartTime(), ZoneId.of(t.getTimezone()));
+                        LocalDateTime endTime = DateTimeUtil.convertToLocalDateTimeViaInstant(storeWithDetails.getSnoozeEndTime(), ZoneId.of(t.getTimezone()));
+                        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Snooze End Time in store timezone:"+endTime);
+                        System.out.println("Checking::::::"+storeWithDetails.getStoreSnoozeTimingLocalFormat());
+                        if(storeWithDetails.getStoreSnoozeTimingLocalFormat()== null){
+
+                            SnoozeTiming st = new SnoozeTiming();
+                            st.setSnoozeStartTime(startTime);
+                            st.setSnoozeEndTime(endTime);
+                            storeWithDetails.setStoreSnoozeTimingLocalFormat(st);
+                        }
+                        // storeWithDetails.getStoreSnoozeTiming().snoozeStartTime= startTime;
+                        // storeWithDetails.getStoreSnoozeTiming().snoozeEndTime= endTime;          
              
                     }
                 } else {
