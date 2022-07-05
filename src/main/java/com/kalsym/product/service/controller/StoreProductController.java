@@ -219,9 +219,18 @@ public class StoreProductController {
             List<ProductAsset> productAssets = productDetails.getProductAssets();
             for(ProductAsset pa : productAssets){
                 pa.setUrl(assetServiceUrl+pa.getUrl());
+                //handle null
+                if(pa.getUrl() == null){
+                    pa.setUrl(null);
+                }
             }
             productDetails.setProductAssets(productAssets);
             productDetails.setThumbnailUrl(assetServiceUrl+productDetails.getThumbnailUrl());
+            //handle null
+            if(productDetails.getThumbnailUrl() == null){
+                productDetails.setThumbnailUrl(null);
+
+            }
             
             for (int i=0;i<productDetails.getProductInventories().size();i++) {
                 ProductInventoryWithDetails productInventory = productDetails.getProductInventories().get(i);
@@ -318,9 +327,19 @@ public class StoreProductController {
         List<ProductAsset> productAssets = optProdcut.get().getProductAssets();
         for(ProductAsset pa : productAssets){
             pa.setUrl(assetServiceUrl+pa.getUrl());
+            //handle null
+                if(pa.getUrl() == null){
+                pa.setUrl(null);
+            }
+            
         }
         productDetails.setProductAssets(productAssets);
         productDetails.setThumbnailUrl(assetServiceUrl+optProdcut.get().getThumbnailUrl());
+        //handle null
+        if(optProdcut.get().getThumbnailUrl() == null){
+            productDetails.setThumbnailUrl(null);
+
+        }
         
         for (int i=0;i<productDetails.getProductInventories().size();i++) {
             ProductInventoryWithDetails productInventory = productDetails.getProductInventories().get(i);

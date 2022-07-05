@@ -53,6 +53,10 @@ public class StoreAssetsUtility {
         //to set the url asset for existing data  
         for(StoreAssets s:storeAssetsList ){
             s.setAssetUrl(assetServiceUrl+s.getAssetUrl());
+            //handle null
+            if(s.getAssetUrl() == null){
+                s.setAssetUrl(null);
+            }
         }
 
         List<com.kalsym.product.service.model.store.StoreAssets> desktopBannerList = storeAssetsRepository.findByStoreIdAndAssetType(storeId, StoreAssetType.BannerDesktopUrl);

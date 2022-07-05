@@ -85,6 +85,12 @@ public class StoreProductAssetController {
         List<ProductAsset> productAssetList = productAssetRepository.findByProductId(productId);
         for (ProductAsset p : productAssetList ){
             p.setUrl(assetServiceUrl+p.getUrl());
+
+            //handle null
+            if(p.getUrl() == null){
+                p.setUrl(null);
+            }
+
         }
 
         response.setStatus(HttpStatus.OK);
@@ -134,6 +140,10 @@ public class StoreProductAssetController {
         //to append the asset url
         optProductAsset.get().setUrl(assetServiceUrl+optProductAsset.get().getUrl());
 
+        //handle null
+        if(optProductAsset.get().getUrl() == null){
+            optProductAsset.get().setUrl(null);
+        }
         response.setStatus(HttpStatus.OK);
         response.setData(optProductAsset.get());
         return ResponseEntity.status(response.getStatus()).body(response);

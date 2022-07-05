@@ -105,6 +105,12 @@ public class StoreCategoryController {
         //to concat store asset url for response data
         for (StoreCategory lc : showData.getContent()){
             lc.setThumbnailUrl(assetServiceUrl+lc.getThumbnailUrl());
+            //handle null
+            if(lc.getThumbnailUrl() == null){
+
+                lc.setThumbnailUrl(null);
+
+            }
         }
 
         response.setStatus(HttpStatus.OK);
@@ -158,6 +164,10 @@ public class StoreCategoryController {
         StoreCategory saveAssetUrl = storeCategoryRepository.save(bodyStoreCategory);
         //to concat store asset url for response data
         saveAssetUrl.setThumbnailUrl(assetServiceUrl+saveAssetUrl.getThumbnailUrl());
+        //handle null
+        if(saveAssetUrl.getThumbnailUrl() ==null){
+            saveAssetUrl.setThumbnailUrl(null);
+        }
 
         response.setStatus(HttpStatus.CREATED);
         response.setData(saveAssetUrl);
@@ -209,6 +219,11 @@ public class StoreCategoryController {
 
         //to concat store asset url for response data
         optStoreCategory.get().setThumbnailUrl(assetServiceUrl+optStoreCategory.get().getThumbnailUrl());
+        // handle null
+        if(optStoreCategory.get().getThumbnailUrl() ==null){
+            optStoreCategory.get().setThumbnailUrl(null);
+
+        }
 
         response.setData(optStoreCategory);
         response.setStatus(HttpStatus.OK);

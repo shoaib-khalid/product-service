@@ -291,6 +291,11 @@ public class StoreAssetsController {
 
         //TO SET THE URL SERVICE
         storeAsset.setAssetUrl(assetServiceUrl+storeAsset.getAssetUrl());
+        //handle null
+        if(storeAsset.getAssetUrl() == null){
+            storeAsset.setAssetUrl(null);
+
+        }
         
         response.setStatus(HttpStatus.OK);
         response.setData(storeAsset);
