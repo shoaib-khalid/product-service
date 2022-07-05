@@ -905,6 +905,11 @@ public class StoreController {
            
             Page<StoreAssets> fetchedPage = storeAssetsRepository.findByCountry(countryId, pageable);
             List<StoreAssets> storeAssetList = fetchedPage.getContent();
+
+            for(StoreAssets sa : storeAssetList){
+
+                sa.setAssetUrl(assetServiceUrl+sa.getAssetUrl());
+            }
             
             TopStore topStore = new TopStore();
             topStore.setTotalStore(totalStore);
