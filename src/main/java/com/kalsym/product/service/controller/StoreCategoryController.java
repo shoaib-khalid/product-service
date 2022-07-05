@@ -28,6 +28,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.ExampleMatcher.GenericPropertyMatcher;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -57,6 +58,9 @@ public class StoreCategoryController {
 
     @Value("${store.assets.url:https://symplified.ai/store-assets}")
     private String storeAssetsBaseUrl;
+
+    @Value("${asset.service.url}")
+    private String assetServiceUrl;
 
     @GetMapping(path = {""}, name = "store-categories-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-categories-get', 'all')")
@@ -96,8 +100,15 @@ public class StoreCategoryController {
         else if (sortingOrder==Sort.Direction.DESC)
             pageable = PageRequest.of(page, pageSize, Sort.by(sortByCol).descending());
         
+        Page<StoreCategory> showData = storeCategoryRepository.findAll(example, pageable);
+                
+        //to concat store asset url for response data
+        for (StoreCategory lc : showData.getContent()){
+            lc.setThumbnailUrl(assetServiceUrl+lc.getThumbnailUrl());
+        }
+
         response.setStatus(HttpStatus.OK);
-        response.setData(storeCategoryRepository.findAll(example, pageable));
+        response.setData(showData);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
@@ -141,11 +152,15 @@ public class StoreCategoryController {
         if (file != null) {
             Logger.application.info("storeCategory created with id: {}", bodyStoreCategory.getId());
             String categoryThumbnailStoragePath = fileStorageService.saveStoreAsset(file, bodyStoreCategory.getId() + fileStorageService.getFileExtension(file));
-            bodyStoreCategory.setThumbnailUrl(storeAssetsBaseUrl + bodyStoreCategory.getId() + fileStorageService.getFileExtension(file));
+            bodyStoreCategory.setThumbnailUrl("/store-assets/"+ bodyStoreCategory.getId() + fileStorageService.getFileExtension(file));
         }
 
+        StoreCategory saveAssetUrl = storeCategoryRepository.save(bodyStoreCategory);
+        //to concat store asset url for response data
+        saveAssetUrl.setThumbnailUrl(assetServiceUrl+saveAssetUrl.getThumbnailUrl());
+
         response.setStatus(HttpStatus.CREATED);
-        response.setData(storeCategoryRepository.save(bodyStoreCategory));
+        response.setData(saveAssetUrl);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -191,6 +206,10 @@ public class StoreCategoryController {
             return ResponseEntity.status(response.getStatus()).body(response);
         }
         Logger.application.info(ProductServiceApplication.VERSION, logprefix, "Store category found with id: {}", storeCategoryId);
+
+        //to concat store asset url for response data
+        optStoreCategory.get().setThumbnailUrl(assetServiceUrl+optStoreCategory.get().getThumbnailUrl());
+
         response.setData(optStoreCategory);
         response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);
@@ -240,7 +259,7 @@ public class StoreCategoryController {
 
         if (file != null) {
             String categoryThumbnailStoragePath = fileStorageService.saveStoreAsset(file, optStoreCategory.get().getId() + fileStorageService.getFileExtension(file));
-            optStoreCategory.get().setThumbnailUrl(storeAssetsBaseUrl + optStoreCategory.get().getId() + fileStorageService.getFileExtension(file));
+            optStoreCategory.get().setThumbnailUrl("/store-assets/" + optStoreCategory.get().getId() + fileStorageService.getFileExtension(file));
         }
 
         response.setStatus(HttpStatus.OK);

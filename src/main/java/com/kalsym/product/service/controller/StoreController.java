@@ -66,6 +66,8 @@ import java.util.Optional;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.util.Date;
+
+import javax.annotation.PostConstruct;
 import javax.imageio.ImageIO;
 import javax.persistence.criteria.Predicate;
 
@@ -195,6 +197,28 @@ public class StoreController {
     
     @Value("${store.favicon.symplified.default.url:https://symplified.it/store-assets/fav-icon-symplified.png}")
     private String storeFavIconUrlSymplified;
+
+    @Value("${asset.service.url}")
+    private String assetServiceUrl;
+
+    private String storeLogoDefaultPath;
+    private String storeBannerEcommerceDefaultPath;
+    private String storeBannerFnbDefaultPath;
+    private String storeFavIconEasydukanPath;
+    private String storeFavIconDeliverinPath;
+    private String storeFavIconSymplifiedPath;
+
+    //https://newbedev.com/spring-boot-value-returns-always-null
+    @PostConstruct
+    public void postConstruct(){
+        storeLogoDefaultPath = assetServiceUrl+"/store-assets/logo_symplified_bg.png";
+        storeBannerEcommerceDefaultPath = assetServiceUrl+ "/store-assets/banner-ecomm.jpeg";
+        storeBannerFnbDefaultPath = assetServiceUrl+"/store-assets/banner-fnb.png";
+        storeFavIconEasydukanPath = assetServiceUrl+"/store-assets/fav-icon-easydukan.png";
+        storeFavIconDeliverinPath = assetServiceUrl+"/store-assets/fav-icon-deliverin.png";
+        storeFavIconSymplifiedPath = assetServiceUrl+"/store-assets/fav-icon-symplified.png";
+
+    }
     
     @GetMapping(path = {""}, name = "stores-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('stores-get', 'all')")
@@ -254,9 +278,9 @@ public class StoreController {
                 List<StoreAssets> storeAssetsList = storeAssetsRepository.findByStoreId(storeWithDetails.getId());
                 storeAssetsList = StoreAssetsUtility.SetDefaultAsset(storeWithDetails.getVerticalCode(), storeWithDetails.getId(), storeAssetsList,
                 storeAssetsRepository, regionVerticalRepository, 
-                storeBannerFnbDefaultUrl, storeBannerEcommerceDefaultUrl,
-                storeLogoDefaultUrl, 
-                storeFavIconUrlSymplified, storeFavIconUrlDeliverin, storeFavIconUrlEasydukan);        
+                storeBannerFnbDefaultPath, storeBannerEcommerceDefaultPath,
+                storeLogoDefaultPath, 
+                storeFavIconSymplifiedPath, storeFavIconDeliverinPath, storeFavIconEasydukanPath,assetServiceUrl);        
                 storeWithDetails.setStoreAssets(storeAssetsList);
 
                 if (storeWithDetails.getSnoozeStartTime()!=null && storeWithDetails.getSnoozeEndTime()!=null) {
@@ -326,9 +350,9 @@ public class StoreController {
         
         storeAssetsList = StoreAssetsUtility.SetDefaultAsset(storeWithDetails.getVerticalCode(), id, storeAssetsList,
                 storeAssetsRepository, regionVerticalRepository, 
-                storeBannerFnbDefaultUrl, storeBannerEcommerceDefaultUrl,
-                storeLogoDefaultUrl, 
-                storeFavIconUrlSymplified, storeFavIconUrlDeliverin, storeFavIconUrlEasydukan);        
+                storeBannerFnbDefaultPath, storeBannerEcommerceDefaultPath,
+                storeLogoDefaultPath, 
+                storeFavIconSymplifiedPath, storeFavIconDeliverinPath, storeFavIconEasydukanPath,assetServiceUrl);        
         storeWithDetails.setStoreAssets(storeAssetsList);
         
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND id: " + id);

@@ -48,12 +48,11 @@ public class PlatformConfigController {
 
         for(PlatformConfig platformConfig : configList){
 
-            PlatformConfig getPlatFormConfig = platformConfig;
-            getPlatFormConfig.setPlatformLogo(assetServiceUrl+platformConfig.getPlatformLogo());
-            getPlatFormConfig.setPlatformLogoDark(assetServiceUrl+platformConfig.getPlatformLogoDark());
-            getPlatFormConfig.setPlatformFavIcon(assetServiceUrl+platformConfig.getPlatformFavIcon());
-            getPlatFormConfig.setPlatformFavIcon32(assetServiceUrl+platformConfig.getPlatformFavIcon32());
-            
+            platformConfig.setPlatformLogo(assetServiceUrl+platformConfig.getPlatformLogo());
+            platformConfig.setPlatformLogoDark(assetServiceUrl+platformConfig.getPlatformLogoDark());
+            platformConfig.setPlatformFavIcon(assetServiceUrl+platformConfig.getPlatformFavIcon());
+            platformConfig.setPlatformFavIcon32(assetServiceUrl+platformConfig.getPlatformFavIcon32());
+
         }
 
         if (configList.isEmpty()) {
