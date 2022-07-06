@@ -6,6 +6,11 @@
 # product-service-3.10.6 | 5-July-2022 
 ##################################################
 1. set url service for image url 
+2. Change config
+
+##Config changes 
+asset.service.url = https://assets.symplified.it //inject production asset service url
+
 ##DB Changes:
 
 	UPDATE product 
