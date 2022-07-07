@@ -45,16 +45,6 @@ public class PlatformConfigController {
         List<PlatformConfig> configList = platformConfigRepository.findByDomain(domain);
 
         //to set the asset url 
-
-        for(PlatformConfig platformConfig : configList){
-
-            platformConfig.setPlatformLogo(assetServiceUrl+platformConfig.getPlatformLogo());
-            platformConfig.setPlatformLogoDark(assetServiceUrl+platformConfig.getPlatformLogoDark());
-            platformConfig.setPlatformFavIcon(assetServiceUrl+platformConfig.getPlatformFavIcon());
-            platformConfig.setPlatformFavIcon32(assetServiceUrl+platformConfig.getPlatformFavIcon32());
-
-        }
-
         if (configList.isEmpty()) {
             response.setStatus(HttpStatus.NOT_FOUND);
         } else {

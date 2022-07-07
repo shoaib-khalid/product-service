@@ -1,4 +1,18 @@
 ##################################################
+# product-service-3.10.9 | 7-July-2022 
+##################################################
+1. Rebuild
+2. update table and insert data of platform logo square in platform_config
+
+##DB Changes:
+ALTER TABLE platform_config ADD platformLogoSquare varchar(500) NULL;
+
+
+UPDATE platform_config 
+SET platformLogoSquare = '/store-assets/DeliverIn-Logo_300X300.png'
+WHERE platformName = 'Deliverin'
+
+##################################################
 # product-service-3.10.8 | 6-July-2022 
 ##################################################
 1. Rebuild
@@ -11,6 +25,7 @@
 ##################################################
 1. set url service for image url 
 2. Change config
+3. 
 
 ##Config changes 
 asset.service.url = https://assets.symplified.it //inject production asset service url
@@ -114,6 +129,11 @@ asset.service.url = https://assets.symplified.it //inject production asset servi
  	`domain` varchar(300) NULL,
  	CONSTRAINT reserved_domain_PK PRIMARY KEY (id)
  );
+
+INSERT INTO symplified.reserved_domain (`domain`) VALUES('payment');
+INSERT INTO symplified.reserved_domain (`domain`) VALUES('admin');
+INSERT INTO symplified.reserved_domain (`domain`) VALUES('customer');
+
 
 
 ##################################################

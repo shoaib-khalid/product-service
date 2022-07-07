@@ -15,6 +15,9 @@ import org.springframework.http.converter.HttpMessageConverter;
 import java.awt.image.BufferedImage;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import com.kalsym.product.service.repository.CustomRepositoryImpl;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
+
 /**
  *
  * @author 7cu
@@ -26,6 +29,8 @@ import com.kalsym.product.service.repository.CustomRepositoryImpl;
 public class ProductServiceApplication {
 
     public static String VERSION;
+    public static String ASSETURL ;
+
 
     static {
         System.setProperty("spring.jpa.hibernate.naming.physical-strategy", "org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl");
@@ -34,6 +39,18 @@ public class ProductServiceApplication {
     public static void main(String... args) {
         SpringApplication.run(ProductServiceApplication.class, args);
     }
+
+    @Value("${asset.service.url}")
+    private String assetServiceUrl;
+
+    @Bean
+    CommandLineRunner lookup(ApplicationContext context) {
+        return args -> {
+            ASSETURL = assetServiceUrl;
+            
+        };
+    }
+
 
     @Bean
     public RestTemplate getRestTemplate() {
