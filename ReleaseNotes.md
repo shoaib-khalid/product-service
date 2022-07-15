@@ -1,4 +1,16 @@
 ##################################################
+# product-service-3.10.10 | 15-July-2022 
+##################################################
+1. Create endpoint for platform-og-tag
+
+INSERT INTO `authority` (`id`, `serviceId`, `name`, `description`) VALUES
+('platform-og-tag-get', 'product-service', 'getPlatformOgTag', '{GET /platform-og-tag, produces [application/json]}');
+
+INSERT INTO `role_authority` (`roleId`, `authorityId`, `serviceId`) VALUES
+('STORE_OWNER', 'platform-og-tag-get', 'product-service'),
+('SUPER_USER', 'platform-og-tag-get', 'product-service');
+
+##################################################
 # product-service-3.10.9 | 7-July-2022 
 ##################################################
 1. Rebuild
