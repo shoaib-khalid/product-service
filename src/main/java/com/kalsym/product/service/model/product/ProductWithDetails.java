@@ -1,5 +1,6 @@
 package com.kalsym.product.service.model.product;
 
+import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.enums.VehicleType;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -11,6 +12,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
 import java.util.Objects;
 import java.util.Set;
 import javax.persistence.CascadeType;
@@ -66,6 +69,9 @@ public class ProductWithDetails implements Serializable {
 
     private String seoName;
 
+    @Transient 
+    String seoUrlMarketPlace;
+
     private Boolean trackQuantity;
 
     private Boolean allowOutOfStockPurchases;
@@ -113,6 +119,11 @@ public class ProductWithDetails implements Serializable {
             fetch = FetchType.LAZY)
     @JoinColumn(name = "id", referencedColumnName = "productId", insertable = false, updatable = false, nullable = true)
     private ProductDeliveryDetail productDeliveryDetail;
+
+    public String getSeoUrlMarketPlace() {
+
+        return ProductServiceApplication.MARKETPLACEURL+"/"+seoName+"?productId="+id;
+    }
 
     public void update(ProductWithDetails product) {
         if (null != product.getName()) {

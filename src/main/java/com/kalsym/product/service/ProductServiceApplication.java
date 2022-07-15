@@ -30,6 +30,7 @@ public class ProductServiceApplication {
 
     public static String VERSION;
     public static String ASSETURL ;
+    public static String MARKETPLACEURL ;
 
 
     static {
@@ -43,11 +44,15 @@ public class ProductServiceApplication {
     @Value("${asset.service.url}")
     private String assetServiceUrl;
 
+    @Value("${marketplace.url}")
+    private String marketPlaceUrl;
+
     @Bean
     CommandLineRunner lookup(ApplicationContext context) {
         return args -> {
             ASSETURL = assetServiceUrl;
-            
+            MARKETPLACEURL = marketPlaceUrl;
+
         };
     }
 
