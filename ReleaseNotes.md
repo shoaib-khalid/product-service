@@ -1,4 +1,10 @@
 ##################################################
+# product-service-3.10.11 | 18-July-2022 
+##################################################
+
+1. Create new endpoint for postStoreTiming bulk (Support for create data and update data with bulk)
+
+##################################################
 # product-service-3.10.10 | 15-July-2022 
 ##################################################
 1. Create endpoint for platform-og-tag
