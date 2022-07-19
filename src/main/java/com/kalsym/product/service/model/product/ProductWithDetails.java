@@ -1,6 +1,8 @@
 package com.kalsym.product.service.model.product;
 
 import com.kalsym.product.service.enums.VehicleType;
+import com.kalsym.product.service.model.store.StoreCategoryMain;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -53,6 +55,10 @@ public class ProductWithDetails implements Serializable {
 
     @Column(name = "categoryId")
     private String categoryId;
+
+    @OneToOne()
+    @JoinColumn(name = "categoryId",referencedColumnName="id", insertable = false, updatable = false, nullable = true)
+    private StoreCategoryMain storeCategory;  
 
     private String status;
 
