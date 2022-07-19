@@ -29,6 +29,9 @@ public class ParentCategory implements Serializable {
     @Column(name="id")
     private String parentId;
 
+    @Column(name="name")
+    private String parentName;
+
     @Column(name="thumbnailUrl")
     private String parentThumbnailUrl;
 
