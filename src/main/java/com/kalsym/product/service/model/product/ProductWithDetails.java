@@ -54,6 +54,8 @@ public class ProductWithDetails implements Serializable {
 
     private String storeId;
 
+    private Integer shortId;
+
     @Column(name = "categoryId")
     private String categoryId;
 
@@ -71,6 +73,9 @@ public class ProductWithDetails implements Serializable {
 
     @Transient 
     String seoUrlMarketPlace;
+
+    @Transient 
+    String seoUrlSf;
 
     private Boolean trackQuantity;
 
@@ -122,7 +127,12 @@ public class ProductWithDetails implements Serializable {
 
     public String getSeoUrlMarketPlace() {
 
-        return ProductServiceApplication.MARKETPLACEURL+"/"+seoName+"?productId="+id;
+        return ProductServiceApplication.MARKETPLACEURL+"/"+shortId+"-"+seoName;
+    }
+
+    public String getSeoUrlSf() {
+
+        return seoUrl+"/"+shortId;
     }
 
     public void update(ProductWithDetails product) {
