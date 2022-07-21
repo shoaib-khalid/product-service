@@ -19,6 +19,7 @@ public interface MarketplaceBannerConfigRepository extends JpaRepository<Marketp
         +"FROM marketplace_banner_config mbc "
         +"WHERE regionCountryId = :regionCountryId "
         +"AND type LIKE CONCAT('%', :type ,'%') "
+        +"ORDER BY `sequence` ASC "
         +"LIMIT 10", 
         nativeQuery = true
     )

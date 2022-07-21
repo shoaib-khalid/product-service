@@ -2,6 +2,11 @@
 # product-service-3.10.12 | 19-July-2022 
 ##################################################
 
+1. Marketplace banner config with sequence
+##################################################
+# product-service-3.10.12 | 19-July-2022 
+##################################################
+
 1. Include store category data in product with details
 ##################################################
 # product-service-3.10.11 | 18-July-2022 

@@ -27,5 +27,8 @@ public class MarketplaceBannerConfig implements Serializable {
 
     private String type;
 
+    private Integer sequence;
+
+    private Integer delayDisplay;
 
 }
