@@ -300,6 +300,87 @@ public class StoreProductInventoryController {
         response.setData(productInventoryRepository.save(productInventory));
         return ResponseEntity.status(response.getStatus()).body(response);
     }
+
+    @PostMapping(path = {"/bulk"}, name = "store-product-inventory-post", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-product-inventory-post', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
+    public ResponseEntity<HttpResponse> postBulkStoreProductInventorys(HttpServletRequest request,
+            @PathVariable String storeId,
+            @PathVariable String productId,
+            @RequestBody List<ProductInventory> productInventoryList) {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "storeId: " + storeId);
+
+        Optional<Store> optStore = storeRepository.findById(storeId);
+
+        if (!optStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
+
+        Optional<Product> optProdcut = productRepository.findById(productId);
+
+        if (!optProdcut.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product NOT_FOUND storeId: " + productId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("product not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+
+        
+
+
+        List<ProductInventory> existingProductInventory = productInventoryRepository.findByProductId(productId);
+
+        //if the existing size same then we just updte data
+        if(existingProductInventory.size() == productInventoryList.size()){
+
+            for (int i=0; i<productInventoryList.size(); i++) {
+
+                ProductInventory previousData = productInventoryRepository.findById(productInventoryList.get(i).getItemCode()).get(); 
+                previousData.setCompareAtprice(productInventoryList.get(i).getCompareAtprice());
+                previousData.setItemCode(productInventoryList.get(i).getItemCode());
+                previousData.setPrice(productInventoryList.get(i).getPrice());
+                previousData.setProductId(productInventoryList.get(i).getProductId());
+                previousData.setQuantity(productInventoryList.get(i).getQuantity());
+                previousData.setSKU(productInventoryList.get(i).getSKU());
+                previousData.setStatus(productInventoryList.get(i).getStatus());
+                productInventoryRepository.save(previousData);
+            }
+
+
+        } else{
+
+            //delete first the existing data if size not same
+            if(existingProductInventory.size() != 0){
+                    
+                for (int i=0; i<existingProductInventory.size(); i++) {
+                
+                    ProductInventory pi = existingProductInventory.get(i);
+                    productInventoryRepository.delete(pi);
+        
+                }
+            }
+
+            for (int i=0; i<productInventoryList.size(); i++) {
+        
+                ProductInventory pi = productInventoryList.get(i);
+                productInventoryRepository.save(pi);
+          
+            }
+
+        }
+
+        List<ProductInventory> data = productInventoryRepository.findByProductId(productId);
+
+        response.setStatus(HttpStatus.OK);
+        response.setData(data);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
     
     
     @PutMapping(path = {"/{id}"}, name = "store-product-inventory-put-by-id", produces = "application/json")

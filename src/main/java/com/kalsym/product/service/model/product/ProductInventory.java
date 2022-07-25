@@ -2,9 +2,12 @@ package com.kalsym.product.service.model.product;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
@@ -33,19 +36,21 @@ import org.hibernate.annotations.OnDeleteAction;
 public class ProductInventory implements Serializable {
 
     @Id
-    private String itemCode;
+    public String itemCode;
 
-    private Double price;
-    private Double compareAtprice;
+    public Double price;
 
-    private String SKU;
+    public Double compareAtprice;
 
-    //private String name;
-    private Integer quantity;
+    @JsonProperty("SKU")
+    public String SKU;
 
-    private String productId;
+    //public String name;
+    public Integer quantity;
+
+    public String productId;
     
-    private String status;
+    public String status;
     
     public void update(ProductInventory pi) {
         if (null != pi.getPrice()) {
