@@ -42,7 +42,7 @@ public class ProductInventory implements Serializable {
 
     public Double compareAtprice;
 
-    @JsonProperty("SKU")
+    // @JsonProperty("SKU")
     public String SKU;
 
     //public String name;
