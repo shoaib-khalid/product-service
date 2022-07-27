@@ -487,7 +487,7 @@ public class StoreProductController {
 
         for (Product existingProduct : products) {
             if (existingProduct.getName().equals(bodyProduct.getName()) && !"DELETED".equalsIgnoreCase(existingProduct.getStatus())) {
-                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "username already exists", "");
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "productName already exists", "");
                 response.setStatus(HttpStatus.CONFLICT);
                 errors.add("Product name already exists");
                 response.setData(errors);
@@ -498,7 +498,9 @@ public class StoreProductController {
 
         //String seoName = generateSeoName(bodyProduct.getName());
         
-        String seoName = bodyProduct.getSeoName();
+        // String seoName = bodyProduct.getSeoName();
+        //Generate SEONAME replace all special character and white space \\s 
+        String seoName = bodyProduct.getName().replaceAll("[`~!@#$%^&*()_+\\[\\]\\\\;\',./{}|:\"<>?|\\s]", "-");
         
         String seoUrl = productSeoUrl.replace("{{store-domain}}", optStore.get().getDomain());
         seoUrl = seoUrl.replace("{{product-name}}", seoName);
