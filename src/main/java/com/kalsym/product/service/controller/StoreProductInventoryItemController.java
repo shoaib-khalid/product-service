@@ -376,14 +376,51 @@ public class StoreProductInventoryItemController {
             return ResponseEntity.status(response.getStatus()).body(response);
         }
 
+        List<ProductInventoryItem> existingProductInventoryItem = productInventoryItemRepository.findByProductId(productId);
 
+        //if the existing size same then we just updte data
+        if(existingProductInventoryItem.size() == productInventoryItemList.size()){
 
         for (int i=0; i<productInventoryItemList.size(); i++) {
-        
+
+            ProductInventoryItem previousData = productInventoryItemRepository.findByItemCodeAndProductVariantAvailableId(productInventoryItemList.get(i).getItemCode(),productInventoryItemList.get(i).getProductVariantAvailableId()).get(); 
+            previousData.setItemCode(productInventoryItemList.get(i).getItemCode());
+            previousData.setProductId(productId);
+            previousData.setProductVariantAvailableId(productInventoryItemList.get(i).getProductVariantAvailableId());
+            previousData.setSequenceNumber(productInventoryItemList.get(i).getSequenceNumber());
+       
+            productInventoryItemRepository.save(previousData);
+        }
+
+
+    } else{
+
+        //delete first the existing data if size not same
+        if(existingProductInventoryItem.size() != 0){
+                
+            for (int i=0; i<existingProductInventoryItem.size(); i++) {
+            
+                ProductInventoryItem pi = existingProductInventoryItem.get(i);
+                productInventoryItemRepository.delete(pi);
+    
+            }
+        }
+
+        for (int i=0; i<productInventoryItemList.size(); i++) {
+    
             ProductInventoryItem pi = productInventoryItemList.get(i);
             productInventoryItemRepository.save(pi);
-      
+        
         }
+
+    }
+
+        // for (int i=0; i<productInventoryItemList.size(); i++) {
+        
+        //     ProductInventoryItem pi = productInventoryItemList.get(i);
+        //     productInventoryItemRepository.save(pi);
+      
+        // }
 
         List<ProductInventoryItem> data = productInventoryItemRepository.findByProductId(productId);
 
