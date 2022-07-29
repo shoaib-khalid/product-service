@@ -338,19 +338,44 @@ public class StoreProductInventoryController {
 
         //if the existing size same then we just updte data
         if(existingProductInventory.size() == productInventoryList.size()){
+            
+            //to handle case fior tem code aa if it is variant type
+            if(existingProductInventory.size() == 1){
 
-            for (int i=0; i<productInventoryList.size(); i++) {
+                //delete it first
+                for (int i=0; i<existingProductInventory.size(); i++) {
+                
+                    ProductInventory pi = existingProductInventory.get(i);
+                    productInventoryRepository.delete(pi);
+        
+                }
+                
+                //then create new one
+                for (int i=0; i<productInventoryList.size(); i++) {
+        
+                    ProductInventory pi = productInventoryList.get(i);
+                    productInventoryRepository.save(pi);
+              
+                }
 
-                ProductInventory previousData = productInventoryRepository.findById(productInventoryList.get(i).getItemCode()).get(); 
-                previousData.setCompareAtprice(productInventoryList.get(i).getCompareAtprice());
-                previousData.setItemCode(productInventoryList.get(i).getItemCode());
-                previousData.setPrice(productInventoryList.get(i).getPrice());
-                previousData.setProductId(productInventoryList.get(i).getProductId());
-                previousData.setQuantity(productInventoryList.get(i).getQuantity());
-                previousData.setSKU(productInventoryList.get(i).getSKU());
-                previousData.setStatus(productInventoryList.get(i).getStatus());
-                productInventoryRepository.save(previousData);
+            } else{
+
+                for (int i=0; i<productInventoryList.size(); i++) {
+
+                    ProductInventory previousData = productInventoryRepository.findById(productInventoryList.get(i).getItemCode()).get(); 
+                    previousData.setCompareAtprice(productInventoryList.get(i).getCompareAtprice());
+                    previousData.setItemCode(productInventoryList.get(i).getItemCode());
+                    previousData.setPrice(productInventoryList.get(i).getPrice());
+                    previousData.setProductId(productInventoryList.get(i).getProductId());
+                    previousData.setQuantity(productInventoryList.get(i).getQuantity());
+                    previousData.setSKU(productInventoryList.get(i).getSKU());
+                    previousData.setStatus(productInventoryList.get(i).getStatus());
+                    productInventoryRepository.save(previousData);
+                }
+
             }
+
+
 
 
         } else{
