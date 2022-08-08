@@ -327,6 +327,7 @@ public class StoreProductAssetController {
         //if file exist then we keep in server storage or we use url only
         if(file != null){
            
+            //if item code exist then delete the existing
             if (itemCode != null) {
                 Optional<ProductAsset> optProdAsset = productAssetRepository.findByItemCode(itemCode);
                 if (optProdAsset.isPresent()) {
@@ -335,7 +336,9 @@ public class StoreProductAssetController {
                 }
                 generatedUrl = itemCode + fileStorageService.generateRandomName();
                 storagePath = fileStorageService.saveProductAsset(file, generatedUrl);            
-            } else {
+            } 
+            //create a new item code of image
+            else {
                 generatedUrl = itemCode + fileStorageService.generateRandomName();
                 storagePath = fileStorageService.saveProductAsset(file, generatedUrl);            
             }
@@ -358,7 +361,22 @@ public class StoreProductAssetController {
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Checking if this asset already exists");
 
-        } else{
+        }
+        //insert the url of image
+        else{
+
+            //with item code
+            if (itemCode != null) {
+
+                Optional<ProductAsset> optProdAsset = productAssetRepository.findByItemCode(itemCode);
+                if (optProdAsset.isPresent()) {
+                    productAssetRepository.deleteById(optProdAsset.get().getId());
+                    Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Existing asset deleted successfully");
+                }
+   
+                productAsset.setItemCode(itemCode);
+
+            }
 
             String split[] = url.split("/product-assets", 0);
             String pathUrl = "/product-assets"+split[1];
@@ -368,6 +386,7 @@ public class StoreProductAssetController {
 
             productAsset.setUrl(pathUrl);
             productAsset = productAssetRepository.save(productAsset);
+
 
         }
         
