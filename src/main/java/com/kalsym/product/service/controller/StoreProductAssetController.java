@@ -251,7 +251,10 @@ public class StoreProductAssetController {
 
         ProductAsset productAsset = optProductAssset.get();
         //HANDLIN PRODUCT ASSET FOR PAYLOAD
-        productAssetBody.setUrl(productAsset.getUrl());
+        String split[] = productAssetBody.getUrl().split("/product-assets", 0);
+        String pathUrl = "/product-assets"+split[1];
+
+        productAssetBody.setUrl(pathUrl);
         productAsset.update(productAssetBody);
 
         productAsset = productAssetRepository.save(productAsset);
