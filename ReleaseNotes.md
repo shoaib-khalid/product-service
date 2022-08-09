@@ -1,4 +1,25 @@
 ##################################################
+# product-service-3.10.17 | 09-August-2022 
+##################################################
+
+1. Create new endpoint get "/marketplace-popup"
+
+##DB Changes:
+
+CREATE TABLE `marketplace_popup_config` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `popupUrl` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `regionCountryId` varchar(3) DEFAULT NULL,
+  `type` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'DESKTOP or MOBILE',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `sequence` int DEFAULT NULL,
+  `actionUrl` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `marketplace_banner_config_FK` (`regionCountryId`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+##################################################
 # product-service-3.10.16 | 01-August-2022 
 ##################################################
 
