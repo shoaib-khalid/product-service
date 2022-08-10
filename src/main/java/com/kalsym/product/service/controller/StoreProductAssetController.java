@@ -251,7 +251,10 @@ public class StoreProductAssetController {
 
         ProductAsset productAsset = optProductAssset.get();
         //HANDLIN PRODUCT ASSET FOR PAYLOAD
-        productAssetBody.setUrl(productAsset.getUrl());
+        String split[] = productAssetBody.getUrl().split("/product-assets", 0);
+        String pathUrl = "/product-assets"+split[1];
+
+        productAssetBody.setUrl(pathUrl);
         productAsset.update(productAssetBody);
 
         productAsset = productAssetRepository.save(productAsset);
@@ -292,7 +295,8 @@ public class StoreProductAssetController {
     public ResponseEntity<HttpResponse> postStoreProductAssets(HttpServletRequest request,
             @PathVariable String storeId,
             @PathVariable String productId,
-            @RequestParam("file") MultipartFile file,
+            @RequestParam(value="file",required = false) MultipartFile file,
+            @RequestParam(required = false) String url,
             @RequestParam(required = false) String itemCode,
             @RequestParam(required = false) Boolean isThumbnail) {
         String logprefix = request.getRequestURI();
@@ -318,41 +322,77 @@ public class StoreProductAssetController {
             response.setError("product not found");
             return ResponseEntity.status(response.getStatus()).body(response);
         }
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "FOUND productId: " + storeId);
+
+        String storagePath;
+        String generatedUrl;
+        ProductAsset productAsset = new ProductAsset();
+
+        //if file exist then we keep in server storage or we use url only
+        if(file != null){
+           
+            //if item code exist then delete the existing
+            if (itemCode != null) {
+                Optional<ProductAsset> optProdAsset = productAssetRepository.findByItemCode(itemCode);
+                if (optProdAsset.isPresent()) {
+                    productAssetRepository.deleteById(optProdAsset.get().getId());
+                    Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Existing asset deleted successfully");
+                }
+                generatedUrl = itemCode + fileStorageService.generateRandomName();
+                storagePath = fileStorageService.saveProductAsset(file, generatedUrl);            
+            } 
+            //create a new item code of image
+            else {
+                generatedUrl = itemCode + fileStorageService.generateRandomName();
+                storagePath = fileStorageService.saveProductAsset(file, generatedUrl);            
+            }
+
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "storagePath: " + storagePath);
+
+            productAsset.setProductId(productId);
+            productAsset.setName(file.getOriginalFilename());
+            productAsset.setItemCode(itemCode);
+            //productAsset.setIsThumbnail(isThumbnail);
+            productAsset.setUrl("/product-assets/"+generatedUrl);
+
+            productAsset = productAssetRepository.save(productAsset);
+
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "saved image: " + productAsset.getId());
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "isThumbnail: " + isThumbnail);
+                    Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "FOUND productId: " + storeId);
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "OriginalFilename: " + file.getOriginalFilename());
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Checking if this asset already exists");
-        String storagePath;
-        String generatedUrl;
-        if (itemCode != null) {
-            Optional<ProductAsset> optProdAsset = productAssetRepository.findByItemCode(itemCode);
-            if (optProdAsset.isPresent()) {
-                productAssetRepository.deleteById(optProdAsset.get().getId());
-                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Existing asset deleted successfully");
-            }
-            generatedUrl = itemCode + fileStorageService.generateRandomName();
-            storagePath = fileStorageService.saveProductAsset(file, generatedUrl);            
-        } else {
-            generatedUrl = itemCode + fileStorageService.generateRandomName();
-            storagePath = fileStorageService.saveProductAsset(file, generatedUrl);            
+
         }
+        //insert the url of image
+        else{
 
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "storagePath: " + storagePath);
+            //with item code
+            if (itemCode != null) {
 
-        ProductAsset productAsset = new ProductAsset();
-        productAsset.setProductId(productId);
-        productAsset.setName(file.getOriginalFilename());
-        productAsset.setItemCode(itemCode);
-        //productAsset.setIsThumbnail(isThumbnail);
-        productAsset.setUrl("/product-assets/"+generatedUrl);
+                Optional<ProductAsset> optProdAsset = productAssetRepository.findByItemCode(itemCode);
+                if (optProdAsset.isPresent()) {
+                    productAssetRepository.deleteById(optProdAsset.get().getId());
+                    Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Existing asset deleted successfully");
+                }
+   
+                productAsset.setItemCode(itemCode);
 
-        productAsset = productAssetRepository.save(productAsset);
+            }
 
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "saved image: " + productAsset.getId());
+            String split[] = url.split("/product-assets", 0);
+            String pathUrl = "/product-assets"+split[1];
 
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "isThumbnail: " + isThumbnail);
+            productAsset.setProductId(productId);
+            productAsset.setName("Clone");
 
+            productAsset.setUrl(pathUrl);
+            productAsset = productAssetRepository.save(productAsset);
+
+
+        }
+        
         Product product = optProdcut.get();
         List<ProductAsset> productAssets = productAssetRepository.findByProductId(productId);
         //if is thumbnail true then remove thumbnail true from all other assets
@@ -378,6 +418,7 @@ public class StoreProductAssetController {
 
         //to display data full url after save
         productAsset.setUrl(assetServiceUrl+productAsset.getUrl());
+    
 
         response.setStatus(HttpStatus.OK);
         response.setData(productAsset);
