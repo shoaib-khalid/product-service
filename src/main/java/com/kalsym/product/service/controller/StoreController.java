@@ -585,8 +585,16 @@ public class StoreController {
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
             Logger.application.error(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " error creating store ", "", e);
-            response.setMessage(e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+
+            if(e.getMessage().contains("Whatsapp API return error")){
+                response.setMessage(e.getMessage());
+                return ResponseEntity.status(HttpStatus.CREATED).body(response);   
+
+            }else{
+                response.setMessage(e.getMessage());
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);   
+            }
+          
         }
 
     }

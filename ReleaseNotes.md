@@ -1,4 +1,13 @@
 ##################################################
+# product-service-3.10.20 | 11-August-2022 
+##################################################
+1. Merge hotfix 
+##################################################
+# product-service-3.10.19 | 11-August-2022 
+##################################################
+
+1. Fix whatsapp issue
+##################################################
 # product-service-3.10.18 | 10-August-2022 
 ##################################################
 
@@ -24,7 +33,6 @@ CREATE TABLE `marketplace_popup_config` (
   PRIMARY KEY (`id`),
   KEY `marketplace_banner_config_FK` (`regionCountryId`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
 ##################################################
 # product-service-3.10.16 | 01-August-2022 
 ##################################################
