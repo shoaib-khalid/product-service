@@ -61,7 +61,7 @@ public class WhatsappService {
         request.setReferenceId(whatsappServiceReferenceId);
         Template template = new Template();
         template.setName(templateName);
-        String[] message = {username, password};
+        String[] message = {username};
         template.setParameters(message);
         request.setTemplate(template);
         HttpEntity<WhatsappMessage> httpEntity = new HttpEntity<>(request, headers);
