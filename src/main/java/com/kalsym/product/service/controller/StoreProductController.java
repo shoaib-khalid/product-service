@@ -593,4 +593,72 @@ public class StoreProductController {
         };
     }
 
+    // @PostMapping(path = {""}, name = "store-products-post")
+    // @PreAuthorize("hasAnyAuthority('store-products-post', 'all')  and @customOwnerVerifier.VerifyStore(#storeId)")
+    // public ResponseEntity<HttpResponse> postCloneStoreProduct(HttpServletRequest request,
+    //         @PathVariable String storeId,
+    //         @RequestParam(required = true) String storeOwnerId) throws Exception {
+    //     String logprefix = request.getRequestURI();
+    //     HttpResponse response = new HttpResponse(request.getRequestURI());
+
+    //     Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "storeId: " + storeId);
+    //     Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "storeOwnerId: " + storeOwnerId);
+
+    //     Optional<Store> optStore = storeRepository.findById(storeId);
+
+    //     if (!optStore.isPresent()) {
+    //         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
+    //         response.setStatus(HttpStatus.NOT_FOUND);
+    //         response.setError("store not found");
+    //         return ResponseEntity.status(response.getStatus()).body(response);
+    //     }
+
+    //     Optional<Store> optStoreOwner = storeRepository.findById(storeId);
+
+    //     if (!optStoreOwner.isPresent()) {
+    //         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeOwnerId: " + storeId);
+    //         response.setStatus(HttpStatus.NOT_FOUND);
+    //         response.setError("storeOwnerId not found");
+    //         return ResponseEntity.status(response.getStatus()).body(response);
+    //     }
+    //     Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
+
+    //     List<String> errors = new ArrayList<>();
+    //     List<Product> products = productRepository.findByStoreId(storeOwnerId);
+
+    //     for (Product existingProduct : products) {
+    //         if (existingProduct.getName().equals(bodyProduct.getName()) && !"DELETED".equalsIgnoreCase(existingProduct.getStatus())) {
+    //             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "productName already exists", "");
+    //             response.setStatus(HttpStatus.CONFLICT);
+    //             errors.add("Product name already exists");
+    //             response.setData(errors);
+    //             return ResponseEntity.status(response.getStatus()).body(response);
+    //         }
+
+    //     }
+
+    //     //String seoName = generateSeoName(bodyProduct.getName());
+        
+    //     // String seoName = bodyProduct.getSeoName();
+    //     //Generate SEONAME replace all special character and white space \\s 
+    //     String seoName = bodyProduct.getName().replaceAll("[`~!@#$%^&*()_+\\[\\]\\\\;\',./{}|:\"<>?|\\s]", "-");
+        
+    //     String seoUrl = productSeoUrl.replace("{{store-domain}}", optStore.get().getDomain());
+    //     seoUrl = seoUrl.replace("{{product-name}}", seoName);
+    //     bodyProduct.setSeoUrl(seoUrl);
+
+    //     bodyProduct.setSeoName(seoName);
+    //     if (bodyProduct.getIsPackage()==null) { bodyProduct.setIsPackage(Boolean.FALSE); }
+
+    //     //set image url 
+
+
+    //     Product savedProduct = productRepository.save(bodyProduct);
+    //     Logger.application.info(ProductServiceApplication.VERSION, logprefix, "product added to store with storeId: {}, productId: {}" + storeId, savedProduct.getId());
+
+    //     response.setStatus(HttpStatus.CREATED);
+    //     response.setData(savedProduct);
+    //     return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    // }
+
 }
