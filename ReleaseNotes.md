@@ -1,5 +1,5 @@
 ##################################################
-# product-service-3.10.16-hotfix | 11-August-2022 
+# product-service-3.10.16-SNAPSHOT | 11-August-2022 
 ##################################################
 
 1. Fix whatsapp issue
