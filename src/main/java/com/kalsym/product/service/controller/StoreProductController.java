@@ -29,6 +29,8 @@ import com.kalsym.product.service.repository.ProductReviewRepository;
 import com.kalsym.product.service.repository.ProductWithDetailsRepository;
 import com.kalsym.product.service.utility.Logger;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -464,7 +466,7 @@ public class StoreProductController {
             body.setThumbnailUrl(assetServiceUrl+body.getThumbnailUrl());
 
         }
-        
+
         response.setStatus(HttpStatus.OK);
         response.setData(body);
         return ResponseEntity.status(response.getStatus()).body(response);
@@ -601,5 +603,79 @@ public class StoreProductController {
             return builder.and(predicates.toArray(new Predicate[predicates.size()]));
         };
     }
+
+    
+    @PostMapping(path = {"/clone"}, name = "store-products-post")
+    @PreAuthorize("hasAnyAuthority('store-products-post', 'all')  and @customOwnerVerifier.VerifyStore(#storeId)")
+    public ResponseEntity<HttpResponse> postCloneStoreProduct(HttpServletRequest request,
+            @PathVariable String storeId,
+            @RequestParam(required = true) String storeOwnerId) throws Exception {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "storeId: " + storeId);
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "storeOwnerId: " + storeOwnerId);
+
+        Optional<Store> optStore = storeRepository.findById(storeId);
+
+        if (!optStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+
+        Optional<Store> optStoreOwner = storeRepository.findById(storeId);
+
+        if (!optStoreOwner.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeOwnerId: " + storeId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("storeOwnerId not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
+
+        List<String> errors = new ArrayList<>();
+        List<Product> storeOwnerProducts = productRepository.findByStoreIdAndStatusNot(storeOwnerId,"DELETED");
+
+        List<Product> mapNewProducts = storeOwnerProducts.stream()
+        .map(x->{
+            x.
+
+            Product data = x;
+            data.setStoreId(storeId);
+
+            return data;
+        })
+        .collect(Collectors.toList());
+
+        System.out.println("Checking size:::::::::::::::::::::::"+storeOwnerProducts.size());
+        System.out.println("Checking mapNewProducts:::::::::::::::::::::::"+mapNewProducts);
+
+
+      //String seoName = generateSeoName(bodyProduct.getName());
+        
+        // String seoName = bodyProduct.getSeoName();
+        //Generate SEONAME replace all special character and white space \\s 
+        // String seoName = bodyProduct.getName().replaceAll("[`~!@#$%^&*()_+\\[\\]\\\\;\',./{}|:\"<>?|\\s]", "-");
+        
+        // String seoUrl = productSeoUrl.replace("{{store-domain}}", optStore.get().getDomain());
+        // seoUrl = seoUrl.replace("{{product-name}}", seoName);
+        // bodyProduct.setSeoUrl(seoUrl);
+
+        // bodyProduct.setSeoName(seoName);
+        // if (bodyProduct.getIsPackage()==null) { bodyProduct.setIsPackage(Boolean.FALSE); }
+
+        // //set image url 
+
+
+        // Product savedProduct = productRepository.save(bodyProduct);
+        // Logger.application.info(ProductServiceApplication.VERSION, logprefix, "product added to store with storeId: {}, productId: {}" + storeId, savedProduct.getId());
+
+        response.setStatus(HttpStatus.OK);
+        response.setData(mapNewProducts);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
 
 }
