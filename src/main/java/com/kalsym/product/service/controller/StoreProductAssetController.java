@@ -12,6 +12,8 @@ import com.kalsym.product.service.service.FileStorageService;
 import com.kalsym.product.service.utility.Logger;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -195,6 +197,11 @@ public class StoreProductAssetController {
             return ResponseEntity.status(response.getStatus()).body(response);
         }
 
+        List<ProductAsset> filtered;
+        filtered = listOfProductAsset.stream()
+        .filter(productasset -> !productasset.getId().equals(id))
+        .collect(Collectors.toList());
+        
         Product product = optProdcut.get();
         if (optProductAsset.get().getUrl().equals(product.getThumbnailUrl())) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "deleting thumbail: " + id);
@@ -203,7 +210,7 @@ public class StoreProductAssetController {
             // productRepository.save(product);
 
             //to set default image if it not set after delete image default
-            this.setDefaultThumbnail(listOfProductAsset, product);
+            this.setDefaultThumbnail(filtered, product);
         }
 
         productAssetRepository.delete(optProductAsset.get());
