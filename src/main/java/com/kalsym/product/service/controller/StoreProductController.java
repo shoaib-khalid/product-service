@@ -456,8 +456,11 @@ public class StoreProductController {
         Product product = optProdcut.get();
         product.update(bodyProduct);
 
+        Product body = productRepository.save(product);
+        body.setThumbnailUrl(assetServiceUrl+body.getThumbnailUrl());
+
         response.setStatus(HttpStatus.OK);
-        response.setData(productRepository.save(product));
+        response.setData(body);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
