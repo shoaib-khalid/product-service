@@ -210,7 +210,15 @@ public class StoreProductAssetController {
             // productRepository.save(product);
 
             //to set default image if it not set after delete image default
-            this.setDefaultThumbnail(filtered, product);
+            if(filtered.size()>0){
+                this.setDefaultThumbnail(filtered, product);
+
+            }else{
+
+                product.setThumbnailUrl(null);
+                productRepository.save(product);
+ 
+            }
         }
 
         productAssetRepository.delete(optProductAsset.get());
