@@ -457,8 +457,14 @@ public class StoreProductController {
         product.update(bodyProduct);
 
         Product body = productRepository.save(product);
-        body.setThumbnailUrl(assetServiceUrl+body.getThumbnailUrl());
+        if(body.getThumbnailUrl() == null){
+            body.setThumbnailUrl(null);
 
+        }else{
+            body.setThumbnailUrl(assetServiceUrl+body.getThumbnailUrl());
+
+        }
+        
         response.setStatus(HttpStatus.OK);
         response.setData(body);
         return ResponseEntity.status(response.getStatus()).body(response);

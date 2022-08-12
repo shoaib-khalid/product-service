@@ -186,6 +186,8 @@ public class StoreProductAssetController {
 
         Optional<ProductAsset> optProductAsset = productAssetRepository.findById(id);
 
+        List<ProductAsset> listOfProductAsset = productAssetRepository.findByProductId(productId);
+
         if (!optProductAsset.isPresent()) {
             Logger.application.warn(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product asset NOT_FOUND inventoryId: " + id);
             response.setStatus(HttpStatus.NOT_FOUND);
@@ -196,8 +198,12 @@ public class StoreProductAssetController {
         Product product = optProdcut.get();
         if (optProductAsset.get().getUrl().equals(product.getThumbnailUrl())) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "deleting thumbail: " + id);
-            product.setThumbnailUrl(null);
-            productRepository.save(product);
+            // product.setThumbnailUrl(null);
+
+            // productRepository.save(product);
+
+            //to set default image if it not set after delete image default
+            this.setDefaultThumbnail(listOfProductAsset, product);
         }
 
         productAssetRepository.delete(optProductAsset.get());
