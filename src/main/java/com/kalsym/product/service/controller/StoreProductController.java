@@ -8,7 +8,9 @@ import com.kalsym.product.service.model.product.ProductAsset;
 import com.kalsym.product.service.model.product.ProductInventoryWithDetails;
 import com.kalsym.product.service.model.product.ProductSpecs;
 import com.kalsym.product.service.model.product.ProductWithDetails;
+import com.kalsym.product.service.model.store.CompareStoreCategory;
 import com.kalsym.product.service.model.store.Store;
+import com.kalsym.product.service.model.store.StoreCategory;
 import com.kalsym.product.service.model.ItemDiscount;
 import com.kalsym.product.service.model.store.StoreDiscount;
 import com.kalsym.product.service.enums.StoreDiscountType;
@@ -52,6 +54,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.kalsym.product.service.repository.ProductInventoryWithDetailsRepository;
 import com.kalsym.product.service.repository.RegionCountriesRepository;
+import com.kalsym.product.service.repository.StoreCategoryRepository;
 import com.kalsym.product.service.repository.StoreDiscountRepository;
 import com.kalsym.product.service.repository.StoreDiscountProductRepository;
 import com.kalsym.product.service.utility.DateTimeUtil;
@@ -113,6 +116,9 @@ public class StoreProductController {
 
     @Autowired
     RegionCountriesRepository regionCountriesRepository;
+
+    @Autowired
+    StoreCategoryRepository storeCategoryRepository;
     
     @Autowired
     private HashmapLoader hashmapLoader;
@@ -635,45 +641,85 @@ public class StoreProductController {
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
 
-        List<String> errors = new ArrayList<>();
+        //get all the categories based on owner store id
+        List<StoreCategory> storeOwnerCategory = storeCategoryRepository.findByStoreId(storeOwnerId);
+        List<StoreCategory> mapNewStoreCategory = new ArrayList<>();
+        
+        //get all the products based on owner store id
         List<Product> storeOwnerProducts = productRepository.findByStoreIdAndStatusNot(storeOwnerId,"DELETED");
+        List<Product> mapNewProducts = new ArrayList<>();
 
-        List<Product> mapNewProducts = storeOwnerProducts.stream()
+        //save the newly store category in branch
+        mapNewStoreCategory = storeOwnerCategory.stream()
         .map(x->{
-            x.
 
-            Product data = x;
+            StoreCategory bodyStoreCategory = new StoreCategory();
+            bodyStoreCategory.setName(x.getName());
+            bodyStoreCategory.setParentCategoryId(x.getParentCategoryId());
+            bodyStoreCategory.setStoreId(storeId);
+            bodyStoreCategory.setThumbnailUrl(x.getThumbnailUrl());
+
+            storeCategoryRepository.save(bodyStoreCategory);
+            return bodyStoreCategory;
+
+
+        })
+        .collect(Collectors.toList());
+
+        //get all the newly store category in order for mapping store category (branch)and store category (owner)
+        List<StoreCategory> storeBranchCategory = storeCategoryRepository.findByStoreId(storeId);
+
+        List<CompareStoreCategory> compareStoreOwnerCategory = new ArrayList<>();
+
+        for(StoreCategory k:storeOwnerCategory){
+
+            for(StoreCategory m:storeBranchCategory){
+               if(m.getName().equals(k.getName())){
+
+                CompareStoreCategory compareData = new CompareStoreCategory();
+                compareData.setStoreOwnerCategoryId(k.getId());
+                compareData.setName(m.getName());
+                compareData.setBranchCategoryId(m.getId());
+                compareStoreOwnerCategory.add(compareData);
+               }
+            }
+        }
+
+        mapNewProducts = storeOwnerProducts.stream()
+        .map(x->{
+
+            //to find category owner id the we use the the branch id for creating branch products
+            CompareStoreCategory filterCategoryOwner = compareStoreOwnerCategory.stream()
+            .filter(category -> category.getStoreOwnerCategoryId().equals(x.getCategoryId()))
+            .findFirst().get();
+
+            //to be add data
+            Product data = new Product();
+            data.setName(x.getName());
+            data.setDescription(x.getDescription());
             data.setStoreId(storeId);
+            data.setCategoryId(filterCategoryOwner.getBranchCategoryId());
+            data.setStatus(x.getStatus());
+            data.setThumbnailUrl(x.getThumbnailUrl());
+            // data.setSeoUrl(seoUrl);
+            data.setSeoName(x.getSeoName());
+            data.setTrackQuantity(x.getTrackQuantity());
+            data.setAllowOutOfStockPurchases(x.getAllowOutOfStockPurchases());
+            data.setMinQuantityForAlarm(x.getMinQuantityForAlarm());
+            data.setPackingSize(x.getPackingSize());
+            data.setIsPackage(x.getIsPackage());
+            data.setIsNoteOptional(x.getIsNoteOptional());
+            data.setCustomNote(x.getCustomNote());
+            data.setVehicleType(x.getVehicleType());
+
+            productRepository.save(data);
 
             return data;
         })
         .collect(Collectors.toList());
 
-        System.out.println("Checking size:::::::::::::::::::::::"+storeOwnerProducts.size());
-        System.out.println("Checking mapNewProducts:::::::::::::::::::::::"+mapNewProducts);
-
-
-      //String seoName = generateSeoName(bodyProduct.getName());
-        
-        // String seoName = bodyProduct.getSeoName();
-        //Generate SEONAME replace all special character and white space \\s 
-        // String seoName = bodyProduct.getName().replaceAll("[`~!@#$%^&*()_+\\[\\]\\\\;\',./{}|:\"<>?|\\s]", "-");
-        
-        // String seoUrl = productSeoUrl.replace("{{store-domain}}", optStore.get().getDomain());
-        // seoUrl = seoUrl.replace("{{product-name}}", seoName);
-        // bodyProduct.setSeoUrl(seoUrl);
-
-        // bodyProduct.setSeoName(seoName);
-        // if (bodyProduct.getIsPackage()==null) { bodyProduct.setIsPackage(Boolean.FALSE); }
-
-        // //set image url 
-
-
-        // Product savedProduct = productRepository.save(bodyProduct);
-        // Logger.application.info(ProductServiceApplication.VERSION, logprefix, "product added to store with storeId: {}, productId: {}" + storeId, savedProduct.getId());
-
         response.setStatus(HttpStatus.OK);
-        response.setData(mapNewProducts);
+        response.setData(compareStoreOwnerCategory);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
