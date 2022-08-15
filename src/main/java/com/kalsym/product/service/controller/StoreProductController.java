@@ -5,8 +5,10 @@ import com.kalsym.product.service.HashmapLoader;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.model.product.Product;
 import com.kalsym.product.service.model.product.ProductAsset;
+import com.kalsym.product.service.model.product.ProductInventory;
 import com.kalsym.product.service.model.product.ProductInventoryWithDetails;
 import com.kalsym.product.service.model.product.ProductSpecs;
+import com.kalsym.product.service.model.product.ProductVariant;
 import com.kalsym.product.service.model.product.ProductWithDetails;
 import com.kalsym.product.service.model.store.CompareStoreCategory;
 import com.kalsym.product.service.model.store.Store;
@@ -23,6 +25,7 @@ import com.kalsym.product.service.model.store.StoreWithDetails;
 import com.kalsym.product.service.model.store.object.CustomPageable;
 import com.kalsym.product.service.repository.ProductAssetRepository;
 import com.kalsym.product.service.repository.ProductInventoryItemRepository;
+import com.kalsym.product.service.repository.ProductInventoryRepository;
 import com.kalsym.product.service.repository.StoreRepository;
 import com.kalsym.product.service.repository.ProductRepository;
 import com.kalsym.product.service.repository.ProductVariantRepository;
@@ -119,6 +122,9 @@ public class StoreProductController {
 
     @Autowired
     StoreCategoryRepository storeCategoryRepository;
+
+    @Autowired
+    ProductInventoryRepository productInventoryMainRepository;
     
     @Autowired
     private HashmapLoader hashmapLoader;
@@ -649,6 +655,9 @@ public class StoreProductController {
         List<Product> storeOwnerProducts = productRepository.findByStoreIdAndStatusNot(storeOwnerId,"DELETED");
         List<Product> mapNewProducts = new ArrayList<>();
 
+        //concat the domain url in order to concat for seoUrl
+        String subProductUrlDomain = "https://" +optStoreOwner.get().getDomain()+"/product/";
+
         //save the newly store category in branch
         mapNewStoreCategory = storeOwnerCategory.stream()
         .map(x->{
@@ -671,6 +680,7 @@ public class StoreProductController {
 
         List<CompareStoreCategory> compareStoreOwnerCategory = new ArrayList<>();
 
+        //to append the array list if category name is same for comparestorecategory
         for(StoreCategory k:storeOwnerCategory){
 
             for(StoreCategory m:storeBranchCategory){
@@ -688,7 +698,7 @@ public class StoreProductController {
         mapNewProducts = storeOwnerProducts.stream()
         .map(x->{
 
-            //to find category owner id the we use the the branch id for creating branch products
+            //to find category owner id then we will use the the branch id for creating branch products
             CompareStoreCategory filterCategoryOwner = compareStoreOwnerCategory.stream()
             .filter(category -> category.getStoreOwnerCategoryId().equals(x.getCategoryId()))
             .findFirst().get();
@@ -701,7 +711,7 @@ public class StoreProductController {
             data.setCategoryId(filterCategoryOwner.getBranchCategoryId());
             data.setStatus(x.getStatus());
             data.setThumbnailUrl(x.getThumbnailUrl());
-            // data.setSeoUrl(seoUrl);
+            data.setSeoUrl(subProductUrlDomain+x.getSeoName());
             data.setSeoName(x.getSeoName());
             data.setTrackQuantity(x.getTrackQuantity());
             data.setAllowOutOfStockPurchases(x.getAllowOutOfStockPurchases());
@@ -711,15 +721,90 @@ public class StoreProductController {
             data.setIsNoteOptional(x.getIsNoteOptional());
             data.setCustomNote(x.getCustomNote());
             data.setVehicleType(x.getVehicleType());
+            
+            Product newlyProductData = productRepository.save(data);
 
-            productRepository.save(data);
+            //to get the product id after save 
+            // List<Product> branchProducts = productRepository.findByStoreIdAndName(storeId, x.getName());
+            
+            //find first element: product name cannot be same under store
+            // Product filteredBranchProducts = branchProducts.stream()
+            // .filter(product -> product.getStatus().equals(x.getStatus()))
+            // .findFirst().get();
+
+            String branchProductId = newlyProductData.getId();
+            
+            //get product asset (store owner) then clone it
+            List<ProductAsset> productAssets = productAssetRepository.findByProductId(x.getId());
+            
+            if(productAssets.size() != 0){
+                for(ProductAsset pa : productAssets){
+
+                    ProductAsset productAsseData = new ProductAsset();
+                    productAsseData.setName(pa.getName());
+                    productAsseData.setUrl(pa.getUrl());
+                    productAsseData.setProductId(branchProductId);
+                    productAsseData.setIsThumbnail(pa.getIsThumbnail());
+
+                    if(pa.getItemCode() != null){
+
+                        //set the itemCode (ownerProductId+{int} -> branchProductId+{int})
+                        productAsseData.setItemCode(pa.getItemCode().replaceAll(x.getId(),branchProductId));
+
+                    }
+                    productAssetRepository.save(productAsseData);
+                    
+                }
+            }
+
+            //get product inventory (store owner) then clone it
+            List<ProductInventory> ownerProductInventory = productInventoryMainRepository.findByProductId(x.getId());
+           
+            if(ownerProductInventory.size() != 0){
+
+                for(ProductInventory pi :ownerProductInventory){
+
+                    ProductInventory productInventoryData = new ProductInventory();
+                    productInventoryData.setItemCode(pi.getItemCode().replaceAll(x.getId(), branchProductId));
+                    productInventoryData.setPrice(pi.getPrice());
+                    productInventoryData.setCompareAtprice(pi.getCompareAtprice());
+                    productInventoryData.setSKU(pi.getSKU());
+                    productInventoryData.setQuantity(pi.getQuantity());
+                    productInventoryData.setProductId(branchProductId);
+                    productInventoryData.setStatus(pi.getStatus());
+
+                    productInventoryMainRepository.save(productInventoryData);
+
+                }
+            }
+
+            //get vaiant (store owner) then clone it
+            List<ProductVariant> ownerProductVariant = productVariantRepository.findByProductId(x.getId());
+
+            if(ownerProductVariant.size() != 0){
+
+                for(ProductVariant pv : ownerProductVariant){
+
+                    ProductVariant productVariantData = new ProductVariant();
+                    productVariantData.setName(pv.getName());
+                    productVariantData.setDescription(pv.getDescription());
+                    productVariantData.setProduct(newlyProductData);
+                    productVariantData.setSequenceNumber(pv.getSequenceNumber());
+
+                    productVariantRepository.save(productVariantData);
+
+                }
+                
+            }
+
+            //get variant available (store owner) then clone it
 
             return data;
         })
         .collect(Collectors.toList());
 
         response.setStatus(HttpStatus.OK);
-        response.setData(compareStoreOwnerCategory);
+        response.setData("SUCCESS CLONING");
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
