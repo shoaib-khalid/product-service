@@ -3,12 +3,16 @@ package com.kalsym.product.service.controller;
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.HashmapLoader;
 import com.kalsym.product.service.utility.HttpResponse;
+import com.kalsym.product.service.model.product.CompareVariantAvailableIdOwnerAndBranch;
+import com.kalsym.product.service.model.product.CompareVariantIdOwnerAndBranch;
 import com.kalsym.product.service.model.product.Product;
 import com.kalsym.product.service.model.product.ProductAsset;
 import com.kalsym.product.service.model.product.ProductInventory;
 import com.kalsym.product.service.model.product.ProductInventoryWithDetails;
+import com.kalsym.product.service.model.product.ProductPackageOption;
 import com.kalsym.product.service.model.product.ProductSpecs;
 import com.kalsym.product.service.model.product.ProductVariant;
+import com.kalsym.product.service.model.product.ProductVariantAvailable;
 import com.kalsym.product.service.model.product.ProductWithDetails;
 import com.kalsym.product.service.model.store.CompareStoreCategory;
 import com.kalsym.product.service.model.store.Store;
@@ -19,11 +23,13 @@ import com.kalsym.product.service.enums.StoreDiscountType;
 import com.kalsym.product.service.enums.DiscountCalculationType;
 import com.kalsym.product.service.model.RegionCountry;
 import com.kalsym.product.service.model.product.ProductInventoryItem;
+import com.kalsym.product.service.model.product.ProductInventoryItemMain;
 import com.kalsym.product.service.model.store.StoreDiscountProduct;
 import com.kalsym.product.service.model.store.StoreDiscountTier;
 import com.kalsym.product.service.model.store.StoreWithDetails;
 import com.kalsym.product.service.model.store.object.CustomPageable;
 import com.kalsym.product.service.repository.ProductAssetRepository;
+import com.kalsym.product.service.repository.ProductInventoryItemMainRepository;
 import com.kalsym.product.service.repository.ProductInventoryItemRepository;
 import com.kalsym.product.service.repository.ProductInventoryRepository;
 import com.kalsym.product.service.repository.StoreRepository;
@@ -56,6 +62,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.kalsym.product.service.repository.ProductInventoryWithDetailsRepository;
+import com.kalsym.product.service.repository.ProductPackageOptionRepository;
 import com.kalsym.product.service.repository.RegionCountriesRepository;
 import com.kalsym.product.service.repository.StoreCategoryRepository;
 import com.kalsym.product.service.repository.StoreDiscountRepository;
@@ -125,6 +132,12 @@ public class StoreProductController {
 
     @Autowired
     ProductInventoryRepository productInventoryMainRepository;
+
+    @Autowired
+    ProductInventoryItemMainRepository productInventoryItemMainRepository;
+
+    @Autowired
+    ProductPackageOptionRepository productPackageOptionRepository;
     
     @Autowired
     private HashmapLoader hashmapLoader;
@@ -781,6 +794,10 @@ public class StoreProductController {
             //get vaiant (store owner) then clone it
             List<ProductVariant> ownerProductVariant = productVariantRepository.findByProductId(x.getId());
 
+            //to keep the value for comparing puprose
+            List<CompareVariantIdOwnerAndBranch> compareVariantIdOwnerAndBranch = new ArrayList<>();
+
+
             if(ownerProductVariant.size() != 0){
 
                 for(ProductVariant pv : ownerProductVariant){
@@ -791,17 +808,99 @@ public class StoreProductController {
                     productVariantData.setProduct(newlyProductData);
                     productVariantData.setSequenceNumber(pv.getSequenceNumber());
 
-                    productVariantRepository.save(productVariantData);
+                    ProductVariant productVariantSave = productVariantRepository.save(productVariantData);
+
+                    //add list of compareVariantId
+                    CompareVariantIdOwnerAndBranch compareVariantId = new CompareVariantIdOwnerAndBranch();
+                    compareVariantId.setBranchVariantId(productVariantSave.getId());
+                    compareVariantId.setOwnerVariantId(pv.getId());
+                    compareVariantIdOwnerAndBranch.add(compareVariantId);
+
 
                 }
                 
             }
 
-            //get variant available (store owner) then clone it
+            //get variant available (store owner)
+            List<ProductVariantAvailable> ownerProductVariantAvailable = productVariantAvailableRepository.findByProductId(x.getId());
+
+            //to keep the value for comparing puprose
+            List<CompareVariantAvailableIdOwnerAndBranch> compareVariantAvailableIdOwnerAndBranch = new ArrayList<>();
+
+            if(ownerProductVariantAvailable.size() != 0){
+
+                for (ProductVariantAvailable pva :ownerProductVariantAvailable){
+
+                    //to find category owner id then we will use the the branch id for creating branch products
+                    CompareVariantIdOwnerAndBranch filterCompareVariantIdOwnerAndBranch = compareVariantIdOwnerAndBranch.stream()
+                    .filter(variant -> variant.getOwnerVariantId().equals(pva.getProductVariantId()))
+                    .findFirst().get();
+                                    
+                    ProductVariantAvailable productVariantAvailableData = new ProductVariantAvailable();
+                    productVariantAvailableData.setProductId(branchProductId);
+                    productVariantAvailableData.setProductVariantId(filterCompareVariantIdOwnerAndBranch.getBranchVariantId());
+                    productVariantAvailableData.setSequenceNumber(pva.getSequenceNumber());
+                    productVariantAvailableData.setValue(pva.getValue());
+
+                    ProductVariantAvailable saveProductVariantAvailable = productVariantAvailableRepository.save(productVariantAvailableData);
+
+                    //add list of 
+                    CompareVariantAvailableIdOwnerAndBranch compareVariantAvailableId = new CompareVariantAvailableIdOwnerAndBranch();
+                    compareVariantAvailableId.setBranchVariantAvailableId(saveProductVariantAvailable.getId());
+                    compareVariantAvailableId.setOwnerVariantAvailableId(pva.getId());
+
+                    compareVariantAvailableIdOwnerAndBranch.add(compareVariantAvailableId);
+                }              
+
+            }
+
+            //get inventory item (store owner) then clone it
+            List<ProductInventoryItemMain> ownerProductInventoryItem = productInventoryItemMainRepository.findByProductId(x.getId());
+
+            if(ownerProductInventoryItem.size() != 0){
+
+                for(ProductInventoryItemMain pii : ownerProductInventoryItem){
+
+                    CompareVariantAvailableIdOwnerAndBranch filterCompareVariantAvailableIdOwnerAndBranch = compareVariantAvailableIdOwnerAndBranch.stream()
+                    .filter(variantavailable -> variantavailable.getOwnerVariantAvailableId().equals(pii.getProductVariantAvailableId()))
+                    .findFirst().get(); 
+
+                    ProductInventoryItemMain piiData = new ProductInventoryItemMain();
+
+                    piiData.setItemCode(pii.getItemCode().replaceAll(x.getId(), branchProductId));
+                    piiData.setProductVariantAvailableId(filterCompareVariantAvailableIdOwnerAndBranch.getBranchVariantAvailableId());
+                    piiData.setProductId(branchProductId);
+                    piiData.setSequenceNumber(piiData.getSequenceNumber());
+
+                    ProductInventoryItemMain saveProductInventoryItemMain = productInventoryItemMainRepository.save(piiData);
+
+                }
+
+            }
+
+            //get product package option
+            List<ProductPackageOption> ownerProductPackageOption = productPackageOptionRepository.findByPackageId(x.getId());
+
+            if(ownerProductPackageOption.size() != 0){
+
+                for(ProductPackageOption ppo :ownerProductPackageOption){
+
+                    ProductPackageOption ppoData = new ProductPackageOption();
+                    ppoData.setTitle(ppoData.getTitle());
+                    ppoData.setTotalAllow(ppoData.getTotalAllow());
+                    ppoData.setPackageId(branchProductId);
+
+                    ProductPackageOption saveProductPackageOption= productPackageOptionRepository.save(ppoData);
+
+                }
+
+            }
 
             return data;
         })
         .collect(Collectors.toList());
+
+ 
 
         response.setStatus(HttpStatus.OK);
         response.setData("SUCCESS CLONING");
