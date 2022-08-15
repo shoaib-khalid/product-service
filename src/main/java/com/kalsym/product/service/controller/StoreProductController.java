@@ -3,6 +3,8 @@ package com.kalsym.product.service.controller;
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.HashmapLoader;
 import com.kalsym.product.service.utility.HttpResponse;
+import com.kalsym.product.service.model.product.CompareProductOwnerAndBranch;
+import com.kalsym.product.service.model.product.CompareProductPackageOption;
 import com.kalsym.product.service.model.product.CompareVariantAvailableIdOwnerAndBranch;
 import com.kalsym.product.service.model.product.CompareVariantIdOwnerAndBranch;
 import com.kalsym.product.service.model.product.Product;
@@ -10,6 +12,7 @@ import com.kalsym.product.service.model.product.ProductAsset;
 import com.kalsym.product.service.model.product.ProductInventory;
 import com.kalsym.product.service.model.product.ProductInventoryWithDetails;
 import com.kalsym.product.service.model.product.ProductPackageOption;
+import com.kalsym.product.service.model.product.ProductPackageOptionDetail;
 import com.kalsym.product.service.model.product.ProductSpecs;
 import com.kalsym.product.service.model.product.ProductVariant;
 import com.kalsym.product.service.model.product.ProductVariantAvailable;
@@ -62,6 +65,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.kalsym.product.service.repository.ProductInventoryWithDetailsRepository;
+import com.kalsym.product.service.repository.ProductPackageOptionDetailRepository;
 import com.kalsym.product.service.repository.ProductPackageOptionRepository;
 import com.kalsym.product.service.repository.RegionCountriesRepository;
 import com.kalsym.product.service.repository.StoreCategoryRepository;
@@ -138,6 +142,9 @@ public class StoreProductController {
 
     @Autowired
     ProductPackageOptionRepository productPackageOptionRepository;
+
+    @Autowired
+    ProductPackageOptionDetailRepository productPackageOptionDetailRepository;
     
     @Autowired
     private HashmapLoader hashmapLoader;
@@ -668,6 +675,15 @@ public class StoreProductController {
         List<Product> storeOwnerProducts = productRepository.findByStoreIdAndStatusNot(storeOwnerId,"DELETED");
         List<Product> mapNewProducts = new ArrayList<>();
 
+        //compare store owner product and branch product
+        List<CompareProductOwnerAndBranch> compareProductOwnerAndBranch = new ArrayList<>();
+
+        //compare store owner category and branch category
+        List<CompareStoreCategory> compareStoreOwnerCategory = new ArrayList<>();
+
+        //compare store owner product PackageOption and branch PackageOption
+        List<CompareProductPackageOption> compareProductPackageOption = new ArrayList<>();
+
         //concat the domain url in order to concat for seoUrl
         String subProductUrlDomain = "https://" +optStoreOwner.get().getDomain()+"/product/";
 
@@ -681,32 +697,19 @@ public class StoreProductController {
             bodyStoreCategory.setStoreId(storeId);
             bodyStoreCategory.setThumbnailUrl(x.getThumbnailUrl());
 
-            storeCategoryRepository.save(bodyStoreCategory);
+            StoreCategory saveStoreCategory = storeCategoryRepository.save(bodyStoreCategory);
+
+            CompareStoreCategory compareData = new CompareStoreCategory();
+            compareData.setStoreOwnerCategoryId(x.getId());
+            compareData.setName(x.getName());
+            compareData.setBranchCategoryId(saveStoreCategory.getId());
+            compareStoreOwnerCategory.add(compareData);
+
             return bodyStoreCategory;
 
 
         })
         .collect(Collectors.toList());
-
-        //get all the newly store category in order for mapping store category (branch)and store category (owner)
-        List<StoreCategory> storeBranchCategory = storeCategoryRepository.findByStoreId(storeId);
-
-        List<CompareStoreCategory> compareStoreOwnerCategory = new ArrayList<>();
-
-        //to append the array list if category name is same for comparestorecategory
-        for(StoreCategory k:storeOwnerCategory){
-
-            for(StoreCategory m:storeBranchCategory){
-               if(m.getName().equals(k.getName())){
-
-                CompareStoreCategory compareData = new CompareStoreCategory();
-                compareData.setStoreOwnerCategoryId(k.getId());
-                compareData.setName(m.getName());
-                compareData.setBranchCategoryId(m.getId());
-                compareStoreOwnerCategory.add(compareData);
-               }
-            }
-        }
 
         mapNewProducts = storeOwnerProducts.stream()
         .map(x->{
@@ -736,15 +739,6 @@ public class StoreProductController {
             data.setVehicleType(x.getVehicleType());
             
             Product newlyProductData = productRepository.save(data);
-
-            //to get the product id after save 
-            // List<Product> branchProducts = productRepository.findByStoreIdAndName(storeId, x.getName());
-            
-            //find first element: product name cannot be same under store
-            // Product filteredBranchProducts = branchProducts.stream()
-            // .filter(product -> product.getStatus().equals(x.getStatus()))
-            // .findFirst().get();
-
             String branchProductId = newlyProductData.getId();
             
             //get product asset (store owner) then clone it
@@ -886,21 +880,56 @@ public class StoreProductController {
                 for(ProductPackageOption ppo :ownerProductPackageOption){
 
                     ProductPackageOption ppoData = new ProductPackageOption();
-                    ppoData.setTitle(ppoData.getTitle());
-                    ppoData.setTotalAllow(ppoData.getTotalAllow());
+                    ppoData.setTitle(ppo.getTitle());
+                    ppoData.setTotalAllow(ppo.getTotalAllow());
                     ppoData.setPackageId(branchProductId);
 
                     ProductPackageOption saveProductPackageOption= productPackageOptionRepository.save(ppoData);
+
+                    CompareProductPackageOption dataCompareProductPackageOption = new CompareProductPackageOption();
+                    dataCompareProductPackageOption.setOwnerProductPackageOptionId(ppo.getId());
+                    dataCompareProductPackageOption.setBranchProductPackageOptionId(saveProductPackageOption.getId());
+                    compareProductPackageOption.add(dataCompareProductPackageOption);
 
                 }
 
             }
 
+            CompareProductOwnerAndBranch comparingProductOwnerAndBranch = new CompareProductOwnerAndBranch();
+            comparingProductOwnerAndBranch.setBranchProductId(branchProductId);
+            comparingProductOwnerAndBranch.setOwnerProductId(x.getId());
+            compareProductOwnerAndBranch.add(comparingProductOwnerAndBranch);
+
             return data;
         })
         .collect(Collectors.toList());
 
- 
+        compareProductPackageOption.stream()
+        .map(y->{
+
+            List<ProductPackageOptionDetail> dataProductPacakageDetails = productPackageOptionDetailRepository.findByProductPackageOptionId(y.getOwnerProductPackageOptionId());
+
+            if(dataProductPacakageDetails.size() != 0){
+
+                for(ProductPackageOptionDetail ppd :dataProductPacakageDetails ){
+
+                    //to find product owner id then we will use the the branch id 
+                    CompareProductOwnerAndBranch filterProductOwnerAndBranch = compareProductOwnerAndBranch.stream()
+                    .filter(product -> product.getOwnerProductId().equals(ppd.getProductId()))
+                    .findFirst().get();
+
+                    ProductPackageOptionDetail packageOptionDetailData = new ProductPackageOptionDetail();
+                    packageOptionDetailData.setProductId(filterProductOwnerAndBranch.getBranchProductId());
+                    packageOptionDetailData.setProductPackageOptionId(y.getBranchProductPackageOptionId());
+
+                    productPackageOptionDetailRepository.save(packageOptionDetailData);
+                }
+
+          
+            }    
+            return y;
+        })
+        .collect(Collectors.toList());
 
         response.setStatus(HttpStatus.OK);
         response.setData("SUCCESS CLONING");
