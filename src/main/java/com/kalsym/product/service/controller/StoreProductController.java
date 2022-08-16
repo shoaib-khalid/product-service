@@ -3,25 +3,34 @@ package com.kalsym.product.service.controller;
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.HashmapLoader;
 import com.kalsym.product.service.utility.HttpResponse;
+import com.kalsym.product.service.model.product.CompareProductOwnerAndBranch;
+import com.kalsym.product.service.model.product.CompareProductPackageOption;
+import com.kalsym.product.service.model.product.CompareVariantAvailableIdOwnerAndBranch;
+import com.kalsym.product.service.model.product.CompareVariantIdOwnerAndBranch;
 import com.kalsym.product.service.model.product.Product;
 import com.kalsym.product.service.model.product.ProductAsset;
+import com.kalsym.product.service.model.product.ProductInventory;
 import com.kalsym.product.service.model.product.ProductInventoryWithDetails;
-import com.kalsym.product.service.model.product.ProductSpecs;
+import com.kalsym.product.service.model.product.ProductPackageOption;
+import com.kalsym.product.service.model.product.ProductPackageOptionDetail;
+import com.kalsym.product.service.model.product.ProductVariant;
+import com.kalsym.product.service.model.product.ProductVariantAvailable;
 import com.kalsym.product.service.model.product.ProductWithDetails;
+import com.kalsym.product.service.model.store.CompareStoreCategory;
 import com.kalsym.product.service.model.store.Store;
+import com.kalsym.product.service.model.store.StoreCategory;
 import com.kalsym.product.service.model.ItemDiscount;
-import com.kalsym.product.service.model.store.StoreDiscount;
-import com.kalsym.product.service.enums.StoreDiscountType;
 import com.kalsym.product.service.enums.DiscountCalculationType;
 import com.kalsym.product.service.model.RegionCountry;
-import com.kalsym.product.service.model.product.ProductInventoryItem;
+import com.kalsym.product.service.model.product.ProductInventoryItemMain;
 import com.kalsym.product.service.model.store.StoreDiscountProduct;
-import com.kalsym.product.service.model.store.StoreDiscountTier;
-import com.kalsym.product.service.model.store.StoreWithDetails;
 import com.kalsym.product.service.model.store.object.CustomPageable;
 import com.kalsym.product.service.repository.ProductAssetRepository;
+import com.kalsym.product.service.repository.ProductInventoryItemMainRepository;
 import com.kalsym.product.service.repository.ProductInventoryItemRepository;
+import com.kalsym.product.service.repository.ProductInventoryRepository;
 import com.kalsym.product.service.repository.StoreRepository;
+import com.kalsym.product.service.service.CloneProductService;
 import com.kalsym.product.service.repository.ProductRepository;
 import com.kalsym.product.service.repository.ProductVariantRepository;
 import com.kalsym.product.service.repository.ProductVariantAvailableRepository;
@@ -29,6 +38,8 @@ import com.kalsym.product.service.repository.ProductReviewRepository;
 import com.kalsym.product.service.repository.ProductWithDetailsRepository;
 import com.kalsym.product.service.utility.Logger;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,19 +60,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.kalsym.product.service.repository.ProductInventoryWithDetailsRepository;
+import com.kalsym.product.service.repository.ProductPackageOptionDetailRepository;
+import com.kalsym.product.service.repository.ProductPackageOptionRepository;
 import com.kalsym.product.service.repository.RegionCountriesRepository;
+import com.kalsym.product.service.repository.StoreCategoryRepository;
 import com.kalsym.product.service.repository.StoreDiscountRepository;
 import com.kalsym.product.service.repository.StoreDiscountProductRepository;
-import com.kalsym.product.service.utility.DateTimeUtil;
 import com.kalsym.product.service.utility.ProductDiscount;
 import java.net.MalformedURLException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.HashMap;
-import java.text.SimpleDateFormat; 
 import javax.persistence.criteria.Predicate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -111,6 +119,24 @@ public class StoreProductController {
 
     @Autowired
     RegionCountriesRepository regionCountriesRepository;
+
+    @Autowired
+    StoreCategoryRepository storeCategoryRepository;
+
+    @Autowired
+    ProductInventoryRepository productInventoryMainRepository;
+
+    @Autowired
+    ProductInventoryItemMainRepository productInventoryItemMainRepository;
+
+    @Autowired
+    ProductPackageOptionRepository productPackageOptionRepository;
+
+    @Autowired
+    ProductPackageOptionDetailRepository productPackageOptionDetailRepository;
+
+    @Autowired
+    CloneProductService cloneProductService;
     
     @Autowired
     private HashmapLoader hashmapLoader;
@@ -464,7 +490,7 @@ public class StoreProductController {
             body.setThumbnailUrl(assetServiceUrl+body.getThumbnailUrl());
 
         }
-        
+
         response.setStatus(HttpStatus.OK);
         response.setData(body);
         return ResponseEntity.status(response.getStatus()).body(response);
@@ -601,5 +627,66 @@ public class StoreProductController {
             return builder.and(predicates.toArray(new Predicate[predicates.size()]));
         };
     }
+
+    
+    @PostMapping(path = {"/clone"}, name = "store-products-post")
+    @PreAuthorize("hasAnyAuthority('store-products-post', 'all')  and @customOwnerVerifier.VerifyStore(#storeId)")
+    public ResponseEntity<HttpResponse> postCloneStoreProduct(HttpServletRequest request,
+            @PathVariable String storeId,
+            @RequestParam(required = true) String storeOwnerId) throws Exception {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "storeId: " + storeId);
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "storeOwnerId: " + storeOwnerId);
+
+        Optional<Store> optStore = storeRepository.findById(storeId);
+
+        if (!optStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+
+        Optional<Store> optStoreOwner = storeRepository.findById(storeOwnerId);
+
+        if (!optStoreOwner.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeOwnerId: " + storeId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("storeOwnerId not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
+
+
+        //checking first before proceed to clone for branch
+        Product productMatch = new Product();
+        productMatch.setStoreId(storeId);
+
+        ExampleMatcher matcher =  ExampleMatcher
+        .matchingAll()
+        .withIgnoreCase()
+        .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
+        Example<Product> example = Example.of(productMatch, matcher);
+        Pageable pageable = PageRequest.of(0, 5);
+
+
+        Page<Product> existingBranchProducts = productRepository.findAll(example, pageable);
+        
+        if(existingBranchProducts.getTotalElements() != 0){
+            response.setStatus(HttpStatus.OK);
+            response.setError("Cannot clone products for store that has already product listing");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+
+        CloneProductThread thread = new CloneProductThread(storeId, storeOwnerId,optStore,cloneProductService);
+        thread.start();
+
+        response.setStatus(HttpStatus.OK);
+        response.setData("SUCCESS CLONING");
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
 
 }
