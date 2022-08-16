@@ -2,6 +2,11 @@
 # product-service-3.10.21 | 16-August-2022 
 ##################################################
 1. Duplicate Bulk Products with Variant / Combo from Other Merchant Acc
+2. Add new enum 'CoverImageUrl' storeAssets
+
+##DB Changes:
+ ALTER TABLE symplified.store_assets MODIFY COLUMN assetType enum('CoverImageUrl','BannerDesktopUrl','BannerMobileUrl','FaviconUrl','DiscountBannerUrl','QrcodeUrl','LogoUrl') CHARACTER SET utf8 COLLATE utf8_general_ci NULL;
+
 ##################################################
 # product-service-3.10.20 | 11-August-2022 
 ##################################################
