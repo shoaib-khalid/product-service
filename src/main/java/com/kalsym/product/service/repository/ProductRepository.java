@@ -33,6 +33,8 @@ public interface ProductRepository extends PagingAndSortingRepository<Product, S
 
     List<Product> findByStoreIdAndStatusNot(@Param("storeId") String storeId,@Param("status") String status);
 
+    @Query(
+        " SELECT p FROM Product p WHERE storeId = :storeId AND status != :status")
+    Page<Product> findPageableStoreAndStatus(@Param("storeId") String storeId, @Param("status") String status, Pageable pageable);
 
-//    List<Product> findByStoreIdAndName(@Param("storeId") String storeId, @Param("name"), String name);
 }

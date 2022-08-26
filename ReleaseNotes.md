@@ -1,4 +1,9 @@
 ##################################################
+# product-service-3.10.22 | 26-August-2022 
+##################################################
+1. Change query for before cloning product
+
+##################################################
 # product-service-3.10.21 | 16-August-2022 
 ##################################################
 1. Duplicate Bulk Products with Variant / Combo from Other Merchant Acc

@@ -38,6 +38,7 @@ import com.kalsym.product.service.repository.ProductReviewRepository;
 import com.kalsym.product.service.repository.ProductWithDetailsRepository;
 import com.kalsym.product.service.utility.Logger;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -659,20 +660,9 @@ public class StoreProductController {
         }
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
 
-
-        //checking first before proceed to clone for branch
-        Product productMatch = new Product();
-        productMatch.setStoreId(storeId);
-
-        ExampleMatcher matcher =  ExampleMatcher
-        .matchingAll()
-        .withIgnoreCase()
-        .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
-        Example<Product> example = Example.of(productMatch, matcher);
         Pageable pageable = PageRequest.of(0, 5);
 
-
-        Page<Product> existingBranchProducts = productRepository.findAll(example, pageable);
+        Page<Product> existingBranchProducts = productRepository.findPageableStoreAndStatus(storeId, "DELETED", pageable);
         
         if(existingBranchProducts.getTotalElements() != 0){
             response.setStatus(HttpStatus.OK);
