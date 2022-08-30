@@ -608,7 +608,9 @@ public class StoreProductController {
             final List<Predicate> predicates = new ArrayList<>();
 
             if (name != null) {
-                predicates.add(builder.equal(root.get("name"), name));
+                // predicates.add(builder.equal(root.get("name"), name));
+                predicates.add(builder.like(root.get("name"), "%"+name+"%"));
+
             }
             if (seoName != null) {
                 // predicates.add(builder.equal(root.get("seoName"), seoName));
