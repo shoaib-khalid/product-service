@@ -1,4 +1,8 @@
 ##################################################
+# product-service-3.10.23 | 30-August-2022 
+##################################################
+1. change query store product get controller and add new query param
+##################################################
 # product-service-3.10.22 | 26-August-2022 
 ##################################################
 1. Change query for before cloning product

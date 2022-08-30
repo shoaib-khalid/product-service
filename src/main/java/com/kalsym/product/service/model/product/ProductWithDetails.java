@@ -83,6 +83,9 @@ public class ProductWithDetails implements Serializable {
     @Transient 
     String seoUrlSf;
 
+    @Transient 
+    String seoNameMarketplace;
+
     private Boolean trackQuantity;
 
     private Boolean allowOutOfStockPurchases;
@@ -139,6 +142,11 @@ public class ProductWithDetails implements Serializable {
     public String getSeoUrlSf() {
 
         return seoUrl+"/"+shortId;
+    }
+
+    public String getSeoNameMarketplace() {
+
+        return shortId+"-"+seoName;
     }
 
     public void update(ProductWithDetails product) {

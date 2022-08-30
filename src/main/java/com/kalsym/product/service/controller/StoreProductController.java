@@ -155,6 +155,7 @@ public class StoreProductController {
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String seoName,
             @RequestParam(required = false) String categoryId,
+            @RequestParam(required = false) Integer shortId,
             @RequestParam(required = false) List<String> status,
             @RequestParam(required = false, defaultValue = "name") String sortByCol,
             @RequestParam(required = false, defaultValue = "ASC") Sort.Direction sortingOrder,
@@ -199,19 +200,20 @@ public class StoreProductController {
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Pageable object created:" + sortingOrder);
         
         
-        if (categoryId == null || categoryId.isEmpty()) {
-            categoryId = "";
-        }
+        // if (categoryId == null || categoryId.isEmpty()) {
+        //     categoryId = "";
+        // }
         
-        if (name == null || name.isEmpty()) {
-            name = "";
-        }
+        // if (name == null || name.isEmpty()) {
+        //     name = "";
+        // }
 
-        if (seoName == null || seoName.isEmpty()) {
-            seoName = "";
-        }
-        
-        /*
+        // if (seoName == null || seoName.isEmpty()) {
+        //     seoName = "";
+        // }
+
+
+    
         ProductWithDetails productMatch = new ProductWithDetails();
         productMatch.setStoreId(storeId);
         ExampleMatcher matcher = ExampleMatcher
@@ -220,7 +222,7 @@ public class StoreProductController {
                 .withIgnoreNullValues()
                 .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
         Example<ProductWithDetails> productExample = Example.of(productMatch, matcher);
-        */
+        
         
         //get reqion country for store
         RegionCountry regionCountry = null;
@@ -229,12 +231,12 @@ public class StoreProductController {
             regionCountry = optRegion.get();
         }
         
-        Page<ProductWithDetails> productWithPage = null;
-        if (!categoryId.equals(""))
-            productWithPage = productWithDetailsRepository.findByNameOrSeoNameOrCategoryIdAscendingOrderByPrice(storeId, name, seoName, status, categoryId, pageable);        
-        else
-            productWithPage = productWithDetailsRepository.findByNameOrSeoNameAscendingOrderByPrice(storeId, name, seoName, status, pageable);        
-        //Page<ProductWithDetails> productWithPage = productWithDetailsRepository.findAll(getStoreProductSpec(name, seoName, categoryId, status, productExample), pageable);
+        // Page<ProductWithDetails> productWithPage = null;
+        // if (!categoryId.equals(""))
+        //     productWithPage = productWithDetailsRepository.findByNameOrSeoNameOrCategoryIdAscendingOrderByPrice(storeId, name, seoName, status, categoryId, shortId, pageable);        
+        // else
+        //     productWithPage = productWithDetailsRepository.findByNameOrSeoNameAscendingOrderByPrice(storeId, name, seoName, status, shortId, pageable);        
+        Page<ProductWithDetails> productWithPage = productWithDetailsRepository.findAll(getStoreProductSpec(name, seoName, categoryId,storeId,shortId, status, productExample), pageable);
         List<ProductWithDetails> productList = productWithPage.getContent();
         
         ProductWithDetails[] productWithDetailsList = new ProductWithDetails[productList.size()];
@@ -596,9 +598,10 @@ public class StoreProductController {
         return name;
     }
     
-    
+    // name, seoName,  categoryId, storeId,shortId, status, 
     public Specification<ProductWithDetails> getStoreProductSpec(
             String name, String seoName, String categoryId, 
+            String storeId, Integer shortId,
             List<String> statusList, Example<ProductWithDetails> example) {
 
         return (Specification<ProductWithDetails>) (root, query, builder) -> {
@@ -608,11 +611,20 @@ public class StoreProductController {
                 predicates.add(builder.equal(root.get("name"), name));
             }
             if (seoName != null) {
-                predicates.add(builder.equal(root.get("seoName"), seoName));
+                // predicates.add(builder.equal(root.get("seoName"), seoName));
+                predicates.add(builder.like(root.get("seoName"), "%"+seoName+"%"));
+
             }
             if (categoryId != null) {
                 predicates.add(builder.equal(root.get("categoryId"), categoryId));
             }
+            if (storeId != null ){
+                predicates.add(builder.equal(root.get("storeId"), storeId));
+            }
+            if (shortId != null ){
+                predicates.add(builder.equal(root.get("shortId"), shortId));
+            }
+
             if (statusList!=null) {
                 int statusCount = statusList.size();
                 List<Predicate> statusPredicatesList = new ArrayList<>();
