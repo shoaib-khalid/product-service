@@ -611,7 +611,7 @@ public class StoreProductController {
 
         return (Specification<ProductWithDetails>) (root, query, builder) -> {
             final List<Predicate> predicates = new ArrayList<>();
-            Join<ProductWithDetails, ProductInventoryWithDetails> productInventories = root.join("productInventories");
+            Join<ProductWithDetails, ProductInventoryWithDetails> productInventories = root.join("productInventories", JoinType.INNER);
 
 
             if (name != null) {
@@ -679,6 +679,7 @@ public class StoreProductController {
             }
 
             query.orderBy(orderList);
+            query.distinct(true);
 
 
             predicates.add(QueryByExamplePredicateBuilder.getPredicate(root, builder, example));
