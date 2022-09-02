@@ -611,7 +611,7 @@ public class StoreProductController {
 
         return (Specification<ProductWithDetails>) (root, query, builder) -> {
             final List<Predicate> predicates = new ArrayList<>();
-            Join<ProductWithDetails, ProductInventoryWithDetails> productInventories = root.join("productInventories", JoinType.LEFT);
+            Join<ProductWithDetails, ProductInventoryWithDetails> productInventories = root.join("productInventories");
 
 
             if (name != null) {
