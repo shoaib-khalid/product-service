@@ -1,4 +1,8 @@
 ##################################################
+# product-service-3.10.24 | 02-September-2022 
+##################################################
+1. Fix bug for sort product price by Adding predicate builder for sort
+##################################################
 # product-service-3.10.23 | 30-August-2022 
 ##################################################
 1. change query store product get controller and add new query param

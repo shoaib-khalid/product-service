@@ -71,6 +71,10 @@ import com.kalsym.product.service.utility.ProductDiscount;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -188,14 +192,15 @@ public class StoreProductController {
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Sort By column:" + sortByCol);
 
-        Pageable pageable = null;
+        Pageable pageable = PageRequest.of(page, pageSize);
 
-        if (sortByCol.equals("price")) {
-            pageable = PageRequest.of(page, pageSize, sortingOrder, "pi.price");
-        } else {
-            pageable = PageRequest.of(page, pageSize, sortingOrder, sortByCol);
 
-        }
+        // if (sortByCol.equals("price")) {
+        //     pageable = PageRequest.of(page, pageSize, sortingOrder, "pi.price");
+        // } else {
+        //     pageable = PageRequest.of(page, pageSize, sortingOrder, sortByCol);
+
+        // }
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Pageable object created:" + sortingOrder);
         
@@ -211,7 +216,6 @@ public class StoreProductController {
         // if (seoName == null || seoName.isEmpty()) {
         //     seoName = "";
         // }
-
 
     
         ProductWithDetails productMatch = new ProductWithDetails();
@@ -236,7 +240,7 @@ public class StoreProductController {
         //     productWithPage = productWithDetailsRepository.findByNameOrSeoNameOrCategoryIdAscendingOrderByPrice(storeId, name, seoName, status, categoryId, shortId, pageable);        
         // else
         //     productWithPage = productWithDetailsRepository.findByNameOrSeoNameAscendingOrderByPrice(storeId, name, seoName, status, shortId, pageable);        
-        Page<ProductWithDetails> productWithPage = productWithDetailsRepository.findAll(getStoreProductSpec(name, seoName, categoryId,storeId,shortId, status, productExample), pageable);
+        Page<ProductWithDetails> productWithPage = productWithDetailsRepository.findAll(getStoreProductSpec(name, seoName, categoryId,storeId,shortId, status, productExample,sortByCol,sortingOrder), pageable);
         List<ProductWithDetails> productList = productWithPage.getContent();
         
         ProductWithDetails[] productWithDetailsList = new ProductWithDetails[productList.size()];
@@ -602,10 +606,13 @@ public class StoreProductController {
     public Specification<ProductWithDetails> getStoreProductSpec(
             String name, String seoName, String categoryId, 
             String storeId, Integer shortId,
-            List<String> statusList, Example<ProductWithDetails> example) {
+            List<String> statusList, Example<ProductWithDetails> example,
+            String sortByCol, Sort.Direction sortingOrder) {
 
         return (Specification<ProductWithDetails>) (root, query, builder) -> {
             final List<Predicate> predicates = new ArrayList<>();
+            Join<ProductWithDetails, ProductInventoryWithDetails> productInventories = root.join("productInventories", JoinType.LEFT);
+
 
             if (name != null) {
                 // predicates.add(builder.equal(root.get("name"), name));
@@ -637,6 +644,43 @@ public class StoreProductController {
                 Predicate finalPredicate = builder.or(statusPredicatesList.toArray(new Predicate[statusCount]));
                 predicates.add(finalPredicate);
             }
+
+            // if (sortByCol.equals("price")) {
+            //     pageable = PageRequest.of(page, pageSize, sortingOrder, "pi.price");
+            // } else {
+            //     pageable = PageRequest.of(page, pageSize, sortingOrder, sortByCol);
+
+            // }
+            List<Order> orderList = new ArrayList<Order>();
+
+            if (sortingOrder==Sort.Direction.ASC){
+                if(sortByCol.equals("price")){
+
+                    orderList.add(builder.asc(productInventories.get(sortByCol)));
+
+                }else{
+                    orderList.add(builder.asc(root.get(sortByCol)));
+
+                }
+
+            }else{
+
+                if(sortByCol.equals("price")){
+
+                    orderList.add(builder.desc(productInventories.get(sortByCol)));
+
+
+                }else{
+                    orderList.add(builder.desc(root.get(sortByCol)));
+
+                }
+
+
+            }
+
+            query.orderBy(orderList);
+
+
             predicates.add(QueryByExamplePredicateBuilder.getPredicate(root, builder, example));
 
             return builder.and(predicates.toArray(new Predicate[predicates.size()]));
