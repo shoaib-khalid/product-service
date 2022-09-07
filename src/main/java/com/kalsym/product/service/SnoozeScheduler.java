@@ -52,14 +52,4 @@ public class SnoozeScheduler {
         }
     }
 
-    // one minute - 60000
-    // @Scheduled(fixedRate = 60000)  
-    public void generateSitemapXml() throws Exception{
-
-        System.out.println("generateSitemapXml ::::::::::::::::::::::::::::::::::::::::::::::::::::::::");
-        // Vertical code for Mys :FnB | E-Commerce
-
-        // List<ParentCategory> dataParentCategories = 
-
-    }
 }
