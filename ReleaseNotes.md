@@ -1,4 +1,8 @@
 ##################################################
+# product-service-3.10.25 | 07-September-2022 
+##################################################
+1. Generate sitemap based on location of marketplace
+##################################################
 # product-service-3.10.24 | 02-September-2022 
 ##################################################
 1. Fix bug for sort product price by Adding predicate builder for sort
