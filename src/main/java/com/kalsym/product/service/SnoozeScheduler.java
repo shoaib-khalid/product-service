@@ -51,4 +51,5 @@ public class SnoozeScheduler {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store:"+store.getId()+" Update snooze off");
         }
     }
+
 }
