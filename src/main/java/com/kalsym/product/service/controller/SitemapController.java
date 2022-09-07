@@ -19,6 +19,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,7 +28,6 @@ import com.kalsym.product.service.service.SiteMapService;
 
 @Controller
 @RestController()
-
 public class SitemapController {
 
     @Value("${path.main.sitemapxml}")
@@ -36,15 +36,19 @@ public class SitemapController {
     @Autowired
     SiteMapService siteMapService;
 
-    @GetMapping(path = {"/sitemap.xml"}, produces = {MediaType.APPLICATION_XML_VALUE,MediaType.TEXT_XML_VALUE}, consumes = MediaType.ALL_VALUE)
-    public ResponseEntity<?> serverFileList(HttpServletRequest request) throws IOException {
+    @GetMapping(path = {"/{filename}.xml"}, produces = {MediaType.APPLICATION_XML_VALUE,MediaType.TEXT_XML_VALUE}, consumes = MediaType.ALL_VALUE)
+    public ResponseEntity<?> serverFileList(HttpServletRequest request,
+    @PathVariable(required = false) String filename
+    ) throws IOException {
 
-        File f = new File(pathMainXml);
+        String fullPath = pathMainXml+"/"+filename+".xml";
+        File f = new File(fullPath);
 
         if(f.exists() && !f.isDirectory()) { 
 
-            byte[] fileContent = Files.readAllBytes(Paths.get(pathMainXml));
-        
+            byte[] fileContent = Files.readAllBytes(Paths.get(fullPath));
+            System.out.println("OPPPSSSS FILE NOT FOUND ::::::::"+fullPath);
+
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.setContentType(MediaType.APPLICATION_XML);
             responseHeaders.setContentLength(fileContent.length);
@@ -58,9 +62,22 @@ public class SitemapController {
 
             System.out.println("OPPPSSSS FILE NOT FOUND ::::::::");
 
-            siteMapService.createFileSitemapLocation();
-            String finalXml = siteMapService.generateLocationSitemap();
-            siteMapService.overWriteFile(finalXml);
+            //create new file first
+            siteMapService.createFileSitemapLocation(fullPath);
+
+            String finalXml = "";
+            if(filename.equals("sitemap")){
+                finalXml = siteMapService.indexSiteMap();
+                System.out.println("SITEMAP ::::::::");
+
+            } else if (filename.equals("location")){
+                finalXml = siteMapService.generateLocationSitemap();
+                System.out.println("location ::::::::");
+
+
+            }
+             
+            siteMapService.overWriteFile(fullPath,finalXml);
 
             byte[] byteArr = finalXml.getBytes();
 
@@ -73,6 +90,44 @@ public class SitemapController {
         }
       
     }
+
+    // @GetMapping(path = {"/sitemap.xml"}, produces = {MediaType.APPLICATION_XML_VALUE,MediaType.TEXT_XML_VALUE}, consumes = MediaType.ALL_VALUE)
+    // public ResponseEntity<?> serverFileList(HttpServletRequest request) throws IOException {
+
+    //     File f = new File(pathMainXml);
+
+    //     if(f.exists() && !f.isDirectory()) { 
+
+    //         byte[] fileContent = Files.readAllBytes(Paths.get(pathMainXml));
+        
+    //         HttpHeaders responseHeaders = new HttpHeaders();
+    //         responseHeaders.setContentType(MediaType.APPLICATION_XML);
+    //         responseHeaders.setContentLength(fileContent.length);
+    
+    //         return new ResponseEntity<byte[]>(fileContent, responseHeaders,
+    //                 HttpStatus.OK);
+
+    //     }
+        
+    //     else{
+
+    //         System.out.println("OPPPSSSS FILE NOT FOUND ::::::::");
+
+    //         siteMapService.createFileSitemapLocation();
+    //         String finalXml = siteMapService.generateLocationSitemap();
+    //         siteMapService.overWriteFile(finalXml);
+
+    //         byte[] byteArr = finalXml.getBytes();
+
+    //         HttpHeaders responseHeaders = new HttpHeaders();
+    //         responseHeaders.setContentType(MediaType.APPLICATION_XML);
+    
+    //         return new ResponseEntity<byte[]>(byteArr,responseHeaders,
+    //                 HttpStatus.OK);
+
+    //     }
+      
+    // }
 
     
 }

@@ -23,8 +23,33 @@ public class SiteMapService {
     @Value("${marketplace.url}")
     private String marketPlaceUrl;
 
+    @Value("${protocol.subdomain}")
+    private String protocolSubdomain;
+
     @Value("${path.main.sitemapxml}")
     private String pathMainXml;
+
+    @Value("${server.servlet.context-path}")
+    private String contextPath;
+
+    public String indexSiteMap(){
+
+        String mainXml = 
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+        +"\n<sitemapindex xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">"
+        ;
+
+        String childSiteMap = 
+        "\n\t<sitemap>"
+        +"\n\t\t<loc>"+protocolSubdomain+contextPath+"/location.xml"+"</loc>"
+        +"\n\t</sitemap>";
+
+        String endXml = "\n</sitemapindex>";
+
+        String finalXml = mainXml+childSiteMap+endXml;
+
+        return finalXml;    
+    }
 
     public String generateLocationSitemap(){
 
@@ -37,10 +62,12 @@ public class SiteMapService {
         String  locationXml = "";
         String endXml = "\n</urlset>";
 
-        SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        // SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-MM-dd");
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         System.out.println(timestamp);   // 2021-03-24 16:48:05.591
-        System.out.println(sdf2.format(timestamp));  // 2021-03-24T16:48:05.591+08:00
+        // System.out.println(sdf2.format(timestamp));  // 2021-03-24T16:48:05.591+08:00
+        System.out.println(sdf3.format(timestamp));         // 2021-03-24 16:48:05
 
 
         for(LocationConfig lc:locationListing){
@@ -48,7 +75,7 @@ public class SiteMapService {
             locationXml += 
             "\n\t<url>"
             +"\n\t\t<loc>"+marketPlaceUrl+"/location/"+lc.getCityId()+"</loc>"
-            +"\n\t\t<lastmod>"+sdf2.format(timestamp)+"</lastmod>"
+            +"\n\t\t<lastmod>"+sdf3.format(timestamp)+"</lastmod>"
             +"\n\t</url>"
             ;
 
@@ -60,12 +87,12 @@ public class SiteMapService {
 
     }
 
-    public void overWriteFile(String finalXml){
+    public void overWriteFile(String fullPath,String finalXml){
             
-        File fold = new File(pathMainXml);
+        File fold = new File(fullPath);
         fold.delete();
 
-        File fnew = new File(pathMainXml);
+        File fnew = new File(fullPath);
         
         try {
             FileWriter f2 = new FileWriter(fnew, false);
@@ -78,9 +105,9 @@ public class SiteMapService {
 
     }
 
-    public void createFileSitemapLocation() throws IOException{
+    public void createFileSitemapLocation(String fullPath) throws IOException{
 
-        File file = new File(pathMainXml);
+        File file = new File(fullPath);
         boolean result;  
 
         try   

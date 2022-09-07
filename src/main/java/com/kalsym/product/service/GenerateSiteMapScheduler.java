@@ -22,15 +22,16 @@ public class GenerateSiteMapScheduler {
     // @Scheduled(fixedRate = 60000)  
 
     //everyday at 11:00 pm
-    @Scheduled(cron = "0 0 23 * * *")
-    public void generateSitemapXml() throws Exception{
+    // @Scheduled(cron = "0 0 23 * * *")
+    public void generateLocationSitemapXml() throws Exception{
 
-        File f = new File(pathMainXml);
+        String fullPathLocation = pathMainXml+"/location.xml";
+        File f = new File(fullPathLocation);
 
         if(f.exists() && !f.isDirectory()) { 
             String finalXml = siteMapService.generateLocationSitemap();
 
-            siteMapService.overWriteFile(finalXml);
+            siteMapService.overWriteFile(fullPathLocation,finalXml);
         }
 
          

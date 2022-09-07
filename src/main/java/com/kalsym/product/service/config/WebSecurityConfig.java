@@ -80,7 +80,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                             "/swagger-resources/**",
                             "/configuration/security",
                             "/swagger-ui.html",
-                            "/sitemap.xml",
+                            "/**.xml",
                             "/webjars/**").permitAll()
                     .anyRequest().authenticated().and()
                     .exceptionHandling().authenticationEntryPoint(sessionAuthenticationEntryPoint).and()
