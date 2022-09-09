@@ -4,6 +4,9 @@
 ALTER TABLE symplified.store ADD isDineIn tinyint(1) DEFAULT 0 NULL;
 ALTER TABLE symplified.store ADD dineInOption varchar(50) NULL;
 ALTER TABLE symplified.store ADD dineInPaymentType enum('CASH') DEFAULT 'CASH' NULL;
+ALTER TABLE symplified.store ADD dineInOption enum('SELFCOLLECT','SENDTOTABLE') DEFAULT 'SELFCOLLECT' NULL;
+ALTER TABLE symplified.store ADD isDelivery tinyint(1) DEFAULT 1 NULL;
+
 
 ##################################################
 # product-service-3.10.26| 07-September-2022 

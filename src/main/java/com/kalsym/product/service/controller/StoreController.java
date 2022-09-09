@@ -459,6 +459,16 @@ public class StoreController {
             if (bodyStore.getDineInPaymentType()==null) {
                 bodyStore.setDineInPaymentType("CASH");
             }
+
+            // set default dineInPayementtype
+            if (bodyStore.getDineInOption()==null) {
+                bodyStore.setDineInOption("SELFCOLLECT");
+            }
+
+            // set default isdelivery to false
+              if (bodyStore.getIsDelivery()==null) {
+                bodyStore.setIsDelivery(false);
+            }
             
             if (bodyStore.getIsBranch()==false) {
                 //only create domain for non-branch store

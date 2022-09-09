@@ -92,7 +92,9 @@ public class StoreWithDetails implements Serializable {
     private String dineInOption;
 
     private String dineInPaymentType;
-    
+
+    private Boolean isDelivery;
+
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private Date snoozeStartTime;
@@ -231,6 +233,10 @@ public class StoreWithDetails implements Serializable {
 
         if (null != store.getDineInOption()) {
             dineInPaymentType = store.getDineInPaymentType();
+        }
+
+        if (null != store.getIsDelivery()) {
+            isDelivery = store.getIsDelivery();
         }
 
     }

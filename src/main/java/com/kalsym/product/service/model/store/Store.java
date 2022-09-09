@@ -96,6 +96,8 @@ public class Store implements Serializable {
 
     private String dineInPaymentType;
 
+    private Boolean isDelivery;
+
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
@@ -196,6 +198,10 @@ public class Store implements Serializable {
 
         if (null != store.getDineInOption()) {
             dineInPaymentType = store.getDineInPaymentType();
+        }
+
+        if (null != store.getIsDelivery()) {
+            isDelivery = store.getIsDelivery();
         }
 
     }
