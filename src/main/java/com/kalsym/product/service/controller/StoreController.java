@@ -457,7 +457,7 @@ public class StoreController {
             }
             // set default dineInPayementtype
             if (bodyStore.getDineInPaymentType()==null) {
-                bodyStore.setDineInPaymentType("CASH");
+                bodyStore.setDineInPaymentType("COD");
             }
 
             // set default dineInPayementtype
@@ -465,9 +465,18 @@ public class StoreController {
                 bodyStore.setDineInOption("SELFCOLLECT");
             }
 
-            // set default isdelivery to false
+            // set default isdelivery for ecommerce =true, 
               if (bodyStore.getIsDelivery()==null) {
-                bodyStore.setIsDelivery(false);
+
+                if(bodyStore.getVerticalCode().contains("Commerce")){
+
+                    bodyStore.setIsDelivery(true);
+                    
+                } else{
+
+                    bodyStore.setIsDelivery(false);
+
+                }
             }
             
             if (bodyStore.getIsBranch()==false) {
