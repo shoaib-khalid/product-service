@@ -1,4 +1,11 @@
 ##################################################
+# product-service-3.10.27| 08-September-2022 
+##################################################
+ALTER TABLE symplified.store ADD isDineIn tinyint(1) DEFAULT 0 NULL;
+ALTER TABLE symplified.store ADD dineInOption varchar(50) NULL;
+ALTER TABLE symplified.store ADD dineInPaymentType enum('CASH') DEFAULT 'CASH' NULL;
+
+##################################################
 # product-service-3.10.26| 07-September-2022 
 ##################################################
 1. File handling if not exists

@@ -446,6 +446,20 @@ public class StoreController {
             if (bodyStore.getIsBranch()==null) {
                 bodyStore.setIsBranch(false);
             }
+
+            //set isDisplayMap to false
+            if (bodyStore.getIsDisplayMap()==null) {
+                bodyStore.setIsDisplayMap(false);
+            }
+            // set isDineIn to false
+            if (bodyStore.getIsDineIn()==null) {
+                bodyStore.setIsDineIn(false);
+            }
+            // set default dineInPayementtype
+            if (bodyStore.getDineInPaymentType()==null) {
+                bodyStore.setDineInPaymentType("CASH");
+            }
+            
             if (bodyStore.getIsBranch()==false) {
                 //only create domain for non-branch store
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "create store domain for non-branch", "");

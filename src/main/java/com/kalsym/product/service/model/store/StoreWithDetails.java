@@ -84,6 +84,14 @@ public class StoreWithDetails implements Serializable {
     private String googleAnalyticId;
     
     private String displayAddress;
+
+    private Boolean isDisplayMap;
+
+    private Boolean isDineIn;
+
+    private String dineInOption;
+
+    private String dineInPaymentType;
     
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
@@ -207,6 +215,22 @@ public class StoreWithDetails implements Serializable {
         
         if (null != store.getDisplayAddress()) {
             displayAddress = store.getDisplayAddress();
+        }
+
+        if (null != store.getIsDisplayMap()) {
+            isDisplayMap = store.getIsDisplayMap();
+        }
+
+        if (null != store.getIsDineIn()) {
+            isDineIn = store.getIsDineIn();
+        }
+
+        if (null != store.getDineInOption()) {
+            dineInOption = store.getDineInOption();
+        }
+
+        if (null != store.getDineInOption()) {
+            dineInPaymentType = store.getDineInPaymentType();
         }
 
     }
