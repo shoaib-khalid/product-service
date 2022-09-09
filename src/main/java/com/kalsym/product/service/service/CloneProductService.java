@@ -194,6 +194,7 @@ public class CloneProductService {
                     ProductInventory productInventoryData = new ProductInventory();
                     productInventoryData.setItemCode(pi.getItemCode().replaceAll(x.getId(), branchProductId));
                     productInventoryData.setPrice(pi.getPrice());
+                    productInventoryData.setDineInPrice(pi.getDineInPrice());
                     productInventoryData.setCompareAtprice(pi.getCompareAtprice());
                     productInventoryData.setSKU(pi.getSKU());
                     productInventoryData.setQuantity(pi.getQuantity());

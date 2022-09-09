@@ -1,11 +1,16 @@
 ##################################################
-# product-service-3.10.27| 08-September-2022 
+# product-service-3.10.28| 09-September-2022 
 ##################################################
+1. AUTO CALCULATE PRICE FOR DINE IN OR DELIVERY
+##################################################
+# product-service-3.10.27| 09-September-2022 
+##################################################
+
 ALTER TABLE symplified.store ADD isDineIn tinyint(1) DEFAULT 0 NULL;
-ALTER TABLE symplified.store ADD dineInOption varchar(50) NULL;
-ALTER TABLE symplified.store ADD dineInPaymentType enum('CASH') DEFAULT 'CASH' NULL;
 ALTER TABLE symplified.store ADD dineInOption enum('SELFCOLLECT','SENDTOTABLE') DEFAULT 'SELFCOLLECT' NULL;
+ALTER TABLE symplified.store ADD dineInPaymentType enum('COD') DEFAULT 'COD' NULL;
 ALTER TABLE symplified.store ADD isDelivery tinyint(1) DEFAULT 1 NULL;
+
 
 
 ##################################################

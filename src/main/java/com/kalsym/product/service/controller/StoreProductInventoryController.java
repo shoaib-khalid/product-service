@@ -295,6 +295,16 @@ public class StoreProductInventoryController {
         }
 
         productInventory.setProductId(productId);
+        // if new client for delivery, we auto set the dine in price 15%
+        if (productInventory.getDineInPrice()==null) {
+            productInventory.setDineInPrice(productInventory.getPrice()*0.85);
+        }
+
+        // if new client for dinein we auto set for delivery price  Increase 17.5%
+        if (productInventory.getPrice()==null) {
+            productInventory.setPrice(productInventory.getDineInPrice()*1.175);
+        }
+
         //productInventory.setProduct(optProdcut.get());
         response.setStatus(HttpStatus.OK);
         response.setData(productInventoryRepository.save(productInventory));
@@ -354,6 +364,16 @@ public class StoreProductInventoryController {
                 for (int i=0; i<productInventoryList.size(); i++) {
         
                     ProductInventory pi = productInventoryList.get(i);
+                    // if delivery, we auto set the dine in price 15%
+                    if (pi.getDineInPrice()==null) {
+                        pi.setDineInPrice(pi.getPrice()*0.85);
+                    }
+
+                    // if dinein we auto set for delivery price  Increase 17.5%
+                    if (pi.getPrice()==null) {
+                        pi.setPrice(pi.getDineInPrice()*1.175);
+                    }
+
                     productInventoryRepository.save(pi);
               
                 }
@@ -370,6 +390,16 @@ public class StoreProductInventoryController {
                     previousData.setQuantity(productInventoryList.get(i).getQuantity());
                     previousData.setSKU(productInventoryList.get(i).getSKU());
                     previousData.setStatus(productInventoryList.get(i).getStatus());
+
+                         // if delivery, we auto set the dine in price 15%
+                         if (previousData.getDineInPrice()==null) {
+                            previousData.setDineInPrice(previousData.getPrice()*0.85);
+                        }
+    
+                        // if dinein we auto set for delivery price  Increase 17.5%
+                        if (previousData.getPrice()==null) {
+                            previousData.setPrice(previousData.getDineInPrice()*1.175);
+                        }
                     productInventoryRepository.save(previousData);
                 }
 
@@ -394,6 +424,16 @@ public class StoreProductInventoryController {
             for (int i=0; i<productInventoryList.size(); i++) {
         
                 ProductInventory pi = productInventoryList.get(i);
+                
+                // if delivery, we auto set the dine in price 15%
+                if (pi.getDineInPrice()==null) {
+                    pi.setDineInPrice(pi.getPrice()*0.85);
+                }
+
+                // if dinein we auto set for delivery price  Increase 17.5%
+                if (pi.getPrice()==null) {
+                    pi.setPrice(pi.getDineInPrice()*1.175);
+                }
                 productInventoryRepository.save(pi);
           
             }
