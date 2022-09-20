@@ -4,6 +4,7 @@ import com.kalsym.product.service.model.product.Product;
 import com.kalsym.product.service.model.store.StoreCategory;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -16,7 +17,7 @@ import org.springframework.stereotype.Repository;
 // CRUD refers Create, Read, Update, Delete
 //@RepositoryRestResource(collectionResourceRel = "categories", path = "categories")
 @Repository
-public interface StoreCategoryRepository extends PagingAndSortingRepository<StoreCategory, String>, JpaRepository<StoreCategory, String> {
+public interface StoreCategoryRepository extends PagingAndSortingRepository<StoreCategory, String>, JpaRepository<StoreCategory, String>, JpaSpecificationExecutor<StoreCategory> {
 
     //List<Category> findByName(@Param("name") String name);
     List<StoreCategory> findByStoreId(@Param("storeId") String storeId);

@@ -5,13 +5,17 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import com.kalsym.product.service.model.LocationConfig;
+import com.kalsym.product.service.model.store.ParentCategory;
+import com.kalsym.product.service.model.store.StoreCategory;
 import com.kalsym.product.service.repository.LocationConfigRepository;
 
 @Service
@@ -19,6 +23,9 @@ public class SiteMapService {
 
     @Autowired
     LocationConfigRepository locationConfigRepository;
+
+    @Autowired
+    StoreCategoryService storeCategoryService;
 
     @Value("${marketplace.url}")
     private String marketPlaceUrl;
@@ -82,6 +89,44 @@ public class SiteMapService {
         }
 
         String finalXml = mainXml+locationXml+endXml;
+
+        return finalXml;
+
+    }
+
+    public String generateParentCategory(){
+       
+        //Mlaaysia vertical code
+        List<String> verticalCode = new ArrayList<>();
+        verticalCode.add("FnB");
+        verticalCode.add("E-Commerce");
+        Page<StoreCategory> searchParentCategory = storeCategoryService.searchWithCriteria(verticalCode,0,30);
+
+        List<StoreCategory> storeCategoryList = searchParentCategory.getContent();
+
+        String mainXml = 
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+        +"\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">"
+        ;
+        String  categoryXml = "";
+        String endXml = "\n</urlset>";
+
+        // SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-MM-dd");
+        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+
+        for(StoreCategory sc:storeCategoryList){
+
+            categoryXml += 
+            "\n\t<url>"
+            +"\n\t\t<loc>"+marketPlaceUrl+"/category/"+sc.getId()+"</loc>"
+            +"\n\t\t<lastmod>"+sdf3.format(timestamp)+"</lastmod>"
+            +"\n\t</url>"
+            ;
+
+        }
+
+        String finalXml = mainXml+categoryXml+endXml;
 
         return finalXml;
 

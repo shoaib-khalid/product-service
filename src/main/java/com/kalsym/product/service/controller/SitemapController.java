@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -24,7 +25,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kalsym.product.service.model.store.StoreCategory;
 import com.kalsym.product.service.service.SiteMapService;
+import com.kalsym.product.service.utility.HttpResponse;
 
 @Controller
 @RestController()
@@ -68,11 +71,13 @@ public class SitemapController {
             String finalXml = "";
             if(filename.equals("sitemap")){
                 finalXml = siteMapService.indexSiteMap();
-                System.out.println("SITEMAP ::::::::");
 
             } else if (filename.equals("location")){
                 finalXml = siteMapService.generateLocationSitemap();
-                System.out.println("location ::::::::");
+
+
+            } else if (filename.equals("category")){
+                finalXml = siteMapService.generateParentCategory();
 
 
             }
