@@ -295,7 +295,7 @@ public class StoreProductInventoryController {
         }
 
         productInventory.setProductId(productId);
-        // if new client for delivery, we auto set the dine in price 15%
+        // if new client for delivery, we auto set the dine in price reduce 15%
         if (productInventory.getDineInPrice()==null) {
             productInventory.setDineInPrice(productInventory.getPrice()*0.85);
         }
@@ -490,6 +490,16 @@ public class StoreProductInventoryController {
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "FOUND inventoryId: " + id);
  
+        // if delivery, we auto set the dine in price reduce 15%
+        if (bodyProductInventory.getDineInPrice()==null) {
+            bodyProductInventory.setDineInPrice(bodyProductInventory.getPrice()*0.85);
+        }
+
+        // if dinein we auto set for delivery price  Increase 17.5%
+        if (bodyProductInventory.getPrice()==null) {
+            bodyProductInventory.setPrice(bodyProductInventory.getDineInPrice()*1.175);
+        }
+
         ProductInventory pi = optProductInventory.get();
         pi.update(bodyProductInventory);
 
