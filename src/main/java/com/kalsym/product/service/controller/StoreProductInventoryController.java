@@ -394,11 +394,18 @@ public class StoreProductInventoryController {
                          // if delivery, we auto set the dine in price 15%
                          if (previousData.getDineInPrice()==null) {
                             previousData.setDineInPrice(previousData.getPrice()*0.85);
+                        } else{
+
+                            previousData.setDineInPrice(productInventoryList.get(i).getDineInPrice());
+
                         }
     
                         // if dinein we auto set for delivery price  Increase 17.5%
                         if (previousData.getPrice()==null) {
                             previousData.setPrice(previousData.getDineInPrice()*1.175);
+                        } else{
+                            previousData.setPrice(productInventoryList.get(i).getPrice());
+
                         }
                     productInventoryRepository.save(previousData);
                 }
