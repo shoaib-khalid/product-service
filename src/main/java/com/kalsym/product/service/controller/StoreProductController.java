@@ -658,7 +658,11 @@ public class StoreProductController {
 
                     orderList.add(builder.asc(productInventories.get(sortByCol)));
 
-                }else{
+                } else if(sortByCol.equals("dineInPrice")){
+                    orderList.add(builder.asc(productInventories.get(sortByCol)));
+
+                }
+                else{
                     orderList.add(builder.asc(root.get(sortByCol)));
 
                 }
@@ -670,7 +674,11 @@ public class StoreProductController {
                     orderList.add(builder.desc(productInventories.get(sortByCol)));
 
 
-                }else{
+                }else if(sortByCol.equals("dineInPrice")){
+                    orderList.add(builder.desc(productInventories.get(sortByCol)));
+
+                }
+                else{
                     orderList.add(builder.desc(root.get(sortByCol)));
 
                 }
