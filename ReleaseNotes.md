@@ -1,4 +1,12 @@
 ##################################################
+# product-service-3.10.29| 09-September-2022 
+##################################################
+ALTER TABLE symplified.product_package_option ADD sequenceNumber int NULL;
+ALTER TABLE symplified.product_package_option_detail ADD isDefault tinyint(1) DEFAULT 0;
+ALTER TABLE symplified.product_package_option_detail ADD sequenceNumber int NULL;
+
+
+##################################################
 # product-service-3.10.28| 09-September-2022 
 ##################################################
 1. AUTO CALCULATE PRICE FOR DINE IN OR DELIVERY
