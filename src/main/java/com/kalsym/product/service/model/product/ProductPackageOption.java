@@ -48,6 +48,9 @@ public class ProductPackageOption implements Serializable {
     private String title;
 
     private Integer totalAllow;
+
+    private Integer sequenceNumber;
+
      
     @OneToMany(cascade = CascadeType.ALL,
             fetch = FetchType.LAZY)

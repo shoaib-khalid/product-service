@@ -304,6 +304,7 @@ public class CloneProductService {
                     ppoData.setTitle(ppo.getTitle());
                     ppoData.setTotalAllow(ppo.getTotalAllow());
                     ppoData.setPackageId(branchProductId);
+                    ppoData.setSequenceNumber(ppo.getSequenceNumber());
 
                     ProductPackageOption saveProductPackageOption= productPackageOptionRepository.save(ppoData);
 
@@ -342,6 +343,8 @@ public class CloneProductService {
                     ProductPackageOptionDetail packageOptionDetailData = new ProductPackageOptionDetail();
                     packageOptionDetailData.setProductId(filterProductOwnerAndBranch.getBranchProductId());
                     packageOptionDetailData.setProductPackageOptionId(y.getBranchProductPackageOptionId());
+                    packageOptionDetailData.setIsDefault(ppd.getIsDefault());
+                    packageOptionDetailData.setSequenceNumber(ppd.getSequenceNumber());
 
                     productPackageOptionDetailRepository.save(packageOptionDetailData);
                 }
