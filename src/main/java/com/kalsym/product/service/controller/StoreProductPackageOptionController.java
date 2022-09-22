@@ -12,8 +12,12 @@ import com.kalsym.product.service.repository.ProductPackageOptionRepository;
 import com.kalsym.product.service.repository.ProductPackageOptionDetailRepository;
 import com.kalsym.product.service.service.FileStorageService;
 import com.kalsym.product.service.utility.Logger;
+
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -83,8 +87,24 @@ public class StoreProductPackageOptionController {
             return ResponseEntity.status(response.getStatus()).body(response);
         }
 
+        List<ProductPackageOption> data = productPackageOptionRepository.findByPackageId(packageId);
+
+        List<ProductPackageOption> sortedList = data.stream()
+        .sorted(Comparator.comparingInt(ProductPackageOption::getSequenceNumber))
+        .map(packageOpt -> {
+            List<ProductPackageOptionDetail> packageOptDetails = packageOpt.getProductPackageOptionDetail().stream()
+            .sorted(Comparator.comparingInt(ProductPackageOptionDetail::getSequenceNumber))
+            .collect(Collectors.toList());
+
+            packageOpt.productPackageOptionDetail =packageOptDetails;
+            return packageOpt;
+        })
+        .collect(Collectors.toList());
+
+   
+
         response.setStatus(HttpStatus.OK);
-        response.setData(productPackageOptionRepository.findByPackageId(packageId));
+        response.setData(sortedList);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
