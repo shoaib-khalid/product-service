@@ -19,8 +19,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.kalsym.product.service.model.store.StoreCategory;
 import com.kalsym.product.service.model.store.Store;
+import com.kalsym.product.service.service.CloneProductService;
 import com.kalsym.product.service.service.FileStorageService;
 import com.kalsym.product.service.utility.Logger;
+import com.kalsym.product.service.worker.BulkDeleteCategory;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +37,7 @@ import org.springframework.data.domain.ExampleMatcher.GenericPropertyMatcher;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -55,6 +59,9 @@ public class StoreCategoryController {
 
     @Autowired
     FileStorageService fileStorageService;
+
+    @Autowired
+    CloneProductService cloneProductService;
 
     @Value("${store.assets.url:https://symplified.ai/store-assets}")
     private String storeAssetsBaseUrl;
@@ -285,6 +292,21 @@ public class StoreCategoryController {
         storeCategoryRepository.save(optStoreCategory.get());
         return ResponseEntity.status(response.getStatus()).body(response);
 
+    }
+
+    @PostMapping(path = {"/bulk-delete"}, name = "store-products-delete-by-id", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-products-delete-by-id', 'all')  and @customOwnerVerifier.VerifyStore(#storeId)")
+    public ResponseEntity<HttpResponse> deleteStoreCategoryByBulk(HttpServletRequest request,
+            @RequestBody List<String> categoryIds) {
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        //create thread
+        BulkDeleteCategory threadBulkDeleteCategory = new BulkDeleteCategory(categoryIds,cloneProductService);
+        threadBulkDeleteCategory.start();
+
+        response.setStatus(HttpStatus.OK);
+        response.setData("Success Deleted");
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 
 }

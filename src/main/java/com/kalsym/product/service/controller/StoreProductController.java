@@ -68,6 +68,8 @@ import com.kalsym.product.service.repository.StoreCategoryRepository;
 import com.kalsym.product.service.repository.StoreDiscountRepository;
 import com.kalsym.product.service.repository.StoreDiscountProductRepository;
 import com.kalsym.product.service.utility.ProductDiscount;
+import com.kalsym.product.service.worker.BulkDeleteProduct;
+
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -746,6 +748,35 @@ public class StoreProductController {
         response.setStatus(HttpStatus.OK);
         response.setData("SUCCESS CLONING");
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PostMapping(path = {"/bulk-delete"}, name = "store-products-delete-by-id", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-products-delete-by-id', 'all')  and @customOwnerVerifier.VerifyStore(#storeId)")
+    public ResponseEntity<HttpResponse> deleteStoreProductByBulk(HttpServletRequest request,
+            @PathVariable String storeId,
+            @RequestBody List<String> productIds) {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "storeId: " + storeId);
+
+        Optional<Store> optStore = storeRepository.findById(storeId);
+
+        if (!optStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
+
+        //create thread
+        BulkDeleteProduct threadBulkDeleteProduct = new BulkDeleteProduct(productIds,cloneProductService);
+        threadBulkDeleteProduct.start();
+
+        response.setStatus(HttpStatus.OK);
+        response.setData("Success Deleted");
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 
 

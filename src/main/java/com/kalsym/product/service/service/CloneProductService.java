@@ -355,5 +355,35 @@ public class CloneProductService {
         })
         .collect(Collectors.toList());
     }
+
+    public void bulkDeleteProducts(List<String> productIds){
+
+        for(String productId : productIds){
+
+            Optional<Product> optProdcut = productRepository.findById(productId);
+
+            if (optProdcut.isPresent()) {
+                Product p = optProdcut.get();
+                p.setStatus("DELETED");
+                productRepository.save(p);
+            }  
+
+        }
+    }
+
+    public void bulkDeleteCategory(List<String> categoryIds){
+
+        for(String categoryId : categoryIds){
+
+            Optional<StoreCategory> optStoreCategory = storeCategoryRepository.findById(categoryId);
+
+            if (optStoreCategory.isPresent()) {
+                
+                storeCategoryRepository.delete(optStoreCategory.get());
+
+            }  
+
+        }
+    }
     
 }
