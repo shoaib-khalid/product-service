@@ -1,6 +1,10 @@
 ##################################################
-# product-service-3.10.29| 09-September-2022 
+# product-service-3.10.29| 22-September-2022 
 ##################################################
+
+1. Hide product that has price 0
+2. Add new column for product_package_option, product_package_option_detail 
+3. Nested sort the sequence number
 ALTER TABLE symplified.product_package_option ADD sequenceNumber int NULL;
 ALTER TABLE symplified.product_package_option_detail ADD isDefault tinyint(1) DEFAULT 0;
 ALTER TABLE symplified.product_package_option_detail ADD sequenceNumber int NULL;
