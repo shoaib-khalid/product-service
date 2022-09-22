@@ -686,6 +686,9 @@ public class StoreProductController {
 
             }
 
+            //filter product code that has prce not 0 for handling combo
+            predicates.add(builder.notEqual(productInventories.get("price"), 0));
+
             query.orderBy(orderList);
             query.distinct(true);
 
