@@ -294,9 +294,10 @@ public class StoreCategoryController {
 
     }
 
-    @PostMapping(path = {"/bulk-delete"}, name = "store-products-delete-by-id", produces = "application/json")
+    @PostMapping(path = {"{storeId}/bulk-delete"}, name = "store-products-delete-by-id", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-products-delete-by-id', 'all')  and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> deleteStoreCategoryByBulk(HttpServletRequest request,
+            @PathVariable String storeId,
             @RequestBody List<String> categoryIds) {
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
