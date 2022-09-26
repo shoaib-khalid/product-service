@@ -7,6 +7,8 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
 
+import com.kalsym.product.service.model.request.AddOnGroupTemplateRequest;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,4 +30,18 @@ public class AddOnTemplateGroup {
 
     private String title;
 
+    public static AddOnTemplateGroup castReference(AddOnGroupTemplateRequest req){
+
+        AddOnTemplateGroup body = new AddOnTemplateGroup();
+        //set the id for update data
+        if(req.getId() != null){
+
+            body.setId(req.getId());
+
+        }
+        body.setStoreId(req.getStoreId());
+        body.setTitle(req.getTitle());
+
+        return body;
+    }
 }

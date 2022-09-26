@@ -560,8 +560,8 @@ public class StoreProductController {
         bodyProduct.setSeoName(seoName);
         if (bodyProduct.getIsPackage()==null) { bodyProduct.setIsPackage(Boolean.FALSE); }
 
-        //set image url 
-
+        //to handle backward compatibility since we implement new features for add on 
+        if(bodyProduct.getHasAddOn()==null) { bodyProduct.setHasAddOn(Boolean.FALSE);}
 
         Product savedProduct = productRepository.save(bodyProduct);
         Logger.application.info(ProductServiceApplication.VERSION, logprefix, "product added to store with storeId: {}, productId: {}" + storeId, savedProduct.getId());

@@ -75,6 +75,8 @@ public class Product implements Serializable {
     private Boolean isNoteOptional;
     
     private String customNote;
+
+    private Boolean hasAddOn;
     
     @CreationTimestamp
     private Date created;
