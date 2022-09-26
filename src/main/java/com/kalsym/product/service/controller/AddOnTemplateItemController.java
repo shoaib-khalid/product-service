@@ -1,10 +1,5 @@
 package com.kalsym.product.service.controller;
 
-import java.util.Optional;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
@@ -26,24 +21,30 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kalsym.product.service.ProductServiceApplication;
-import com.kalsym.product.service.model.product.AddOnTemplateGroup;
-import com.kalsym.product.service.model.request.AddOnGroupTemplateRequest;
-import com.kalsym.product.service.repository.AddOnTemplateGroupRepository;
-import com.kalsym.product.service.service.AddOnTemplateGroupService;
+import com.kalsym.product.service.model.product.AddOnTemplateItem;
+import com.kalsym.product.service.model.request.AddOnTemplateItemRequest;
 import com.kalsym.product.service.utility.HttpResponse;
+
+import java.util.Optional;
+
+import javax.servlet.http.HttpServletRequest;
 import com.kalsym.product.service.utility.Logger;
+import javax.validation.Valid;
+
+
+import com.kalsym.product.service.service.AddOnTemplateItemService;
 
 @RestController()
-@RequestMapping("/addon-template-group")
-public class AddOnTemplateGroupController {
-
+@RequestMapping("/addon-template-item")
+public class AddOnTemplateItemController {
+    
     @Autowired
-    AddOnTemplateGroupService addOnTemplateGroupService;
+    AddOnTemplateItemService addOnTemplateItemService;
     
     @GetMapping(path = {""}, name = "store-categories-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-categories-get', 'all')")
-    public ResponseEntity<HttpResponse> getAddOnTemplateGroup(HttpServletRequest request,
-            @RequestParam(required = false) String storeId,
+    public ResponseEntity<HttpResponse> getAddOnTemplateItem(HttpServletRequest request,
+            @RequestParam(required = false) String groupId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int pageSize) {
 
@@ -53,7 +54,7 @@ public class AddOnTemplateGroupController {
         try {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "", "");
 
-            Page<AddOnTemplateGroup> showData = addOnTemplateGroupService.getQueryAddonTemplateGroup(page,pageSize,storeId);
+            Page<AddOnTemplateItem> showData = addOnTemplateItemService.getQueryAddonTemplateItem(page,pageSize,groupId);
                     
             response.setStatus(HttpStatus.OK);
             response.setData(showData);
@@ -73,7 +74,7 @@ public class AddOnTemplateGroupController {
     @PreAuthorize("hasAnyAuthority('stores-post', 'all')")
     public ResponseEntity<HttpResponse> postAddOnGroupTemplate(
         HttpServletRequest request,
-        @Valid @RequestBody AddOnGroupTemplateRequest bodyAddOnTemplateGroup
+        @Valid @RequestBody AddOnTemplateItemRequest bodyAddOnTemplateItem
     ){
 
         HttpResponse response = new HttpResponse(request.getRequestURI());
@@ -83,9 +84,9 @@ public class AddOnTemplateGroupController {
 
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "", "");
 
-            AddOnTemplateGroup body = AddOnTemplateGroup.castReference(bodyAddOnTemplateGroup);
+            AddOnTemplateItem body = AddOnTemplateItem.castReference(bodyAddOnTemplateItem);
    
-            AddOnTemplateGroup data = addOnTemplateGroupService.createData(body);
+            AddOnTemplateItem data = addOnTemplateItemService.createData(body);
 
             response.setStatus(HttpStatus.CREATED);
             response.setData(data);
@@ -102,10 +103,10 @@ public class AddOnTemplateGroupController {
 
     @PutMapping(path = {"/{id}"}, name = "store-product-assets-put-by-id")
     @PreAuthorize("hasAnyAuthority('store-product-assets-put-by-id', 'all')")
-    public ResponseEntity<HttpResponse> putAddOnTemplateGroup(
+    public ResponseEntity<HttpResponse> putAddOnTemplateItem(
         HttpServletRequest request,
         @PathVariable String id,
-        @Valid @RequestBody AddOnGroupTemplateRequest bodyAddOnTemplateGroup
+        @Valid @RequestBody AddOnTemplateItemRequest bodyAddOnTemplateItem
     ){
 
         HttpResponse response = new HttpResponse(request.getRequestURI());
@@ -115,12 +116,12 @@ public class AddOnTemplateGroupController {
 
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "", "");
             
-            bodyAddOnTemplateGroup.setId(id);
+            bodyAddOnTemplateItem.setId(id);
 
             //set cast reference before proceeding to update
-            AddOnTemplateGroup body = AddOnTemplateGroup.castReference(bodyAddOnTemplateGroup);
+            AddOnTemplateItem body = AddOnTemplateItem.castReference(bodyAddOnTemplateItem);
             
-            AddOnTemplateGroup data = addOnTemplateGroupService.updateAddOnTemplateGroup(id,body);
+            AddOnTemplateItem data = addOnTemplateItemService.updateAddOnTemplateItem(id,body);
 
             response.setStatus(HttpStatus.OK);
             response.setData(data);
@@ -137,14 +138,14 @@ public class AddOnTemplateGroupController {
 
     @DeleteMapping(path = {"/{id}"}, name = "store-categories-delete-by-id")
     @PreAuthorize("hasAnyAuthority('store-categories-delete-by-id', 'all')")
-    public ResponseEntity<HttpResponse> deleteAddOnTemplateGroup(
+    public ResponseEntity<HttpResponse> deleteAddOnTemplateItem(
         HttpServletRequest request, 
         @PathVariable String id
     ){
 
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
-        Boolean isDeleted = addOnTemplateGroupService.deleteAddOnTemplateGroup(id);
+        Boolean isDeleted = addOnTemplateItemService.deleteAddOnTemplateItem(id);
         HttpStatus httpStatus;
 
         String message;
@@ -160,7 +161,7 @@ public class AddOnTemplateGroupController {
 
     @GetMapping(path = {"{id}"}, name = "store-categories-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-categories-get', 'all')")
-    public ResponseEntity<HttpResponse> getByIdAddOnTemplateGroup(    
+    public ResponseEntity<HttpResponse> getByIdAddOnTemplateItem(    
     HttpServletRequest request, 
     @PathVariable String id
     ){
@@ -168,7 +169,7 @@ public class AddOnTemplateGroupController {
 
         try {
 
-            Optional<AddOnTemplateGroup> data = addOnTemplateGroupService.getById(id);
+            Optional<AddOnTemplateItem> data = addOnTemplateItemService.getById(id);
             if(data.isPresent()){
                 response.setStatus(HttpStatus.OK);
                 response.setData(data.get());
@@ -187,5 +188,4 @@ public class AddOnTemplateGroupController {
             return ResponseEntity.status(response.getStatus()).body(response);
         }
     }
-
 }

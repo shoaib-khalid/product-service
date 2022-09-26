@@ -69,6 +69,8 @@ public class AddOnTemplateItemService {
         AddOnTemplateItem data = addOnTemplateItemRepository.findById(id).get();
         data.setDineInPrice(addOnTemplateItem.getDineInPrice());
         data.setPrice(addOnTemplateItem.getPrice());
+        data.setGroupId(addOnTemplateItem.getGroupId());
+        data.setName(addOnTemplateItem.getName());
         
         return addOnTemplateItemRepository.save(data);                                
     }
