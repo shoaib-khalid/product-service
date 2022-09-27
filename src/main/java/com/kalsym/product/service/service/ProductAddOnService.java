@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import com.kalsym.product.service.model.product.ProductAddOn;
 import com.kalsym.product.service.repository.ProductAddOnRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,7 @@ public class ProductAddOnService {
     @Autowired 
     ProductAddOnRepository productAddOnRepository;
 
-    public Page<ProductAddOn> getQueryAddonTemplateGroup(int page, int pageSize, String addOnItemId){
+    public Page<ProductAddOn> getQueryProductAddOn(int page, int pageSize, String addOnItemId){
 
         Pageable pageable = PageRequest.of(page, pageSize);
 
@@ -74,5 +75,11 @@ public class ProductAddOnService {
         data.setStatus(productAddOn.getStatus());
         
         return productAddOnRepository.save(data);                                
+    }
+
+    public List<ProductAddOn> getAllProductByProductId(String productId){
+
+        List<ProductAddOn> getData = productAddOnRepository.findByProductId(productId);
+        return getData;
     }
 }
