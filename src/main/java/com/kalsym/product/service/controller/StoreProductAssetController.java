@@ -12,6 +12,8 @@ import com.kalsym.product.service.service.FileStorageService;
 import com.kalsym.product.service.utility.Logger;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,6 +51,9 @@ public class StoreProductAssetController {
     @Autowired
     StoreRepository storeRepository;
 
+    @Value("${asset.service.url}")
+    String assetServiceUrl;
+
     @GetMapping(path = {""}, name = "store-product-assets-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-product-assets-get', 'all')")
     public ResponseEntity<HttpResponse> getStoreProductAssets(HttpServletRequest request,
@@ -78,8 +83,23 @@ public class StoreProductAssetController {
             return ResponseEntity.status(response.getStatus()).body(response);
         }
 
+        //to append the asset url
+        List<ProductAsset> productAssetList = productAssetRepository.findByProductId(productId);
+        for (ProductAsset p : productAssetList ){
+
+            //handle null
+            if(p.getUrl() != null){
+                p.setUrl(assetServiceUrl+p.getUrl());
+
+            } else {
+                p.setUrl(null);
+
+            }
+
+        }
+
         response.setStatus(HttpStatus.OK);
-        response.setData(productAssetRepository.findByProductId(productId));
+        response.setData(productAssetList);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
@@ -122,6 +142,15 @@ public class StoreProductAssetController {
             return ResponseEntity.status(response.getStatus()).body(response);
         }
 
+        //to append the asset url
+        //handle null
+        if(optProductAsset.get().getUrl() != null){
+            optProductAsset.get().setUrl(assetServiceUrl+optProductAsset.get().getUrl());
+
+        } else{
+            optProductAsset.get().setUrl(null);
+
+        }
         response.setStatus(HttpStatus.OK);
         response.setData(optProductAsset.get());
         return ResponseEntity.status(response.getStatus()).body(response);
@@ -159,6 +188,8 @@ public class StoreProductAssetController {
 
         Optional<ProductAsset> optProductAsset = productAssetRepository.findById(id);
 
+        List<ProductAsset> listOfProductAsset = productAssetRepository.findByProductId(productId);
+
         if (!optProductAsset.isPresent()) {
             Logger.application.warn(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product asset NOT_FOUND inventoryId: " + id);
             response.setStatus(HttpStatus.NOT_FOUND);
@@ -166,11 +197,28 @@ public class StoreProductAssetController {
             return ResponseEntity.status(response.getStatus()).body(response);
         }
 
+        List<ProductAsset> filtered;
+        filtered = listOfProductAsset.stream()
+        .filter(productasset -> !productasset.getId().equals(id))
+        .collect(Collectors.toList());
+        
         Product product = optProdcut.get();
         if (optProductAsset.get().getUrl().equals(product.getThumbnailUrl())) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "deleting thumbail: " + id);
-            product.setThumbnailUrl(null);
-            productRepository.save(product);
+            // product.setThumbnailUrl(null);
+
+            // productRepository.save(product);
+
+            //to set default image if it not set after delete image default
+            if(filtered.size()>0){
+                this.setDefaultThumbnail(filtered, product);
+
+            }else{
+
+                product.setThumbnailUrl(null);
+                productRepository.save(product);
+ 
+            }
         }
 
         productAssetRepository.delete(optProductAsset.get());
@@ -223,6 +271,11 @@ public class StoreProductAssetController {
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "FOUND product asset Id: " + id);
 
         ProductAsset productAsset = optProductAssset.get();
+        //HANDLIN PRODUCT ASSET FOR PAYLOAD
+        // String split[] = productAssetBody.getUrl().split("/product-assets", 0);
+        // String pathUrl = "/product-assets"+split[1];
+
+        // productAssetBody.setUrl(pathUrl);
         productAsset.update(productAssetBody);
 
         productAsset = productAssetRepository.save(productAsset);
@@ -247,20 +300,24 @@ public class StoreProductAssetController {
             }
         }
 
+        //to display data full url after save
+        productAsset.setUrl(assetServiceUrl+productAsset.getUrl());
+        
         response.setStatus(HttpStatus.OK);
         response.setData(productAsset);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @Value("${product.assets.url:https://symplified.ai/product-assets/}")
-    private String productAssetsBaseUrl;
+    // @Value("${product.assets.url:https://symplified.ai/product-assets/}")
+    // private String productAssetsBaseUrl;
 
     @PostMapping(path = {""}, name = "store-product-assets-post")
     @PreAuthorize("hasAnyAuthority('store-product-assets-post', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> postStoreProductAssets(HttpServletRequest request,
             @PathVariable String storeId,
             @PathVariable String productId,
-            @RequestParam("file") MultipartFile file,
+            @RequestParam(value="file",required = false) MultipartFile file,
+            @RequestParam(required = false) String url,
             @RequestParam(required = false) String itemCode,
             @RequestParam(required = false) Boolean isThumbnail) {
         String logprefix = request.getRequestURI();
@@ -286,40 +343,77 @@ public class StoreProductAssetController {
             response.setError("product not found");
             return ResponseEntity.status(response.getStatus()).body(response);
         }
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "FOUND productId: " + storeId);
+
+        String storagePath;
+        String generatedUrl;
+        ProductAsset productAsset = new ProductAsset();
+
+        //if file exist then we keep in server storage or we use url only
+        if(file != null){
+           
+            //if item code exist then delete the existing
+            if (itemCode != null) {
+                Optional<ProductAsset> optProdAsset = productAssetRepository.findByItemCode(itemCode);
+                if (optProdAsset.isPresent()) {
+                    productAssetRepository.deleteById(optProdAsset.get().getId());
+                    Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Existing asset deleted successfully");
+                }
+                generatedUrl = itemCode + fileStorageService.generateRandomName();
+                storagePath = fileStorageService.saveProductAsset(file, generatedUrl);            
+            } 
+            //create a new item code of image
+            else {
+                generatedUrl = itemCode + fileStorageService.generateRandomName();
+                storagePath = fileStorageService.saveProductAsset(file, generatedUrl);            
+            }
+
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "storagePath: " + storagePath);
+
+            productAsset.setProductId(productId);
+            productAsset.setName(file.getOriginalFilename());
+            productAsset.setItemCode(itemCode);
+            //productAsset.setIsThumbnail(isThumbnail);
+            productAsset.setUrl("/product-assets/"+generatedUrl);
+
+            productAsset = productAssetRepository.save(productAsset);
+
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "saved image: " + productAsset.getId());
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "isThumbnail: " + isThumbnail);
+                    Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "FOUND productId: " + storeId);
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "OriginalFilename: " + file.getOriginalFilename());
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Checking if this asset already exists");
-        String storagePath;
-        String generatedUrl;
-        if (itemCode != null) {
-            Optional<ProductAsset> optProdAsset = productAssetRepository.findByItemCode(itemCode);
-            if (optProdAsset.isPresent()) {
-                productAssetRepository.deleteById(optProdAsset.get().getId());
-                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Existing asset deleted successfully");
-            }
-            generatedUrl = itemCode + fileStorageService.generateRandomName();
-            storagePath = fileStorageService.saveProductAsset(file, generatedUrl);            
-        } else {
-            generatedUrl = itemCode + fileStorageService.generateRandomName();
-            storagePath = fileStorageService.saveProductAsset(file, generatedUrl);            
+
         }
+        //insert the url of image
+        else{
 
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "storagePath: " + storagePath);
+            //with item code
+            if (itemCode != null) {
 
-        ProductAsset productAsset = new ProductAsset();
-        productAsset.setProductId(productId);
-        productAsset.setName(file.getOriginalFilename());
-        productAsset.setItemCode(itemCode);
-        //productAsset.setIsThumbnail(isThumbnail);
-        productAsset.setUrl(productAssetsBaseUrl + generatedUrl);
+                Optional<ProductAsset> optProdAsset = productAssetRepository.findByItemCode(itemCode);
+                if (optProdAsset.isPresent()) {
+                    productAssetRepository.deleteById(optProdAsset.get().getId());
+                    Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Existing asset deleted successfully");
+                }
+   
+                productAsset.setItemCode(itemCode);
 
-        productAsset = productAssetRepository.save(productAsset);
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "saved image: " + productAsset.getId());
+            }
 
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "isThumbnail: " + isThumbnail);
+            String split[] = url.split("/product-assets", 0);
+            String pathUrl = "/product-assets"+split[1];
 
+            productAsset.setProductId(productId);
+            productAsset.setName("Clone");
+
+            productAsset.setUrl(pathUrl);
+            productAsset = productAssetRepository.save(productAsset);
+
+
+        }
+        
         Product product = optProdcut.get();
         List<ProductAsset> productAssets = productAssetRepository.findByProductId(productId);
         //if is thumbnail true then remove thumbnail true from all other assets
@@ -342,6 +436,10 @@ public class StoreProductAssetController {
         } else {
             this.setDefaultThumbnail(productAssets, product);
         }
+
+        //to display data full url after save
+        productAsset.setUrl(assetServiceUrl+productAsset.getUrl());
+    
 
         response.setStatus(HttpStatus.OK);
         response.setData(productAsset);
@@ -407,7 +505,7 @@ public class StoreProductAssetController {
         productAsset.setProductId(productId);
         productAsset.setName(file.getOriginalFilename());
         productAsset.setItemCode(itemCode);
-        productAsset.setUrl(productAssetsBaseUrl + generatedUrl);
+        productAsset.setUrl("/product-assets/" + generatedUrl);
         productAsset.setId(optProductAssset.get().getId());
         productAsset = productAssetRepository.save(productAsset);
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "saved image: " + productAsset.getId());
@@ -436,6 +534,9 @@ public class StoreProductAssetController {
         } else {
             this.setDefaultThumbnail(productAssets, product);
         }
+
+        //to display data full url after save
+        productAsset.setUrl(assetServiceUrl+productAsset.getUrl());
 
         response.setStatus(HttpStatus.OK);
         response.setData(productAsset);

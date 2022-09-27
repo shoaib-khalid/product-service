@@ -2,6 +2,8 @@ package com.kalsym.product.service.model.store;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.kalsym.product.service.model.RegionCountry;
+import com.kalsym.product.service.model.StoreSnooze;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -82,7 +84,17 @@ public class StoreWithDetails implements Serializable {
     private String googleAnalyticId;
     
     private String displayAddress;
-    
+
+    private Boolean isDisplayMap;
+
+    private Boolean isDineIn;
+
+    private String dineInOption;
+
+    private String dineInPaymentType;
+
+    private Boolean isDelivery;
+
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private Date snoozeStartTime;
@@ -92,6 +104,12 @@ public class StoreWithDetails implements Serializable {
     private Date snoozeEndTime;
     
     private String snoozeReason;
+
+    @Transient
+    Boolean isSnooze;
+
+    @Transient
+    StoreSnooze storeSnooze;
         
     private Boolean isBranch;
             
@@ -199,6 +217,26 @@ public class StoreWithDetails implements Serializable {
         
         if (null != store.getDisplayAddress()) {
             displayAddress = store.getDisplayAddress();
+        }
+
+        if (null != store.getIsDisplayMap()) {
+            isDisplayMap = store.getIsDisplayMap();
+        }
+
+        if (null != store.getIsDineIn()) {
+            isDineIn = store.getIsDineIn();
+        }
+
+        if (null != store.getDineInOption()) {
+            dineInOption = store.getDineInOption();
+        }
+
+        if (null != store.getDineInOption()) {
+            dineInPaymentType = store.getDineInPaymentType();
+        }
+
+        if (null != store.getIsDelivery()) {
+            isDelivery = store.getIsDelivery();
         }
 
     }

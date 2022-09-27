@@ -48,11 +48,14 @@ public class ProductPackageOption implements Serializable {
     private String title;
 
     private Integer totalAllow;
+
+    private Integer sequenceNumber;
+
      
     @OneToMany(cascade = CascadeType.ALL,
             fetch = FetchType.LAZY)
     @JoinColumn(name = "productPackageOptionId", insertable = false, updatable = false, nullable = true)
-    private List<ProductPackageOptionDetail> productPackageOptionDetail;
+    public List<ProductPackageOptionDetail> productPackageOptionDetail;
     
     public void update(ProductPackageOption productPackageOption) {
        
@@ -62,6 +65,10 @@ public class ProductPackageOption implements Serializable {
        
         if (null != productPackageOption.getTotalAllow()) {
             totalAllow = productPackageOption.getTotalAllow();
+        }
+
+        if (null != productPackageOption.getSequenceNumber()) {
+            sequenceNumber = productPackageOption.getSequenceNumber();
         }
       
     }

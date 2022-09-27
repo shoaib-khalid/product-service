@@ -37,7 +37,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class WhatsappService {
         
-    @Value("${whatsapp.service.push.url:https://waw.symplified.it/360dialog/callback/templatemessage/push}")
+    @Value("${whatsapp.service.push.url:https://api.symplified.it/whatsapp-java-service/v1/templatemessage/push}")
     private String whatsappServiceUrl;
     
     @Value("${whatsapp.service.template.new.store:symplified_new_store_notification}")
@@ -61,7 +61,7 @@ public class WhatsappService {
         request.setReferenceId(whatsappServiceReferenceId);
         Template template = new Template();
         template.setName(templateName);
-        String[] message = {username, password};
+        String[] message = {username};
         template.setParameters(message);
         request.setTemplate(template);
         HttpEntity<WhatsappMessage> httpEntity = new HttpEntity<>(request, headers);

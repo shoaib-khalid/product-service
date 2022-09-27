@@ -4,8 +4,11 @@ import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.utility.HttpResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -28,6 +31,9 @@ public class PlatformConfigController {
     @Autowired
     PlatformConfigRepository platformConfigRepository;
 
+    @Value("${asset.service.url}")
+    String assetServiceUrl;
+
     @GetMapping(path = {""}, name = "region-countries-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('region-countries-get', 'all')")
     public ResponseEntity<HttpResponse> getConfigbyDomain(HttpServletRequest request,
@@ -37,6 +43,8 @@ public class PlatformConfigController {
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "", "");
 
         List<PlatformConfig> configList = platformConfigRepository.findByDomain(domain);
+
+        //to set the asset url 
         if (configList.isEmpty()) {
             response.setStatus(HttpStatus.NOT_FOUND);
         } else {

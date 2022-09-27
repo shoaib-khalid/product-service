@@ -12,8 +12,12 @@ import com.kalsym.product.service.repository.ProductPackageOptionRepository;
 import com.kalsym.product.service.repository.ProductPackageOptionDetailRepository;
 import com.kalsym.product.service.service.FileStorageService;
 import com.kalsym.product.service.utility.Logger;
+
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -83,8 +87,25 @@ public class StoreProductPackageOptionController {
             return ResponseEntity.status(response.getStatus()).body(response);
         }
 
+        //nested sort 
+        List<ProductPackageOption> data = productPackageOptionRepository.findByPackageId(packageId);
+
+        List<ProductPackageOption> sortedList = data.stream()
+        .sorted(Comparator.comparingInt(ProductPackageOption::getSequenceNumber))
+        .map(packageOpt -> {
+            List<ProductPackageOptionDetail> packageOptDetails = packageOpt.getProductPackageOptionDetail().stream()
+            .sorted(Comparator.comparingInt(ProductPackageOptionDetail::getSequenceNumber))
+            .collect(Collectors.toList());
+
+            packageOpt.productPackageOptionDetail =packageOptDetails;
+            return packageOpt;
+        })
+        .collect(Collectors.toList());
+
+   
+
         response.setStatus(HttpStatus.OK);
-        response.setData(productPackageOptionRepository.findByPackageId(packageId));
+        response.setData(sortedList);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
@@ -243,18 +264,39 @@ public class StoreProductPackageOptionController {
         ProductPackageOption updatedPackageOption = null;
         if (optProductPackageUpdated.isPresent()) {
             updatedPackageOption = optProductPackageUpdated.get();
-            for (int i=0;i<updatedPackageOption.getProductPackageOptionDetail().size();i++) {
-                ProductPackageOptionDetail optionDetails = updatedPackageOption.getProductPackageOptionDetail().get(i);
-                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Option details Id:"+optionDetails.getId()+" productId:"+optionDetails.getProductId());
-                if (optionDetails.getProduct()==null) {
-                    Optional<Product> optProduct = productRepository.findById(optionDetails.getProductId());
-                    if (optProduct.isPresent()) {
-                        optionDetails.setProduct(optProduct.get());
-                    }
+
+            
+            List<ProductPackageOptionDetail> sortedList = updatedPackageOption.getProductPackageOptionDetail().stream()
+            .sorted(Comparator.comparingInt(ProductPackageOptionDetail::getSequenceNumber))
+            .map(packageOptDtl -> {
+           
+                ProductPackageOptionDetail ppod = packageOptDtl;
+                if (packageOptDtl.getProduct()==null) {
+                        Optional<Product> optProduct = productRepository.findById(packageOptDtl.getProductId());
+                        if (optProduct.isPresent()) {
+                            packageOptDtl.setProduct(optProduct.get());
+                        }
+                } else {
+                    packageOptDtl.getProduct();
                 }
-                Product product = optionDetails.getProduct();
-                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Product details Id:"+product.getId()+" productId:"+product.getName());                
-            }
+        
+                return ppod;
+            })
+            .collect(Collectors.toList());
+
+            updatedPackageOption.setProductPackageOptionDetail(sortedList);
+            
+            //     ProductPackageOptionDetail optionDetails = updatedPackageOption.getProductPackageOptionDetail().get(i);
+            //     Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Option details Id:"+optionDetails.getId()+" productId:"+optionDetails.getProductId());
+            //     if (optionDetails.getProduct()==null) {
+            //         Optional<Product> optProduct = productRepository.findById(optionDetails.getProductId());
+            //         if (optProduct.isPresent()) {
+            //             optionDetails.setProduct(optProduct.get());
+            //         }
+            //     }
+            //     Product product = optionDetails.getProduct();
+            //     Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Product details Id:"+product.getId()+" productId:"+product.getName());                
+            // }
         }
         response.setStatus(HttpStatus.OK);
         response.setData(updatedPackageOption);
@@ -308,19 +350,41 @@ public class StoreProductPackageOptionController {
         ProductPackageOption updatedPackageOption = null;
         if (optProductPackageUpdated.isPresent()) {
             updatedPackageOption = optProductPackageUpdated.get();
-            for (int i=0;i<updatedPackageOption.getProductPackageOptionDetail().size();i++) {
-                ProductPackageOptionDetail optionDetails = updatedPackageOption.getProductPackageOptionDetail().get(i);
-                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Option details Id:"+optionDetails.getId()+" productId:"+optionDetails.getProductId());
-                if (optionDetails.getProduct()==null) {
-                    Optional<Product> optProduct = productRepository.findById(optionDetails.getProductId());
-                    if (optProduct.isPresent()) {
-                        optionDetails.setProduct(optProduct.get());
-                    }
+
+            List<ProductPackageOptionDetail> sortedList = updatedPackageOption.getProductPackageOptionDetail().stream()
+            .sorted(Comparator.comparingInt(ProductPackageOptionDetail::getSequenceNumber))
+            .map(packageOptDtl -> {
+           
+                ProductPackageOptionDetail ppod = packageOptDtl;
+                if (packageOptDtl.getProduct()==null) {
+                        Optional<Product> optProduct = productRepository.findById(packageOptDtl.getProductId());
+                        if (optProduct.isPresent()) {
+                            packageOptDtl.setProduct(optProduct.get());
+                        }
+                } else {
+                    packageOptDtl.getProduct();
                 }
-                Product product = optionDetails.getProduct();
-                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Product details Id:"+product.getId()+" productId:"+product.getName());                
-            }
+        
+                return ppod;
+            })
+            .collect(Collectors.toList());
+
+            updatedPackageOption.setProductPackageOptionDetail(sortedList);
+            // updatedPackageOption = optProductPackageUpdated.get();
+            // for (int i=0;i<updatedPackageOption.getProductPackageOptionDetail().size();i++) {
+            //     ProductPackageOptionDetail optionDetails = updatedPackageOption.getProductPackageOptionDetail().get(i);
+            //     Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Option details Id:"+optionDetails.getId()+" productId:"+optionDetails.getProductId());
+            //     if (optionDetails.getProduct()==null) {
+            //         Optional<Product> optProduct = productRepository.findById(optionDetails.getProductId());
+            //         if (optProduct.isPresent()) {
+            //             optionDetails.setProduct(optProduct.get());
+            //         }
+            //     }
+            //     Product product = optionDetails.getProduct();
+            //     Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Product details Id:"+product.getId()+" productId:"+product.getName());                
+            // }
         }
+        
         response.setStatus(HttpStatus.OK);
         response.setData(updatedPackageOption);
         return ResponseEntity.status(response.getStatus()).body(response);

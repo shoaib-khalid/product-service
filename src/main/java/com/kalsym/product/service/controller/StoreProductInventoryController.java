@@ -295,9 +295,162 @@ public class StoreProductInventoryController {
         }
 
         productInventory.setProductId(productId);
+        // if new client for delivery, we auto set the dine in price reduce 15%
+        if (productInventory.getDineInPrice()==null) {
+            productInventory.setDineInPrice(productInventory.getPrice()*0.85);
+        }
+
+        // if new client for dinein we auto set for delivery price  Increase 17.5%
+        if (productInventory.getPrice()==null) {
+            productInventory.setPrice(productInventory.getDineInPrice()*1.175);
+        }
+
         //productInventory.setProduct(optProdcut.get());
         response.setStatus(HttpStatus.OK);
         response.setData(productInventoryRepository.save(productInventory));
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @PostMapping(path = {"/bulk"}, name = "store-product-inventory-post", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-product-inventory-post', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
+    public ResponseEntity<HttpResponse> postBulkStoreProductInventorys(HttpServletRequest request,
+            @PathVariable String storeId,
+            @PathVariable String productId,
+            @RequestBody List<ProductInventory> productInventoryList) {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "storeId: " + storeId);
+
+        Optional<Store> optStore = storeRepository.findById(storeId);
+
+        if (!optStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
+
+        Optional<Product> optProdcut = productRepository.findById(productId);
+
+        if (!optProdcut.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product NOT_FOUND storeId: " + productId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("product not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+
+        
+
+
+        List<ProductInventory> existingProductInventory = productInventoryRepository.findByProductId(productId);
+
+        //if the existing size same then we just updte data
+        if(existingProductInventory.size() == productInventoryList.size()){
+            
+            //to handle case fior tem code aa if it is variant type
+            if(existingProductInventory.size() == 1){
+
+                //delete it first
+                for (int i=0; i<existingProductInventory.size(); i++) {
+                
+                    ProductInventory pi = existingProductInventory.get(i);
+                    productInventoryRepository.delete(pi);
+        
+                }
+                
+                //then create new one
+                for (int i=0; i<productInventoryList.size(); i++) {
+        
+                    ProductInventory pi = productInventoryList.get(i);
+                    // if delivery, we auto set the dine in price 15%
+                    if (pi.getDineInPrice()==null) {
+                        pi.setDineInPrice(pi.getPrice()*0.85);
+                    }
+
+                    // if dinein we auto set for delivery price  Increase 17.5%
+                    if (pi.getPrice()==null) {
+                        pi.setPrice(pi.getDineInPrice()*1.175);
+                    }
+
+                    productInventoryRepository.save(pi);
+              
+                }
+
+            } else{
+
+                for (int i=0; i<productInventoryList.size(); i++) {
+
+                    ProductInventory previousData = productInventoryRepository.findById(productInventoryList.get(i).getItemCode()).get(); 
+                    previousData.setCompareAtprice(productInventoryList.get(i).getCompareAtprice());
+                    previousData.setItemCode(productInventoryList.get(i).getItemCode());
+                    previousData.setPrice(productInventoryList.get(i).getPrice());
+                    previousData.setProductId(productInventoryList.get(i).getProductId());
+                    previousData.setQuantity(productInventoryList.get(i).getQuantity());
+                    previousData.setSKU(productInventoryList.get(i).getSKU());
+                    previousData.setStatus(productInventoryList.get(i).getStatus());
+
+                         // if delivery, we auto set the dine in price 15%
+                         if (previousData.getDineInPrice()==null) {
+                            previousData.setDineInPrice(productInventoryList.get(i).getPrice()*0.85);
+                        } else{
+
+                            previousData.setDineInPrice(productInventoryList.get(i).getDineInPrice());
+
+                        }
+    
+                        // if dinein we auto set for delivery price  Increase 17.5%
+                        if (previousData.getPrice()==null) {
+                            previousData.setPrice(productInventoryList.get(i).getDineInPrice()*1.175);
+                        } else{
+                            previousData.setPrice(productInventoryList.get(i).getPrice());
+
+                        }
+                    productInventoryRepository.save(previousData);
+                }
+
+            }
+
+
+
+
+        } else{
+
+            //delete first the existing data if size not same
+            if(existingProductInventory.size() != 0){
+                    
+                for (int i=0; i<existingProductInventory.size(); i++) {
+                
+                    ProductInventory pi = existingProductInventory.get(i);
+                    productInventoryRepository.delete(pi);
+        
+                }
+            }
+
+            for (int i=0; i<productInventoryList.size(); i++) {
+        
+                ProductInventory pi = productInventoryList.get(i);
+                
+                // if delivery, we auto set the dine in price 15%
+                if (pi.getDineInPrice()==null) {
+                    pi.setDineInPrice(pi.getPrice()*0.85);
+                }
+
+                // if dinein we auto set for delivery price  Increase 17.5%
+                if (pi.getPrice()==null) {
+                    pi.setPrice(pi.getDineInPrice()*1.175);
+                }
+                productInventoryRepository.save(pi);
+          
+            }
+
+        }
+
+        List<ProductInventory> data = productInventoryRepository.findByProductId(productId);
+
+        response.setStatus(HttpStatus.OK);
+        response.setData(data);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
     
@@ -344,6 +497,16 @@ public class StoreProductInventoryController {
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "FOUND inventoryId: " + id);
  
+        // if delivery, we auto set the dine in price reduce 15%
+        if (bodyProductInventory.getDineInPrice()==null) {
+            bodyProductInventory.setDineInPrice(bodyProductInventory.getPrice()*0.85);
+        }
+
+        // if dinein we auto set for delivery price  Increase 17.5%
+        if (bodyProductInventory.getPrice()==null) {
+            bodyProductInventory.setPrice(bodyProductInventory.getDineInPrice()*1.175);
+        }
+
         ProductInventory pi = optProductInventory.get();
         pi.update(bodyProductInventory);
 

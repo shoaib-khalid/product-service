@@ -5,6 +5,7 @@ import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.model.product.Product;
 import com.kalsym.product.service.model.product.ProductInventory;
 import com.kalsym.product.service.model.product.ProductInventoryItem;
+import com.kalsym.product.service.model.product.ProductInventoryWithDetails;
 import com.kalsym.product.service.model.store.Store;
 import com.kalsym.product.service.repository.ProductAssetRepository;
 import com.kalsym.product.service.repository.StoreRepository;
@@ -12,6 +13,8 @@ import com.kalsym.product.service.repository.ProductRepository;
 import com.kalsym.product.service.repository.ProductInventoryItemRepository;
 import com.kalsym.product.service.repository.ProductReviewRepository;
 import com.kalsym.product.service.utility.Logger;
+
+import java.util.List;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -341,6 +344,89 @@ public class StoreProductInventoryItemController {
         response.setData(productInventoryItemRepository.save(pit));
         return ResponseEntity.status(response.getStatus()).body(response);
                 
+    }
+
+    @PostMapping(path = {"/bulk-item"}, name = "store-product-inventory-post", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-product-inventory-post', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
+    public ResponseEntity<HttpResponse> postBulkStoreProductInventoryItem(HttpServletRequest request,
+            @PathVariable String storeId,
+            @PathVariable String productId,
+            @RequestBody List<ProductInventoryItem> productInventoryItemList) {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "storeId: " + storeId);
+
+        Optional<Store> optStore = storeRepository.findById(storeId);
+
+        if (!optStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
+
+        Optional<Product> optProdcut = productRepository.findById(productId);
+
+        if (!optProdcut.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product NOT_FOUND storeId: " + productId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("product not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+
+        List<ProductInventoryItem> existingProductInventoryItem = productInventoryItemRepository.findByProductId(productId);
+
+        //if the existing size same then we just updte data
+        if(existingProductInventoryItem.size() == productInventoryItemList.size()){
+
+        for (int i=0; i<productInventoryItemList.size(); i++) {
+
+            ProductInventoryItem previousData = productInventoryItemRepository.findByItemCodeAndProductVariantAvailableId(productInventoryItemList.get(i).getItemCode(),productInventoryItemList.get(i).getProductVariantAvailableId()).get(); 
+            previousData.setItemCode(productInventoryItemList.get(i).getItemCode());
+            previousData.setProductId(productId);
+            previousData.setProductVariantAvailableId(productInventoryItemList.get(i).getProductVariantAvailableId());
+            previousData.setSequenceNumber(productInventoryItemList.get(i).getSequenceNumber());
+       
+            productInventoryItemRepository.save(previousData);
+        }
+
+
+    } else{
+
+        //delete first the existing data if size not same
+        if(existingProductInventoryItem.size() != 0){
+                
+            for (int i=0; i<existingProductInventoryItem.size(); i++) {
+            
+                ProductInventoryItem pi = existingProductInventoryItem.get(i);
+                productInventoryItemRepository.delete(pi);
+    
+            }
+        }
+
+        for (int i=0; i<productInventoryItemList.size(); i++) {
+    
+            ProductInventoryItem pi = productInventoryItemList.get(i);
+            productInventoryItemRepository.save(pi);
+        
+        }
+
+    }
+
+        // for (int i=0; i<productInventoryItemList.size(); i++) {
+        
+        //     ProductInventoryItem pi = productInventoryItemList.get(i);
+        //     productInventoryItemRepository.save(pi);
+      
+        // }
+
+        List<ProductInventoryItem> data = productInventoryItemRepository.findByProductId(productId);
+
+        response.setStatus(HttpStatus.OK);
+        response.setData(data);
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 
 }

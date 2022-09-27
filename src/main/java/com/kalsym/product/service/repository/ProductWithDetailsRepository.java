@@ -38,6 +38,7 @@ public interface ProductWithDetailsRepository extends PagingAndSortingRepository
             + "AND pwd.seoName LIKE CONCAT('%', :seoName ,'%') "
             + "AND pwd.status IN :status "
             + "AND pwd.storeId = :storeId "
+            + "AND pwd.shortId = :shortId "
             + "AND pwd.categoryId LIKE CONCAT('%', :categoryId, '%') "
             + "GROUP BY pwd.id"
     )
@@ -47,6 +48,7 @@ public interface ProductWithDetailsRepository extends PagingAndSortingRepository
             @Param("seoName") String seoName,
             @Param("status") List<String> status,
             @Param("categoryId") String categoryId,
+            @Param("shortId") Integer shortId,
             Pageable pageable
     );
     
@@ -57,6 +59,7 @@ public interface ProductWithDetailsRepository extends PagingAndSortingRepository
             + "WHERE pwd.name LIKE CONCAT('%', :name ,'%') "
             + "AND pwd.seoName LIKE CONCAT('%', :seoName ,'%') "
             + "AND pwd.status IN :status "
+            + "AND pwd.shortId = :shortId "
             + "AND pwd.storeId = :storeId "
             + "GROUP BY pwd.id"
     )
@@ -65,6 +68,7 @@ public interface ProductWithDetailsRepository extends PagingAndSortingRepository
             @Param("name") String name,
             @Param("seoName") String seoName,
             @Param("status") List<String> status,
+            @Param("shortId") Integer shortId,
             Pageable pageable
     );
 }

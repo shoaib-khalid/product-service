@@ -3,24 +3,34 @@ package com.kalsym.product.service.controller;
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.HashmapLoader;
 import com.kalsym.product.service.utility.HttpResponse;
+import com.kalsym.product.service.model.product.CompareProductOwnerAndBranch;
+import com.kalsym.product.service.model.product.CompareProductPackageOption;
+import com.kalsym.product.service.model.product.CompareVariantAvailableIdOwnerAndBranch;
+import com.kalsym.product.service.model.product.CompareVariantIdOwnerAndBranch;
 import com.kalsym.product.service.model.product.Product;
+import com.kalsym.product.service.model.product.ProductAsset;
+import com.kalsym.product.service.model.product.ProductInventory;
 import com.kalsym.product.service.model.product.ProductInventoryWithDetails;
-import com.kalsym.product.service.model.product.ProductSpecs;
+import com.kalsym.product.service.model.product.ProductPackageOption;
+import com.kalsym.product.service.model.product.ProductPackageOptionDetail;
+import com.kalsym.product.service.model.product.ProductVariant;
+import com.kalsym.product.service.model.product.ProductVariantAvailable;
 import com.kalsym.product.service.model.product.ProductWithDetails;
+import com.kalsym.product.service.model.store.CompareStoreCategory;
 import com.kalsym.product.service.model.store.Store;
+import com.kalsym.product.service.model.store.StoreCategory;
 import com.kalsym.product.service.model.ItemDiscount;
-import com.kalsym.product.service.model.store.StoreDiscount;
-import com.kalsym.product.service.enums.StoreDiscountType;
 import com.kalsym.product.service.enums.DiscountCalculationType;
 import com.kalsym.product.service.model.RegionCountry;
-import com.kalsym.product.service.model.product.ProductInventoryItem;
+import com.kalsym.product.service.model.product.ProductInventoryItemMain;
 import com.kalsym.product.service.model.store.StoreDiscountProduct;
-import com.kalsym.product.service.model.store.StoreDiscountTier;
-import com.kalsym.product.service.model.store.StoreWithDetails;
 import com.kalsym.product.service.model.store.object.CustomPageable;
 import com.kalsym.product.service.repository.ProductAssetRepository;
+import com.kalsym.product.service.repository.ProductInventoryItemMainRepository;
 import com.kalsym.product.service.repository.ProductInventoryItemRepository;
+import com.kalsym.product.service.repository.ProductInventoryRepository;
 import com.kalsym.product.service.repository.StoreRepository;
+import com.kalsym.product.service.service.CloneProductService;
 import com.kalsym.product.service.repository.ProductRepository;
 import com.kalsym.product.service.repository.ProductVariantRepository;
 import com.kalsym.product.service.repository.ProductVariantAvailableRepository;
@@ -28,6 +38,9 @@ import com.kalsym.product.service.repository.ProductReviewRepository;
 import com.kalsym.product.service.repository.ProductWithDetailsRepository;
 import com.kalsym.product.service.utility.Logger;
 import java.util.Optional;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,19 +61,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.kalsym.product.service.repository.ProductInventoryWithDetailsRepository;
+import com.kalsym.product.service.repository.ProductPackageOptionDetailRepository;
+import com.kalsym.product.service.repository.ProductPackageOptionRepository;
 import com.kalsym.product.service.repository.RegionCountriesRepository;
+import com.kalsym.product.service.repository.StoreCategoryRepository;
 import com.kalsym.product.service.repository.StoreDiscountRepository;
 import com.kalsym.product.service.repository.StoreDiscountProductRepository;
-import com.kalsym.product.service.utility.DateTimeUtil;
 import com.kalsym.product.service.utility.ProductDiscount;
+import com.kalsym.product.service.worker.BulkDeleteProduct;
+
 import java.net.MalformedURLException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.HashMap;
-import java.text.SimpleDateFormat; 
+
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -110,12 +126,33 @@ public class StoreProductController {
 
     @Autowired
     RegionCountriesRepository regionCountriesRepository;
+
+    @Autowired
+    StoreCategoryRepository storeCategoryRepository;
+
+    @Autowired
+    ProductInventoryRepository productInventoryMainRepository;
+
+    @Autowired
+    ProductInventoryItemMainRepository productInventoryItemMainRepository;
+
+    @Autowired
+    ProductPackageOptionRepository productPackageOptionRepository;
+
+    @Autowired
+    ProductPackageOptionDetailRepository productPackageOptionDetailRepository;
+
+    @Autowired
+    CloneProductService cloneProductService;
     
     @Autowired
     private HashmapLoader hashmapLoader;
             
-    @Value("${product.seo.url:https://{{store-domain}}.symplified.store/products/name/{{product-name}}}")
+    @Value("${product.seo.url:https://{{store-domain}}/product/{{product-name}}}")
     private String productSeoUrl;
+
+    @Value("${asset.service.url}")
+    String assetServiceUrl;
 
     @GetMapping(path = {""}, name = "store-products-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-products-get', 'all')")
@@ -124,14 +161,22 @@ public class StoreProductController {
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String seoName,
             @RequestParam(required = false) String categoryId,
+            @RequestParam(required = false) Integer shortId,
             @RequestParam(required = false) List<String> status,
             @RequestParam(required = false, defaultValue = "name") String sortByCol,
             @RequestParam(required = false, defaultValue = "ASC") Sort.Direction sortingOrder,
+            @RequestParam(required = false) Boolean showAllPrice,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int pageSize) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " STATUS: " + status+" categoryId:"+categoryId);
+
+
+        //to hide the product that 0 price
+        if(showAllPrice == null ){
+            showAllPrice = false;
+        }
 
         if (status == null) {
             status = new ArrayList();
@@ -156,31 +201,32 @@ public class StoreProductController {
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Sort By column:" + sortByCol);
 
-        Pageable pageable = null;
+        Pageable pageable = PageRequest.of(page, pageSize);
 
-        if (sortByCol.equals("price")) {
-            pageable = PageRequest.of(page, pageSize, sortingOrder, "pi.price");
-        } else {
-            pageable = PageRequest.of(page, pageSize, sortingOrder, sortByCol);
 
-        }
+        // if (sortByCol.equals("price")) {
+        //     pageable = PageRequest.of(page, pageSize, sortingOrder, "pi.price");
+        // } else {
+        //     pageable = PageRequest.of(page, pageSize, sortingOrder, sortByCol);
+
+        // }
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Pageable object created:" + sortingOrder);
         
         
-        if (categoryId == null || categoryId.isEmpty()) {
-            categoryId = "";
-        }
+        // if (categoryId == null || categoryId.isEmpty()) {
+        //     categoryId = "";
+        // }
         
-        if (name == null || name.isEmpty()) {
-            name = "";
-        }
+        // if (name == null || name.isEmpty()) {
+        //     name = "";
+        // }
 
-        if (seoName == null || seoName.isEmpty()) {
-            seoName = "";
-        }
-        
-        /*
+        // if (seoName == null || seoName.isEmpty()) {
+        //     seoName = "";
+        // }
+
+    
         ProductWithDetails productMatch = new ProductWithDetails();
         productMatch.setStoreId(storeId);
         ExampleMatcher matcher = ExampleMatcher
@@ -189,7 +235,7 @@ public class StoreProductController {
                 .withIgnoreNullValues()
                 .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
         Example<ProductWithDetails> productExample = Example.of(productMatch, matcher);
-        */
+        
         
         //get reqion country for store
         RegionCountry regionCountry = null;
@@ -198,18 +244,42 @@ public class StoreProductController {
             regionCountry = optRegion.get();
         }
         
-        Page<ProductWithDetails> productWithPage = null;
-        if (!categoryId.equals(""))
-            productWithPage = productWithDetailsRepository.findByNameOrSeoNameOrCategoryIdAscendingOrderByPrice(storeId, name, seoName, status, categoryId, pageable);        
-        else
-            productWithPage = productWithDetailsRepository.findByNameOrSeoNameAscendingOrderByPrice(storeId, name, seoName, status, pageable);        
-        //Page<ProductWithDetails> productWithPage = productWithDetailsRepository.findAll(getStoreProductSpec(name, seoName, categoryId, status, productExample), pageable);
+        // Page<ProductWithDetails> productWithPage = null;
+        // if (!categoryId.equals(""))
+        //     productWithPage = productWithDetailsRepository.findByNameOrSeoNameOrCategoryIdAscendingOrderByPrice(storeId, name, seoName, status, categoryId, shortId, pageable);        
+        // else
+        //     productWithPage = productWithDetailsRepository.findByNameOrSeoNameAscendingOrderByPrice(storeId, name, seoName, status, shortId, pageable);        
+        Page<ProductWithDetails> productWithPage = productWithDetailsRepository.findAll(getStoreProductSpec(name, seoName, categoryId,storeId,shortId, status,showAllPrice, productExample,sortByCol,sortingOrder), pageable);
         List<ProductWithDetails> productList = productWithPage.getContent();
         
         ProductWithDetails[] productWithDetailsList = new ProductWithDetails[productList.size()];
         for (int x=0;x<productList.size();x++) {
             //check for item discount in hashmap
             ProductWithDetails productDetails = productList.get(x);
+
+            //set asset url for List of products asset and thumnailurl
+            List<ProductAsset> productAssets = productDetails.getProductAssets();
+            for(ProductAsset pa : productAssets){
+                //handle null
+                if(pa.getUrl() != null){
+                    pa.setUrl(assetServiceUrl+pa.getUrl());
+
+                } else{
+                    pa.setUrl(null);
+
+                }
+            }
+            productDetails.setProductAssets(productAssets);
+            //handle null
+            if(productDetails.getThumbnailUrl() != null){
+                productDetails.setThumbnailUrl(assetServiceUrl+productDetails.getThumbnailUrl());
+
+
+            } else{
+                productDetails.setThumbnailUrl(null);
+
+            }
+            
             for (int i=0;i<productDetails.getProductInventories().size();i++) {
                 ProductInventoryWithDetails productInventory = productDetails.getProductInventories().get(i);
                 //ItemDiscount discountDetails = discountedItemMap.get(productInventory.getItemCode());
@@ -300,6 +370,31 @@ public class StoreProductController {
                 
         //check for item discount in hashmap
         ProductWithDetails productDetails = optProdcut.get();
+
+        //set asset url for List of products asset and thumnailurl
+        List<ProductAsset> productAssets = optProdcut.get().getProductAssets();
+        for(ProductAsset pa : productAssets){
+            //handle null
+            if(pa.getUrl() != null){
+                pa.setUrl(assetServiceUrl+pa.getUrl());
+
+            } else {
+                pa.setUrl(null);
+
+            }
+            
+        }
+        productDetails.setProductAssets(productAssets);
+        //handle null
+        if(optProdcut.get().getThumbnailUrl() != null){
+            productDetails.setThumbnailUrl(assetServiceUrl+optProdcut.get().getThumbnailUrl());
+
+
+        } else{
+            productDetails.setThumbnailUrl(null);
+
+        }
+        
         for (int i=0;i<productDetails.getProductInventories().size();i++) {
             ProductInventoryWithDetails productInventory = productDetails.getProductInventories().get(i);
             //ItemDiscount discountDetails = discountedItemMap.get(productInventory.getItemCode());
@@ -403,8 +498,17 @@ public class StoreProductController {
         Product product = optProdcut.get();
         product.update(bodyProduct);
 
+        Product body = productRepository.save(product);
+        if(body.getThumbnailUrl() == null){
+            body.setThumbnailUrl(null);
+
+        }else{
+            body.setThumbnailUrl(assetServiceUrl+body.getThumbnailUrl());
+
+        }
+
         response.setStatus(HttpStatus.OK);
-        response.setData(productRepository.save(product));
+        response.setData(body);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
@@ -434,7 +538,7 @@ public class StoreProductController {
 
         for (Product existingProduct : products) {
             if (existingProduct.getName().equals(bodyProduct.getName()) && !"DELETED".equalsIgnoreCase(existingProduct.getStatus())) {
-                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "username already exists", "");
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "productName already exists", "");
                 response.setStatus(HttpStatus.CONFLICT);
                 errors.add("Product name already exists");
                 response.setData(errors);
@@ -445,7 +549,9 @@ public class StoreProductController {
 
         //String seoName = generateSeoName(bodyProduct.getName());
         
-        String seoName = bodyProduct.getSeoName();
+        // String seoName = bodyProduct.getSeoName();
+        //Generate SEONAME replace all special character and white space \\s 
+        String seoName = bodyProduct.getName().replaceAll("[`~!@#$%^&*()_+\\[\\]\\\\;\',./{}|:\"<>?|\\s]", "-");
         
         String seoUrl = productSeoUrl.replace("{{store-domain}}", optStore.get().getDomain());
         seoUrl = seoUrl.replace("{{product-name}}", seoName);
@@ -453,6 +559,9 @@ public class StoreProductController {
 
         bodyProduct.setSeoName(seoName);
         if (bodyProduct.getIsPackage()==null) { bodyProduct.setIsPackage(Boolean.FALSE); }
+
+        //set image url 
+
 
         Product savedProduct = productRepository.save(bodyProduct);
         Logger.application.info(ProductServiceApplication.VERSION, logprefix, "product added to store with storeId: {}, productId: {}" + storeId, savedProduct.getId());
@@ -502,23 +611,38 @@ public class StoreProductController {
         return name;
     }
     
-    
+    // name, seoName,  categoryId, storeId,shortId, status, 
     public Specification<ProductWithDetails> getStoreProductSpec(
             String name, String seoName, String categoryId, 
-            List<String> statusList, Example<ProductWithDetails> example) {
+            String storeId, Integer shortId,
+            List<String> statusList,Boolean showAllPrice, Example<ProductWithDetails> example,
+            String sortByCol, Sort.Direction sortingOrder) {
 
         return (Specification<ProductWithDetails>) (root, query, builder) -> {
             final List<Predicate> predicates = new ArrayList<>();
+            Join<ProductWithDetails, ProductInventoryWithDetails> productInventories = root.join("productInventories", JoinType.INNER);
+
 
             if (name != null) {
-                predicates.add(builder.equal(root.get("name"), name));
+                // predicates.add(builder.equal(root.get("name"), name));
+                predicates.add(builder.like(root.get("name"), "%"+name+"%"));
+
             }
             if (seoName != null) {
-                predicates.add(builder.equal(root.get("seoName"), seoName));
+                // predicates.add(builder.equal(root.get("seoName"), seoName));
+                predicates.add(builder.like(root.get("seoName"), "%"+seoName+"%"));
+
             }
             if (categoryId != null) {
                 predicates.add(builder.equal(root.get("categoryId"), categoryId));
             }
+            if (storeId != null ){
+                predicates.add(builder.equal(root.get("storeId"), storeId));
+            }
+            if (shortId != null ){
+                predicates.add(builder.equal(root.get("shortId"), shortId));
+            }
+
             if (statusList!=null) {
                 int statusCount = statusList.size();
                 List<Predicate> statusPredicatesList = new ArrayList<>();
@@ -529,10 +653,141 @@ public class StoreProductController {
                 Predicate finalPredicate = builder.or(statusPredicatesList.toArray(new Predicate[statusCount]));
                 predicates.add(finalPredicate);
             }
+
+            // if (sortByCol.equals("price")) {
+            //     pageable = PageRequest.of(page, pageSize, sortingOrder, "pi.price");
+            // } else {
+            //     pageable = PageRequest.of(page, pageSize, sortingOrder, sortByCol);
+
+            // }
+            List<Order> orderList = new ArrayList<Order>();
+
+            if (sortingOrder==Sort.Direction.ASC){
+                if(sortByCol.equals("price")){
+
+                    orderList.add(builder.asc(productInventories.get(sortByCol)));
+
+                } else if(sortByCol.equals("dineInPrice")){
+                    orderList.add(builder.asc(productInventories.get(sortByCol)));
+
+                }
+                else{
+                    orderList.add(builder.asc(root.get(sortByCol)));
+
+                }
+
+            }else{
+
+                if(sortByCol.equals("price")){
+
+                    orderList.add(builder.desc(productInventories.get(sortByCol)));
+
+
+                }else if(sortByCol.equals("dineInPrice")){
+                    orderList.add(builder.desc(productInventories.get(sortByCol)));
+
+                }
+                else{
+                    orderList.add(builder.desc(root.get(sortByCol)));
+
+                }
+
+
+            }
+
+            //filter product code that has prce not 0 for handling combo
+            if(showAllPrice == false){
+                predicates.add(builder.notEqual(productInventories.get("price"), 0));
+
+            }
+
+            query.orderBy(orderList);
+            query.distinct(true);
+
+
             predicates.add(QueryByExamplePredicateBuilder.getPredicate(root, builder, example));
 
             return builder.and(predicates.toArray(new Predicate[predicates.size()]));
         };
     }
+
+    
+    @PostMapping(path = {"/clone"}, name = "store-products-post")
+    @PreAuthorize("hasAnyAuthority('store-products-post', 'all')  and @customOwnerVerifier.VerifyStore(#storeId)")
+    public ResponseEntity<HttpResponse> postCloneStoreProduct(HttpServletRequest request,
+            @PathVariable String storeId,
+            @RequestParam(required = true) String storeOwnerId) throws Exception {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "storeId: " + storeId);
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "storeOwnerId: " + storeOwnerId);
+
+        Optional<Store> optStore = storeRepository.findById(storeId);
+
+        if (!optStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+
+        Optional<Store> optStoreOwner = storeRepository.findById(storeOwnerId);
+
+        if (!optStoreOwner.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeOwnerId: " + storeId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("storeOwnerId not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
+
+        Pageable pageable = PageRequest.of(0, 5);
+
+        Page<Product> existingBranchProducts = productRepository.findPageableStoreAndStatus(storeId, "DELETED", pageable);
+        
+        if(existingBranchProducts.getTotalElements() != 0){
+            response.setStatus(HttpStatus.OK);
+            response.setError("Cannot clone products for store that has already product listing");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+
+        CloneProductThread thread = new CloneProductThread(storeId, storeOwnerId,optStore,cloneProductService);
+        thread.start();
+
+        response.setStatus(HttpStatus.OK);
+        response.setData("SUCCESS CLONING");
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PostMapping(path = {"/bulk-delete"}, name = "store-products-delete-by-id", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-products-delete-by-id', 'all')  and @customOwnerVerifier.VerifyStore(#storeId)")
+    public ResponseEntity<HttpResponse> deleteStoreProductByBulk(HttpServletRequest request,
+            @PathVariable String storeId,
+            @RequestBody List<String> productIds) {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "storeId: " + storeId);
+
+        Optional<Store> optStore = storeRepository.findById(storeId);
+
+        if (!optStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
+
+        //create thread
+        BulkDeleteProduct threadBulkDeleteProduct = new BulkDeleteProduct(productIds,cloneProductService);
+        threadBulkDeleteProduct.start();
+
+        response.setStatus(HttpStatus.OK);
+        response.setData("Success Deleted");
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
 
 }

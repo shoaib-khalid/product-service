@@ -16,6 +16,8 @@ import com.kalsym.product.service.utility.Logger;
 import java.util.Optional;
 import java.util.List;
 import java.util.ArrayList;
+
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -75,6 +77,29 @@ public class StoreAssetsController {
     
     @Value("${store.favicon.symplified.default.url:https://symplified.it/store-assets/fav-icon-symplified.png}")
     private String storeFavIconUrlSymplified;
+
+    @Value("${asset.service.url}")
+    private String assetServiceUrl;
+
+    private String storeLogoDefaultPath;
+    private String storeBannerEcommerceDefaultPath;
+    private String storeBannerFnbDefaultPath;
+    private String storeFavIconEasydukanPath;
+    private String storeFavIconDeliverinPath;
+    private String storeFavIconSymplifiedPath;
+
+    //https://newbedev.com/spring-boot-value-returns-always-null
+    @PostConstruct
+    public void postConstruct(){
+        storeLogoDefaultPath = assetServiceUrl+"/store-assets/logo_symplified_bg.png";
+        storeBannerEcommerceDefaultPath = assetServiceUrl+ "/store-assets/banner-ecomm.jpeg";
+        storeBannerFnbDefaultPath = assetServiceUrl+"/store-assets/banner-fnb.png";
+        storeFavIconEasydukanPath = assetServiceUrl+"/store-assets/fav-icon-easydukan.png";
+        storeFavIconDeliverinPath = assetServiceUrl+"/store-assets/fav-icon-deliverin.png";
+        storeFavIconSymplifiedPath = assetServiceUrl+"/store-assets/fav-icon-symplified.png";
+
+    }
+
             
     @PostMapping(path = {""}, name = "store-assets-post")
     @PreAuthorize("hasAnyAuthority('store-assets-post', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
@@ -127,7 +152,7 @@ public class StoreAssetsController {
 
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Asset Filename: " + storeAsset.getAssetFile().getOriginalFilename());
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Asset storagePath: " + logoStoragePath);
-        storeAsset.setAssetUrl(storeAssetsBaseUrl + generatedUrl);                
+        storeAsset.setAssetUrl("/store-assets/" + generatedUrl);                
 
         storeAssetsRepository.save(storeAsset);
         
@@ -136,7 +161,7 @@ public class StoreAssetsController {
                 storeAssetsRepository, regionVerticalRepository, 
                 storeBannerFnbDefaultUrl, storeBannerEcommerceDefaultUrl,
                 storeLogoDefaultUrl, 
-                storeFavIconUrlSymplified, storeFavIconUrlDeliverin, storeFavIconUrlEasydukan); 
+                storeFavIconUrlSymplified, storeFavIconUrlDeliverin, storeFavIconUrlEasydukan,assetServiceUrl); 
         List<StoreAssets> storeAssetsListWithoutFile = new ArrayList<>();
         for (int i=0;i<storeAssetsList.size();i++) {
             StoreAssets storeAssetsWithoutFile = storeAssetsList.get(i);
@@ -169,13 +194,13 @@ public class StoreAssetsController {
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
         
         List<StoreAssets> storeAssetsList = storeAssetsRepository.findByStoreId(storeId);
-        
+
         storeAssetsList = StoreAssetsUtility.SetDefaultAsset(optStore.get().getVerticalCode(), storeId, storeAssetsList,
                 storeAssetsRepository, regionVerticalRepository, 
-                storeBannerFnbDefaultUrl, storeBannerEcommerceDefaultUrl,
-                storeLogoDefaultUrl, 
-                storeFavIconUrlSymplified, storeFavIconUrlDeliverin, storeFavIconUrlEasydukan); 
-        
+                storeBannerFnbDefaultPath, storeBannerEcommerceDefaultPath,
+                storeLogoDefaultPath, 
+                storeFavIconSymplifiedPath, storeFavIconDeliverinPath, storeFavIconEasydukanPath,assetServiceUrl); 
+
         List<StoreAssets> storeAssetsListWithoutFile = new ArrayList<>();
         for (int i=0;i<storeAssetsList.size();i++) {
             StoreAssets storeAssetsWithoutFile = storeAssetsList.get(i);
@@ -258,11 +283,26 @@ public class StoreAssetsController {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Uploaded Filename: " + uploadedFile.getOriginalFilename());
             String logoStoragePath = fileStorageService.saveStoreAsset(uploadedFile, storeId + "-"+storeAsset.getAssetType());
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Asset storagePath: " + logoStoragePath);
-            storeAsset.setAssetUrl(storeAssetsBaseUrl + storeId + "-"+storeAsset.getAssetType());
+            storeAsset.setAssetUrl("/store-assets/" + storeId + "-"+storeAsset.getAssetType());
         } 
+
+        //TO SAVE DATA 
+        storeAssetsRepository.save(storeAsset);
+
+        //TO SET THE URL SERVICE
+        //handle null
+        if(storeAsset.getAssetUrl() != null){
+            storeAsset.setAssetUrl(assetServiceUrl+storeAsset.getAssetUrl());
+
+        }else{
+
+            storeAsset.setAssetUrl(null);
+
+        }
+
         
         response.setStatus(HttpStatus.OK);
-        response.setData(storeAssetsRepository.save(storeAsset));
+        response.setData(storeAsset);
         return ResponseEntity.status(response.getStatus()).body(response);
     }        
 

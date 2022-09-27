@@ -1,4 +1,312 @@
 ##################################################
+# product-service-3.10.30| 23-September-2022 
+##################################################
+1. bulk delete product and categories
+##################################################
+# product-service-3.10.29| 22-September-2022 
+##################################################
+
+1. Hide product that has price 0
+2. Add new column for product_package_option, product_package_option_detail 
+3. Nested sort the sequence number
+ALTER TABLE symplified.product_package_option ADD sequenceNumber int NULL;
+ALTER TABLE symplified.product_package_option_detail ADD isDefault tinyint(1) DEFAULT 0;
+ALTER TABLE symplified.product_package_option_detail ADD sequenceNumber int NULL;
+
+
+##################################################
+# product-service-3.10.28| 09-September-2022 
+##################################################
+1. AUTO CALCULATE PRICE FOR DINE IN OR DELIVERY
+##################################################
+# product-service-3.10.27| 09-September-2022 
+##################################################
+
+ALTER TABLE symplified.store ADD isDineIn tinyint(1) DEFAULT 0 NULL;
+ALTER TABLE symplified.store ADD dineInOption enum('SELFCOLLECT','SENDTOTABLE') DEFAULT 'SELFCOLLECT' NULL;
+ALTER TABLE symplified.store ADD dineInPaymentType enum('COD') DEFAULT 'COD' NULL;
+ALTER TABLE symplified.store ADD isDelivery tinyint(1) DEFAULT 1 NULL;
+
+
+
+##################################################
+# product-service-3.10.26| 07-September-2022 
+##################################################
+1. File handling if not exists
+##################################################
+# product-service-3.10.25 | 07-September-2022 
+##################################################
+1. Generate sitemap based on location of marketplace
+##################################################
+# product-service-3.10.24 | 02-September-2022 
+##################################################
+1. Fix bug for sort product price by Adding predicate builder for sort
+##################################################
+# product-service-3.10.23 | 30-August-2022 
+##################################################
+1. change query store product get controller and add new query param
+##################################################
+# product-service-3.10.22 | 26-August-2022 
+##################################################
+1. Change query for before cloning product
+
+##################################################
+# product-service-3.10.21 | 16-August-2022 
+##################################################
+1. Duplicate Bulk Products with Variant / Combo from Other Merchant Acc
+2. Add new enum 'CoverImageUrl' storeAssets
+
+##DB Changes:
+ ALTER TABLE symplified.store_assets MODIFY COLUMN assetType enum('CoverImageUrl','BannerDesktopUrl','BannerMobileUrl','FaviconUrl','DiscountBannerUrl','QrcodeUrl','LogoUrl') CHARACTER SET utf8 COLLATE utf8_general_ci NULL;
+
+##################################################
+# product-service-3.10.20 | 11-August-2022 
+##################################################
+1. Merge hotfix 
+##################################################
+# product-service-3.10.19 | 11-August-2022 
+##################################################
+
+1. Fix whatsapp issue
+##################################################
+# product-service-3.10.18 | 10-August-2022 
+##################################################
+
+1. Search products and filter image not null , post product assets with url
+
+##################################################
+# product-service-3.10.17 | 09-August-2022 
+##################################################
+
+1. Create new endpoint get "/marketplace-popup"
+
+##DB Changes:
+
+CREATE TABLE `marketplace_popup_config` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `popupUrl` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `regionCountryId` varchar(3) DEFAULT NULL,
+  `type` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'DESKTOP or MOBILE',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `sequence` int DEFAULT NULL,
+  `actionUrl` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `marketplace_banner_config_FK` (`regionCountryId`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+##################################################
+# product-service-3.10.16 | 01-August-2022 
+##################################################
+
+1. Add new response colum actionUrl in marketplace banner 
+##################################################
+# product-service-3.10.15 | 27-July-2022 
+##################################################
+
+1. Generate seoname and show marketplace url
+
+##################################################
+# product-service-3.10.14 | 25-July-2022 
+##################################################
+
+1. Bulk inventory and inventory items
+
+##################################################
+# product-service-3.10.13 | 19-July-2022 
+##################################################
+
+1. Marketplace banner config with sequence
+##################################################
+# product-service-3.10.12 | 19-July-2022 
+##################################################
+
+1. Include store category data in product with details
+##################################################
+# product-service-3.10.11 | 18-July-2022 
+##################################################
+
+1. Create new endpoint for postStoreTiming bulk (Support for create data and update data with bulk)
+
+##################################################
+# product-service-3.10.10 | 15-July-2022 
+##################################################
+1. Create endpoint for platform-og-tag
+
+INSERT INTO `authority` (`id`, `serviceId`, `name`, `description`) VALUES
+('platform-og-tag-get', 'product-service', 'getPlatformOgTag', '{GET /platform-og-tag, produces [application/json]}');
+
+INSERT INTO `role_authority` (`roleId`, `authorityId`, `serviceId`) VALUES
+('STORE_OWNER', 'platform-og-tag-get', 'product-service'),
+('SUPER_USER', 'platform-og-tag-get', 'product-service');
+
+##################################################
+# product-service-3.10.9 | 7-July-2022 
+##################################################
+1. Rebuild
+2. update table and insert data of platform logo square in platform_config
+
+##DB Changes:
+ALTER TABLE platform_config ADD platformLogoSquare varchar(500) NULL;
+
+
+UPDATE platform_config 
+SET platformLogoSquare = '/store-assets/DeliverIn-Logo_300X300.png'
+WHERE platformName = 'Deliverin'
+
+##################################################
+# product-service-3.10.8 | 6-July-2022 
+##################################################
+1. Rebuild
+##################################################
+# product-service-3.10.7 | 5-July-2022 
+##################################################
+1. Handling null value for asset url
+##################################################
+# product-service-3.10.6 | 5-July-2022 
+##################################################
+1. set url service for image url 
+2. Change config
+3. 
+
+##Config changes 
+asset.service.url = https://assets.symplified.it //inject production asset service url
+
+##DB Changes:
+
+	UPDATE product 
+	SET thumbnailUrl = REPLACE(thumbnailUrl, 'https://symplified.it', '') 
+	WHERE thumbnailUrl LIKE '%https://symplified.it%';
+
+	UPDATE product 
+	SET thumbnailUrl = REPLACE(thumbnailUrl, 'https://symplified.biz', '') 
+	WHERE thumbnailUrl  LIKE '%https://symplified.biz%';
+
+	UPDATE product_asset
+	SET url = REPLACE(url, 'https://symplified.it', '') 
+	WHERE url LIKE '%https://symplified.it%';
+
+	UPDATE product_asset
+	SET url = REPLACE(url, 'https://symplified.biz', '') 
+	WHERE url LIKE '%https://symplified.biz%';
+
+	UPDATE store_assets
+	SET assetUrl = REPLACE(assetUrl, 'https://symplified.it', '') 
+	WHERE assetUrl LIKE '%https://symplified.it%';
+
+	UPDATE store_assets
+	SET assetUrl = REPLACE(assetUrl, 'https://symplified.biz', '') 
+	WHERE assetUrl LIKE '%https://symplified.biz%';
+
+	UPDATE store_category
+	SET thumbnailUrl = REPLACE(thumbnailUrl, 'https://symplified.it', '') 
+	WHERE thumbnailUrl LIKE '%https://symplified.it%';
+
+	UPDATE store_category
+	SET thumbnailUrl = REPLACE(thumbnailUrl, 'https://symplified.biz', '') 
+	WHERE thumbnailUrl LIKE '%https://symplified.biz%';
+
+##################################################
+# product-service-3.10.5 | 1-July-2022 
+##################################################
+1. Add isSnooze for /stores endpoint
+
+##################################################
+# product-service-3.10.4 | 30-June-2022 
+##################################################
+1. Market place banner set url service for images url
+
+##DB Changes:
+
+	UPDATE marketplace_banner_config 
+	SET bannerUrl = REPLACE(bannerUrl, 'https://symplified.it', '') 
+	WHERE bannerUrl  LIKE '%https://symplified.it%';
+
+##################################################
+# product-service-3.10.3 | 30-June-2022 
+##################################################
+1. Plaform service set url service for images url
+2. Update db in platform config
+
+##DB Changes:
+
+	UPDATE platform_config 
+	SET platformLogo = REPLACE(platformLogo, 'https://symplified.it', '') 
+	WHERE platformLogo  LIKE '%https://symplified.it%';
+
+	UPDATE platform_config 
+	SET platformLogoDark = REPLACE(platformLogoDark, 'https://symplified.it', '') 
+	WHERE platformLogoDark  LIKE '%https://symplified.it%';
+
+	UPDATE platform_config 
+	SET platformFavIcon = REPLACE(platformFavIcon, 'https://symplified.it', '') 
+	WHERE platformFavIcon  LIKE '%https://symplified.it%';
+
+	UPDATE platform_config 
+	SET platformFavIcon32 = REPLACE(platformFavIcon32, 'https://symplified.it', '') 
+	WHERE platformFavIcon32  LIKE '%https://symplified.it%'
+
+##################################################
+# product-service-3.10.2 | 30-June-2022 
+##################################################
+1. Remove code for version 3.8.0 since it is already implemented in location service
+
+##################################################
+# product-service-3.10.1 | 27-June-2022 
+##################################################
+1. add request param type('DESKTOP'|'MOBILE') for banner-config endpoint 
+
+##################################################
+# product-service-3.10.0 | 23-June-2022
+##################################################
+
+1. Check domain name of store with reservde domain name
+2. DB Changes : Create new table 'reserved_domain'
+
+
+##DB Changes:
+
+ CREATE TABLE symplified.reserved_domain (
+ 	id bigint auto_increment NOT NULL,
+ 	`domain` varchar(300) NULL,
+ 	CONSTRAINT reserved_domain_PK PRIMARY KEY (id)
+ );
+
+INSERT INTO symplified.reserved_domain (`domain`) VALUES('payment');
+INSERT INTO symplified.reserved_domain (`domain`) VALUES('admin');
+INSERT INTO symplified.reserved_domain (`domain`) VALUES('customer');
+
+
+
+##################################################
+# product-service-3.9.0 | 10-June-2022
+##################################################
+
+1. Create new endpoint to get all marketplace banner image ( get :/banner-config?regionCountryId=:? )
+2. DB Changes : Create new table for market place banner
+
+
+##DB Changes:
+
+CREATE TABLE `marketplace_banner_config` (
+	id bigint auto_increment NOT NULL,
+	bannerUrl varchar(500) NULL,
+	regionCountryId varchar(3) NULL,
+	CONSTRAINT marketplace_banner_config_PK PRIMARY KEY (id),
+	CONSTRAINT marketplace_banner_config_FK FOREIGN KEY (regionCountryId) REFERENCES symplified.region_country(id) ON DELETE RESTRICT ON UPDATE RESTRICT
+);
+
+
+##################################################
+# product-service-3.8.0 | 21-May-2022
+##################################################
+
+1. Create new endpoint to get all products based on parentCategoryId get :/products/parent-category
+
+# product-service-3.7.4 | 14-Jun-2022
+##################################################
+
+1. Fix seoUrl in store product
+##################################################
 # product-service-3.7.3 | 25-May-2022
 ##################################################
 

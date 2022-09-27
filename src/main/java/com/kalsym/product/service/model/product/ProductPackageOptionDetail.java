@@ -52,7 +52,11 @@ public class ProductPackageOptionDetail implements Serializable {
     private String productPackageOptionId;
     
     private String productId;
-   
+
+    private Boolean isDefault;
+
+    private Integer sequenceNumber;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "productId", insertable = false, updatable = false)
     private Product product;

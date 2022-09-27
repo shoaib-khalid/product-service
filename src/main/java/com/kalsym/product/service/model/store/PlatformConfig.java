@@ -3,6 +3,8 @@ package com.kalsym.product.service.model.store;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.kalsym.product.service.ProductServiceApplication;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
@@ -50,4 +52,43 @@ public class PlatformConfig implements Serializable {
     private String gaCode;
     
     private String platformFavIcon32;
+
+    private String platformLogoSquare;
+
+    
+    public String getPlatformLogo() {
+        if (platformLogo==null)
+            return null;
+        else
+            return ProductServiceApplication.ASSETURL+ platformLogo;
+    }
+
+    public String getPlatformLogoDark() {
+        if (platformLogoDark==null)
+            return null;
+        else
+            return ProductServiceApplication.ASSETURL+ platformLogoDark;
+    }
+
+    public String getPlatformFavIcon() {
+        if (platformFavIcon==null)
+            return null;
+        else
+            return ProductServiceApplication.ASSETURL+ platformFavIcon;
+    }
+
+    public String getPlatformFavIcon32() {
+        if (platformFavIcon32==null)
+            return null;
+        else
+            return ProductServiceApplication.ASSETURL+ platformFavIcon32;
+    }
+
+    public String getPlatformLogoSquare() {
+        if (platformLogoSquare==null)
+            return null;
+        else
+            return ProductServiceApplication.ASSETURL+ platformLogoSquare;
+    }
+
 }

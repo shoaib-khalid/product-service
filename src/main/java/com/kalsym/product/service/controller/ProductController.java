@@ -16,12 +16,17 @@ import com.kalsym.product.service.utility.Logger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import javax.persistence.criteria.Predicate;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.convert.QueryByExamplePredicateBuilder;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,6 +40,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.kalsym.product.service.repository.ProductInventoryWithDetailsRepository;
 import com.kalsym.product.service.utility.Validation;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  *
@@ -70,6 +76,10 @@ public class ProductController {
 
     @Autowired
     StoreRepository storeRepository;
+
+    @Value("${asset.service.url}")
+    private String assetServiceUrl;
+
 
     /**
      * Get product by store or category or productId
@@ -150,7 +160,7 @@ public class ProductController {
     public ResponseEntity<HttpResponse> searchProduct(HttpServletRequest request,
             @RequestParam(required = false) String storeId,
             @RequestParam(required = false) String name,
-            @RequestParam(required = false, defaultValue = "true") boolean featured,
+            // @RequestParam(required = false, defaultValue = "true") boolean featured,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int pageSize) {
         String logprefix = request.getRequestURI();
@@ -159,17 +169,28 @@ public class ProductController {
         
         Product productMatch = new Product();
 
+        System.out.println("ggggggggggggggggggggggggggggggggggggggggggggggggggg============================="+storeId);
+
         Pageable pageable = PageRequest.of(page, pageSize);
-        productMatch.setStoreId(storeId);
-        productMatch.setName(name);
+
         ExampleMatcher matcher = ExampleMatcher
                 .matchingAll()
                 .withIgnoreCase()
                 .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
         Example<Product> example = Example.of(productMatch, matcher);
 
+        Specification<Product> productSpecs = searchProductSpecs(storeId, name,example);
+
+        Page<Product> data = productRepository.findAll(productSpecs, pageable);
+
+        // TO SET THUMBNAIL URL
+        for (Product p : data.getContent()){
+
+            p.setThumbnailUrl(assetServiceUrl+p.getThumbnailUrl());
+        }
+
         response.setStatus(HttpStatus.OK);
-        response.setData(productRepository.findAll(example, pageable));
+        response.setData(data);
         return ResponseEntity.status(response.getStatus()).body(response);
 
     }
@@ -248,5 +269,32 @@ public class ProductController {
         response.setData(productRepository.save(product));
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
     }
+
+    public static Specification<Product> searchProductSpecs(
+        String storeId, 
+        String name, 
+        Example<Product> example) {
+
+        return (Specification<Product>) (root, query, builder) -> {
+            final List<Predicate> predicates = new ArrayList<>();
+
+            if (storeId != null && !storeId.isEmpty()) {
+                predicates.add(builder.equal(root.get("storeId"), storeId));
+            }
+
+            if (name != null && !name.isEmpty()) {
+                predicates.add(builder.like(root.get("name"), "%"+name+"%"));
+            }
+
+            predicates.add(root.get("thumbnailUrl").isNotNull());
+            
+            predicates.add(QueryByExamplePredicateBuilder.getPredicate(root, builder, example));
+
+            return builder.and(predicates.toArray(new Predicate[predicates.size()]));
+        };
+    }
+
+
+
 
 }

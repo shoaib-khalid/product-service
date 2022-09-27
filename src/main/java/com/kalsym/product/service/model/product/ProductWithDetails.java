@@ -1,6 +1,9 @@
 package com.kalsym.product.service.model.product;
 
+import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.enums.VehicleType;
+import com.kalsym.product.service.model.store.StoreCategoryMain;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -11,6 +14,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
 import java.util.Objects;
 import java.util.Set;
 import javax.persistence.CascadeType;
@@ -51,8 +56,14 @@ public class ProductWithDetails implements Serializable {
 
     private String storeId;
 
+    private Integer shortId;
+
     @Column(name = "categoryId")
     private String categoryId;
+
+    @OneToOne()
+    @JoinColumn(name = "categoryId",referencedColumnName="id", insertable = false, updatable = false, nullable = true)
+    private StoreCategoryMain storeCategory;  
 
     private String status;
 
@@ -65,6 +76,15 @@ public class ProductWithDetails implements Serializable {
     private String seoUrl;
 
     private String seoName;
+
+    @Transient 
+    String seoUrlMarketPlace;
+
+    @Transient 
+    String seoUrlSf;
+
+    @Transient 
+    String seoNameMarketplace;
 
     private Boolean trackQuantity;
 
@@ -113,6 +133,21 @@ public class ProductWithDetails implements Serializable {
             fetch = FetchType.LAZY)
     @JoinColumn(name = "id", referencedColumnName = "productId", insertable = false, updatable = false, nullable = true)
     private ProductDeliveryDetail productDeliveryDetail;
+
+    public String getSeoUrlMarketPlace() {
+
+        return ProductServiceApplication.MARKETPLACEURL+"/"+shortId+"-"+seoName;
+    }
+
+    public String getSeoUrlSf() {
+
+        return seoUrl+"/"+shortId;
+    }
+
+    public String getSeoNameMarketplace() {
+
+        return shortId+"-"+seoName;
+    }
 
     public void update(ProductWithDetails product) {
         if (null != product.getName()) {

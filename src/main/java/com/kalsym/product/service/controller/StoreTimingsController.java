@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,6 +114,72 @@ public class StoreTimingsController {
         timingBody.setStoreId(storeId);
         response.setStatus(HttpStatus.ACCEPTED);
         response.setData(storeTimingsRepository.save(timing));
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @PostMapping(path = {"/bulk"}, name = "store-timings-post")
+    @PreAuthorize("hasAnyAuthority('store-timings-post', 'all') and @customOwnerVerifier.VerifyStore(#storeId)")
+    public ResponseEntity<HttpResponse> postBulkStoreTimings(HttpServletRequest request,
+            @PathVariable String storeId,
+            @RequestBody List<StoreTiming> timingBodyList) {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "storeId: " + storeId);
+
+        Optional<Store> optStore = storeRepository.findById(storeId);
+
+        if (!optStore.isPresent()) {
+            Logger.application.warn(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
+
+        List<StoreTiming> existingStoreTiming = storeTimingsRepository.findByStoreId(storeId);
+        
+        //if data exist then update the data
+        if(existingStoreTiming.size() != 0){
+
+            
+            for (int i=0; i<timingBodyList.size(); i++) {
+
+                if (null != timingBodyList.get(i).getDay()) {
+                    timingBodyList.get(i).setDay(timingBodyList.get(i).getDay().toUpperCase());
+                }
+
+                StoreTiming data = storeTimingsRepository.findByStoreIdAndDay(storeId,timingBodyList.get(i).getDay().toUpperCase()).get();
+                data.setStoreId(storeId);
+                data.setDay(timingBodyList.get(i).getDay().toUpperCase());
+                data.setOpenTime(timingBodyList.get(i).getOpenTime());
+                data.setCloseTime(timingBodyList.get(i).getCloseTime());
+                data.setIsOff(timingBodyList.get(i).getIsOff());
+                data.setBreakStartTime(timingBodyList.get(i).getBreakStartTime());
+                data.setBreakEndTime(timingBodyList.get(i).getBreakEndTime());
+
+                storeTimingsRepository.save(data);
+
+            }
+
+
+        }
+        else{
+
+            for (int i=0; i<timingBodyList.size(); i++) {
+                if (null != timingBodyList.get(i).getDay()) {
+                    timingBodyList.get(i).setDay(timingBodyList.get(i).getDay().toUpperCase());
+                }
+    
+                StoreTiming storeTiming = timingBodyList.get(i);
+                storeTiming.setStoreId(storeId);
+                storeTimingsRepository.save(storeTiming);
+            }
+
+        }
+
+        response.setData(timingBodyList);
+        response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 

@@ -19,8 +19,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.kalsym.product.service.model.store.StoreCategory;
 import com.kalsym.product.service.model.store.Store;
+import com.kalsym.product.service.service.CloneProductService;
 import com.kalsym.product.service.service.FileStorageService;
 import com.kalsym.product.service.utility.Logger;
+import com.kalsym.product.service.worker.BulkDeleteCategory;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,11 +31,13 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.ExampleMatcher.GenericPropertyMatcher;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -55,8 +60,14 @@ public class StoreCategoryController {
     @Autowired
     FileStorageService fileStorageService;
 
+    @Autowired
+    CloneProductService cloneProductService;
+
     @Value("${store.assets.url:https://symplified.ai/store-assets}")
     private String storeAssetsBaseUrl;
+
+    @Value("${asset.service.url}")
+    private String assetServiceUrl;
 
     @GetMapping(path = {""}, name = "store-categories-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-categories-get', 'all')")
@@ -96,8 +107,20 @@ public class StoreCategoryController {
         else if (sortingOrder==Sort.Direction.DESC)
             pageable = PageRequest.of(page, pageSize, Sort.by(sortByCol).descending());
         
+        Page<StoreCategory> showData = storeCategoryRepository.findAll(example, pageable);
+                
+        //to concat store asset url for response data
+        for (StoreCategory lc : showData.getContent()){
+            //handle null
+            if(lc.getThumbnailUrl() != null){
+                lc.setThumbnailUrl(assetServiceUrl+lc.getThumbnailUrl());
+            }else{
+                lc.setThumbnailUrl(null);
+            }
+        }
+
         response.setStatus(HttpStatus.OK);
-        response.setData(storeCategoryRepository.findAll(example, pageable));
+        response.setData(showData);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
@@ -141,11 +164,22 @@ public class StoreCategoryController {
         if (file != null) {
             Logger.application.info("storeCategory created with id: {}", bodyStoreCategory.getId());
             String categoryThumbnailStoragePath = fileStorageService.saveStoreAsset(file, bodyStoreCategory.getId() + fileStorageService.getFileExtension(file));
-            bodyStoreCategory.setThumbnailUrl(storeAssetsBaseUrl + bodyStoreCategory.getId() + fileStorageService.getFileExtension(file));
+            bodyStoreCategory.setThumbnailUrl("/store-assets/"+ bodyStoreCategory.getId() + fileStorageService.getFileExtension(file));
+        }
+
+        StoreCategory saveAssetUrl = storeCategoryRepository.save(bodyStoreCategory);
+        //to concat store asset url for response data
+        //handle null
+        if(saveAssetUrl.getThumbnailUrl() != null){
+            saveAssetUrl.setThumbnailUrl(assetServiceUrl+saveAssetUrl.getThumbnailUrl());
+
+        } else{
+            saveAssetUrl.setThumbnailUrl(null);
+
         }
 
         response.setStatus(HttpStatus.CREATED);
-        response.setData(storeCategoryRepository.save(bodyStoreCategory));
+        response.setData(saveAssetUrl);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -191,6 +225,17 @@ public class StoreCategoryController {
             return ResponseEntity.status(response.getStatus()).body(response);
         }
         Logger.application.info(ProductServiceApplication.VERSION, logprefix, "Store category found with id: {}", storeCategoryId);
+
+        //to concat store asset url for response data
+        // handle null
+        if(optStoreCategory.get().getThumbnailUrl() !=null){
+            optStoreCategory.get().setThumbnailUrl(assetServiceUrl+optStoreCategory.get().getThumbnailUrl());
+
+        } else{
+            optStoreCategory.get().setThumbnailUrl(null);
+
+        }
+
         response.setData(optStoreCategory);
         response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);
@@ -240,13 +285,29 @@ public class StoreCategoryController {
 
         if (file != null) {
             String categoryThumbnailStoragePath = fileStorageService.saveStoreAsset(file, optStoreCategory.get().getId() + fileStorageService.getFileExtension(file));
-            optStoreCategory.get().setThumbnailUrl(storeAssetsBaseUrl + optStoreCategory.get().getId() + fileStorageService.getFileExtension(file));
+            optStoreCategory.get().setThumbnailUrl("/store-assets/" + optStoreCategory.get().getId() + fileStorageService.getFileExtension(file));
         }
 
         response.setStatus(HttpStatus.OK);
         storeCategoryRepository.save(optStoreCategory.get());
         return ResponseEntity.status(response.getStatus()).body(response);
 
+    }
+
+    @PostMapping(path = {"{storeId}/bulk-delete"}, name = "store-products-delete-by-id", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('store-products-delete-by-id', 'all')  and @customOwnerVerifier.VerifyStore(#storeId)")
+    public ResponseEntity<HttpResponse> deleteStoreCategoryByBulk(HttpServletRequest request,
+            @PathVariable String storeId,
+            @RequestBody List<String> categoryIds) {
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        //create thread
+        BulkDeleteCategory threadBulkDeleteCategory = new BulkDeleteCategory(categoryIds,cloneProductService);
+        threadBulkDeleteCategory.start();
+
+        response.setStatus(HttpStatus.OK);
+        response.setData("Success Deleted");
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 
 }

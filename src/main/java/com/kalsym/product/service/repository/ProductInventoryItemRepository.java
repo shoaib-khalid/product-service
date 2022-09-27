@@ -17,5 +17,5 @@ public interface ProductInventoryItemRepository extends PagingAndSortingReposito
 
     List<ProductInventoryItem> findByProductId(@Param("productId") String productId);
     
-    Optional<ProductInventoryItem> findByItemCodeAndProductVariantAvailableId(@Param("itemCode") String itemCode, @Param("itemCode") String productVariantAvailableId);
+    Optional<ProductInventoryItem> findByItemCodeAndProductVariantAvailableId(@Param("itemCode") String itemCode, @Param("productVariantAvailableId") String productVariantAvailableId);
 }

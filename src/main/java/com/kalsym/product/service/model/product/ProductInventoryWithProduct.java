@@ -38,6 +38,7 @@ public class ProductInventoryWithProduct implements Serializable {
 
     private Double price;
     private Double compareAtprice;
+    private Double dineInPrice;
 
     private String SKU;
 

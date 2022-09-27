@@ -5,10 +5,14 @@ import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.enums.DiscountCalculationType;
 import com.kalsym.product.service.model.ItemDiscount;
 import com.kalsym.product.service.model.MySQLUserDetails;
+import com.kalsym.product.service.model.RegionCountry;
 import com.kalsym.product.service.model.RegionVertical;
+import com.kalsym.product.service.model.ReserveDomain;
+import com.kalsym.product.service.model.StoreSnooze;
 import com.kalsym.product.service.model.store.StoreCategory;
 import com.kalsym.product.service.repository.ProductRepository;
 import com.kalsym.product.service.repository.StoreRepository;
+import com.kalsym.product.service.utility.DateTimeUtil;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.utility.Validation;
 import com.kalsym.product.service.utility.SessionInformation;
@@ -46,6 +50,7 @@ import com.kalsym.product.service.repository.StoreAssetRepository;
 import com.kalsym.product.service.repository.StoreAssetsRepository;
 import com.kalsym.product.service.repository.ClientsRepository;
 import com.kalsym.product.service.repository.RegionVerticalRepository;
+import com.kalsym.product.service.repository.ReserveDomainRepository;
 import com.kalsym.product.service.repository.StoreDeliveryPeriodsRepository;
 import com.kalsym.product.service.service.FileStorageService;
 
@@ -58,11 +63,16 @@ import com.kalsym.product.service.utility.ProductDiscount;
 import com.kalsym.product.service.utility.StoreAssetsUtility;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
+
+import javax.annotation.PostConstruct;
 import javax.imageio.ImageIO;
 import javax.persistence.criteria.Predicate;
 
@@ -124,6 +134,9 @@ public class StoreController {
 
     @Autowired
     StoreCategoryRepository storeCategoryRepository;
+
+    @Autowired
+    ReserveDomainRepository reserveDomainRepository;
 
     @Autowired
     StoreSubdomainHandler storeSubdomainHandler;
@@ -189,6 +202,28 @@ public class StoreController {
     
     @Value("${store.favicon.symplified.default.url:https://symplified.it/store-assets/fav-icon-symplified.png}")
     private String storeFavIconUrlSymplified;
+
+    @Value("${asset.service.url}")
+    private String assetServiceUrl;
+
+    private String storeLogoDefaultPath;
+    private String storeBannerEcommerceDefaultPath;
+    private String storeBannerFnbDefaultPath;
+    private String storeFavIconEasydukanPath;
+    private String storeFavIconDeliverinPath;
+    private String storeFavIconSymplifiedPath;
+
+    //https://newbedev.com/spring-boot-value-returns-always-null
+    @PostConstruct
+    public void postConstruct(){
+        storeLogoDefaultPath = assetServiceUrl+"/store-assets/logo_symplified_bg.png";
+        storeBannerEcommerceDefaultPath = assetServiceUrl+ "/store-assets/banner-ecomm.jpeg";
+        storeBannerFnbDefaultPath = assetServiceUrl+"/store-assets/banner-fnb.png";
+        storeFavIconEasydukanPath = assetServiceUrl+"/store-assets/fav-icon-easydukan.png";
+        storeFavIconDeliverinPath = assetServiceUrl+"/store-assets/fav-icon-deliverin.png";
+        storeFavIconSymplifiedPath = assetServiceUrl+"/store-assets/fav-icon-symplified.png";
+
+    }
     
     @GetMapping(path = {""}, name = "stores-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('stores-get', 'all')")
@@ -248,10 +283,54 @@ public class StoreController {
                 List<StoreAssets> storeAssetsList = storeAssetsRepository.findByStoreId(storeWithDetails.getId());
                 storeAssetsList = StoreAssetsUtility.SetDefaultAsset(storeWithDetails.getVerticalCode(), storeWithDetails.getId(), storeAssetsList,
                 storeAssetsRepository, regionVerticalRepository, 
-                storeBannerFnbDefaultUrl, storeBannerEcommerceDefaultUrl,
-                storeLogoDefaultUrl, 
-                storeFavIconUrlSymplified, storeFavIconUrlDeliverin, storeFavIconUrlEasydukan);        
+                storeBannerFnbDefaultPath, storeBannerEcommerceDefaultPath,
+                storeLogoDefaultPath, 
+                storeFavIconSymplifiedPath, storeFavIconDeliverinPath, storeFavIconEasydukanPath,assetServiceUrl);        
                 storeWithDetails.setStoreAssets(storeAssetsList);
+
+                StoreSnooze st = new StoreSnooze();
+
+                if (storeWithDetails.getSnoozeStartTime()!=null && storeWithDetails.getSnoozeEndTime()!=null) {
+                    int resultSnooze = storeWithDetails.getSnoozeEndTime().compareTo(Calendar.getInstance().getTime());
+                    if (resultSnooze < 0) {
+                        storeWithDetails.setIsSnooze(false);
+
+                        st.snoozeStartTime = null;
+                        st.snoozeEndTime = null;
+                        st.isSnooze = false;
+                        st.snoozeReason = null;
+                        storeWithDetails.setStoreSnooze(st);
+
+
+                    } else {
+                
+                        storeWithDetails.setIsSnooze(true);
+                        RegionCountry t = storeWithDetails.getRegionCountry();
+                
+                        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Store timezone:"+t.getTimezone());
+                        LocalDateTime startTime = DateTimeUtil.convertToLocalDateTimeViaInstant(storeWithDetails.getSnoozeStartTime(), ZoneId.of(t.getTimezone()));
+                        LocalDateTime endTime = DateTimeUtil.convertToLocalDateTimeViaInstant(storeWithDetails.getSnoozeEndTime(), ZoneId.of(t.getTimezone()));
+                        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Snooze End Time in store timezone:"+endTime);
+                        
+                            st.snoozeStartTime = startTime;
+                            st.snoozeEndTime = endTime;
+                            st.isSnooze = true;
+                            st.snoozeReason = storeWithDetails.getSnoozeReason();
+                     
+                            storeWithDetails.setStoreSnooze(st);
+                        
+                            
+             
+                    }
+                } else {
+                    storeWithDetails.setIsSnooze(false);
+                    st.snoozeStartTime = null;
+                    st.snoozeEndTime = null;
+                    st.isSnooze = false;
+                    st.snoozeReason = null;
+                    storeWithDetails.setStoreSnooze(st);
+                    
+                }   
                 
                 storeWithDetailsList[x]=storeWithDetails;
             }
@@ -307,9 +386,9 @@ public class StoreController {
         
         storeAssetsList = StoreAssetsUtility.SetDefaultAsset(storeWithDetails.getVerticalCode(), id, storeAssetsList,
                 storeAssetsRepository, regionVerticalRepository, 
-                storeBannerFnbDefaultUrl, storeBannerEcommerceDefaultUrl,
-                storeLogoDefaultUrl, 
-                storeFavIconUrlSymplified, storeFavIconUrlDeliverin, storeFavIconUrlEasydukan);        
+                storeBannerFnbDefaultPath, storeBannerEcommerceDefaultPath,
+                storeLogoDefaultPath, 
+                storeFavIconSymplifiedPath, storeFavIconDeliverinPath, storeFavIconEasydukanPath,assetServiceUrl);        
         storeWithDetails.setStoreAssets(storeAssetsList);
         
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND id: " + id);
@@ -367,6 +446,39 @@ public class StoreController {
             if (bodyStore.getIsBranch()==null) {
                 bodyStore.setIsBranch(false);
             }
+
+            //set isDisplayMap to false
+            if (bodyStore.getIsDisplayMap()==null) {
+                bodyStore.setIsDisplayMap(false);
+            }
+            // set isDineIn to false
+            if (bodyStore.getIsDineIn()==null) {
+                bodyStore.setIsDineIn(false);
+            }
+            // set default dineInPayementtype
+            if (bodyStore.getDineInPaymentType()==null) {
+                bodyStore.setDineInPaymentType("COD");
+            }
+
+            // set default dineInPayementtype
+            if (bodyStore.getDineInOption()==null) {
+                bodyStore.setDineInOption("SELFCOLLECT");
+            }
+
+            // set default isdelivery for ecommerce =true, 
+              if (bodyStore.getIsDelivery()==null) {
+
+                if(bodyStore.getVerticalCode().contains("Commerce")){
+
+                    bodyStore.setIsDelivery(true);
+                    
+                } else{
+
+                    bodyStore.setIsDelivery(false);
+
+                }
+            }
+            
             if (bodyStore.getIsBranch()==false) {
                 //only create domain for non-branch store
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "create store domain for non-branch", "");
@@ -506,8 +618,16 @@ public class StoreController {
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
             Logger.application.error(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " error creating store ", "", e);
-            response.setMessage(e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+
+            if(e.getMessage().contains("Whatsapp API return error")){
+                response.setMessage(e.getMessage());
+                return ResponseEntity.status(HttpStatus.CREATED).body(response);   
+
+            }else{
+                response.setMessage(e.getMessage());
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);   
+            }
+          
         }
 
     }
@@ -759,7 +879,19 @@ public class StoreController {
 
         Optional<StoreWithDetails> optStore = storeWithDetailsRepository.findByDomain(domain);
 
-        if (!optStore.isPresent()) {
+        //split string to get subdomain
+        Integer i = domain.indexOf('.');
+        String subdomain;
+
+        if(i == -1){
+            subdomain = domain;
+        }else{
+            subdomain = domain.substring(0,i);
+        }
+
+        Optional<ReserveDomain> optReserveDomain = reserveDomainRepository.getReserveDomain(subdomain);
+
+        if (!optStore.isPresent() && !optReserveDomain.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " Domain: " + domain+" IS available");
             response.setStatus(HttpStatus.OK);
             return ResponseEntity.status(response.getStatus()).body(response);
@@ -850,6 +982,18 @@ public class StoreController {
            
             Page<StoreAssets> fetchedPage = storeAssetsRepository.findByCountry(countryId, pageable);
             List<StoreAssets> storeAssetList = fetchedPage.getContent();
+
+            for(StoreAssets sa : storeAssetList){
+
+                //handle null
+                if(sa.getAssetUrl() != null){
+                    sa.setAssetUrl(assetServiceUrl+sa.getAssetUrl());
+
+                } else{
+                    sa.setAssetUrl(null);
+
+                }
+            }
             
             TopStore topStore = new TopStore();
             topStore.setTotalStore(totalStore);

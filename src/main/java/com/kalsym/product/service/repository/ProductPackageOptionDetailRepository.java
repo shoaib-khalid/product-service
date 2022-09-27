@@ -18,4 +18,7 @@ public interface ProductPackageOptionDetailRepository extends PagingAndSortingRe
     
     @Transactional
     String deleteByProductPackageOptionId(@Param("productPackageOptionId") String productPackageOptionId);
+
+    List<ProductPackageOptionDetail> findByProductPackageOptionId(@Param("productPackageOptionId") String productPackageOptionId);
+
 }
