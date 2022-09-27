@@ -27,7 +27,7 @@ import lombok.ToString;
 @ToString
 @Entity
 @Table(name = "product_addon")
-public class ProductAddOn {
+public class ProductAddOn implements Serializable{
          
     @Id
     @GeneratedValue(generator = "uuid2")
@@ -43,11 +43,6 @@ public class ProductAddOn {
     private Double dineInPrice;
 
     private String status;
-
-    @OneToOne(cascade = CascadeType.ALL,
-    fetch = FetchType.EAGER)
-    @JoinColumn(name = "addOnItemId", referencedColumnName = "id", insertable = false, updatable = false, nullable = true)    
-    private ProductAddOnItemDetails productAddOnItemDetails;
 
     public static ProductAddOn castReference(ProductAddOnRequest reqBody){
 

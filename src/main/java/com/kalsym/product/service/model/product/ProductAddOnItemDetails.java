@@ -1,10 +1,14 @@
 package com.kalsym.product.service.model.product;
 
+import java.util.List;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -26,10 +30,12 @@ import lombok.ToString;
 
     private String name;
 
-    @OneToOne(cascade = CascadeType.ALL,
-    fetch = FetchType.EAGER)
-    @JoinColumn(name = "groupId", referencedColumnName = "id", insertable = false, updatable = false, nullable = true)    
-    private ProductAddOnGroupDetails productAddOnGroupDetails;
+    private String groupId;
+
+   @OneToMany(cascade = CascadeType.ALL,
+   fetch = FetchType.LAZY)
+   @JoinColumn(name = "addOnItemId",insertable = false, updatable = false, nullable = true)  
+   private List<ProductAddOn> productAddOnDetails;
 
 
 

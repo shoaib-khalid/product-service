@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.model.product.ProductAddOn;
+import com.kalsym.product.service.model.product.ProductAddOnGroupDetails;
 import com.kalsym.product.service.model.request.ProductAddOnRequest;
 import com.kalsym.product.service.service.ProductAddOnService;
 import com.kalsym.product.service.utility.HttpResponse;
@@ -80,7 +81,9 @@ public class ProductAddOnController {
         try {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "", "");
 
-            List<ProductAddOn> showData = productAddOnService.getAllProductByProductId(productId);
+            // List<ProductAddOn> showData = productAddOnService.getAllProductByProductId(productId);
+            List<ProductAddOnGroupDetails> showData = productAddOnService.getAllProductAddOnGroupDetails(productId);
+
                     
             response.setStatus(HttpStatus.OK);
             response.setData(showData);
