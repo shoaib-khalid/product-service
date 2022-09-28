@@ -11,6 +11,7 @@ import com.kalsym.product.service.repository.ProductAddOnRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.persistence.criteria.Predicate;
 
@@ -96,6 +97,49 @@ public class ProductAddOnService {
 
         List<ProductAddOn> getData = productAddOnRepository.findByProductId(productId);
         return getData;
+    }
+
+    public List<ProductAddOnGroupDetails> transformDataGroupTemplateofProductAddOn(List<ProductAddOn> showData){
+
+        List<ProductAddOnItemDetails> result = 
+        showData.stream()
+        .map(mapper->{
+            // ProductAddOnItemDetails productAddOnItemDetails = mapper.getProductAddOnItemDetails();
+            ProductAddOnItemDetails productAddOnItemDetails = new ProductAddOnItemDetails();
+            productAddOnItemDetails.setId(mapper.getId());
+            productAddOnItemDetails.setProductId(mapper.getProductId());
+            productAddOnItemDetails.setPrice(mapper.getPrice());
+            productAddOnItemDetails.setDineInPrice(mapper.getDineInPrice());
+            productAddOnItemDetails.setStatus(mapper.getStatus());
+            productAddOnItemDetails.setName(mapper.getProductAddOnItemDetails().getName());
+            productAddOnItemDetails.setGroupId(mapper.getProductAddOnItemDetails().getGroupId());
+            productAddOnItemDetails.setAddOnItemId(mapper.getAddOnItemId());
+
+            return productAddOnItemDetails;
+        })
+        .collect(Collectors.toList());
+
+        List<ProductAddOnGroupDetails> result2 = showData.stream()
+        .map(mapper->{
+            ProductAddOnGroupDetails productAddOnGroupDetails = mapper.getProductAddOnItemDetails().getProductAddOnGroupDetails();
+            return productAddOnGroupDetails;
+        })
+        .distinct()
+        .collect(Collectors.toList());
+
+        List<ProductAddOnGroupDetails> result3 = result2.stream()
+        .map(mapper->{
+
+            List<ProductAddOnItemDetails> filterByGroupId =result.stream()
+            .filter(x -> x.getGroupId().equals(mapper.getId()))
+            .collect(Collectors.toList());
+            ProductAddOnGroupDetails productAddOnGroupDetails = mapper;
+            productAddOnGroupDetails.setProductAddOnItemDetail(filterByGroupId);
+            return productAddOnGroupDetails;
+        })
+        .collect(Collectors.toList());
+        
+        return result3;
     }
 
     // public List<ProductAddOnGroupDetails> getAllProductAddOnGroupDetails(String productId){

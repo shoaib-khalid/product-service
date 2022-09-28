@@ -20,7 +20,8 @@ import lombok.Setter;
 import lombok.ToString;
 
 
-//this model to select certain column only for viewing purp
+//in order to make frontend easier to manipulate data we will use this model, hence we use transient annotation so that we will set the value of of product add on in this  model 
+// do not use this model for create and update
  @Getter
  @Setter
  @ToString
@@ -33,9 +34,12 @@ import lombok.ToString;
     @Id 
     private String id;
 
-    private String name;
+    @Transient
+    private String addOnItemId;
 
     private String groupId;
+
+    private String name;
 
     @OneToOne(cascade = CascadeType.ALL,
     fetch = FetchType.EAGER)
@@ -53,6 +57,8 @@ import lombok.ToString;
 
     @Transient
     private String status;
+
+
 
 
  }

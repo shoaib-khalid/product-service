@@ -87,51 +87,10 @@ public class ProductAddOnController {
             List<ProductAddOn> showData = productAddOnService.getAllProductByProductId(productId);
             // List<ProductAddOnGroupDetails> showData = productAddOnService.getAllProductAddOnGroupDetails(productId);
 
-            //group by addontemplategroupid
-            List<ProductAddOnItemDetails> result = 
-			showData.stream()
-            .map(mapper->{
-                // ProductAddOnItemDetails productAddOnItemDetails = mapper.getProductAddOnItemDetails();
-                ProductAddOnItemDetails productAddOnItemDetails = new ProductAddOnItemDetails();
-                productAddOnItemDetails.setId(mapper.getId());
-                productAddOnItemDetails.setProductId(mapper.getProductId());
-                productAddOnItemDetails.setPrice(mapper.getPrice());
-                productAddOnItemDetails.setDineInPrice(mapper.getDineInPrice());
-                productAddOnItemDetails.setStatus(mapper.getStatus());
-                productAddOnItemDetails.setName(mapper.getProductAddOnItemDetails().getName());
-                productAddOnItemDetails.setGroupId(mapper.getProductAddOnItemDetails().getGroupId());
-
-                return productAddOnItemDetails;
-            })
-            .collect(Collectors.toList());
-
-            List<ProductAddOnGroupDetails> result2 = showData.stream()
-            .map(mapper->{
-                ProductAddOnGroupDetails productAddOnGroupDetails = mapper.getProductAddOnItemDetails().getProductAddOnGroupDetails();
-                return productAddOnGroupDetails;
-            })
-            .distinct()
-            .collect(Collectors.toList());
-
-            List<ProductAddOnGroupDetails> result3 = result2.stream()
-            .map(mapper->{
-
-                List<ProductAddOnItemDetails> filterByGroupId =result.stream()
-                .filter(x -> x.getGroupId().equals(mapper.getId()))
-                .collect(Collectors.toList());
-                System.out.println("CHECKING DALAMA JEE:::"+filterByGroupId);
-                ProductAddOnGroupDetails productAddOnGroupDetails = mapper;
-                productAddOnGroupDetails.setProductAddOnItemDetail(filterByGroupId);
-                return productAddOnGroupDetails;
-            })
-            .collect(Collectors.toList());
-            
-
-            System.out.println("CHECKINGGGGGresult3 :::"+result3);
-
-                    
+            List<ProductAddOnGroupDetails> resultData = productAddOnService.transformDataGroupTemplateofProductAddOn(showData);
+        
             response.setStatus(HttpStatus.OK);
-            response.setData(result3);
+            response.setData(resultData);
             return ResponseEntity.status(response.getStatus()).body(response);
             
         } catch (Exception e) {
