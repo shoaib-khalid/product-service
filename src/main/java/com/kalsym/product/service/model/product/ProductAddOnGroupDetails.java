@@ -9,6 +9,9 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -20,6 +23,8 @@ import lombok.ToString;
 @ToString
 @Entity
 @Table(name = "addon_template_group")
+@JsonInclude(JsonInclude.Include.NON_NULL)
+
 public class ProductAddOnGroupDetails {
     
     @Id
@@ -27,9 +32,6 @@ public class ProductAddOnGroupDetails {
 
     private String title;
     
-    @OneToMany(cascade = CascadeType.ALL,
-    fetch = FetchType.LAZY)
-    @JoinColumn(name = "groupId",insertable = false, updatable = false, nullable = true)
-    private List<ProductAddOnItemDetails> productAddOnItemDetails;
-    
+    @Transient 
+    private List<ProductAddOnItemDetails> productAddOnItemDetail;
 }

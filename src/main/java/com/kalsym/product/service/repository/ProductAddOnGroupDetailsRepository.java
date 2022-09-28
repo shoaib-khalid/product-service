@@ -14,16 +14,16 @@ import com.kalsym.product.service.model.product.ProductAddOnGroupDetails;
 @Repository
 public interface ProductAddOnGroupDetailsRepository extends JpaRepository<ProductAddOnGroupDetails, String>,JpaSpecificationExecutor<ProductAddOnGroupDetails>{
     
-    @Query(
-        " SELECT pagd "
-        + "FROM ProductAddOnGroupDetails pagd "
-        + "INNER JOIN ProductAddOnItemDetails paid on paid.groupId = pagd.id "
-        + "INNER JOIN ProductAddOn pa on pa.addOnItemId = paid.id "
-        + "WHERE pa.productId = :productId"     
-    )
-    List<ProductAddOnGroupDetails> getProductAddOnJpqlQuery(
-            @Param("productId") String productId         
-    );
+    // @Query(
+    //     " SELECT pagd "
+    //     + "FROM ProductAddOnGroupDetails pagd "
+    //     + "INNER JOIN ProductAddOnItemDetails paid on paid.groupId = pagd.id "
+    //     + "INNER JOIN ProductAddOn pa on pa.addOnItemId = paid.id "
+    //     + "WHERE pa.productId = :productId"     
+    // )
+    // List<ProductAddOnGroupDetails> getProductAddOnJpqlQuery(
+    //         @Param("productId") String productId         
+    // );
 }
 
 

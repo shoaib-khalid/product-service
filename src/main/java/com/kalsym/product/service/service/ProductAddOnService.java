@@ -98,42 +98,42 @@ public class ProductAddOnService {
         return getData;
     }
 
-    public List<ProductAddOnGroupDetails> getAllProductAddOnGroupDetails(String productId){
+    // public List<ProductAddOnGroupDetails> getAllProductAddOnGroupDetails(String productId){
 
-        ProductAddOnGroupDetails productMatch = new ProductAddOnGroupDetails();
+    //     ProductAddOnGroupDetails productMatch = new ProductAddOnGroupDetails();
 
-        ExampleMatcher matcher = ExampleMatcher
-        .matchingAll()
-        .withIgnoreCase()
-        .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
-        Example<ProductAddOnGroupDetails> example = Example.of(productMatch, matcher);
+    //     ExampleMatcher matcher = ExampleMatcher
+    //     .matchingAll()
+    //     .withIgnoreCase()
+    //     .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
+    //     Example<ProductAddOnGroupDetails> example = Example.of(productMatch, matcher);
 
-        Specification<ProductAddOnGroupDetails> productSpecs = searchProductAddOnSpecs(productId,example);
+    //     Specification<ProductAddOnGroupDetails> productSpecs = searchProductAddOnSpecs(productId,example);
 
-        List<ProductAddOnGroupDetails> data = productAddOnGroupDetailsRepository.findAll(productSpecs);
+    //     List<ProductAddOnGroupDetails> data = productAddOnGroupDetailsRepository.findAll(productSpecs);
 
-        // List<ProductAddOnGroupDetails> data = productAddOnGroupDetailsRepository.getProductAddOnJpqlQuery(productId);
+    //     // List<ProductAddOnGroupDetails> data = productAddOnGroupDetailsRepository.getProductAddOnJpqlQuery(productId);
 
-        return data ;
-    }
+    //     return data ;
+    // }
 
-    public static Specification<ProductAddOnGroupDetails> searchProductAddOnSpecs(
-        String productId, 
-        Example<ProductAddOnGroupDetails> example) {
+    // public static Specification<ProductAddOnGroupDetails> searchProductAddOnSpecs(
+    //     String productId, 
+    //     Example<ProductAddOnGroupDetails> example) {
 
-        return (Specification<ProductAddOnGroupDetails>) (root, query, builder) -> {
-            final List<Predicate> predicates = new ArrayList<>();
+    //     return (Specification<ProductAddOnGroupDetails>) (root, query, builder) -> {
+    //         final List<Predicate> predicates = new ArrayList<>();
 
-            Join<ProductAddOnGroupDetails, ProductAddOnItemDetails> addOnItemDetails = root.join("productAddOnItemDetails");
-            Join<ProductAddOnItemDetails, ProductAddOn> addOnDetails = addOnItemDetails.join("productAddOnDetails", JoinType.INNER);
-            if (productId != null && !productId.isEmpty()) {
-                predicates.add(builder.equal(addOnDetails.get("productId"), productId));
-            }
+    //         Join<ProductAddOnGroupDetails, ProductAddOnItemDetails> addOnItemDetails = root.join("productAddOnItemDetails");
+    //         Join<ProductAddOnItemDetails, ProductAddOn> addOnDetails = addOnItemDetails.join("productAddOnDetails", JoinType.INNER);
+    //         if (productId != null && !productId.isEmpty()) {
+    //             predicates.add(builder.equal(addOnDetails.get("productId"), productId));
+    //         }
 
-            predicates.add(QueryByExamplePredicateBuilder.getPredicate(root, builder, example));
-            query.distinct(true);
+    //         predicates.add(QueryByExamplePredicateBuilder.getPredicate(root, builder, example));
+    //         query.distinct(true);
 
-            return builder.and(predicates.toArray(new Predicate[predicates.size()]));
-        };
-    }
+    //         return builder.and(predicates.toArray(new Predicate[predicates.size()]));
+    //     };
+    // }
 }
