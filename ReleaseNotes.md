@@ -9,25 +9,30 @@
 1. Hide product that has price 0
 2. Add new column for product_package_option, product_package_option_detail 
 3. Nested sort the sequence number
-ALTER TABLE symplified.product_package_option ADD sequenceNumber int NULL;
-ALTER TABLE symplified.product_package_option_detail ADD isDefault tinyint(1) DEFAULT 0;
-ALTER TABLE symplified.product_package_option_detail ADD sequenceNumber int NULL;
 
+##DB Changes
+ALTER TABLE symplified.product_package_option ADD sequenceNumber int DEFAULT 0;
+ALTER TABLE symplified.product_package_option_detail ADD isDefault tinyint(1) DEFAULT 0;
+ALTER TABLE symplified.product_package_option_detail ADD sequenceNumber int DEFAULT 0;
 
 ##################################################
 # product-service-3.10.28| 09-September-2022 
 ##################################################
 1. AUTO CALCULATE PRICE FOR DINE IN OR DELIVERY
+
 ##################################################
 # product-service-3.10.27| 09-September-2022 
 ##################################################
 
+##DB Changes
 ALTER TABLE symplified.store ADD isDineIn tinyint(1) DEFAULT 0 NULL;
 ALTER TABLE symplified.store ADD dineInOption enum('SELFCOLLECT','SENDTOTABLE') DEFAULT 'SELFCOLLECT' NULL;
 ALTER TABLE symplified.store ADD dineInPaymentType enum('COD') DEFAULT 'COD' NULL;
 ALTER TABLE symplified.store ADD isDelivery tinyint(1) DEFAULT 1 NULL;
 
+ALTER TABLE symplified.product_inventory ADD dineInPrice decimal(10,2) NULL;
 
+** Taufik did the query for auto calculate dine in price for existing database
 
 ##################################################
 # product-service-3.10.26| 07-September-2022 
@@ -37,6 +42,12 @@ ALTER TABLE symplified.store ADD isDelivery tinyint(1) DEFAULT 1 NULL;
 # product-service-3.10.25 | 07-September-2022 
 ##################################################
 1. Generate sitemap based on location of marketplace
+
+##Application properties Changes:
+ 
+path.main.sitemapxml =
+      /home/docker/Software/assets/frontend-assets/sitemap.xml
+	  
 ##################################################
 # product-service-3.10.24 | 02-September-2022 
 ##################################################
