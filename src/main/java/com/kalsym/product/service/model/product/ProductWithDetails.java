@@ -98,6 +98,8 @@ public class ProductWithDetails implements Serializable {
     
     private Boolean isNoteOptional;
     
+    private Boolean hasAddOn;
+
     private String customNote;
      
     @CreationTimestamp
