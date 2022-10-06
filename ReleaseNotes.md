@@ -1,4 +1,8 @@
 ##################################################
+# product-service-3.10.33| 06-October-2022 
+##################################################
+1. Product Add on post with bulk
+##################################################
 # product-service-3.10.32| 06-October-2022 
 ##################################################
 1. Product Add On features
@@ -23,28 +27,35 @@ CREATE TABLE `addon_template_item` (
 
 -- symplified.product_addon definition
 
+-- symplified.product_addon definition
+
 CREATE TABLE `product_addon` (
   `id` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `productId` varchar(50) CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT NULL,
-  `addOnItemId` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
+  `addonTemplateItemId` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
   `price` decimal(10,2) DEFAULT NULL,
   `dineInPrice` decimal(10,2) DEFAULT NULL,
   `status` enum('AVAILABLE','NOTAVAILABLE','OUTOFSTOCK') DEFAULT NULL,
   `sequenceNumber` int DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `productId` (`productId`),
-  KEY `addOnItemId` (`addOnItemId`),
+  KEY `addOnItemId` (`addonTemplateItemId`),
   CONSTRAINT `product_addon_ibfk_1` FOREIGN KEY (`productId`) REFERENCES `product` (`id`),
-  CONSTRAINT `product_addon_ibfk_2` FOREIGN KEY (`addOnItemId`) REFERENCES `addon_template_item` (`id`)
+  CONSTRAINT `product_addon_ibfk_2` FOREIGN KEY (`addonTemplateItemId`) REFERENCES `addon_template_item` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- symplified.product_addon_group definition
 
 CREATE TABLE `product_addon_group` (
   `id` varchar(50) NOT NULL,
-  `addonGroupId` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
+  `addonTemplateGroupId` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
   `minAllowed` int DEFAULT NULL,
   `maxAllowed` int DEFAULT NULL,
   `sequenceNumber` int DEFAULT '0',
-  `productId` varchar(50) DEFAULT NULL
+  `productId` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `product_addon_group_FK` (`addonTemplateGroupId`),
+  CONSTRAINT `product_addon_group_FK` FOREIGN KEY (`addonTemplateGroupId`) REFERENCES `addon_template_group` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 ##################################################
 # product-service-3.10.31| 06-October-2022 

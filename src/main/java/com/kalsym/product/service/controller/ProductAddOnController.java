@@ -105,7 +105,7 @@ public class ProductAddOnController {
 
     @PostMapping(path = {""}, name = "stores-post")
     @PreAuthorize("hasAnyAuthority('stores-post', 'all')")
-    public ResponseEntity<HttpResponse> postAddOnGroupTemplate(
+    public ResponseEntity<HttpResponse> postProductAddOn(
         HttpServletRequest request,
         @Valid @RequestBody ProductAddOnRequest bodyProductAddOn
     ){
@@ -123,6 +123,51 @@ public class ProductAddOnController {
 
             response.setStatus(HttpStatus.CREATED);
             response.setData(data);
+            return ResponseEntity.status(response.getStatus()).body(response);
+            
+        } catch (Exception e) {
+            // TODO: handle exception
+            response.setStatus(HttpStatus.BAD_REQUEST);
+            response.setError(e.toString());
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+    }
+
+    @PostMapping(path = {"/bulk"}, name = "stores-post")
+    @PreAuthorize("hasAnyAuthority('stores-post', 'all')")
+    public ResponseEntity<HttpResponse> postBulkProductAddOn(
+        HttpServletRequest request,
+        @Valid @RequestBody ProductAddOnRequest[] bodyProductAddOn
+    ){
+
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+        String logprefix = request.getRequestURI();
+
+        try {
+
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "", "");
+
+            for (int i=0;i<bodyProductAddOn.length;i++) {
+
+                ProductAddOn body = ProductAddOn.castReference(bodyProductAddOn[i]);
+
+
+                if(body.getId()==null){
+                    
+                    //if id null then create
+                    ProductAddOn data = productAddOnService.createData(body);
+
+                }else{
+                    
+                    //else update
+                    ProductAddOn data = productAddOnService.updateProductAddOn(body.getId(),body);
+                }
+             
+              
+            }
+
+            response.setStatus(HttpStatus.OK);
+            response.setData(bodyProductAddOn);
             return ResponseEntity.status(response.getStatus()).body(response);
             
         } catch (Exception e) {

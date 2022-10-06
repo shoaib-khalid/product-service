@@ -72,7 +72,7 @@ public class AddOnTemplateItemController {
 
     @PostMapping(path = {""}, name = "stores-post")
     @PreAuthorize("hasAnyAuthority('stores-post', 'all')")
-    public ResponseEntity<HttpResponse> postAddOnGroupTemplate(
+    public ResponseEntity<HttpResponse> postAddOnGroupTemplateItem(
         HttpServletRequest request,
         @Valid @RequestBody AddOnTemplateItemRequest bodyAddOnTemplateItem
     ){
@@ -100,6 +100,50 @@ public class AddOnTemplateItemController {
         }
     }
 
+
+    @PostMapping(path = {"/bulk"}, name = "stores-post")
+    @PreAuthorize("hasAnyAuthority('stores-post', 'all')")
+    public ResponseEntity<HttpResponse> postBulkAddOnGroupTemplateItem(
+        HttpServletRequest request,
+        @Valid @RequestBody AddOnTemplateItemRequest[] bodyAddOnTemplateItem
+    ){
+
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+        String logprefix = request.getRequestURI();
+
+        try {
+
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "", "");
+
+            for (int i=0;i<bodyAddOnTemplateItem.length;i++) {
+
+                AddOnTemplateItem body = AddOnTemplateItem.castReference(bodyAddOnTemplateItem[i]);
+
+                if(body.getId()==null){
+                    
+                    //if id null then create
+                    AddOnTemplateItem data = addOnTemplateItemService.createData(body);
+
+                }else{
+                    
+                    //else update
+                    AddOnTemplateItem data = addOnTemplateItemService.updateAddOnTemplateItem(body.getId(),body);
+                }
+             
+              
+            }
+
+            response.setStatus(HttpStatus.OK);
+            response.setData(bodyAddOnTemplateItem);
+            return ResponseEntity.status(response.getStatus()).body(response);
+            
+        } catch (Exception e) {
+            // TODO: handle exception
+            response.setStatus(HttpStatus.BAD_REQUEST);
+            response.setError(e.toString());
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+    }
 
     @PutMapping(path = {"/{id}"}, name = "store-product-assets-put-by-id")
     @PreAuthorize("hasAnyAuthority('store-product-assets-put-by-id', 'all')")
