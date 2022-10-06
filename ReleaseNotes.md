@@ -1,4 +1,52 @@
 ##################################################
+# product-service-3.10.32| 06-October-2022 
+##################################################
+1. Product Add On features
+
+##DB Changes
+
+CREATE TABLE `addon_template_group` (
+  `id` varchar(50) NOT NULL,
+  `storeId` varchar(50) DEFAULT NULL,
+  `title` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `addon_template_item` (
+  `id` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `groupId` varchar(50) DEFAULT NULL,
+  `name` varchar(100) DEFAULT NULL,
+  `price` decimal(10,2) DEFAULT NULL,
+  `dineInPrice` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- symplified.product_addon definition
+
+CREATE TABLE `product_addon` (
+  `id` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `productId` varchar(50) CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT NULL,
+  `addOnItemId` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
+  `price` decimal(10,2) DEFAULT NULL,
+  `dineInPrice` decimal(10,2) DEFAULT NULL,
+  `status` enum('AVAILABLE','NOTAVAILABLE','OUTOFSTOCK') DEFAULT NULL,
+  `sequenceNumber` int DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `productId` (`productId`),
+  KEY `addOnItemId` (`addOnItemId`),
+  CONSTRAINT `product_addon_ibfk_1` FOREIGN KEY (`productId`) REFERENCES `product` (`id`),
+  CONSTRAINT `product_addon_ibfk_2` FOREIGN KEY (`addOnItemId`) REFERENCES `addon_template_item` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `product_addon_group` (
+  `id` varchar(50) NOT NULL,
+  `addonGroupId` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
+  `minAllowed` int DEFAULT NULL,
+  `maxAllowed` int DEFAULT NULL,
+  `sequenceNumber` int DEFAULT '0',
+  `productId` varchar(50) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+##################################################
 # product-service-3.10.31| 06-October-2022 
 ##################################################
 1. Sort the list of productInventories in with ascending of price
