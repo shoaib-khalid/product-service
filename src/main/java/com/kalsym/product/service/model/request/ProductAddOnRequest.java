@@ -12,7 +12,7 @@ public class ProductAddOnRequest {
 
     private String productId;
 
-    private String addOnItemId;
+    private String addonTemplateItemId;
 
     private String status;
 

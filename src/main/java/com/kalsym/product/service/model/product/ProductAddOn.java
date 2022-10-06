@@ -36,7 +36,7 @@ public class ProductAddOn{
     
     private String productId;
 
-    private String addOnItemId;
+    private String addonTemplateItemId;
 
     private Double price;
 
@@ -48,7 +48,7 @@ public class ProductAddOn{
 
     @OneToOne(cascade = CascadeType.ALL,
     fetch = FetchType.EAGER)
-    @JoinColumn(name = "addOnItemId", referencedColumnName = "id", insertable = false, updatable = false, nullable = true)    
+    @JoinColumn(name = "addonTemplateItemId", referencedColumnName = "id", insertable = false, updatable = false, nullable = true)    
     private ProductAddOnItemDetails productAddOnItemDetails;
 
     public static ProductAddOn castReference(ProductAddOnRequest reqBody){
@@ -77,7 +77,7 @@ public class ProductAddOn{
         }
 
         body.setProductId(reqBody.getProductId());
-        body.setAddOnItemId(reqBody.getAddOnItemId());
+        body.setAddonTemplateItemId(reqBody.getAddonTemplateItemId());
         body.setStatus(reqBody.getStatus());
         body.setSequenceNumber(reqBody.getSequenceNumber());
 

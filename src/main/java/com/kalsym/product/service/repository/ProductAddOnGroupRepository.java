@@ -15,7 +15,7 @@ import com.kalsym.product.service.model.product.ProductAddOnGroup;
 @Repository
 public interface ProductAddOnGroupRepository extends JpaRepository<ProductAddOnGroup, String>,JpaSpecificationExecutor<ProductAddOnGroup>{
     
-    Optional<ProductAddOnGroup> findByProductIdAndAddonGroupId(@Param("productId") String productId,@Param("addonGroupId") String addonGroupId);
+    Optional<ProductAddOnGroup> findByProductIdAndAddonTemplateGroupId(@Param("productId") String productId,@Param("addonTemplateGroupId") String addonTemplateGroupId);
 
     List<ProductAddOnGroup> findByProductId(@Param("productId") String productId);
 

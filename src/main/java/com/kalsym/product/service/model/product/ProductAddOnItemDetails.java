@@ -35,7 +35,7 @@ import lombok.ToString;
     private String id;
 
     @Transient
-    private String addOnItemId;
+    private String addonTemplateItemId;
 
     private String groupId;
 

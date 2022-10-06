@@ -33,7 +33,7 @@ public class ProductAddOnGroup {
     @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
     private String id;
 
-    private String addonGroupId;
+    private String addonTemplateGroupId;
 
     private Integer minAllowed;
 
@@ -54,7 +54,7 @@ public class ProductAddOnGroup {
         }
 
         body.setProductId(reqBody.getProductId());
-        body.setAddonGroupId(reqBody.getAddonGroupId());
+        body.setAddonTemplateGroupId(reqBody.getAddonTemplateGroupId());
         body.setMinAllowed(reqBody.getMinAllowed());
         body.setMaxAllowed(reqBody.getMaxAllowed());
         body.setSequenceNumber(reqBody.getSequenceNumber());

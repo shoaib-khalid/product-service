@@ -10,7 +10,7 @@ public class ProductAddonGroupRequest {
     
     private String id;
 
-    private String addonGroupId;
+    private String addonTemplateGroupId;
 
     private Integer minAllowed;
 

@@ -31,7 +31,7 @@ public class ProductAddOnGroupService {
     public ProductAddOnGroup updateProductAddsOnGroup(String id, ProductAddOnGroup productAddonGroup){
 
         ProductAddOnGroup data = productAddOnGroupRepository.findById(id).get();
-        data.setAddonGroupId(productAddonGroup.getAddonGroupId());
+        data.setAddonTemplateGroupId(productAddonGroup.getAddonTemplateGroupId());
         data.setMaxAllowed(productAddonGroup.getMaxAllowed());
         data.setMinAllowed(productAddonGroup.getMinAllowed());
         data.setSequenceNumber(productAddonGroup.getSequenceNumber());

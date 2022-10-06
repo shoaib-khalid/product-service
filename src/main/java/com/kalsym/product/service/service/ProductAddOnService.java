@@ -49,7 +49,7 @@ public class ProductAddOnService {
         Pageable pageable = PageRequest.of(page, pageSize);
 
         ProductAddOn productAddOnMatch = new ProductAddOn();
-        productAddOnMatch.setAddOnItemId(addOnItemId);
+        productAddOnMatch.setAddonTemplateItemId(addOnItemId);
 
         ExampleMatcher matcher = ExampleMatcher
                 .matchingAll()
@@ -119,7 +119,7 @@ public class ProductAddOnService {
             productAddOnItemDetails.setStatus(mapper.getStatus());
             productAddOnItemDetails.setName(mapper.getProductAddOnItemDetails().getName());
             productAddOnItemDetails.setGroupId(mapper.getProductAddOnItemDetails().getGroupId());
-            productAddOnItemDetails.setAddOnItemId(mapper.getAddOnItemId());
+            productAddOnItemDetails.setAddonTemplateItemId(mapper.getAddonTemplateItemId());
             productAddOnItemDetails.setSequenceNumber(mapper.getSequenceNumber());
 
             return productAddOnItemDetails;
@@ -141,7 +141,7 @@ public class ProductAddOnService {
             .filter(x -> x.getGroupId().equals(mapper.getId()))
             .collect(Collectors.toList());
             //get product add on group details 
-            ProductAddOnGroup productAddOnGroup = productAddOnGroupRepository.findByProductIdAndAddonGroupId(productId,mapper.getId()).get();
+            ProductAddOnGroup productAddOnGroup = productAddOnGroupRepository.findByProductIdAndAddonTemplateGroupId(productId,mapper.getId()).get();
             ProductAddOnGroupDetails productAddOnGroupDetails = mapper;
             productAddOnGroupDetails.setProductAddOnItemDetail(filterByGroupId);
             productAddOnGroupDetails.setMaxAllowed(productAddOnGroup.getMaxAllowed());
