@@ -72,6 +72,7 @@ import com.kalsym.product.service.worker.BulkDeleteProduct;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.persistence.criteria.Join;
@@ -306,6 +307,15 @@ public class StoreProductController {
                     }
                 }
             }
+            
+            //sort the product inventories by price acsending
+            List<ProductInventoryWithDetails> sortProductInventories = productDetails.getProductInventories().stream()
+            .sorted(Comparator.comparingDouble(ProductInventoryWithDetails::getPrice))
+            .collect(Collectors.toList());
+
+            //set the product inventories data for sort price ascending
+            productDetails.setProductInventories(sortProductInventories);
+
             productWithDetailsList[x]=productDetails;
         }
         

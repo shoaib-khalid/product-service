@@ -1,4 +1,8 @@
 ##################################################
+# product-service-3.10.31| 06-October-2022 
+##################################################
+1. Sort the list of productInventories in with ascending of price
+##################################################
 # product-service-3.10.30| 23-September-2022 
 ##################################################
 1. bulk delete product and categories
