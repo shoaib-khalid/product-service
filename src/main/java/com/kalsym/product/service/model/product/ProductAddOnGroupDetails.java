@@ -35,6 +35,14 @@ public class ProductAddOnGroupDetails {
     @Transient 
     private List<ProductAddOnItemDetails> productAddOnItemDetail;
 
-    // @Transient
-    // private String 
+    @Transient
+    private Integer sequenceNumber;
+
+    @Transient
+    private Integer minAllowed;
+
+    @Transient
+    private Integer maxAllowed;
+
+
 }

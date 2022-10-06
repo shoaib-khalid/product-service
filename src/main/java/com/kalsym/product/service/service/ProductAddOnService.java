@@ -3,12 +3,15 @@ package com.kalsym.product.service.service;
 import org.springframework.stereotype.Service;
 
 import com.kalsym.product.service.model.product.ProductAddOn;
+import com.kalsym.product.service.model.product.ProductAddOnGroup;
 import com.kalsym.product.service.model.product.ProductAddOnGroupDetails;
 import com.kalsym.product.service.model.product.ProductAddOnItemDetails;
 import com.kalsym.product.service.repository.ProductAddOnGroupDetailsRepository;
+import com.kalsym.product.service.repository.ProductAddOnGroupRepository;
 import com.kalsym.product.service.repository.ProductAddOnRepository;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -37,6 +40,9 @@ public class ProductAddOnService {
 
     @Autowired
     ProductAddOnGroupDetailsRepository productAddOnGroupDetailsRepository;
+
+    @Autowired
+    ProductAddOnGroupRepository productAddOnGroupRepository;
 
     public Page<ProductAddOn> getQueryProductAddOn(int page, int pageSize, String addOnItemId){
 
@@ -99,7 +105,7 @@ public class ProductAddOnService {
         return getData;
     }
 
-    public List<ProductAddOnGroupDetails> transformDataGroupTemplateofProductAddOn(List<ProductAddOn> showData){
+    public List<ProductAddOnGroupDetails> transformDataGroupTemplateofProductAddOn(List<ProductAddOn> showData, String productId){
 
         List<ProductAddOnItemDetails> result = 
         showData.stream()
@@ -114,6 +120,7 @@ public class ProductAddOnService {
             productAddOnItemDetails.setName(mapper.getProductAddOnItemDetails().getName());
             productAddOnItemDetails.setGroupId(mapper.getProductAddOnItemDetails().getGroupId());
             productAddOnItemDetails.setAddOnItemId(mapper.getAddOnItemId());
+            productAddOnItemDetails.setSequenceNumber(mapper.getSequenceNumber());
 
             return productAddOnItemDetails;
         })
@@ -133,13 +140,31 @@ public class ProductAddOnService {
             List<ProductAddOnItemDetails> filterByGroupId =result.stream()
             .filter(x -> x.getGroupId().equals(mapper.getId()))
             .collect(Collectors.toList());
+            //get product add on group details 
+            ProductAddOnGroup productAddOnGroup = productAddOnGroupRepository.findByProductIdAndAddonGroupId(productId,mapper.getId()).get();
             ProductAddOnGroupDetails productAddOnGroupDetails = mapper;
             productAddOnGroupDetails.setProductAddOnItemDetail(filterByGroupId);
+            productAddOnGroupDetails.setMaxAllowed(productAddOnGroup.getMaxAllowed());
+            productAddOnGroupDetails.setMinAllowed(productAddOnGroup.getMinAllowed());
+            productAddOnGroupDetails.setSequenceNumber(productAddOnGroup.getSequenceNumber());
+            productAddOnGroupDetails.setId(productAddOnGroup.getId());
             return productAddOnGroupDetails;
         })
         .collect(Collectors.toList());
+
+        //nested sort
+        List<ProductAddOnGroupDetails> sortedList = result3.stream()
+        .sorted(Comparator.comparingInt(ProductAddOnGroupDetails::getSequenceNumber))
+        .map(mapper -> {
+            List<ProductAddOnItemDetails> packageOptDetails = mapper.getProductAddOnItemDetail().stream()
+            .sorted(Comparator.comparingInt(ProductAddOnItemDetails::getSequenceNumber))
+            .collect(Collectors.toList());
+            mapper.setProductAddOnItemDetail(packageOptDetails);
+            return mapper;
+        })
+        .collect(Collectors.toList());
         
-        return result3;
+        return sortedList;
     }
 
     // public List<ProductAddOnGroupDetails> getAllProductAddOnGroupDetails(String productId){

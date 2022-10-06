@@ -19,5 +19,7 @@ public class ProductAddOnRequest {
     private Double price;
 
     private Double dineInPrice;
+
+    private Integer sequenceNumber;
     
 }

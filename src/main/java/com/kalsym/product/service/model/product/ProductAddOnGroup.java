@@ -41,8 +41,6 @@ public class ProductAddOnGroup {
 
     private Integer sequenceNumber;
 
-    private Boolean isDefault;
-
     private String productId;
 
     public static ProductAddOnGroup castReference(ProductAddonGroupRequest reqBody){
@@ -60,7 +58,6 @@ public class ProductAddOnGroup {
         body.setMinAllowed(reqBody.getMinAllowed());
         body.setMaxAllowed(reqBody.getMaxAllowed());
         body.setSequenceNumber(reqBody.getSequenceNumber());
-        body.setIsDefault(reqBody.getIsDefault());
 
         return body;
     }

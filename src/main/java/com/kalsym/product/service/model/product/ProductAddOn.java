@@ -44,6 +44,8 @@ public class ProductAddOn{
 
     private String status;
 
+    private Integer sequenceNumber;
+
     @OneToOne(cascade = CascadeType.ALL,
     fetch = FetchType.EAGER)
     @JoinColumn(name = "addOnItemId", referencedColumnName = "id", insertable = false, updatable = false, nullable = true)    
@@ -77,6 +79,7 @@ public class ProductAddOn{
         body.setProductId(reqBody.getProductId());
         body.setAddOnItemId(reqBody.getAddOnItemId());
         body.setStatus(reqBody.getStatus());
+        body.setSequenceNumber(reqBody.getSequenceNumber());
 
         return body;
     }

@@ -35,7 +35,6 @@ public class ProductAddOnGroupService {
         data.setMaxAllowed(productAddonGroup.getMaxAllowed());
         data.setMinAllowed(productAddonGroup.getMinAllowed());
         data.setSequenceNumber(productAddonGroup.getSequenceNumber());
-        data.setIsDefault(productAddonGroup.getIsDefault());
         
         return productAddOnGroupRepository.save(data);                                
     }

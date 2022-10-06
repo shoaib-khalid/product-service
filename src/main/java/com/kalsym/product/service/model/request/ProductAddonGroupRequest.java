@@ -18,7 +18,5 @@ public class ProductAddonGroupRequest {
 
     private Integer sequenceNumber;
 
-    private Boolean isDefault;
-
     private String productId;
 }

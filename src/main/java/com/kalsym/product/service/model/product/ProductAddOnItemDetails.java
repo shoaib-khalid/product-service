@@ -58,6 +58,8 @@ import lombok.ToString;
     @Transient
     private String status;
 
+    @Transient
+    private Integer sequenceNumber;
 
 
 

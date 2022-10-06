@@ -87,7 +87,7 @@ public class ProductAddOnController {
             List<ProductAddOn> showData = productAddOnService.getAllProductByProductId(productId);
             // List<ProductAddOnGroupDetails> showData = productAddOnService.getAllProductAddOnGroupDetails(productId);
 
-            List<ProductAddOnGroupDetails> resultData = productAddOnService.transformDataGroupTemplateofProductAddOn(showData);
+            List<ProductAddOnGroupDetails> resultData = productAddOnService.transformDataGroupTemplateofProductAddOn(showData,productId);
         
             response.setStatus(HttpStatus.OK);
             response.setData(resultData);
