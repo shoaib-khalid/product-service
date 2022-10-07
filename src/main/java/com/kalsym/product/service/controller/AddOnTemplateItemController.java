@@ -25,6 +25,8 @@ import com.kalsym.product.service.model.product.AddOnTemplateItem;
 import com.kalsym.product.service.model.request.AddOnTemplateItemRequest;
 import com.kalsym.product.service.utility.HttpResponse;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
@@ -115,26 +117,31 @@ public class AddOnTemplateItemController {
 
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "", "");
 
+            // AddOnTemplateItem[] responseData = new AddOnTemplateItem[bodyAddOnTemplateItem.length];
+            List<AddOnTemplateItem> responseData = new ArrayList<>();
+
             for (int i=0;i<bodyAddOnTemplateItem.length;i++) {
 
                 AddOnTemplateItem body = AddOnTemplateItem.castReference(bodyAddOnTemplateItem[i]);
 
+                AddOnTemplateItem data;
+                
                 if(body.getId()==null){
                     
                     //if id null then create
-                    AddOnTemplateItem data = addOnTemplateItemService.createData(body);
+                    data = addOnTemplateItemService.createData(body);
 
                 }else{
                     
                     //else update
-                    AddOnTemplateItem data = addOnTemplateItemService.updateAddOnTemplateItem(body.getId(),body);
+                    data = addOnTemplateItemService.updateAddOnTemplateItem(body.getId(),body);
                 }
              
-              
+                responseData.add(data);
             }
 
             response.setStatus(HttpStatus.OK);
-            response.setData(bodyAddOnTemplateItem);
+            response.setData(responseData);
             return ResponseEntity.status(response.getStatus()).body(response);
             
         } catch (Exception e) {
