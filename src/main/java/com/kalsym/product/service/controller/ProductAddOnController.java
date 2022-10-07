@@ -1,4 +1,5 @@
 package com.kalsym.product.service.controller;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -146,28 +147,31 @@ public class ProductAddOnController {
         try {
 
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "", "");
+            List<ProductAddOn> responseData = new ArrayList<>();
 
             for (int i=0;i<bodyProductAddOn.length;i++) {
 
                 ProductAddOn body = ProductAddOn.castReference(bodyProductAddOn[i]);
 
+                ProductAddOn data;
 
                 if(body.getId()==null){
                     
                     //if id null then create
-                    ProductAddOn data = productAddOnService.createData(body);
+                    data = productAddOnService.createData(body);
 
                 }else{
                     
                     //else update
-                    ProductAddOn data = productAddOnService.updateProductAddOn(body.getId(),body);
+                    data = productAddOnService.updateProductAddOn(body.getId(),body);
                 }
              
-              
+                responseData.add(data);
+
             }
 
             response.setStatus(HttpStatus.OK);
-            response.setData(bodyProductAddOn);
+            response.setData(responseData);
             return ResponseEntity.status(response.getStatus()).body(response);
             
         } catch (Exception e) {
