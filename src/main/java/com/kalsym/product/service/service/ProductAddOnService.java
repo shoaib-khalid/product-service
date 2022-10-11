@@ -143,6 +143,7 @@ public class ProductAddOnService {
             //get product add on group details 
             ProductAddOnGroup productAddOnGroup = productAddOnGroupRepository.findByProductIdAndAddonTemplateGroupId(productId,mapper.getId()).get();
             ProductAddOnGroupDetails productAddOnGroupDetails = mapper;
+            productAddOnGroupDetails.setGroupId(productAddOnGroup.getAddonTemplateGroupId());
             productAddOnGroupDetails.setProductAddOnItemDetail(filterByGroupId);
             productAddOnGroupDetails.setMaxAllowed(productAddOnGroup.getMaxAllowed());
             productAddOnGroupDetails.setMinAllowed(productAddOnGroup.getMinAllowed());

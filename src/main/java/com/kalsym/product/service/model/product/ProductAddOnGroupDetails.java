@@ -44,5 +44,7 @@ public class ProductAddOnGroupDetails {
     @Transient
     private Integer maxAllowed;
 
+    @Transient
+    private String groupId;
 
 }
