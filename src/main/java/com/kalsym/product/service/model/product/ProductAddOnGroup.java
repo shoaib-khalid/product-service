@@ -43,6 +43,8 @@ public class ProductAddOnGroup {
 
     private String productId;
 
+    private String status;
+
     public static ProductAddOnGroup castReference(ProductAddonGroupRequest reqBody){
 
         ProductAddOnGroup body = new ProductAddOnGroup();
@@ -58,7 +60,20 @@ public class ProductAddOnGroup {
         body.setMinAllowed(reqBody.getMinAllowed());
         body.setMaxAllowed(reqBody.getMaxAllowed());
         body.setSequenceNumber(reqBody.getSequenceNumber());
+        body.setStatus(reqBody.getStatus());
+
 
         return body;
+    }
+
+    public ProductAddOnGroup updateData(ProductAddOnGroup data,ProductAddOnGroup newBody){
+
+        data.setAddonTemplateGroupId(newBody.getAddonTemplateGroupId());
+        data.setMaxAllowed(newBody.getMaxAllowed());
+        data.setMinAllowed(newBody.getMinAllowed());
+        data.setSequenceNumber(newBody.getSequenceNumber());
+        data.setStatus(newBody.getStatus());
+        return data;
+
     }
 }

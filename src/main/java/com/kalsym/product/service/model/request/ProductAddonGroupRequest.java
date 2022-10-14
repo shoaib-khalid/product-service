@@ -19,4 +19,7 @@ public class ProductAddonGroupRequest {
     private Integer sequenceNumber;
 
     private String productId;
+
+    private String status;
+
 }

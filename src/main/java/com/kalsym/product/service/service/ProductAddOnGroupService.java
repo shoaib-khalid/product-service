@@ -31,12 +31,8 @@ public class ProductAddOnGroupService {
     public ProductAddOnGroup updateProductAddsOnGroup(String id, ProductAddOnGroup productAddonGroup){
 
         ProductAddOnGroup data = productAddOnGroupRepository.findById(id).get();
-        data.setAddonTemplateGroupId(productAddonGroup.getAddonTemplateGroupId());
-        data.setMaxAllowed(productAddonGroup.getMaxAllowed());
-        data.setMinAllowed(productAddonGroup.getMinAllowed());
-        data.setSequenceNumber(productAddonGroup.getSequenceNumber());
-        
-        return productAddOnGroupRepository.save(data);                                
+             
+        return productAddOnGroupRepository.save(data.updateData(data,productAddonGroup));                                
     }
 
     public Optional<ProductAddOnGroup> getById(String id){
