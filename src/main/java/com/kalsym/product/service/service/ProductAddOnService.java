@@ -105,7 +105,7 @@ public class ProductAddOnService {
 
     public List<ProductAddOn> getByProductAddonGroupId(String productAddonGroupId){
 
-        List<ProductAddOn> getData = productAddOnRepository.findByProductAddonGroupId(productAddonGroupId);
+        List<ProductAddOn> getData = productAddOnRepository.findByProductAddonGroupIdAndStatusNot(productAddonGroupId,"DELETED");
         
         return getData;
     }

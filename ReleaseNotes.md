@@ -1,4 +1,9 @@
 ##################################################
+# product-service-3.10.35| 14-October-2022 
+##################################################
+1. Fix product that has price 0 not shwowing according to platform type
+2. chnage a bit for the query for findng status not deletd
+##################################################
 # product-service-3.10.34| 14-October-2022 
 ##################################################
 1. Update the statu of product add on instead of delete

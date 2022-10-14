@@ -167,6 +167,7 @@ public class StoreProductController {
             @RequestParam(required = false, defaultValue = "name") String sortByCol,
             @RequestParam(required = false, defaultValue = "ASC") Sort.Direction sortingOrder,
             @RequestParam(required = false) Boolean showAllPrice,
+            @RequestParam(required = false) String platformType,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int pageSize) {
         String logprefix = request.getRequestURI();
@@ -177,6 +178,11 @@ public class StoreProductController {
         //to hide the product that 0 price
         if(showAllPrice == null ){
             showAllPrice = false;
+        }
+
+        //to handle price 0 according to platform , by default we set it marketplace
+        if(platformType == null){
+            platformType = "marketplace";
         }
 
         if (status == null) {
@@ -250,7 +256,7 @@ public class StoreProductController {
         //     productWithPage = productWithDetailsRepository.findByNameOrSeoNameOrCategoryIdAscendingOrderByPrice(storeId, name, seoName, status, categoryId, shortId, pageable);        
         // else
         //     productWithPage = productWithDetailsRepository.findByNameOrSeoNameAscendingOrderByPrice(storeId, name, seoName, status, shortId, pageable);        
-        Page<ProductWithDetails> productWithPage = productWithDetailsRepository.findAll(getStoreProductSpec(name, seoName, categoryId,storeId,shortId, status,showAllPrice, productExample,sortByCol,sortingOrder), pageable);
+        Page<ProductWithDetails> productWithPage = productWithDetailsRepository.findAll(getStoreProductSpec(name, seoName, categoryId,storeId,shortId, status,showAllPrice, platformType,productExample,sortByCol,sortingOrder), pageable);
         List<ProductWithDetails> productList = productWithPage.getContent();
         
         ProductWithDetails[] productWithDetailsList = new ProductWithDetails[productList.size()];
@@ -625,7 +631,7 @@ public class StoreProductController {
     public Specification<ProductWithDetails> getStoreProductSpec(
             String name, String seoName, String categoryId, 
             String storeId, Integer shortId,
-            List<String> statusList,Boolean showAllPrice, Example<ProductWithDetails> example,
+            List<String> statusList,Boolean showAllPrice, String platformType, Example<ProductWithDetails> example,
             String sortByCol, Sort.Direction sortingOrder) {
 
         return (Specification<ProductWithDetails>) (root, query, builder) -> {
@@ -707,7 +713,14 @@ public class StoreProductController {
 
             //filter product code that has prce not 0 for handling combo
             if(showAllPrice == false){
-                predicates.add(builder.notEqual(productInventories.get("price"), 0));
+                if(platformType == "dinein"){
+                    predicates.add(builder.notEqual(productInventories.get("dineInPrice"), 0));
+
+                }
+                else{
+                    predicates.add(builder.notEqual(productInventories.get("price"), 0));
+
+                }
 
             }
 
