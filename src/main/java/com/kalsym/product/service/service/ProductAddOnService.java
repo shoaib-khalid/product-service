@@ -95,6 +95,7 @@ public class ProductAddOnService {
         data.setDineInPrice(productAddOn.getDineInPrice());
         data.setPrice(productAddOn.getPrice());
         data.setStatus(productAddOn.getStatus());
+        data.setSequenceNumber(productAddOn.getSequenceNumber());
         
         return productAddOnRepository.save(data);                                
     }
