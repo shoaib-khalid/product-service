@@ -713,7 +713,9 @@ public class StoreProductController {
 
             //filter product code that has prce not 0 for handling combo
             if(showAllPrice == false){
-                if(platformType == "dinein"){
+
+                if(platformType.equals("dinein")){
+
                     predicates.add(builder.notEqual(productInventories.get("dineInPrice"), 0));
 
                 }
