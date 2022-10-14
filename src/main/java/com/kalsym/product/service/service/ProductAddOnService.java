@@ -112,6 +112,7 @@ public class ProductAddOnService {
 
     public List<ProductAddOnGroupDetails> transformDataGroupTemplateofProductAddOn(List<ProductAddOn> showData, String productId){
 
+        //extract details of product add on first
         List<ProductAddOnItemDetails> result = 
         showData.stream()
         .map(mapper->{
@@ -123,7 +124,10 @@ public class ProductAddOnService {
             productAddOnItemDetails.setDineInPrice(mapper.getDineInPrice());
             productAddOnItemDetails.setStatus(mapper.getStatus());
             productAddOnItemDetails.setName(mapper.getProductAddOnItemDetails().getName());
+
+            //aka templategroupid
             productAddOnItemDetails.setGroupId(mapper.getProductAddOnItemDetails().getGroupId());
+
             productAddOnItemDetails.setAddonTemplateItemId(mapper.getAddonTemplateItemId());
             productAddOnItemDetails.setSequenceNumber(mapper.getSequenceNumber());
             productAddOnItemDetails.setProductAddonGroupId(mapper.getProductAddonGroupId());
@@ -132,6 +136,7 @@ public class ProductAddOnService {
         })
         .collect(Collectors.toList());
 
+        //extract info on addon_template_group  
         List<ProductAddOnGroupDetails> result2 = showData.stream()
         .map(mapper->{
             ProductAddOnGroupDetails productAddOnGroupDetails = mapper.getProductAddOnItemDetails().getProductAddOnGroupDetails();
@@ -140,6 +145,7 @@ public class ProductAddOnService {
         .distinct()
         .collect(Collectors.toList());
 
+        //merge the info into one collection
         List<ProductAddOnGroupDetails> result3 = result2.stream()
         .map(mapper->{
 
@@ -147,7 +153,7 @@ public class ProductAddOnService {
             .filter(x -> x.getGroupId().equals(mapper.getId()))
             .collect(Collectors.toList());
             //get product add on group details 
-            ProductAddOnGroup productAddOnGroup = productAddOnGroupRepository.findByProductIdAndAddonTemplateGroupId(productId,mapper.getId()).get();
+            ProductAddOnGroup productAddOnGroup = productAddOnGroupRepository.findByProductIdAndAddonTemplateGroupIdAndStatusNot(productId,mapper.getId(),"DELETED").get();
             ProductAddOnGroupDetails productAddOnGroupDetails = mapper;
             productAddOnGroupDetails.setGroupId(productAddOnGroup.getAddonTemplateGroupId());
             productAddOnGroupDetails.setProductAddOnItemDetail(filterByGroupId);

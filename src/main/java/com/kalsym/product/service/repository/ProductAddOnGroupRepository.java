@@ -21,5 +21,8 @@ public interface ProductAddOnGroupRepository extends JpaRepository<ProductAddOnG
 
     List<ProductAddOnGroup> findByProductIdAndStatusNot(@Param("productId") String productId,@Param("status") String status);
 
+    Optional<ProductAddOnGroup> findByProductIdAndAddonTemplateGroupIdAndStatusNot(@Param("productId") String productId,@Param("addonTemplateGroupId") String addonTemplateGroupId,@Param("status") String status);
+
+
 }
 
