@@ -14,4 +14,6 @@ public interface ProductAddOnRepository extends JpaRepository<ProductAddOn, Stri
     
     List<ProductAddOn> findByProductId(@Param("productId") String productId);
 
+    List<ProductAddOn> findByProductIdAndStatusNot(@Param("productId") String productId,@Param("status") String status);
+
 }

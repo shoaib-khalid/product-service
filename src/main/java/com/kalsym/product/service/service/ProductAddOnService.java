@@ -98,7 +98,8 @@ public class ProductAddOnService {
 
     public List<ProductAddOn> getAllProductByProductId(String productId){
 
-        List<ProductAddOn> getData = productAddOnRepository.findByProductId(productId);
+        List<ProductAddOn> getData = productAddOnRepository.findByProductIdAndStatusNot(productId,"DELETED");
+        
         return getData;
     }
 
@@ -118,7 +119,7 @@ public class ProductAddOnService {
             productAddOnItemDetails.setGroupId(mapper.getProductAddOnItemDetails().getGroupId());
             productAddOnItemDetails.setAddonTemplateItemId(mapper.getAddonTemplateItemId());
             productAddOnItemDetails.setSequenceNumber(mapper.getSequenceNumber());
-            // productAddOnItemDetails.setProductAddonGroupId(mapper.getProductAddonGroupId());
+            productAddOnItemDetails.setProductAddonGroupId(mapper.getProductAddonGroupId());
 
             return productAddOnItemDetails;
         })

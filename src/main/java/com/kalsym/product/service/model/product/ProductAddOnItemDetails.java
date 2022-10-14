@@ -61,6 +61,7 @@ import lombok.ToString;
     @Transient
     private Integer sequenceNumber;
 
-
+    @Transient
+    private String productAddonGroupId;
 
  }
