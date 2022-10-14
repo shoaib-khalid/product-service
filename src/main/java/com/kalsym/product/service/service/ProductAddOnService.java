@@ -103,6 +103,13 @@ public class ProductAddOnService {
         return getData;
     }
 
+    public List<ProductAddOn> getByProductAddonGroupId(String productAddonGroupId){
+
+        List<ProductAddOn> getData = productAddOnRepository.findByProductAddonGroupId(productAddonGroupId);
+        
+        return getData;
+    }
+
     public List<ProductAddOnGroupDetails> transformDataGroupTemplateofProductAddOn(List<ProductAddOn> showData, String productId){
 
         List<ProductAddOnItemDetails> result = 

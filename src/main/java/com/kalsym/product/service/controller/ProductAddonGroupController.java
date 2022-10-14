@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kalsym.product.service.ProductServiceApplication;
+import com.kalsym.product.service.model.product.ProductAddOn;
 import com.kalsym.product.service.model.product.ProductAddOnGroup;
 import com.kalsym.product.service.model.product.ProductAddOnGroupDetails;
 import com.kalsym.product.service.model.product.ProductAddOnItemDetails;
@@ -45,6 +46,9 @@ public class ProductAddonGroupController {
 
     @Autowired
     ProductAddOnGroupService productAddOnGroupService;
+
+    @Autowired
+    ProductAddOnService productAddOnService;
     
     @GetMapping(path = {""}, name = "store-categories-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-categories-get', 'all')")
@@ -151,17 +155,40 @@ public class ProductAddonGroupController {
 
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
-        Boolean isDeleted = productAddOnGroupService.deleteProductAddOnGroup(id);
-        HttpStatus httpStatus;
+        //uPDATE THE DATA STATUS TO DELETED
+        Optional<ProductAddOnGroup> optData = productAddOnGroupService.getById(id);
+        ProductAddOnGroup body = optData.get();
+        
+        if(!optData.isPresent()){
 
-        String message;
-        httpStatus = isDeleted ? HttpStatus.OK :HttpStatus.NOT_FOUND;
-        message = isDeleted ? "Success Deleted" : "Id Not Found";
-        response.setStatus(httpStatus);
-        response.setMessage(message);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError(Integer.toString(HttpStatus.NOT_FOUND.value()));
+            return ResponseEntity.status(response.getStatus()).body(response);    
+        }
 
+        //update the data set the status to "DELETED"
+        body.setStatus("DELETED");
+        ProductAddOnGroup data = productAddOnGroupService.updateProductAddsOnGroup(id,body);
+
+        //THEN FIND ANY OF PRODUCT ADD ON WHICH LINK TO PRODUCTADDONGROUPID
+        List<ProductAddOn> getListOfProductAddon = productAddOnService.getByProductAddonGroupId(id);
+
+        if(getListOfProductAddon.size()>0){
+
+            for (int i=0;i<getListOfProductAddon.size();i++) {
+
+                //set the status the update
+                ProductAddOn productAddonData = getListOfProductAddon.get(i);
+                productAddonData.setStatus("DELETED");
+
+                productAddOnService.updateProductAddOn(productAddonData.getId(), productAddonData);
+
+            }
+        }
+
+        response.setStatus(HttpStatus.OK);
+        response.setData(data);
         return ResponseEntity.status(response.getStatus()).body(response);
-
 
     }
 

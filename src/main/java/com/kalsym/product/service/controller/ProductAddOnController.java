@@ -227,14 +227,23 @@ public class ProductAddOnController {
 
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
-        Boolean isDeleted = productAddOnService.deleteProductAddOn(id);
-        HttpStatus httpStatus;
+        Optional<ProductAddOn> optData = productAddOnService.getById(id);
+        ProductAddOn body = optData.get();
 
-        String message;
-        httpStatus = isDeleted ? HttpStatus.OK :HttpStatus.NOT_FOUND;
-        message = isDeleted ? "Success Deleted" : "Id Not Found";
-        response.setStatus(httpStatus);
-        response.setMessage(message);
+   
+        if(!optData.isPresent()){
+
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError(Integer.toString(HttpStatus.NOT_FOUND.value()));
+            return ResponseEntity.status(response.getStatus()).body(response);    
+        }
+
+        //update the data set the status to "DELETED"
+        body.setStatus("DELETED");
+        ProductAddOn data = productAddOnService.updateProductAddOn(id,body);
+
+        response.setStatus(HttpStatus.OK);
+        response.setData(data);
 
         return ResponseEntity.status(response.getStatus()).body(response);
 

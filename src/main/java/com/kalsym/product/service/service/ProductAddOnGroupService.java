@@ -23,7 +23,7 @@ public class ProductAddOnGroupService {
 
     public List<ProductAddOnGroup> listOfProductAddsOnGroup(String productId){
         
-        List<ProductAddOnGroup> getData = productAddOnGroupRepository.findByProductId(productId);
+        List<ProductAddOnGroup> getData = productAddOnGroupRepository.findByProductIdAndStatusNot(productId,"DELETED");
         return getData;
 
     }
