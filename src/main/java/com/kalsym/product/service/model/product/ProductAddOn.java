@@ -46,6 +46,8 @@ public class ProductAddOn{
 
     private Integer sequenceNumber;
 
+    private String productAddonGroupId;
+
     @OneToOne(cascade = CascadeType.ALL,
     fetch = FetchType.EAGER)
     @JoinColumn(name = "addonTemplateItemId", referencedColumnName = "id", insertable = false, updatable = false, nullable = true)    
@@ -78,9 +80,23 @@ public class ProductAddOn{
 
         body.setProductId(reqBody.getProductId());
         body.setAddonTemplateItemId(reqBody.getAddonTemplateItemId());
+        body.setProductAddonGroupId(reqBody.getProductAddonGroupId());
         body.setStatus(reqBody.getStatus());
         body.setSequenceNumber(reqBody.getSequenceNumber());
 
         return body;
+    }
+
+    public ProductAddOn updateData(ProductAddOn data,ProductAddOn newBody){
+
+        data.setStatus(newBody.getStatus());
+        data.setSequenceNumber(newBody.getSequenceNumber());
+        data.setDineInPrice(newBody.getDineInPrice());
+        data.setPrice(newBody.getPrice());
+        data.setProductAddonGroupId(newBody.getProductAddonGroupId());
+
+
+        return data;
+
     }
 }

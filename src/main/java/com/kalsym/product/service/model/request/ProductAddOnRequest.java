@@ -22,4 +22,7 @@ public class ProductAddOnRequest {
 
     private Integer sequenceNumber;
     
+    private String productAddonGroupId;
+
+    
 }

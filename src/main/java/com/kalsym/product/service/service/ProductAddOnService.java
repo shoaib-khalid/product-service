@@ -92,12 +92,8 @@ public class ProductAddOnService {
     public ProductAddOn updateProductAddOn(String id, ProductAddOn productAddOn){
 
         ProductAddOn data = productAddOnRepository.findById(id).get();
-        data.setDineInPrice(productAddOn.getDineInPrice());
-        data.setPrice(productAddOn.getPrice());
-        data.setStatus(productAddOn.getStatus());
-        data.setSequenceNumber(productAddOn.getSequenceNumber());
-        
-        return productAddOnRepository.save(data);                                
+
+        return productAddOnRepository.save(data.updateData(data, productAddOn));                                
     }
 
     public List<ProductAddOn> getAllProductByProductId(String productId){
@@ -122,6 +118,7 @@ public class ProductAddOnService {
             productAddOnItemDetails.setGroupId(mapper.getProductAddOnItemDetails().getGroupId());
             productAddOnItemDetails.setAddonTemplateItemId(mapper.getAddonTemplateItemId());
             productAddOnItemDetails.setSequenceNumber(mapper.getSequenceNumber());
+            // productAddOnItemDetails.setProductAddonGroupId(mapper.getProductAddonGroupId());
 
             return productAddOnItemDetails;
         })
