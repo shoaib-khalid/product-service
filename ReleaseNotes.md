@@ -1,4 +1,9 @@
 ##################################################
+# product-service-3.10.31-HOTFIX| 17-October-2022 
+##################################################
+1. Hot fix product that has price 0 not shwowing according to platform type
+
+##################################################
 # product-service-3.10.31| 06-October-2022 
 ##################################################
 1. Sort the list of productInventories in with ascending of price
