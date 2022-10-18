@@ -135,15 +135,20 @@ public class ProductAddOnService {
             return productAddOnItemDetails;
         })
         .collect(Collectors.toList());
+        // System.out.println("ProductAddOnItemDetails::::::::::::::"+result);
+
+
 
         //extract info on addon_template_group  
         List<ProductAddOnGroupDetails> result2 = showData.stream()
         .map(mapper->{
             ProductAddOnGroupDetails productAddOnGroupDetails = mapper.getProductAddOnItemDetails().getProductAddOnGroupDetails();
+            productAddOnGroupDetails.setGroupId(productId);
             return productAddOnGroupDetails;
         })
         .distinct()
         .collect(Collectors.toList());
+        // System.out.println("CHECKING DISTINCT OF GROUP"+result2);
 
         //merge the info into one collection
         List<ProductAddOnGroupDetails> result3 = result2.stream()
@@ -153,7 +158,9 @@ public class ProductAddOnService {
             .filter(x -> x.getGroupId().equals(mapper.getId()))
             .collect(Collectors.toList());
             //get product add on group details 
-            ProductAddOnGroup productAddOnGroup = productAddOnGroupRepository.findByProductIdAndAddonTemplateGroupIdAndStatusNot(productId,mapper.getId(),"DELETED").get();
+            // ProductAddOnGroup productAddOnGroup = productAddOnGroupRepository.findByProductIdAndAddonTemplateGroupIdAndStatusNot(productId,mapper.getId(),"DELETED").get();
+            ProductAddOnGroup productAddOnGroup = productAddOnGroupRepository.findByIdAndProductIdAndAddonTemplateGroupIdAndStatusNot(filterByGroupId.get(0).getProductAddonGroupId(),productId,mapper.getId(),"DELETED").get();
+
             ProductAddOnGroupDetails productAddOnGroupDetails = mapper;
             productAddOnGroupDetails.setGroupId(productAddOnGroup.getAddonTemplateGroupId());
             productAddOnGroupDetails.setProductAddOnItemDetail(filterByGroupId);
