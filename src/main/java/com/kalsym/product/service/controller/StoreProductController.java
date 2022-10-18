@@ -563,17 +563,18 @@ public class StoreProductController {
 
         }
 
+        //frontend handle seoname and seourl
         //String seoName = generateSeoName(bodyProduct.getName());
         
         // String seoName = bodyProduct.getSeoName();
         //Generate SEONAME replace all special character and white space \\s 
-        String seoName = bodyProduct.getName().replaceAll("[`~!@#$%^&*()_+\\[\\]\\\\;\',./{}|:\"<>?|\\s]", "-");
+        // String seoName = bodyProduct.getName().replaceAll("[`~!@#$%^&*()_+\\[\\]\\\\;\',./{}|:\"<>?|\\s]", "-");
         
-        String seoUrl = productSeoUrl.replace("{{store-domain}}", optStore.get().getDomain());
-        seoUrl = seoUrl.replace("{{product-name}}", seoName);
-        bodyProduct.setSeoUrl(seoUrl);
+        // String seoUrl = productSeoUrl.replace("{{store-domain}}", optStore.get().getDomain());
+        // seoUrl = seoUrl.replace("{{product-name}}", seoName);
+        // bodyProduct.setSeoUrl(seoUrl);
 
-        bodyProduct.setSeoName(seoName);
+        // bodyProduct.setSeoName(seoName);
         if (bodyProduct.getIsPackage()==null) { bodyProduct.setIsPackage(Boolean.FALSE); }
 
         //to handle backward compatibility since we implement new features for add on 

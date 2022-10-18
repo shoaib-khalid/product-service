@@ -3,6 +3,7 @@
 ##################################################
 1. Fix product that has price 0 not shwowing according to platform type
 2. chnage a bit for the query for findng status not deletd
+3. fix bug when create product with chinese character by removing generate seoname and seorul from backend
 ##################################################
 # product-service-3.10.34| 14-October-2022 
 ##################################################
