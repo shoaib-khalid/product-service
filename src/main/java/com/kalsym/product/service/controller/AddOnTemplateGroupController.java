@@ -1,5 +1,6 @@
 package com.kalsym.product.service.controller;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,9 +28,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.model.product.AddOnTemplateGroup;
+import com.kalsym.product.service.model.product.ProductAddOn;
 import com.kalsym.product.service.model.request.AddOnGroupTemplateRequest;
 import com.kalsym.product.service.repository.AddOnTemplateGroupRepository;
 import com.kalsym.product.service.service.AddOnTemplateGroupService;
+import com.kalsym.product.service.service.ProductAddOnService;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.utility.Logger;
 
@@ -39,6 +42,9 @@ public class AddOnTemplateGroupController {
 
     @Autowired
     AddOnTemplateGroupService addOnTemplateGroupService;
+
+    @Autowired
+    ProductAddOnService productAddOnService;
     
     @GetMapping(path = {""}, name = "store-categories-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-categories-get', 'all')")
@@ -143,17 +149,37 @@ public class AddOnTemplateGroupController {
     ){
 
         HttpResponse response = new HttpResponse(request.getRequestURI());
+  
+        try {
 
-        Boolean isDeleted = addOnTemplateGroupService.deleteAddOnTemplateGroup(id);
-        HttpStatus httpStatus;
+            
+            List<ProductAddOn> existingProductAddonTemplateGroupId = productAddOnService.getAllProductAddOnAndStatusNot(id,"DELETED");
 
-        String message;
-        httpStatus = isDeleted ? HttpStatus.OK :HttpStatus.NOT_FOUND;
-        message = isDeleted ? "Success Deleted" : "Id Not Found";
-        response.setStatus(httpStatus);
-        response.setMessage(message);
+            //if there is data we cannot simply 
+            if(existingProductAddonTemplateGroupId.size()>0){
 
-        return ResponseEntity.status(response.getStatus()).body(response);
+                response.setStatus(HttpStatus.CONFLICT);
+                response.setError(Integer.toString(HttpStatus.CONFLICT.value()));
+                response.setMessage("The add on is in used.");
+                return ResponseEntity.status(response.getStatus()).body(response);
+
+            }
+            else{
+                // AddOnTemplateGroup data = addOnTemplateGroupService.updateStatusAddOnTemplateGroup(id);
+                response.setStatus(HttpStatus.OK);
+                // response.setData(data);
+                return ResponseEntity.status(response.getStatus()).body(response);
+
+            }
+
+         
+            
+        } catch (Exception e) {
+            // TODO: handle exception
+            response.setStatus(HttpStatus.BAD_REQUEST);
+            response.setError(e.toString());
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
 
 
     }

@@ -44,12 +44,11 @@ public class ProductAddOnService {
     @Autowired
     ProductAddOnGroupRepository productAddOnGroupRepository;
 
-    public Page<ProductAddOn> getQueryProductAddOn(int page, int pageSize, String addOnItemId){
+    public Page<ProductAddOn> getQueryProductAddOn(int page, int pageSize,String addonTemplateGroupId,String status){
 
         Pageable pageable = PageRequest.of(page, pageSize);
 
         ProductAddOn productAddOnMatch = new ProductAddOn();
-        productAddOnMatch.setAddonTemplateItemId(addOnItemId);
 
         ExampleMatcher matcher = ExampleMatcher
                 .matchingAll()
@@ -58,7 +57,9 @@ public class ProductAddOnService {
                 .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
         Example<ProductAddOn> productAddOnExample = Example.of(productAddOnMatch, matcher);
 
-        Page<ProductAddOn> productAddOnWithPage = productAddOnRepository.findAll(productAddOnExample, pageable);
+        Specification<ProductAddOn> productAddOnSpecs = searchProductAddOnSpecs(status,addonTemplateGroupId,productAddOnExample);
+
+        Page<ProductAddOn> productAddOnWithPage = productAddOnRepository.findAll(productAddOnSpecs, pageable);
 
         return productAddOnWithPage;
     }
@@ -99,6 +100,16 @@ public class ProductAddOnService {
     public List<ProductAddOn> getAllProductByProductId(String productId){
 
         List<ProductAddOn> getData = productAddOnRepository.findByProductIdAndStatusNot(productId,"DELETED");
+        
+        return getData;
+    }
+
+    public List<ProductAddOn> getAllProductAddOnAndStatusNot(String addonTemplateGroupId,String status){
+
+        //find with limit 
+        Page<ProductAddOn> productAddOnWithPage = getQueryProductAddOn(0,5,addonTemplateGroupId,status);
+
+        List<ProductAddOn> getData =productAddOnWithPage.getContent();
         
         return getData;
     }
@@ -187,42 +198,26 @@ public class ProductAddOnService {
         return sortedList;
     }
 
-    // public List<ProductAddOnGroupDetails> getAllProductAddOnGroupDetails(String productId){
+    public static Specification<ProductAddOn> searchProductAddOnSpecs(
+        String status, 
+        String productAddonTemplateGroupId,
+        Example<ProductAddOn> example) {
 
-    //     ProductAddOnGroupDetails productMatch = new ProductAddOnGroupDetails();
+        return (Specification<ProductAddOn>) (root, query, builder) -> {
+            final List<Predicate> predicates = new ArrayList<>();
+            Join<ProductAddOn, ProductAddOnItemDetails> productAddOnItemDetails = root.join("productAddOnItemDetails");
+            Join<ProductAddOnItemDetails, ProductAddOnGroupDetails> productAddOnGroupDetails = productAddOnItemDetails.join("productAddOnGroupDetails");
 
-    //     ExampleMatcher matcher = ExampleMatcher
-    //     .matchingAll()
-    //     .withIgnoreCase()
-    //     .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
-    //     Example<ProductAddOnGroupDetails> example = Example.of(productMatch, matcher);
 
-    //     Specification<ProductAddOnGroupDetails> productSpecs = searchProductAddOnSpecs(productId,example);
+            // if (status != null) {
+            //     predicates.add(builder.notEqual(root.get("status"), status));
+            // }
 
-    //     List<ProductAddOnGroupDetails> data = productAddOnGroupDetailsRepository.findAll(productSpecs);
+            if (productAddonTemplateGroupId != null) {
+                predicates.add(builder.equal(productAddOnGroupDetails.get("id"), productAddonTemplateGroupId));
+            }
 
-    //     // List<ProductAddOnGroupDetails> data = productAddOnGroupDetailsRepository.getProductAddOnJpqlQuery(productId);
-
-    //     return data ;
-    // }
-
-    // public static Specification<ProductAddOnGroupDetails> searchProductAddOnSpecs(
-    //     String productId, 
-    //     Example<ProductAddOnGroupDetails> example) {
-
-    //     return (Specification<ProductAddOnGroupDetails>) (root, query, builder) -> {
-    //         final List<Predicate> predicates = new ArrayList<>();
-
-    //         Join<ProductAddOnGroupDetails, ProductAddOnItemDetails> addOnItemDetails = root.join("productAddOnItemDetails");
-    //         Join<ProductAddOnItemDetails, ProductAddOn> addOnDetails = addOnItemDetails.join("productAddOnDetails", JoinType.INNER);
-    //         if (productId != null && !productId.isEmpty()) {
-    //             predicates.add(builder.equal(addOnDetails.get("productId"), productId));
-    //         }
-
-    //         predicates.add(QueryByExamplePredicateBuilder.getPredicate(root, builder, example));
-    //         query.distinct(true);
-
-    //         return builder.and(predicates.toArray(new Predicate[predicates.size()]));
-    //     };
-    // }
+            return builder.and(predicates.toArray(new Predicate[predicates.size()]));
+        };
+    }
 }
