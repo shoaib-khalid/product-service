@@ -28,10 +28,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.model.product.AddOnTemplateGroup;
+import com.kalsym.product.service.model.product.AddOnTemplateItem;
 import com.kalsym.product.service.model.product.ProductAddOn;
 import com.kalsym.product.service.model.request.AddOnGroupTemplateRequest;
 import com.kalsym.product.service.repository.AddOnTemplateGroupRepository;
 import com.kalsym.product.service.service.AddOnTemplateGroupService;
+import com.kalsym.product.service.service.AddOnTemplateItemService;
 import com.kalsym.product.service.service.ProductAddOnService;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.utility.Logger;
@@ -45,6 +47,9 @@ public class AddOnTemplateGroupController {
 
     @Autowired
     ProductAddOnService productAddOnService;
+
+    @Autowired
+    AddOnTemplateItemService addOnTemplateItemService;
     
     @GetMapping(path = {""}, name = "store-categories-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-categories-get', 'all')")
@@ -165,8 +170,22 @@ public class AddOnTemplateGroupController {
 
             }
             else{
-                // AddOnTemplateGroup data = addOnTemplateGroupService.updateStatusAddOnTemplateGroup(id);
+
+                //update status deleted in template group
+                AddOnTemplateGroup data = addOnTemplateGroupService.updateStatusAddOnTemplateGroup(id);
+
+                //then we update staus to delete in item template
+                Page<AddOnTemplateItem> existingAddOnTemplateItem =addOnTemplateItemService.getQueryAddonTemplateItem(0, 5, id);
+                List<AddOnTemplateItem> existingAddOnTemplateItemList = existingAddOnTemplateItem.getContent();
+
+                for(AddOnTemplateItem tempItem:existingAddOnTemplateItemList){
+
+                    addOnTemplateItemService.updateStatusAddOnTemplateItem(tempItem.getId());
+
+                }
+
                 response.setStatus(HttpStatus.OK);
+                response.setMessage("Successfully Deleted");
                 // response.setData(data);
                 return ResponseEntity.status(response.getStatus()).body(response);
 

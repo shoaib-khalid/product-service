@@ -39,11 +39,13 @@ public class AddOnTemplateGroup {
 
     private String title;
 
-    @Enumerated(EnumType.STRING)
-    private TemplateGroupAndTemplateItemType status;
+    // @Enumerated(EnumType.STRING)
+    // private TemplateGroupAndTemplateItemType status;
+
+    private String status;
 
     @OneToMany(cascade = CascadeType.ALL,
-    fetch = FetchType.LAZY)
+    fetch = FetchType.EAGER)
     @JoinColumn(name = "groupId",insertable = false, updatable = false, nullable = true)
     private List<AddOnTemplateItem> addOnTemplateItem;
 

@@ -1,12 +1,15 @@
 package com.kalsym.product.service.model.product;
 import java.io.Serializable;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
 
+import com.kalsym.product.service.enums.TemplateGroupAndTemplateItemType;
 import com.kalsym.product.service.model.request.AddOnTemplateItemRequest;
 
 import lombok.Getter;
@@ -33,6 +36,12 @@ public class AddOnTemplateItem {
     private Double price;
 
     private Double dineInPrice;
+
+    // @Enumerated(EnumType.STRING)
+    // private TemplateGroupAndTemplateItemType status;
+
+    private String status;
+
 
     public static AddOnTemplateItem castReference(AddOnTemplateItemRequest reqBody){
 

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,11 +14,13 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.convert.QueryByExamplePredicateBuilder;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.kalsym.product.service.enums.TemplateGroupAndTemplateItemType;
 import com.kalsym.product.service.model.product.AddOnTemplateGroup;
+import com.kalsym.product.service.model.product.AddOnTemplateItem;
 import com.kalsym.product.service.model.product.ProductAddOn;
 import com.kalsym.product.service.repository.AddOnTemplateGroupRepository;
 
@@ -39,7 +43,7 @@ public class AddOnTemplateGroupService {
                 .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
         Example<AddOnTemplateGroup> templateGroupExample = Example.of(templateGroupMatch, matcher);
 
-        Specification<AddOnTemplateGroup> addOnTemplateGroupSpecs = searchAddOnTemplateGroupSpecs(storeId, TemplateGroupAndTemplateItemType.DELETED,templateGroupExample);
+        Specification<AddOnTemplateGroup> addOnTemplateGroupSpecs = searchAddOnTemplateGroupSpecs(storeId, TemplateGroupAndTemplateItemType.DELETED.name(),templateGroupExample);
 
         Page<AddOnTemplateGroup> templateGroupWithPage = addOnTemplateGroupRepository.findAll(addOnTemplateGroupSpecs, pageable);
 
@@ -48,7 +52,7 @@ public class AddOnTemplateGroupService {
 
     public AddOnTemplateGroup createData(AddOnTemplateGroup addOnTemplateGroup){
 
-        addOnTemplateGroup.setStatus(TemplateGroupAndTemplateItemType.AVAILABLE);
+        addOnTemplateGroup.setStatus(TemplateGroupAndTemplateItemType.AVAILABLE.name());
         
         return addOnTemplateGroupRepository.save(addOnTemplateGroup);
 
@@ -86,18 +90,19 @@ public class AddOnTemplateGroupService {
     public AddOnTemplateGroup updateStatusAddOnTemplateGroup(String id){
         
         AddOnTemplateGroup data = addOnTemplateGroupRepository.findById(id).get();
-        data.setStatus(TemplateGroupAndTemplateItemType.DELETED);
+        data.setStatus(TemplateGroupAndTemplateItemType.DELETED.name());
         
         return addOnTemplateGroupRepository.save(data);                                
     }
 
     public static Specification<AddOnTemplateGroup> searchAddOnTemplateGroupSpecs(
         String storeId, 
-        TemplateGroupAndTemplateItemType status, 
+        String status,
         Example<AddOnTemplateGroup> example) {
 
         return (Specification<AddOnTemplateGroup>) (root, query, builder) -> {
             final List<Predicate> predicates = new ArrayList<>();
+            Join<AddOnTemplateGroup,AddOnTemplateItem> addOnTemplateItemDetail = root.join("addOnTemplateItem");
 
             if (storeId != null && !storeId.isEmpty()) {
                 predicates.add(builder.equal(root.get("storeId"), storeId));
@@ -105,7 +110,15 @@ public class AddOnTemplateGroupService {
 
             if (status != null) {
                 predicates.add(builder.notEqual(root.get("status"), status));
+                //by default we need to get the list of add on template item status not deleted
+                predicates.add(builder.equal(addOnTemplateItemDetail.get("status"), "AVAILABLE"));
+
             }
+
+            //by default we need to get the list of add on template item status not deleted
+            predicates.add(QueryByExamplePredicateBuilder.getPredicate(root, builder, example));
+            query.distinct(true);
+
 
             return builder.and(predicates.toArray(new Predicate[predicates.size()]));
         };

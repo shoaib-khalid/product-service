@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.kalsym.product.service.enums.TemplateGroupAndTemplateItemType;
 import com.kalsym.product.service.model.product.AddOnTemplateItem;
 import com.kalsym.product.service.repository.AddOnTemplateItemRepository;
 
@@ -71,6 +72,14 @@ public class AddOnTemplateItemService {
         data.setPrice(addOnTemplateItem.getPrice());
         data.setGroupId(addOnTemplateItem.getGroupId());
         data.setName(addOnTemplateItem.getName());
+        
+        return addOnTemplateItemRepository.save(data);                                
+    }
+
+    public AddOnTemplateItem updateStatusAddOnTemplateItem(String id){
+        
+        AddOnTemplateItem data = addOnTemplateItemRepository.findById(id).get();
+        data.setStatus(TemplateGroupAndTemplateItemType.DELETED.name());
         
         return addOnTemplateItemRepository.save(data);                                
     }
