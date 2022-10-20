@@ -210,7 +210,7 @@ public class AddOnTemplateItemController {
             if(existingProductAddonTemplateItem.size()>0){
 
                 response.setStatus(HttpStatus.CONFLICT);
-                response.setError(Integer.toString(HttpStatus.CONFLICT.value()));
+                response.setError("Oops! Cannot Delete.");
                 response.setMessage("The add on is in used.");
                 return ResponseEntity.status(response.getStatus()).body(response);
 
