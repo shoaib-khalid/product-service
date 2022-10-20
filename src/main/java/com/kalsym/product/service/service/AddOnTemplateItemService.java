@@ -1,5 +1,6 @@
 package com.kalsym.product.service.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,11 @@ public class AddOnTemplateItemService {
         Page<AddOnTemplateItem> templateItemWithPage = addOnTemplateItemRepository.findAll(templateItemExample, pageable);
 
         return templateItemWithPage;
+    }
+
+    public List<AddOnTemplateItem> showAddonTemplateByGroupId(String groupId){
+
+       return addOnTemplateItemRepository.findByGroupIdAndStatusNot(groupId, TemplateGroupAndTemplateItemType.DELETED.name());
     }
 
     public AddOnTemplateItem createData(AddOnTemplateItem addOnTemplateItem){

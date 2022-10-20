@@ -160,7 +160,7 @@ public class AddOnTemplateGroupController {
             
             List<ProductAddOn> existingProductAddonTemplateGroupId = productAddOnService.getAllProductAddOnAndStatusNot(id,"DELETED");
 
-            //if there is data we cannot simply 
+            //if there is data we cannot simply change the status we will throw error code
             if(existingProductAddonTemplateGroupId.size()>0){
 
                 response.setStatus(HttpStatus.CONFLICT);
@@ -175,8 +175,7 @@ public class AddOnTemplateGroupController {
                 AddOnTemplateGroup data = addOnTemplateGroupService.updateStatusAddOnTemplateGroup(id);
 
                 //then we update staus to delete in item template
-                Page<AddOnTemplateItem> existingAddOnTemplateItem =addOnTemplateItemService.getQueryAddonTemplateItem(0, 5, id);
-                List<AddOnTemplateItem> existingAddOnTemplateItemList = existingAddOnTemplateItem.getContent();
+                List<AddOnTemplateItem> existingAddOnTemplateItemList = addOnTemplateItemService.showAddonTemplateByGroupId(id);
 
                 for(AddOnTemplateItem tempItem:existingAddOnTemplateItemList){
 
