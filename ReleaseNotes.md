@@ -1,4 +1,9 @@
 ##################################################
+# product-service-3.10.36| 20-October-2022 
+##################################################
+1. Code refactoring product add on template
+
+##################################################
 # product-service-3.10.35| 14-October-2022 
 ##################################################
 1. Fix product that has price 0 not shwowing according to platform type
