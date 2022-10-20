@@ -13,6 +13,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Where;
+
 import javax.persistence.CascadeType;
 
 import com.kalsym.product.service.enums.TemplateGroupAndTemplateItemType;
@@ -47,6 +49,7 @@ public class AddOnTemplateGroup {
     @OneToMany(cascade = CascadeType.ALL,
     fetch = FetchType.EAGER)
     @JoinColumn(name = "groupId",insertable = false, updatable = false, nullable = true)
+    @Where(clause = "status = 'AVAILABLE'")
     private List<AddOnTemplateItem> addOnTemplateItem;
 
     public static AddOnTemplateGroup castReference(AddOnGroupTemplateRequest req){
