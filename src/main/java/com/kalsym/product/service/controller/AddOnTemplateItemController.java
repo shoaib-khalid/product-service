@@ -211,7 +211,7 @@ public class AddOnTemplateItemController {
 
                 response.setStatus(HttpStatus.CONFLICT);
                 response.setError("Oops! Cannot Delete.");
-                response.setMessage("The add on is in used.");
+                response.setMessage("The add-on item is in used.");
                 return ResponseEntity.status(response.getStatus()).body(response);
 
             }
