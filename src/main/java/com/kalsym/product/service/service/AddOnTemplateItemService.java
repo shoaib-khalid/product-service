@@ -47,6 +47,8 @@ public class AddOnTemplateItemService {
 
     public AddOnTemplateItem createData(AddOnTemplateItem addOnTemplateItem){
 
+        addOnTemplateItem.setStatus(TemplateGroupAndTemplateItemType.AVAILABLE.name());
+
         return addOnTemplateItemRepository.save(addOnTemplateItem);
 
     }

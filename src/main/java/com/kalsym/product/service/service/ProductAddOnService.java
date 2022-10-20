@@ -114,6 +114,15 @@ public class ProductAddOnService {
         return getData;
     }
 
+    public List<ProductAddOn> findTop5ByAddonTemplateItemIdAndStatusNot(String templateItemid,String status){
+
+        //find with limit 
+        List<ProductAddOn> getData =productAddOnRepository.findTop5ByAddonTemplateItemIdAndStatusNot(templateItemid, status);
+        
+        return getData;
+    }
+
+
     public List<ProductAddOn> getByProductAddonGroupId(String productAddonGroupId){
 
         List<ProductAddOn> getData = productAddOnRepository.findByProductAddonGroupIdAndStatusNot(productAddonGroupId,"DELETED");
@@ -209,9 +218,9 @@ public class ProductAddOnService {
             Join<ProductAddOnItemDetails, ProductAddOnGroupDetails> productAddOnGroupDetails = productAddOnItemDetails.join("productAddOnGroupDetails");
 
 
-            // if (status != null) {
-            //     predicates.add(builder.notEqual(root.get("status"), status));
-            // }
+            if (status != null) {
+                predicates.add(builder.notEqual(root.get("status"), status));
+            }
 
             if (productAddonTemplateGroupId != null) {
                 predicates.add(builder.equal(productAddOnGroupDetails.get("id"), productAddonTemplateGroupId));

@@ -203,10 +203,11 @@ public class AddOnTemplateItemController {
         try {
 
             
-            List<ProductAddOn> existingProductAddonTemplateGroupId = productAddOnService.getAllProductAddOnAndStatusNot(id,"DELETED");
+            // List<ProductAddOn> existingProductAddonTemplateGroupId = productAddOnService.getAllProductAddOnAndStatusNot(id,"DELETED");
+            List<ProductAddOn> existingProductAddonTemplateItem = productAddOnService.findTop5ByAddonTemplateItemIdAndStatusNot(id,"DELETED");
 
             //if there is data we cannot simply change the status we will throw error code
-            if(existingProductAddonTemplateGroupId.size()>0){
+            if(existingProductAddonTemplateItem.size()>0){
 
                 response.setStatus(HttpStatus.CONFLICT);
                 response.setError(Integer.toString(HttpStatus.CONFLICT.value()));
