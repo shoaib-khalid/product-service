@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.model.product.AddOnTemplateItem;
+import com.kalsym.product.service.model.product.ProductAddOn;
 import com.kalsym.product.service.model.request.AddOnTemplateItemRequest;
 import com.kalsym.product.service.utility.HttpResponse;
 
@@ -35,6 +36,7 @@ import javax.validation.Valid;
 
 
 import com.kalsym.product.service.service.AddOnTemplateItemService;
+import com.kalsym.product.service.service.ProductAddOnService;
 
 @RestController()
 @RequestMapping("/addon-template-item")
@@ -42,6 +44,9 @@ public class AddOnTemplateItemController {
     
     @Autowired
     AddOnTemplateItemService addOnTemplateItemService;
+
+    @Autowired
+    ProductAddOnService productAddOnService;
     
     @GetMapping(path = {""}, name = "store-categories-get", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-categories-get', 'all')")
@@ -195,17 +200,41 @@ public class AddOnTemplateItemController {
     ){
 
         HttpResponse response = new HttpResponse(request.getRequestURI());
+        try {
 
-        Boolean isDeleted = addOnTemplateItemService.deleteAddOnTemplateItem(id);
-        HttpStatus httpStatus;
+            
+            List<ProductAddOn> existingProductAddonTemplateGroupId = productAddOnService.getAllProductAddOnAndStatusNot(id,"DELETED");
 
-        String message;
-        httpStatus = isDeleted ? HttpStatus.OK :HttpStatus.NOT_FOUND;
-        message = isDeleted ? "Success Deleted" : "Id Not Found";
-        response.setStatus(httpStatus);
-        response.setMessage(message);
+            //if there is data we cannot simply change the status we will throw error code
+            if(existingProductAddonTemplateGroupId.size()>0){
 
-        return ResponseEntity.status(response.getStatus()).body(response);
+                response.setStatus(HttpStatus.CONFLICT);
+                response.setError(Integer.toString(HttpStatus.CONFLICT.value()));
+                response.setMessage("The add on is in used.");
+                return ResponseEntity.status(response.getStatus()).body(response);
+
+            }
+            else{
+
+
+                //then we update staus to delete in item template
+                addOnTemplateItemService.updateStatusAddOnTemplateItem(id);
+
+                response.setStatus(HttpStatus.OK);
+                response.setMessage("Successfully Deleted");
+                // response.setData(data);
+                return ResponseEntity.status(response.getStatus()).body(response);
+
+            }
+
+         
+            
+        } catch (Exception e) {
+            // TODO: handle exception
+            response.setStatus(HttpStatus.BAD_REQUEST);
+            response.setError(e.toString());
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
 
 
     }
