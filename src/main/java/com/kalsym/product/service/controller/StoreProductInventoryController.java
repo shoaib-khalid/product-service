@@ -199,13 +199,26 @@ public class StoreProductInventoryController {
         ItemDiscount discountDetails = ProductDiscount.getItemDiscount(storeDiscountRepository, storeId, productInventory.getItemCode(), regionCountry);
         if (discountDetails!=null) {
             double discountedPrice = productInventory.getPrice();
+            double dineIndDiscountedPrice = productInventory.getDineInPrice();
             if (discountDetails.calculationType.equals(DiscountCalculationType.FIX)) {
                 discountedPrice = productInventory.getPrice() - discountDetails.discountAmount;
             } else if (discountDetails.calculationType.equals(DiscountCalculationType.PERCENT)) {
                 discountedPrice = productInventory.getPrice() - (discountDetails.discountAmount / 100 * productInventory.getPrice());
             }
+
+            if(discountDetails.dineInCalculationType!=null && discountDetails.dineInCalculationType.equals(DiscountCalculationType.FIX)){
+                dineIndDiscountedPrice = productInventory.getDineInPrice() - discountDetails.dineInDiscountAmount;
+
+            }
+            else if (discountDetails.dineInCalculationType!=null && discountDetails.dineInCalculationType.equals(DiscountCalculationType.PERCENT)) {
+                dineIndDiscountedPrice = productInventory.getDineInPrice() - (discountDetails.dineInDiscountAmount / 100 * productInventory.getDineInPrice());
+            }
+
             discountDetails.discountedPrice = discountedPrice;
-            discountDetails.normalPrice = productInventory.getPrice();                    
+            discountDetails.normalPrice = productInventory.getPrice();  
+            discountDetails.dineIndDiscountedPrice= dineIndDiscountedPrice;
+            discountDetails.dineInNormalPrice = productInventory.getDineInPrice();
+
             productInventory.setItemDiscount(discountDetails);             
         }        
         
