@@ -35,7 +35,7 @@ public class ItemDiscount {
     public DiscountCalculationType calculationType;
     public DiscountCalculationType dineInCalculationType;
     public double dineInDiscountAmount;    
-    public double dineIndDiscountedPrice;
+    public double dineInDiscountedPrice;
     public double dineInNormalPrice;
 
 
