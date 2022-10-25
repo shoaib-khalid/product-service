@@ -2,6 +2,9 @@
 # product-service-3.10.37| 21-October-2022 
 ##################################################
 1. DineIn discount
+# product-service-3.10.36-HOTFIX| 25-October-2022 
+##################################################
+1. Hotfix when delete change the status to 'DELETED' for product add on and product addon group 
 ##################################################
 # product-service-3.10.36| 20-October-2022 
 ##################################################

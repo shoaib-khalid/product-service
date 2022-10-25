@@ -8,6 +8,8 @@ import com.kalsym.product.service.model.product.CompareProductPackageOption;
 import com.kalsym.product.service.model.product.CompareVariantAvailableIdOwnerAndBranch;
 import com.kalsym.product.service.model.product.CompareVariantIdOwnerAndBranch;
 import com.kalsym.product.service.model.product.Product;
+import com.kalsym.product.service.model.product.ProductAddOn;
+import com.kalsym.product.service.model.product.ProductAddOnGroup;
 import com.kalsym.product.service.model.product.ProductAsset;
 import com.kalsym.product.service.model.product.ProductInventory;
 import com.kalsym.product.service.model.product.ProductInventoryWithDetails;
@@ -31,6 +33,8 @@ import com.kalsym.product.service.repository.ProductInventoryItemRepository;
 import com.kalsym.product.service.repository.ProductInventoryRepository;
 import com.kalsym.product.service.repository.StoreRepository;
 import com.kalsym.product.service.service.CloneProductService;
+import com.kalsym.product.service.service.ProductAddOnGroupService;
+import com.kalsym.product.service.service.ProductAddOnService;
 import com.kalsym.product.service.repository.ProductRepository;
 import com.kalsym.product.service.repository.ProductVariantRepository;
 import com.kalsym.product.service.repository.ProductVariantAvailableRepository;
@@ -145,6 +149,12 @@ public class StoreProductController {
 
     @Autowired
     CloneProductService cloneProductService;
+
+    @Autowired
+    ProductAddOnService productAddOnService;
+
+    @Autowired
+    ProductAddOnGroupService productAddOnGroupService;
     
     @Autowired
     private HashmapLoader hashmapLoader;
@@ -491,6 +501,37 @@ public class StoreProductController {
         Product p = optProdcut.get();
         p.setStatus("DELETED");
         productRepository.save(p);
+
+        //set all the product add on under it
+
+        List<ProductAddOnGroup> getListProductAddonGroupByProductById= productAddOnGroupService.listOfProductAddsOnGroup(id);
+        
+        if(getListProductAddonGroupByProductById.size()>0){
+
+            for(ProductAddOnGroup pag : getListProductAddonGroupByProductById){
+
+                ProductAddOnGroup productAddonData = pag;
+                productAddonData.setStatus("DELETED");
+                productAddOnGroupService.updateProductAddsOnGroup(productAddonData.getId(),productAddonData);
+
+            }
+
+        }
+
+        List<ProductAddOn> getListOfProductAddon = productAddOnService.getAllProductByProductId(id);
+
+        if(getListOfProductAddon.size()>0){
+
+            for (ProductAddOn pao :getListOfProductAddon){
+
+                ProductAddOn productAddon = pao;
+                productAddon.setStatus("DELETED");
+                productAddOnService.updateProductAddOn(productAddon.getId(), productAddon);
+
+            }
+
+        }
+
         response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);
     }

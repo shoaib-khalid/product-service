@@ -29,6 +29,7 @@ import com.kalsym.product.service.utility.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import com.kalsym.product.service.utility.Logger;
@@ -208,6 +209,13 @@ public class AddOnTemplateItemController {
 
             //if there is data we cannot simply change the status we will throw error code
             if(existingProductAddonTemplateItem.size()>0){
+
+                //then each of the list remove it
+                // existingProductAddonTemplateItem.stream()
+                // .map(mapper ->{
+                //     return mapper;
+                // })
+                // .collect(Collectors.toList());
 
                 response.setStatus(HttpStatus.CONFLICT);
                 response.setError("Oops! Cannot Delete.");
