@@ -1,4 +1,8 @@
 ##################################################
+# product-service-3.10.36-HOTFIX| 25-October-2022 
+##################################################
+1. Hotfix when delete change the status to 'DELETED' for product add on and product addon group 
+##################################################
 # product-service-3.10.36| 20-October-2022 
 ##################################################
 1. Code refactoring product add on template
