@@ -27,6 +27,7 @@ public class AddOnTemplateItemService {
 
         AddOnTemplateItem templateItemMatch = new AddOnTemplateItem();
         templateItemMatch.setGroupId(groupId);
+        templateItemMatch.setStatus("AVAILABLE");
 
         ExampleMatcher matcher = ExampleMatcher
                 .matchingAll()
