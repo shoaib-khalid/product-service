@@ -55,6 +55,7 @@ import java.util.stream.Collectors;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 
 import java.util.HashMap;
@@ -444,29 +445,43 @@ public class CloneProductService {
 
                 for(ProductAddOn prodAddon :ownerProductAddon){
 
+                    //to find owner id then we will use the the branch id for creating branch products
+                    CompareProductAddonGroup filterProductAddonGroupOwner = compareStoreOwnerProductAddonGroup.stream()
+                    .filter(temp -> temp.getStoreProductAddonGroupId().equals(prodAddon.getProductAddonGroupId()))
+                    .findFirst().get();
+
+                    //to find owner id then we will use the the branch id
+
+                    CompareStoreTemplateGroup filterDataTemplateGroup = compareStoreOwnerTemplateGroup.stream()
+                    .filter(mapper -> mapper.getCompareTemplateItem()
+                                    .stream()
+                                    .anyMatch(b-> b.getStoreTemplateItem().equals(prodAddon.getAddonTemplateItemId())
+                    ))
+                    .map(templategroup -> {
+        
+                        List<CompareStoreTemplateItem> templateItemDetails = templategroup.getCompareTemplateItem()
+                        .stream()
+                        .sorted(
+                            Comparator.comparing((CompareStoreTemplateItem t) -> !t.getStoreTemplateItem().equals(prodAddon.getAddonTemplateItemId()))
+                            .thenComparing(CompareStoreTemplateItem::getStoreTemplateItem)
+                        )
+                        .collect(Collectors.toList());
+        
+                        templategroup.setCompareTemplateItem(templateItemDetails);
+            
+                        return templategroup;
+                    })
+                    .findFirst().get();
+
+                    //set new product add on for branch
                     ProductAddOn prodAddonData = new ProductAddOn();
                     prodAddonData.setProductId(branchProductId);
                     prodAddonData.setPrice(prodAddon.getPrice());
                     prodAddonData.setDineInPrice(prodAddon.getDineInPrice());
                     prodAddonData.setStatus(prodAddon.getStatus());
                     prodAddonData.setSequenceNumber(prodAddon.getSequenceNumber());
-
-                    //to find owner id then we will use the the branch id for creating branch products
-                    CompareProductAddonGroup filterProductAddonGroupOwner = compareStoreOwnerProductAddonGroup.stream()
-                    .filter(temp -> temp.getStoreProductAddonGroupId().equals(prodAddon.getProductAddonGroupId()))
-                    .findFirst().get();
-
                     prodAddonData.setProductAddonGroupId(filterProductAddonGroupOwner.getBranchProductAddonGroupId());
-
-                    //to find owner id then we will use the the branch id 
-                    // CompareStoreTemplateGroup filterTemplateItem = compareStoreOwnerTemplateGroup.stream()
-                    // .filter(mapper -> mapper.getCompareTemplateItem().ge)
-                    // .findFirst().get();
-
-
-                    // prodAddonData.setAddonTemplateItemId(subProductUrlDomain);
-
-
+                    prodAddonData.setAddonTemplateItemId(filterDataTemplateGroup.getCompareTemplateItem().get(0).getBranchTemplateItem());
 
 
                 }

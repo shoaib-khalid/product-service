@@ -133,10 +133,31 @@ public class CodePlaygroundController {
             })
             .collect(Collectors.toList());
 
+            CompareStoreTemplateGroup filterDataTemplateGroup = compareStoreOwnerTemplateGroup.stream()
+            .filter(mapper -> mapper.getCompareTemplateItem()
+                            .stream()
+                            .anyMatch(b-> b.getName().equals("Medium")
+            ))
+            .map(templategroup -> {
+
+                List<CompareStoreTemplateItem> templateItemDetails = templategroup.getCompareTemplateItem()
+                .stream()
+                .sorted(
+                    Comparator.comparing((CompareStoreTemplateItem t) -> !t.getName().equals("Medium"))
+                    .thenComparing(CompareStoreTemplateItem::getName)
+                )
+                .collect(Collectors.toList());
+
+                templategroup.setCompareTemplateItem(templateItemDetails);
+    
+                return templategroup;
+            })
+            .findFirst().get();
+
 
             
             response.setStatus(HttpStatus.OK);
-            response.setData(filterData);
+            response.setData(filterDataTemplateGroup);
             return ResponseEntity.status(response.getStatus()).body(response);
             
         } catch (Exception e) {
