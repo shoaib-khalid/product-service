@@ -4,11 +4,14 @@ import org.springframework.stereotype.Service;
 
 import com.kalsym.product.service.model.product.AddOnTemplateGroup;
 import com.kalsym.product.service.model.product.AddOnTemplateItem;
+import com.kalsym.product.service.model.product.CompareProductAddonGroup;
 import com.kalsym.product.service.model.product.CompareProductOwnerAndBranch;
 import com.kalsym.product.service.model.product.CompareProductPackageOption;
 import com.kalsym.product.service.model.product.CompareVariantAvailableIdOwnerAndBranch;
 import com.kalsym.product.service.model.product.CompareVariantIdOwnerAndBranch;
 import com.kalsym.product.service.model.product.Product;
+import com.kalsym.product.service.model.product.ProductAddOn;
+import com.kalsym.product.service.model.product.ProductAddOnGroup;
 import com.kalsym.product.service.model.product.ProductAsset;
 import com.kalsym.product.service.model.store.CompareStoreCategory;
 import com.kalsym.product.service.model.store.CompareStoreTemplateGroup;
@@ -32,6 +35,8 @@ import com.kalsym.product.service.model.store.StoreDiscountTier;
 import com.kalsym.product.service.model.store.StoreWithDetails;
 import com.kalsym.product.service.repository.AddOnTemplateGroupRepository;
 import com.kalsym.product.service.repository.AddOnTemplateItemRepository;
+import com.kalsym.product.service.repository.ProductAddOnGroupRepository;
+import com.kalsym.product.service.repository.ProductAddOnRepository;
 import com.kalsym.product.service.repository.ProductAssetRepository;
 import com.kalsym.product.service.repository.ProductInventoryItemMainRepository;
 import com.kalsym.product.service.repository.ProductInventoryRepository;
@@ -96,6 +101,12 @@ public class CloneProductService {
     @Autowired
     AddOnTemplateItemRepository addOnTemplateItemRepository;
 
+    @Autowired 
+    ProductAddOnRepository productAddOnRepository;
+
+    @Autowired 
+    ProductAddOnGroupRepository productAddOnGroupRepository;
+
     public void cloneProducts (String storeId, String storeOwnerId,Optional<Store> optStore){
 
         //get all the categories based on owner store id
@@ -124,6 +135,9 @@ public class CloneProductService {
     
         //compare data (Template Group)
         List<CompareStoreTemplateGroup> compareStoreOwnerTemplateGroup = new ArrayList<>();
+
+        //compare data of product add on owner and branch
+        List<CompareProductAddonGroup> compareStoreOwnerProductAddonGroup = new ArrayList<>();
     
         mapNewTemplateGroup = storeOwnerTemplateGroup.stream()
         .map(addontemplategroup->{
@@ -388,6 +402,72 @@ public class CloneProductService {
                     dataCompareProductPackageOption.setOwnerProductPackageOptionId(ppo.getId());
                     dataCompareProductPackageOption.setBranchProductPackageOptionId(saveProductPackageOption.getId());
                     compareProductPackageOption.add(dataCompareProductPackageOption);
+
+                }
+
+            }
+
+            //Product add on group
+            List<ProductAddOnGroup> ownerProductAddonGroup =productAddOnGroupRepository.findByProductIdAndStatusNot(x.getId(),"DELETED");
+
+            if(ownerProductAddonGroup.size() != 0){
+
+                for(ProductAddOnGroup prodAddonGroup :ownerProductAddonGroup){
+
+                    //to find owner id then we will use the the branch id for creating branch products
+                    CompareStoreTemplateGroup filterTemplateGroupOwner = compareStoreOwnerTemplateGroup.stream()
+                    .filter(temp -> temp.getStoreTemplateGroupId().equals(prodAddonGroup.getAddonTemplateGroupId()))
+                    .findFirst().get();
+
+                    ProductAddOnGroup prodAddonGroupData = new ProductAddOnGroup();
+                    prodAddonGroupData.setAddonTemplateGroupId(filterTemplateGroupOwner.getBranchTemplateGroupId());
+                    prodAddonGroupData.setMinAllowed(prodAddonGroup.getMinAllowed());
+                    prodAddonGroupData.setMaxAllowed(prodAddonGroup.getMaxAllowed());
+                    prodAddonGroupData.setSequenceNumber(prodAddonGroup.getSequenceNumber());
+                    prodAddonGroupData.setProductId(branchProductId);
+                    prodAddonGroupData.setStatus(prodAddonGroup.getStatus());
+
+                    ProductAddOnGroup saveProductAddonGroup = productAddOnGroupRepository.save(prodAddonGroupData);
+
+                    CompareProductAddonGroup dataCompareProductAddonGroup = new CompareProductAddonGroup();
+                    dataCompareProductAddonGroup.setStoreProductAddonGroupId(prodAddonGroup.getId());
+                    dataCompareProductAddonGroup.setBranchProductAddonGroupId(saveProductAddonGroup.getId());
+
+                    compareStoreOwnerProductAddonGroup.add(dataCompareProductAddonGroup);
+                }
+            }
+
+            //Product add on
+            List<ProductAddOn> ownerProductAddon = productAddOnRepository.findByProductIdAndStatusNot(x.getId(),"DELETED");
+
+            if(ownerProductAddon.size() != 0){
+
+                for(ProductAddOn prodAddon :ownerProductAddon){
+
+                    ProductAddOn prodAddonData = new ProductAddOn();
+                    prodAddonData.setProductId(branchProductId);
+                    prodAddonData.setPrice(prodAddon.getPrice());
+                    prodAddonData.setDineInPrice(prodAddon.getDineInPrice());
+                    prodAddonData.setStatus(prodAddon.getStatus());
+                    prodAddonData.setSequenceNumber(prodAddon.getSequenceNumber());
+
+                    //to find owner id then we will use the the branch id for creating branch products
+                    CompareProductAddonGroup filterProductAddonGroupOwner = compareStoreOwnerProductAddonGroup.stream()
+                    .filter(temp -> temp.getStoreProductAddonGroupId().equals(prodAddon.getProductAddonGroupId()))
+                    .findFirst().get();
+
+                    prodAddonData.setProductAddonGroupId(filterProductAddonGroupOwner.getBranchProductAddonGroupId());
+
+                    //to find owner id then we will use the the branch id 
+                    // CompareStoreTemplateGroup filterTemplateItem = compareStoreOwnerTemplateGroup.stream()
+                    // .filter(mapper -> mapper.getCompareTemplateItem().ge)
+                    // .findFirst().get();
+
+
+                    // prodAddonData.setAddonTemplateItemId(subProductUrlDomain);
+
+
+
 
                 }
 
