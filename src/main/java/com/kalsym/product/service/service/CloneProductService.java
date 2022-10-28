@@ -2,6 +2,8 @@ package com.kalsym.product.service.service;
 
 import org.springframework.stereotype.Service;
 
+import com.kalsym.product.service.model.product.AddOnTemplateGroup;
+import com.kalsym.product.service.model.product.AddOnTemplateItem;
 import com.kalsym.product.service.model.product.CompareProductOwnerAndBranch;
 import com.kalsym.product.service.model.product.CompareProductPackageOption;
 import com.kalsym.product.service.model.product.CompareVariantAvailableIdOwnerAndBranch;
@@ -9,6 +11,8 @@ import com.kalsym.product.service.model.product.CompareVariantIdOwnerAndBranch;
 import com.kalsym.product.service.model.product.Product;
 import com.kalsym.product.service.model.product.ProductAsset;
 import com.kalsym.product.service.model.store.CompareStoreCategory;
+import com.kalsym.product.service.model.store.CompareStoreTemplateGroup;
+import com.kalsym.product.service.model.store.CompareStoreTemplateItem;
 import com.kalsym.product.service.model.store.Store;
 import com.kalsym.product.service.model.store.StoreCategory;
 import com.kalsym.product.service.model.product.ProductInventory;
@@ -26,6 +30,8 @@ import com.kalsym.product.service.enums.StoreDiscountType;
 
 import com.kalsym.product.service.model.store.StoreDiscountTier;
 import com.kalsym.product.service.model.store.StoreWithDetails;
+import com.kalsym.product.service.repository.AddOnTemplateGroupRepository;
+import com.kalsym.product.service.repository.AddOnTemplateItemRepository;
 import com.kalsym.product.service.repository.ProductAssetRepository;
 import com.kalsym.product.service.repository.ProductInventoryItemMainRepository;
 import com.kalsym.product.service.repository.ProductInventoryRepository;
@@ -84,6 +90,12 @@ public class CloneProductService {
     @Autowired
     ProductPackageOptionDetailRepository productPackageOptionDetailRepository;
 
+    @Autowired
+    AddOnTemplateGroupRepository addOnTemplateGroupRepository;
+
+    @Autowired
+    AddOnTemplateItemRepository addOnTemplateItemRepository;
+
     public void cloneProducts (String storeId, String storeOwnerId,Optional<Store> optStore){
 
         //get all the categories based on owner store id
@@ -105,6 +117,68 @@ public class CloneProductService {
 
         //concat the domain url in order to concat for seoUrl
         String subProductUrlDomain = "https://" +optStore.get().getDomain()+"/product/";
+
+        //get all template group  with template item  based on store owner id
+        List<AddOnTemplateGroup> storeOwnerTemplateGroup = addOnTemplateGroupRepository.findByStoreIdAndStatusNot(storeOwnerId, "DELETED");
+        List<AddOnTemplateGroup> mapNewTemplateGroup = new ArrayList<>();
+    
+        //compare data (Template Group)
+        List<CompareStoreTemplateGroup> compareStoreOwnerTemplateGroup = new ArrayList<>();
+    
+        mapNewTemplateGroup = storeOwnerTemplateGroup.stream()
+        .map(addontemplategroup->{
+
+            AddOnTemplateGroup bodyAddOnTemplateGroup = new AddOnTemplateGroup();
+            bodyAddOnTemplateGroup.setTitle(addontemplategroup.getTitle());
+            bodyAddOnTemplateGroup.setStoreId(storeId);
+            bodyAddOnTemplateGroup.setStatus(addontemplategroup.getStatus());
+            
+            //saving the data for branch
+            AddOnTemplateGroup saveAddOnTemplateGroup = addOnTemplateGroupRepository.save(bodyAddOnTemplateGroup);
+
+            //get template items and save em
+            List<AddOnTemplateItem> templateItemStoreOwner  = addontemplategroup.getAddOnTemplateItem();
+
+            List<CompareStoreTemplateItem> compareStoreOwnerTemplateItem = new ArrayList<>();
+            
+            //set data for comparing purose
+            CompareStoreTemplateGroup compareData = new CompareStoreTemplateGroup();
+            compareData.setStoreTemplateGroupId(addontemplategroup.getId());
+            compareData.setTitle(addontemplategroup.getTitle());
+            compareData.setBranchTemplateGroupId(saveAddOnTemplateGroup.getId());
+
+            templateItemStoreOwner.stream()
+            .map(addontemplateitem->{
+
+                AddOnTemplateItem bodyAddonTemplateItem = new AddOnTemplateItem();
+                bodyAddonTemplateItem.setStatus(storeId);
+                bodyAddonTemplateItem.setGroupId(saveAddOnTemplateGroup.getId());
+                bodyAddonTemplateItem.setName(addontemplateitem.getName());
+                bodyAddonTemplateItem.setPrice(addontemplateitem.getPrice());
+                bodyAddonTemplateItem.setDineInPrice(addontemplateitem.getDineInPrice());
+
+                //saving the data for branch
+                AddOnTemplateItem saveAddOnTemplateItem = addOnTemplateItemRepository.save(bodyAddonTemplateItem);
+
+                CompareStoreTemplateItem compareDataTemplateItem = new CompareStoreTemplateItem();
+                compareDataTemplateItem.setStoreTemplateItem(addontemplateitem.getId());
+                compareDataTemplateItem.setBranchTemplateItem(saveAddOnTemplateItem.getId());
+                compareDataTemplateItem.setName(addontemplateitem.getName());
+
+                compareStoreOwnerTemplateItem.add(compareDataTemplateItem);
+
+                return addontemplateitem;
+            })
+            .collect(Collectors.toList());
+
+            compareData.setCompareTemplateItem(compareStoreOwnerTemplateItem);
+
+            compareStoreOwnerTemplateGroup.add(compareData);
+
+            return bodyAddOnTemplateGroup;
+
+        })
+        .collect(Collectors.toList());
 
         //save the newly store category in branch
         mapNewStoreCategory = storeOwnerCategory.stream()
@@ -157,7 +231,9 @@ public class CloneProductService {
             data.setIsNoteOptional(x.getIsNoteOptional());
             data.setCustomNote(x.getCustomNote());
             data.setVehicleType(x.getVehicleType());
+            data.setHasAddOn(x.getHasAddOn());
             
+            //after we save branch product, then we will use the product id of branch
             Product newlyProductData = productRepository.save(data);
             String branchProductId = newlyProductData.getId();
             
