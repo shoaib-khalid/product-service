@@ -73,6 +73,7 @@ import com.kalsym.product.service.repository.StoreDiscountRepository;
 import com.kalsym.product.service.repository.StoreDiscountProductRepository;
 import com.kalsym.product.service.utility.ProductDiscount;
 import com.kalsym.product.service.worker.BulkDeleteProduct;
+import com.kalsym.product.service.worker.CloneSelectedProduct;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -836,6 +837,54 @@ public class StoreProductController {
 
         CloneProductThread thread = new CloneProductThread(storeId, storeOwnerId,optStore,cloneProductService);
         thread.start();
+
+        response.setStatus(HttpStatus.OK);
+        response.setData("SUCCESS CLONING");
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PostMapping(path = {"/selected-clone"}, name = "store-products-post")
+    @PreAuthorize("hasAnyAuthority('store-products-post', 'all')  and @customOwnerVerifier.VerifyStore(#storeId)")
+    public ResponseEntity<HttpResponse> postCloneStoreProductId(HttpServletRequest request,
+            @PathVariable String storeId,
+            @RequestBody List<String> productIds,
+            @RequestParam(required = true) String storeBranchId) throws Exception {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "storeId: " + storeId);
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "storeBranchId: " + storeBranchId);
+
+        Optional<Store> optStore = storeRepository.findById(storeId);
+
+        if (!optStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+
+        Optional<Store> optStoreBranch = storeRepository.findById(storeBranchId);
+
+        if (!optStoreBranch.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeOwnerId: " + storeId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("optStoreBranch not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND storeId: " + storeId);
+
+        try {
+
+            CloneSelectedProduct thread = new CloneSelectedProduct(storeId,storeBranchId,optStoreBranch,productIds,cloneProductService);
+            thread.start();
+        
+        } catch (Exception e) {
+        // TODO: handle exception
+        }
+
+
+
 
         response.setStatus(HttpStatus.OK);
         response.setData("SUCCESS CLONING");
