@@ -166,7 +166,7 @@ public class CloneProductService {
             .map(addontemplateitem->{
 
                 AddOnTemplateItem bodyAddonTemplateItem = new AddOnTemplateItem();
-                bodyAddonTemplateItem.setStatus(storeId);
+                bodyAddonTemplateItem.setStatus(addontemplateitem.getStatus());
                 bodyAddonTemplateItem.setGroupId(saveAddOnTemplateGroup.getId());
                 bodyAddonTemplateItem.setName(addontemplateitem.getName());
                 bodyAddonTemplateItem.setPrice(addontemplateitem.getPrice());
@@ -451,7 +451,6 @@ public class CloneProductService {
                     .findFirst().get();
 
                     //to find owner id then we will use the the branch id
-
                     CompareStoreTemplateGroup filterDataTemplateGroup = compareStoreOwnerTemplateGroup.stream()
                     .filter(mapper -> mapper.getCompareTemplateItem()
                                     .stream()
@@ -483,7 +482,7 @@ public class CloneProductService {
                     prodAddonData.setProductAddonGroupId(filterProductAddonGroupOwner.getBranchProductAddonGroupId());
                     prodAddonData.setAddonTemplateItemId(filterDataTemplateGroup.getCompareTemplateItem().get(0).getBranchTemplateItem());
 
-
+                    ProductAddOn saveProductAddon = productAddOnRepository.save(prodAddonData);
                 }
 
             }
