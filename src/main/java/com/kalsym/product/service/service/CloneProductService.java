@@ -108,6 +108,8 @@ public class CloneProductService {
     @Autowired 
     ProductAddOnGroupRepository productAddOnGroupRepository;
 
+
+    // use this for scenario when newly merchant (branch) wants to create products based on HQ PRODUCTS
     public void cloneProducts (String storeId, String storeOwnerId,Optional<Store> optStore){
 
         //get all the categories based on owner store id
@@ -556,6 +558,11 @@ public class CloneProductService {
         }
     }
 
+    //use this for scenario existing store (branch) wants to copy products from HQ , 
+    //the only difference we will query each of related data of products branch and owner , 
+    //and merge data by making comparison , 
+    //if compare data is NULL it means brnanch data dont have hence we will create it later (if any products will wants to clone to make it as reference)
+    //todo : REFACTOR CODE 
     public void cloneProductById(String storeOwnerId, String storeBranchId,Optional<Store> optStoreBranch,List<String> productIds){
 
         //concat the domain url in order to concat for seoUrl
@@ -838,7 +845,43 @@ public class CloneProductService {
 
             }
 
+            //product add on 
+            List<ProductAddOn> storeOwnerProductAddon =  productAddOnRepository.findByProductIdAndStatusNot(productId,"DELETED");
+
         }
+
+
+
+        //later assign product combo
+
+        // //to add product package option details
+        // compareProductPackageOption.stream()
+        // .map(y->{
+
+        //     List<ProductPackageOptionDetail> dataProductPacakageDetails = productPackageOptionDetailRepository.findByProductPackageOptionId(y.getOwnerProductPackageOptionId());
+
+        //     if(dataProductPacakageDetails.size() != 0){
+
+        //         for(ProductPackageOptionDetail ppd :dataProductPacakageDetails ){
+
+        //             //to find product owner id and we map with branch product, let say the value of branch is null then we will create new product
+        //             Optional<Product> optPro = productRepository.findById(ppd.getProductId());
+
+                    
+        //             // ProductPackageOptionDetail packageOptionDetailData = new ProductPackageOptionDetail();
+        //             // packageOptionDetailData.setProductId(filterProductOwnerAndBranch.getBranchProductId());
+        //             // packageOptionDetailData.setProductPackageOptionId(y.getBranchProductPackageOptionId());
+        //             // packageOptionDetailData.setIsDefault(ppd.getIsDefault());
+        //             // packageOptionDetailData.setSequenceNumber(ppd.getSequenceNumber());
+
+        //             // productPackageOptionDetailRepository.save(packageOptionDetailData);
+        //         }
+
+          
+        //     }    
+        //     return y;
+        // })
+        // .collect(Collectors.toList());
   
         
     }
