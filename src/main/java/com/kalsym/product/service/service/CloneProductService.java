@@ -586,41 +586,21 @@ public class CloneProductService {
         storeOwnerCategory.stream()
         .map(x->{
 
-            //set comparing data between owner and branch
-            CompareStoreCategory compareData = new CompareStoreCategory();
-            compareData.setStoreOwnerCategoryId(x.getId());
-            compareData.setName(x.getName());
-
+            //match result same name
             Optional<StoreCategory> optFilterStoreBranchCategory = storeBranchCategory.stream()
             .filter(cat -> cat.getName().contains(x.getName()))
             .findFirst();
 
-            //we set it to null first unless the selected product that has not been created in branch categroy then we will create it
-            if(!optFilterStoreBranchCategory.isPresent()){
+            //set comparing data
+            CompareStoreCategory compareData = new CompareStoreCategory();
+            compareData.setStoreOwnerCategoryId(x.getId());
+            compareData.setName(x.getName());
+            //we set it to null first ,then we will create it upon create a product if reference branch categoryid is null
+            compareData.setBranchCategoryId(optFilterStoreBranchCategory.isPresent()?optFilterStoreBranchCategory.get().getId():null);
 
-                // StoreCategory bodyStoreCategory = new StoreCategory();
-                // bodyStoreCategory.setName(x.getName());
-                // bodyStoreCategory.setParentCategoryId(x.getParentCategoryId());
-                // bodyStoreCategory.setStoreId(storeBranchId);
-                // bodyStoreCategory.setThumbnailUrl(x.getThumbnailUrl());
-
-                // StoreCategory saveStoreCategory = storeCategoryRepository.save(bodyStoreCategory);
-            
-                // compareData.setBranchCategoryId(saveStoreCategory.getId());
-
-                compareData.setBranchCategoryId(null);
-
-            }
-            else{
-
-                compareData.setBranchCategoryId(optFilterStoreBranchCategory.get().getId());
-            }
-
-            //push data for comparing purpose of store category
             compareStoreOwnerCategory.add(compareData);
 
             return x;
-
 
         })
         .collect(Collectors.toList());
@@ -628,13 +608,16 @@ public class CloneProductService {
         storeOwnerTemplateGroup.stream()
         .map((AddOnTemplateGroup x)->{
 
+            //match result same title
             Optional<AddOnTemplateGroup> optFilterStoreBranchAddOnTemplateGroup = storeBranchTemplateGroup.stream()
             .filter((AddOnTemplateGroup atg) -> atg.getTitle().contains(x.getTitle()))
             .findFirst();
 
+            //set comparing data
             CompareStoreTemplateGroup compareTemplateGroup = new CompareStoreTemplateGroup();
             compareTemplateGroup.setStoreTemplateGroupId(x.getId());
             compareTemplateGroup.setTitle(x.getTitle());
+            //we set it to null first ,then we will create it upon create a product if reference TemplateGroup categoryid is null
             compareTemplateGroup.setBranchTemplateGroupId(optFilterStoreBranchAddOnTemplateGroup.isPresent()?optFilterStoreBranchAddOnTemplateGroup.get().getId():null);
 
             List<CompareStoreTemplateItem> compareStoreOwnerTemplateItem = new ArrayList<>();
@@ -646,8 +629,10 @@ public class CloneProductService {
                 compareDataTemplateItem.setStoreTemplateItem(ownerTemplateItem.getId());
                 compareDataTemplateItem.setName(ownerTemplateItem.getName());
 
-
+                //handle error if template group is null
                 if(optFilterStoreBranchAddOnTemplateGroup.isPresent()){
+                    
+                    //match result same name
                     Optional<AddOnTemplateItem> optFilterStoreBranchTemplateItem = optFilterStoreBranchAddOnTemplateGroup
                     .get().getAddOnTemplateItem()
                     .stream()
@@ -660,9 +645,7 @@ public class CloneProductService {
                 } else{
                     compareDataTemplateItem.setBranchTemplateItem(null);
                 }
-           
-
-              
+   
                 compareStoreOwnerTemplateItem.add(compareDataTemplateItem);
 
                 return ownerTemplateItem;
@@ -716,10 +699,11 @@ public class CloneProductService {
                         }
                     }
                  
+                } else{
+                    data.setCategoryId(filterCategoryOwner.getBranchCategoryId());
+
                 }
                 
-                data.setCategoryId(filterCategoryOwner.getBranchCategoryId());
-
                 data.setStatus(dataOptProduct.getStatus());
                 data.setThumbnailUrl(dataOptProduct.getThumbnailUrl());
                 data.setSeoUrl(subProductUrlDomain+dataOptProduct.getSeoName());
@@ -906,6 +890,9 @@ public class CloneProductService {
                         .filter(temp -> temp.getStoreTemplateGroupId().equals(prodAddonGroup.getAddonTemplateGroupId()))
                         .findFirst().get();
 
+                        ProductAddOnGroup prodAddonGroupData = new ProductAddOnGroup();
+
+                        //we only save template group for store branch if selected product has addon related to the template group
                         if(filterTemplateGroupOwner.getBranchTemplateGroupId() == null){
 
                             AddOnTemplateGroup getDetailsOfStoreOwnerAddonTemplateGroup = addOnTemplateGroupRepository.findById(filterTemplateGroupOwner.getStoreTemplateGroupId()).get();
@@ -923,10 +910,15 @@ public class CloneProductService {
                                 }
                             }
 
+                            prodAddonGroupData.setAddonTemplateGroupId(saveAddOnTemplateGroup.getId());
+
+
+                        } else{
+                            
+                            prodAddonGroupData.setAddonTemplateGroupId(filterTemplateGroupOwner.getBranchTemplateGroupId());
+
                         }
 
-                        ProductAddOnGroup prodAddonGroupData = new ProductAddOnGroup();
-                        prodAddonGroupData.setAddonTemplateGroupId(filterTemplateGroupOwner.getBranchTemplateGroupId());
                         prodAddonGroupData.setMinAllowed(prodAddonGroup.getMinAllowed());
                         prodAddonGroupData.setMaxAllowed(prodAddonGroup.getMaxAllowed());
                         prodAddonGroupData.setSequenceNumber(prodAddonGroup.getSequenceNumber());
@@ -955,13 +947,13 @@ public class CloneProductService {
                     .filter(temp -> temp.getStoreProductAddonGroupId().equals(prodAddon.getProductAddonGroupId()))
                     .findFirst().get();
 
-                    //to find owner id then we will use the the branch id
+                    //to find compare tempate item by matching the id , then sort it on same id will be on top
                     CompareStoreTemplateGroup filterDataTemplateGroup = compareStoreOwnerTemplateGroup.stream()
-                    .filter(mapper -> mapper.getCompareTemplateItem()
+                    .filter((CompareStoreTemplateGroup mapper) -> mapper.getCompareTemplateItem()
                                     .stream()
                                     .anyMatch(b-> b.getStoreTemplateItem().equals(prodAddon.getAddonTemplateItemId())
                     ))
-                    .map(templategroup -> {
+                    .map((CompareStoreTemplateGroup templategroup) -> {
         
                         List<CompareStoreTemplateItem> templateItemDetails = templategroup.getCompareTemplateItem()
                         .stream()
@@ -985,13 +977,48 @@ public class CloneProductService {
                     prodAddonData.setStatus(prodAddon.getStatus());
                     prodAddonData.setSequenceNumber(prodAddon.getSequenceNumber());
                     prodAddonData.setProductAddonGroupId(filterProductAddonGroupOwner.getBranchProductAddonGroupId());
-                    prodAddonData.setAddonTemplateItemId(filterDataTemplateGroup.getCompareTemplateItem().get(0).getBranchTemplateItem());
+
+                    //if null then create template item 
+                    if(filterDataTemplateGroup.getCompareTemplateItem().get(0).getBranchTemplateItem() == null){
+
+                        //create first by getting detail of owner
+                        AddOnTemplateItem getDetailsOfStoreOwnerAddonTemplateItem = addOnTemplateItemRepository.findById(filterDataTemplateGroup.getCompareTemplateItem().get(0).getStoreTemplateItem()).get();
+                        AddOnTemplateItem bodyAddonTemplateItem = new AddOnTemplateItem();
+                        bodyAddonTemplateItem.setStatus(getDetailsOfStoreOwnerAddonTemplateItem.getStatus());
+                        bodyAddonTemplateItem.setName(getDetailsOfStoreOwnerAddonTemplateItem.getName());
+                        bodyAddonTemplateItem.setPrice(getDetailsOfStoreOwnerAddonTemplateItem.getPrice());
+                        bodyAddonTemplateItem.setDineInPrice(getDetailsOfStoreOwnerAddonTemplateItem.getDineInPrice());
+                        
+                        CompareProductAddonGroup filterProductAddonGroup = compareStoreOwnerProductAddonGroup.stream()
+                        .filter((CompareProductAddonGroup y)-> y.getStoreProductAddonGroupId().equals(getDetailsOfStoreOwnerAddonTemplateItem.getGroupId()))
+                        .findFirst().get();
+
+                        bodyAddonTemplateItem.setGroupId(filterProductAddonGroup.getBranchProductAddonGroupId());
+                
+                        //saving the data for branch
+                        AddOnTemplateItem saveAddOnTemplateItem = addOnTemplateItemRepository.save(bodyAddonTemplateItem);
+                        prodAddonData.setAddonTemplateItemId(saveAddOnTemplateItem.getId());
+
+
+                        //then mao the value of comaoter template group
+                        for(CompareStoreTemplateGroup cstg:compareStoreOwnerTemplateGroup){
+
+                            if(cstg.getCompareTemplateItem().get(0).getStoreTemplateItem().equals(prodAddon.getAddonTemplateItemId())){
+                                cstg.getCompareTemplateItem().get(0).setBranchTemplateItem(subProductUrlDomain);
+                            }
+
+                        }
+                        
+                    } 
+                    else{
+                        prodAddonData.setAddonTemplateItemId(filterDataTemplateGroup.getCompareTemplateItem().get(0).getBranchTemplateItem());
+
+                    }
 
                     ProductAddOn saveProductAddon = productAddOnRepository.save(prodAddonData);
                 }
 
             }
-
 
             }
 
