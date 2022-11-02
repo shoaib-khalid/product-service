@@ -988,12 +988,7 @@ public class CloneProductService {
                         bodyAddonTemplateItem.setName(getDetailsOfStoreOwnerAddonTemplateItem.getName());
                         bodyAddonTemplateItem.setPrice(getDetailsOfStoreOwnerAddonTemplateItem.getPrice());
                         bodyAddonTemplateItem.setDineInPrice(getDetailsOfStoreOwnerAddonTemplateItem.getDineInPrice());
-                        
-                        CompareProductAddonGroup filterProductAddonGroup = compareStoreOwnerProductAddonGroup.stream()
-                        .filter((CompareProductAddonGroup y)-> y.getStoreProductAddonGroupId().equals(getDetailsOfStoreOwnerAddonTemplateItem.getGroupId()))
-                        .findFirst().get();
-
-                        bodyAddonTemplateItem.setGroupId(filterProductAddonGroup.getBranchProductAddonGroupId());
+                        bodyAddonTemplateItem.setGroupId(filterDataTemplateGroup.getBranchTemplateGroupId());
                 
                         //saving the data for branch
                         AddOnTemplateItem saveAddOnTemplateItem = addOnTemplateItemRepository.save(bodyAddonTemplateItem);
@@ -1028,38 +1023,51 @@ public class CloneProductService {
 
 
 
-        //later assign product combo
 
-        // //to add product package option details
-        // compareProductPackageOption.stream()
-        // .map(y->{
-
-        //     List<ProductPackageOptionDetail> dataProductPacakageDetails = productPackageOptionDetailRepository.findByProductPackageOptionId(y.getOwnerProductPackageOptionId());
-
-        //     if(dataProductPacakageDetails.size() != 0){
-
-        //         for(ProductPackageOptionDetail ppd :dataProductPacakageDetails ){
-
-        //             //to find product owner id and we map with branch product, let say the value of branch is null then we will create new product
-        //             Optional<Product> optPro = productRepository.findById(ppd.getProductId());
-
-                    
-        //             // ProductPackageOptionDetail packageOptionDetailData = new ProductPackageOptionDetail();
-        //             // packageOptionDetailData.setProductId(filterProductOwnerAndBranch.getBranchProductId());
-        //             // packageOptionDetailData.setProductPackageOptionId(y.getBranchProductPackageOptionId());
-        //             // packageOptionDetailData.setIsDefault(ppd.getIsDefault());
-        //             // packageOptionDetailData.setSequenceNumber(ppd.getSequenceNumber());
-
-        //             // productPackageOptionDetailRepository.save(packageOptionDetailData);
-        //         }
-
-          
-        //     }    
-        //     return y;
-        // })
-        // .collect(Collectors.toList());
   
         
     }
+
+    // public void clone 
+
+    // public void assignSelectedProductPackaeOptionDetails(List<CompareProductPackageOption> compareProductPackageOption){  
+
+
+    //     //later assign product combo
+
+    //     //to add product package option details
+    //     compareProductPackageOption.stream()
+    //     .map(y->{
+
+    //         List<ProductPackageOptionDetail> dataProductPacakageDetails = productPackageOptionDetailRepository.findByProductPackageOptionId(y.getOwnerProductPackageOptionId());
+
+    //         if(dataProductPacakageDetails.size() != 0){
+
+    //             for(ProductPackageOptionDetail ppd :dataProductPacakageDetails ){
+
+    //                 //to find product owner id and we map with branch product, let say the value of branch is null then we will create new product
+    //                 Optional<Product> optPro = productRepository.findById(ppd.getProductId());
+    //                 CompareProductOwnerAndBranch filterProductOwnerAndBranch = compareProductOwnerAndBranch.stream()
+    //                 .filter(product -> product.getOwnerProductId().equals(ppd.getProductId()))
+    //                 .findFirst().get();
+                    
+    //                 ProductPackageOptionDetail packageOptionDetailData = new ProductPackageOptionDetail();
+    //                 packageOptionDetailData.setProductId(filterProductOwnerAndBranch.getBranchProductId());
+    //                 packageOptionDetailData.setProductPackageOptionId(y.getBranchProductPackageOptionId());
+    //                 packageOptionDetailData.setIsDefault(ppd.getIsDefault());
+    //                 packageOptionDetailData.setSequenceNumber(ppd.getSequenceNumber());
+
+    //                 productPackageOptionDetailRepository.save(packageOptionDetailData);
+    //             }
+
+          
+    //         }    
+    //         return y;
+    //     })
+    //     .collect(Collectors.toList());
+
+    // }
    
 }
+
+
