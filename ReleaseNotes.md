@@ -1,4 +1,9 @@
 ##################################################
+# product-service-3.10.39| 03-November-2022
+##################################################
+1. Clone all product with add ons for newly store 
+2. Clone selected product
+##################################################
 # product-service-3.10.38| 21-October-2022 
 ##################################################
 1. Upgradeversion
