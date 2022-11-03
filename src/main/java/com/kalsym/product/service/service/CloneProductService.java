@@ -1031,146 +1031,151 @@ public class CloneProductService {
 
         List<Product> branchProducts = productRepository.findByStoreIdAndStatusNot(storeBranchId,"DELETED");
 
-        //to add product package option details
-        compareProductPackageOption.stream()
-        .map(y->{
+        if(compareProductPackageOption.size()>0){
 
-            List<ProductPackageOptionDetail> dataProductPacakageDetails = productPackageOptionDetailRepository.findByProductPackageOptionId(y.getOwnerProductPackageOptionId());
+            for(CompareProductPackageOption cppo: compareProductPackageOption){
 
-            if(dataProductPacakageDetails.size() != 0){
-
-                for(ProductPackageOptionDetail ppd :dataProductPacakageDetails ){
-
-                    Optional<Product> optOwnerProd = productRepository.findById(ppd.getProductId());
-                    Product ownerProduct = optOwnerProd.get();
-
-                    Optional<Product> optFilterProductBranch = branchProducts.stream()
-                    .filter((Product product) -> product.getName().contains(optOwnerProd.get().getName()))
-                    .findFirst();
-
-                    ProductPackageOptionDetail packageOptionDetailData = new ProductPackageOptionDetail();
-
-
-                    //we will create the product first if not exist in branch
-                    if(!optFilterProductBranch.isPresent()){
-
-                        //to find category owner id then we will use the the branch id for creating branch products
-                        CompareStoreCategory filterCategoryOwner = compareStoreOwnerCategory.stream()
-                        .filter(category -> category.getStoreOwnerCategoryId().equals(ownerProduct.getCategoryId()))
-                        .findFirst().get();
-        
-                        //to be add data
-                        Product data = new Product();
-                        data.setName(ownerProduct.getName());
-                        data.setDescription(ownerProduct.getDescription());
-                        data.setStoreId(storeBranchId);
-        
-                        //if null branchcategoryId then we save it in database
-                        if(filterCategoryOwner.getBranchCategoryId() == null){
-        
-                            Optional<StoreCategory> ownerCategory = storeCategoryRepository.findById(filterCategoryOwner.getStoreOwnerCategoryId());
-        
-                            StoreCategory bodyStoreCategory = new StoreCategory();
-                            bodyStoreCategory.setName(ownerCategory.get().getName());
-                            bodyStoreCategory.setParentCategoryId(ownerCategory.get().getParentCategoryId());
-                            bodyStoreCategory.setStoreId(storeBranchId);
-                            bodyStoreCategory.setThumbnailUrl(ownerCategory.get().getThumbnailUrl());
-        
-                            StoreCategory saveStoreCategory = storeCategoryRepository.save(bodyStoreCategory);
-                        
-                            for(CompareStoreCategory csoc:compareStoreOwnerCategory){
-        
-                                if(csoc.getStoreOwnerCategoryId().equals(ownerCategory.get().getId())){
-                                    csoc.setBranchCategoryId(saveStoreCategory.getId());
+                List<ProductPackageOptionDetail> dataProductPacakageDetails = productPackageOptionDetailRepository.findByProductPackageOptionId(cppo.getOwnerProductPackageOptionId());
+    
+                if(dataProductPacakageDetails.size() != 0){
+    
+                    for(ProductPackageOptionDetail ppd :dataProductPacakageDetails ){
+    
+                        Optional<Product> optOwnerProd = productRepository.findById(ppd.getProductId());
+                        Product ownerProduct = optOwnerProd.get();
+    
+                        Optional<Product> optFilterProductBranch = branchProducts.stream()
+                        .filter((Product product) -> product.getName().contains(optOwnerProd.get().getName()))
+                        .findFirst();
+    
+                        ProductPackageOptionDetail packageOptionDetailData = new ProductPackageOptionDetail();
+    
+    
+                        //we will create the product first if not exist in branch
+                        if(!optFilterProductBranch.isPresent()){
+    
+                            //to find category owner id then we will use the the branch id for creating branch products
+                            CompareStoreCategory filterCategoryOwner = compareStoreOwnerCategory.stream()
+                            .filter(category -> category.getStoreOwnerCategoryId().equals(ownerProduct.getCategoryId()))
+                            .findFirst().get();
+            
+                            //to be add data
+                            Product data = new Product();
+                            data.setName(ownerProduct.getName());
+                            data.setDescription(ownerProduct.getDescription());
+                            data.setStoreId(storeBranchId);
+            
+                            //if null branchcategoryId then we save it in database
+                            if(filterCategoryOwner.getBranchCategoryId() == null){
+            
+                                Optional<StoreCategory> ownerCategory = storeCategoryRepository.findById(filterCategoryOwner.getStoreOwnerCategoryId());
+            
+                                StoreCategory bodyStoreCategory = new StoreCategory();
+                                bodyStoreCategory.setName(ownerCategory.get().getName());
+                                bodyStoreCategory.setParentCategoryId(ownerCategory.get().getParentCategoryId());
+                                bodyStoreCategory.setStoreId(storeBranchId);
+                                bodyStoreCategory.setThumbnailUrl(ownerCategory.get().getThumbnailUrl());
+            
+                                StoreCategory saveStoreCategory = storeCategoryRepository.save(bodyStoreCategory);
+                            
+                                for(CompareStoreCategory csoc:compareStoreOwnerCategory){
+            
+                                    if(csoc.getStoreOwnerCategoryId().equals(ownerCategory.get().getId())){
+                                        csoc.setBranchCategoryId(saveStoreCategory.getId());
+                                    }
+                                }
+                             
+                            } else{
+                                data.setCategoryId(filterCategoryOwner.getBranchCategoryId());
+            
+                            }
+                            
+                            data.setStatus(ownerProduct.getStatus());
+                            data.setThumbnailUrl(ownerProduct.getThumbnailUrl());
+                            data.setSeoUrl(subProductUrlDomain+ownerProduct.getSeoName());
+                            data.setSeoName(ownerProduct.getSeoName());
+                            data.setTrackQuantity(ownerProduct.getTrackQuantity());
+                            data.setAllowOutOfStockPurchases(ownerProduct.getAllowOutOfStockPurchases());
+                            data.setMinQuantityForAlarm(ownerProduct.getMinQuantityForAlarm());
+                            data.setPackingSize(ownerProduct.getPackingSize());
+                            data.setIsPackage(ownerProduct.getIsPackage());
+                            data.setIsNoteOptional(ownerProduct.getIsNoteOptional());
+                            data.setCustomNote(ownerProduct.getCustomNote());
+                            data.setVehicleType(ownerProduct.getVehicleType());
+                            data.setHasAddOn(ownerProduct.getHasAddOn());
+                            
+                            //after we save branch product, then we will use the product id of branch
+                            Product newlyProductData = productRepository.save(data);
+                            String branchProductId = newlyProductData.getId();
+                            
+                            //get product asset (store owner) then clone it
+                            List<ProductAsset> productAssets = productAssetRepository.findByProductId(ownerProduct.getId());
+                            
+                            if(productAssets.size() != 0){
+                                for(ProductAsset pa : productAssets){
+            
+                                    ProductAsset productAsseData = new ProductAsset();
+                                    productAsseData.setName(pa.getName());
+                                    productAsseData.setUrl(pa.getUrl());
+                                    productAsseData.setProductId(branchProductId);
+                                    productAsseData.setIsThumbnail(pa.getIsThumbnail());
+            
+                                    if(pa.getItemCode() != null){
+            
+                                        //set the itemCode (ownerProductId+{int} -> branchProductId+{int})
+                                        productAsseData.setItemCode(pa.getItemCode().replaceAll(ownerProduct.getId(),branchProductId));
+            
+                                    }
+                                    productAssetRepository.save(productAsseData);
+                                    
                                 }
                             }
-                         
+            
+                            //usually for 
+                            List<ProductInventory> ownerProductInventory = productInventoryMainRepository.findByProductId(ownerProduct.getId());
+                            
+                            if(ownerProductInventory.size() != 0){
+            
+                                for(ProductInventory pi :ownerProductInventory){
+            
+                                    ProductInventory productInventoryData = new ProductInventory();
+                                    productInventoryData.setItemCode(pi.getItemCode().replaceAll(ownerProduct.getId(), branchProductId));
+                                    productInventoryData.setPrice(pi.getPrice());
+                                    productInventoryData.setDineInPrice(pi.getDineInPrice());
+                                    productInventoryData.setCompareAtprice(pi.getCompareAtprice());
+                                    productInventoryData.setSKU(pi.getSKU());
+                                    productInventoryData.setQuantity(pi.getQuantity());
+                                    productInventoryData.setProductId(branchProductId);
+                                    productInventoryData.setStatus(pi.getStatus());
+            
+                                    productInventoryMainRepository.save(productInventoryData);
+            
+                                }
+                            }
+    
+                            packageOptionDetailData.setProductId(branchProductId);
+    
+                        
                         } else{
-                            data.setCategoryId(filterCategoryOwner.getBranchCategoryId());
-        
-                        }
-                        
-                        data.setStatus(ownerProduct.getStatus());
-                        data.setThumbnailUrl(ownerProduct.getThumbnailUrl());
-                        data.setSeoUrl(subProductUrlDomain+ownerProduct.getSeoName());
-                        data.setSeoName(ownerProduct.getSeoName());
-                        data.setTrackQuantity(ownerProduct.getTrackQuantity());
-                        data.setAllowOutOfStockPurchases(ownerProduct.getAllowOutOfStockPurchases());
-                        data.setMinQuantityForAlarm(ownerProduct.getMinQuantityForAlarm());
-                        data.setPackingSize(ownerProduct.getPackingSize());
-                        data.setIsPackage(ownerProduct.getIsPackage());
-                        data.setIsNoteOptional(ownerProduct.getIsNoteOptional());
-                        data.setCustomNote(ownerProduct.getCustomNote());
-                        data.setVehicleType(ownerProduct.getVehicleType());
-                        data.setHasAddOn(ownerProduct.getHasAddOn());
-                        
-                        //after we save branch product, then we will use the product id of branch
-                        Product newlyProductData = productRepository.save(data);
-                        String branchProductId = newlyProductData.getId();
-                        
-                        //get product asset (store owner) then clone it
-                        List<ProductAsset> productAssets = productAssetRepository.findByProductId(ownerProduct.getId());
-                        
-                        if(productAssets.size() != 0){
-                            for(ProductAsset pa : productAssets){
-        
-                                ProductAsset productAsseData = new ProductAsset();
-                                productAsseData.setName(pa.getName());
-                                productAsseData.setUrl(pa.getUrl());
-                                productAsseData.setProductId(branchProductId);
-                                productAsseData.setIsThumbnail(pa.getIsThumbnail());
-        
-                                if(pa.getItemCode() != null){
-        
-                                    //set the itemCode (ownerProductId+{int} -> branchProductId+{int})
-                                    productAsseData.setItemCode(pa.getItemCode().replaceAll(ownerProduct.getId(),branchProductId));
-        
-                                }
-                                productAssetRepository.save(productAsseData);
-                                
-                            }
-                        }
-        
-                        //usually for 
-                        List<ProductInventory> ownerProductInventory = productInventoryMainRepository.findByProductId(ownerProduct.getId());
-                        
-                        if(ownerProductInventory.size() != 0){
-        
-                            for(ProductInventory pi :ownerProductInventory){
-        
-                                ProductInventory productInventoryData = new ProductInventory();
-                                productInventoryData.setItemCode(pi.getItemCode().replaceAll(ownerProduct.getId(), branchProductId));
-                                productInventoryData.setPrice(pi.getPrice());
-                                productInventoryData.setDineInPrice(pi.getDineInPrice());
-                                productInventoryData.setCompareAtprice(pi.getCompareAtprice());
-                                productInventoryData.setSKU(pi.getSKU());
-                                productInventoryData.setQuantity(pi.getQuantity());
-                                productInventoryData.setProductId(branchProductId);
-                                productInventoryData.setStatus(pi.getStatus());
-        
-                                productInventoryMainRepository.save(productInventoryData);
-        
-                            }
-                        }
+                            
+                            packageOptionDetailData.setProductId(optFilterProductBranch.get().getId());
 
-                        packageOptionDetailData.setProductId(branchProductId);
-
-                    
+                        }
+                        
+                        packageOptionDetailData.setProductPackageOptionId(cppo.getBranchProductPackageOptionId());
+                        packageOptionDetailData.setIsDefault(ppd.getIsDefault());
+                        packageOptionDetailData.setSequenceNumber(ppd.getSequenceNumber());
+    
+                        productPackageOptionDetailRepository.save(packageOptionDetailData);
                     }
-                    
-                    packageOptionDetailData.setProductId(optFilterProductBranch.get().getId());
-                    packageOptionDetailData.setProductPackageOptionId(y.getBranchProductPackageOptionId());
-                    packageOptionDetailData.setIsDefault(ppd.getIsDefault());
-                    packageOptionDetailData.setSequenceNumber(ppd.getSequenceNumber());
+    
+              
+                } 
+            }
+        }
 
-                    productPackageOptionDetailRepository.save(packageOptionDetailData);
-                }
 
-          
-            }    
-            return y;
-        })
-        .collect(Collectors.toList());
+
 
     }
    
