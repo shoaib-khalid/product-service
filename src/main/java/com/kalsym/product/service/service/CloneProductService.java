@@ -108,6 +108,11 @@ public class CloneProductService {
     @Autowired 
     ProductAddOnGroupRepository productAddOnGroupRepository;
 
+    @Autowired
+    ProductAddOnGroupService productAddOnGroupService;
+
+    @Autowired
+    ProductAddOnService productAddOnService;
 
     // use this for scenario when newly merchant (branch) wants to create products based on HQ PRODUCTS
     public void cloneProducts (String storeId, String storeOwnerId,Optional<Store> optStore){
@@ -538,6 +543,36 @@ public class CloneProductService {
                 Product p = optProdcut.get();
                 p.setStatus("DELETED");
                 productRepository.save(p);
+
+                //set all the product add on under it
+
+                List<ProductAddOnGroup> getListProductAddonGroupByProductById= productAddOnGroupService.listOfProductAddsOnGroup(productId);
+                
+                if(getListProductAddonGroupByProductById.size()>0){
+
+                    for(ProductAddOnGroup pag : getListProductAddonGroupByProductById){
+
+                        ProductAddOnGroup productAddonData = pag;
+                        productAddonData.setStatus("DELETED");
+                        productAddOnGroupService.updateProductAddsOnGroup(productAddonData.getId(),productAddonData);
+
+                    }
+
+                }
+
+                List<ProductAddOn> getListOfProductAddon = productAddOnService.getAllProductByProductId(productId);
+
+                if(getListOfProductAddon.size()>0){
+
+                    for (ProductAddOn pao :getListOfProductAddon){
+
+                        ProductAddOn productAddon = pao;
+                        productAddon.setStatus("DELETED");
+                        productAddOnService.updateProductAddOn(productAddon.getId(), productAddon);
+
+                    }
+
+                }
             }  
 
         }
