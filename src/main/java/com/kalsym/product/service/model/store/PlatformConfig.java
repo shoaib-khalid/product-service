@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.model.PlatformConfigDetails;
+import com.kalsym.product.service.model.PlatformDeliveryProvider;
 import com.kalsym.product.service.model.PlatformPaymentProvider;
 
 import java.io.Serializable;
@@ -72,6 +73,11 @@ public class PlatformConfig implements Serializable {
     fetch = FetchType.LAZY)
     @JoinColumn(name = "platformId", insertable = false, updatable = false)
     private List<PlatformPaymentProvider> platformPaymentProvider;
+
+    @OneToMany(cascade = CascadeType.ALL,
+    fetch = FetchType.LAZY)
+    @JoinColumn(name = "platformId", insertable = false, updatable = false)
+    private List<PlatformDeliveryProvider> platformDeliveryProvider;
     
     public String getPlatformLogo() {
         if (platformLogo==null)
