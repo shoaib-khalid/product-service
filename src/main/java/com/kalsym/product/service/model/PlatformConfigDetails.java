@@ -46,5 +46,6 @@ public class PlatformConfigDetails {
 
     private String businessReg;
 
+    private String actionAdsUrl;
 
 }
