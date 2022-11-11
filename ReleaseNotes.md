@@ -38,7 +38,8 @@ CREATE TABLE `platform_payment_provider` (
   CONSTRAINT `platform_payment_provider_FK` FOREIGN KEY (`platformId`) REFERENCES `platform_config` (`platformId`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
-
+ALTER TABLE symplified.platform_config_details ADD address varchar(250) NULL;
+ALTER TABLE symplified.platform_config_details ADD businessReg varchar(150) NULL;
 
 ##################################################
 # product-service-3.10.40| 09-November-2022

@@ -41,4 +41,10 @@ public class PlatformConfigDetails {
     private String email;
 
     private String adsImageUrl;
+
+    private String address;
+
+    private String businessReg;
+
+
 }
