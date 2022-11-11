@@ -1,4 +1,8 @@
 ##################################################
+# product-service-3.10.41| 11-November-2022
+##################################################
+1. Include platfrom config details , platform payment provider, platfrom delvery provider
+##################################################
 # product-service-3.10.40| 09-November-2022
 ##################################################
 1. Get by product id include dienin discount
