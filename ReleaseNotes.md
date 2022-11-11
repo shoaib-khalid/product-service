@@ -2,6 +2,44 @@
 # product-service-3.10.41| 11-November-2022
 ##################################################
 1. Include platfrom config details , platform payment provider, platfrom delvery provider
+
+##DB Changes
+
+
+CREATE TABLE `platform_config_details` (
+  `platformId` varchar(50) NOT NULL,
+  `whatsappUrl` varchar(150) DEFAULT NULL,
+  `fbUrl` varchar(150) DEFAULT NULL,
+  `instaUrl` varchar(150) DEFAULT NULL,
+  `phoneNumber` varchar(20) DEFAULT NULL,
+  `email` varchar(50) DEFAULT NULL,
+  `adsImageUrl` varchar(150) DEFAULT NULL,
+  PRIMARY KEY (`platformId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `platform_delivery_provider` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `providerName` varchar(100) DEFAULT NULL,
+  `providerImage` varchar(150) DEFAULT NULL,
+  `platformId` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `platform_delivery_provider_FK` (`platformId`),
+  CONSTRAINT `platform_delivery_provider_FK` FOREIGN KEY (`platformId`) REFERENCES `platform_config` (`platformId`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+
+CREATE TABLE `platform_payment_provider` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `providerName` varchar(150) DEFAULT NULL,
+  `providerImage` varchar(200) DEFAULT NULL,
+  `platformId` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `platform_payment_provider_FK` (`platformId`),
+  CONSTRAINT `platform_payment_provider_FK` FOREIGN KEY (`platformId`) REFERENCES `platform_config` (`platformId`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+
+
 ##################################################
 # product-service-3.10.40| 09-November-2022
 ##################################################
@@ -19,6 +57,13 @@
 # product-service-3.10.37| 21-October-2022 
 ##################################################
 1. DineIn discount
+
+##DB Changes
+new column added for table store_discount_product : 
+
+-dineInDiscountAmount
+-dineInCalculationType
+
 # product-service-3.10.36-HOTFIX| 25-October-2022 
 ##################################################
 1. Hotfix when delete change the status to 'DELETED' for product add on and product addon group 
