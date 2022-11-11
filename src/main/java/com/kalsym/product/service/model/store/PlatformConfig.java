@@ -4,13 +4,22 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.kalsym.product.service.ProductServiceApplication;
+import com.kalsym.product.service.model.PlatformConfigDetails;
+import com.kalsym.product.service.model.PlatformPaymentProvider;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -55,6 +64,14 @@ public class PlatformConfig implements Serializable {
 
     private String platformLogoSquare;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "platformId", referencedColumnName = "platformId", insertable = false, updatable = false)
+    private PlatformConfigDetails platformConfigDetails;
+
+    @OneToMany(cascade = CascadeType.ALL,
+    fetch = FetchType.LAZY)
+    @JoinColumn(name = "platformId")
+    private List<PlatformPaymentProvider> platformPaymentProvider;
     
     public String getPlatformLogo() {
         if (platformLogo==null)
