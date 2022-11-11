@@ -70,7 +70,7 @@ public class PlatformConfig implements Serializable {
 
     @OneToMany(cascade = CascadeType.ALL,
     fetch = FetchType.LAZY)
-    @JoinColumn(name = "platformId")
+    @JoinColumn(name = "platformId", insertable = false, updatable = false)
     private List<PlatformPaymentProvider> platformPaymentProvider;
     
     public String getPlatformLogo() {
