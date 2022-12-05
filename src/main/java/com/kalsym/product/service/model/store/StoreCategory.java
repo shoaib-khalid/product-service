@@ -39,4 +39,7 @@ public class StoreCategory implements Serializable {
 
     private String verticalCode;
 
+    private Integer sequenceNumber;
+
+
 }

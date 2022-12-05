@@ -1,4 +1,11 @@
 ##################################################
+# product-service-3.10.42| 05-December-2022
+##################################################
+
+1. Update endpoint for staore category
+ALTER TABLE symplified.store_category ADD sequenceNumber int DEFAULT 0;
+
+##################################################
 # product-service-3.10.41| 11-November-2022
 ##################################################
 1. Include platfrom config details , platform payment provider, platfrom delvery provider

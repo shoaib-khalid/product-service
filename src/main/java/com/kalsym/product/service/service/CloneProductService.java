@@ -211,6 +211,7 @@ public class CloneProductService {
             bodyStoreCategory.setParentCategoryId(x.getParentCategoryId());
             bodyStoreCategory.setStoreId(storeId);
             bodyStoreCategory.setThumbnailUrl(x.getThumbnailUrl());
+            bodyStoreCategory.setSequenceNumber(x.getSequenceNumber());
 
             StoreCategory saveStoreCategory = storeCategoryRepository.save(bodyStoreCategory);
 
@@ -724,6 +725,7 @@ public class CloneProductService {
                     bodyStoreCategory.setParentCategoryId(ownerCategory.get().getParentCategoryId());
                     bodyStoreCategory.setStoreId(storeBranchId);
                     bodyStoreCategory.setThumbnailUrl(ownerCategory.get().getThumbnailUrl());
+                    bodyStoreCategory.setSequenceNumber(ownerCategory.get().getSequenceNumber());
 
                     StoreCategory saveStoreCategory = storeCategoryRepository.save(bodyStoreCategory);
                 
@@ -1110,7 +1112,8 @@ public class CloneProductService {
                                 bodyStoreCategory.setParentCategoryId(ownerCategory.get().getParentCategoryId());
                                 bodyStoreCategory.setStoreId(storeBranchId);
                                 bodyStoreCategory.setThumbnailUrl(ownerCategory.get().getThumbnailUrl());
-            
+                                bodyStoreCategory.setSequenceNumber(ownerCategory.get().getSequenceNumber());
+
                                 StoreCategory saveStoreCategory = storeCategoryRepository.save(bodyStoreCategory);
                             
                                 for(CompareStoreCategory csoc:compareStoreOwnerCategory){

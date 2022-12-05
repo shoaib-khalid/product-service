@@ -76,7 +76,7 @@ public class StoreCategoryController {
             @RequestParam(required = false) String storeId,
             @RequestParam(required = false) String verticalCode,
             @RequestParam(required = false) String parentCategoryId,
-            @RequestParam(required = false, defaultValue = "name") String sortByCol,
+            @RequestParam(required = false, defaultValue = "sequenceNumber") String sortByCol,
             @RequestParam(required = false, defaultValue = "ASC") Sort.Direction sortingOrder,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int pageSize) {
@@ -130,6 +130,7 @@ public class StoreCategoryController {
             @RequestParam() String name,
             @RequestParam(required = false) String parentCategoryId, 
             @RequestParam(required = false) Integer displaySequence, 
+            @RequestParam(required = false) Integer sequenceNumber, 
             @RequestParam() String storeId, 
             @RequestParam(name = "file", required = false) MultipartFile file) {
 
@@ -160,6 +161,7 @@ public class StoreCategoryController {
         bodyStoreCategory.setParentCategoryId(parentCategoryId);
         bodyStoreCategory.setDisplaySequence(displaySequence);
         bodyStoreCategory.setStoreId(storeId);
+        bodyStoreCategory.setSequenceNumber(sequenceNumber);
         storeCategoryRepository.save(bodyStoreCategory);
         if (file != null) {
             Logger.application.info("storeCategory created with id: {}", bodyStoreCategory.getId());
@@ -248,6 +250,7 @@ public class StoreCategoryController {
             @RequestParam(name = "name", required = true) String name,
             @RequestParam(name = "parentCategoryId" ,required = false) String parentCategoryId, 
             @RequestParam(name = "displaySequence", required = false) Integer displaySequence,
+            @RequestParam(name = "sequenceNumber", required = false) Integer sequenceNumber,
             @RequestParam(name = "storeId", required = true) String storeId,
             @RequestParam(name = "file", required = false) MultipartFile file) {
         String logprefix = request.getRequestURI();
