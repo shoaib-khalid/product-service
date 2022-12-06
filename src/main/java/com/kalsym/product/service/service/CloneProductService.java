@@ -594,6 +594,17 @@ public class CloneProductService {
         }
     }
 
+    
+    public void bulkEditCategory(List<StoreCategory> categories){
+
+        for(StoreCategory sc:categories){
+            Optional<StoreCategory> optStoreCategory = storeCategoryRepository.findById(sc.getId());
+            optStoreCategory.get().setSequenceNumber(sc.getSequenceNumber());
+            storeCategoryRepository.save(optStoreCategory.get());
+
+        }
+    }
+
     //use this for scenario existing store (branch) wants to copy products from HQ , 
     //the only difference we will query each of related data of products branch and owner , 
     //and merge data by making comparison , 

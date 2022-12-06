@@ -23,6 +23,9 @@ import com.kalsym.product.service.service.CloneProductService;
 import com.kalsym.product.service.service.FileStorageService;
 import com.kalsym.product.service.utility.Logger;
 import com.kalsym.product.service.worker.BulkDeleteCategory;
+import com.kalsym.product.service.worker.BulkEditCategory;
+
+import io.swagger.annotations.ApiOperation;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -183,6 +186,27 @@ public class StoreCategoryController {
         response.setStatus(HttpStatus.CREATED);
         response.setData(saveAssetUrl);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @ApiOperation(value = "Bulk edit for sequence of store categories", notes = "Note: Please include the id and sequence number only in the request body.")
+    @PostMapping(path = {"/bulk-edit-sequence"}, name = "store-categories-post")
+    @PreAuthorize("hasAnyAuthority('store-categories-post','all')  and @customOwnerVerifier.VerifyStore(#storeId)")
+    public ResponseEntity<HttpResponse> postBulkEditSequenceNumber(
+        HttpServletRequest request,
+        @RequestParam() String storeId, 
+        @RequestBody List<StoreCategory> storeCategoryProduct) {
+
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+        String logprefix = request.getRequestURI();
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "", "");
+
+        //create thread
+        BulkEditCategory threadBulkEditCategory = new BulkEditCategory(storeCategoryProduct,cloneProductService);
+        threadBulkEditCategory.start();
+
+        response.setStatus(HttpStatus.OK);
+        response.setData("Success Updated");
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @DeleteMapping(path = {"/{storeCategoryId}"}, name = "store-categories-delete-by-id")
