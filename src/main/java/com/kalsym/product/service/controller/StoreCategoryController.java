@@ -286,6 +286,10 @@ public class StoreCategoryController {
             optStoreCategory.get().setDisplaySequence(displaySequence);
         }
 
+        if (sequenceNumber != null) {
+            optStoreCategory.get().setSequenceNumber(sequenceNumber);
+        }
+
         if (file != null) {
             String categoryThumbnailStoragePath = fileStorageService.saveStoreAsset(file, optStoreCategory.get().getId() + fileStorageService.getFileExtension(file));
             optStoreCategory.get().setThumbnailUrl("/store-assets/" + optStoreCategory.get().getId() + fileStorageService.getFileExtension(file));
