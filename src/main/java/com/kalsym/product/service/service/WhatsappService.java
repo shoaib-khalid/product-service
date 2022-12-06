@@ -54,7 +54,7 @@ public class WhatsappService {
         }
         RestTemplate restTemplate = new RestTemplate();        
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Bearer AccessToken");
+        headers.add("Authorization", "Bearer accessToken");
 
         WhatsappMessage request = new WhatsappMessage();
         request.setGuest(false);
