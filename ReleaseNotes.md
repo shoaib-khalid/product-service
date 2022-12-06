@@ -1,4 +1,8 @@
 ##################################################
+# product-service-3.10.41-HOTFIX| 06-December-2022
+##################################################
+1.set header authorization
+##################################################
 # product-service-3.10.41| 11-November-2022
 ##################################################
 1. Include platfrom config details , platform payment provider, platfrom delvery provider
