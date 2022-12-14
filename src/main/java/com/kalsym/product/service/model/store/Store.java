@@ -98,6 +98,8 @@ public class Store implements Serializable {
 
     private Boolean isDelivery;
 
+    private Boolean dineInConsolidatedOrder;
+
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
@@ -202,6 +204,10 @@ public class Store implements Serializable {
 
         if (null != store.getIsDelivery()) {
             isDelivery = store.getIsDelivery();
+        }
+
+        if (null != store.getDineInConsolidatedOrder()) {
+            dineInConsolidatedOrder = store.getDineInConsolidatedOrder();
         }
 
     }

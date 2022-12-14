@@ -465,6 +465,11 @@ public class StoreController {
                 bodyStore.setDineInOption("SELFCOLLECT");
             }
 
+            // set isDineIn to false
+            if (bodyStore.getDineInConsolidatedOrder()==null) {
+                bodyStore.setDineInConsolidatedOrder(false);
+            }
+
             // set default isdelivery for ecommerce =true, 
               if (bodyStore.getIsDelivery()==null) {
 

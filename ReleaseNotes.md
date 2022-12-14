@@ -1,4 +1,14 @@
 ##################################################
+# product-service-3.10.45| 14-December-2022
+##################################################
+1. add new clolumn , modify chnage for  creation store and edit store 
+
+##DB Changes
+dineInConsolidatedOrder
+
+ALTER TABLE symplified.product_package_option_detail ADD dineInConsolidatedOrder tinyint(1) DEFAULT 0;
+
+##################################################
 # product-service-3.10.44| 14-December-2022
 ##################################################
 1. Merge hotfix in staging

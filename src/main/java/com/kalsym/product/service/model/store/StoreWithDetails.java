@@ -93,6 +93,8 @@ public class StoreWithDetails implements Serializable {
 
     private String dineInPaymentType;
 
+    private Boolean dineInConsolidatedOrder;
+
     private Boolean isDelivery;
 
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
@@ -237,6 +239,10 @@ public class StoreWithDetails implements Serializable {
 
         if (null != store.getIsDelivery()) {
             isDelivery = store.getIsDelivery();
+        }
+
+        if (null != store.getDineInConsolidatedOrder()) {
+            dineInConsolidatedOrder = store.getDineInConsolidatedOrder();
         }
 
     }
