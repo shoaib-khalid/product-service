@@ -11,6 +11,9 @@
 1. Update endpoint for staore category
 ALTER TABLE symplified.store_category ADD sequenceNumber int DEFAULT 0;
 
+# product-service-3.10.41-HOTFIX| 06-December-2022
+##################################################
+1.set header authorization
 ##################################################
 # product-service-3.10.41| 11-November-2022
 ##################################################
