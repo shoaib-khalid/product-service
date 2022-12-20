@@ -1,4 +1,8 @@
 ##################################################
+# product-service-3.10.46| 20-December-2022
+##################################################
+1. set isOpen store to check store timing
+##################################################
 # product-service-3.10.45| 14-December-2022
 ##################################################
 1. add new clolumn , modify chnage for  creation store and edit store 

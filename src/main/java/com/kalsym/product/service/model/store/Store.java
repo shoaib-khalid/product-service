@@ -100,6 +100,8 @@ public class Store implements Serializable {
 
     private Boolean dineInConsolidatedOrder;
 
+    private Boolean isAlwaysOpen;
+
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
@@ -209,6 +211,11 @@ public class Store implements Serializable {
         if (null != store.getDineInConsolidatedOrder()) {
             dineInConsolidatedOrder = store.getDineInConsolidatedOrder();
         }
+
+        if (null != store.getIsAlwaysOpen()) {
+            isAlwaysOpen = store.getIsAlwaysOpen();
+        }
+
 
     }
 

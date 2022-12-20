@@ -34,6 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.kalsym.product.service.model.store.Store;
 import com.kalsym.product.service.model.store.StoreWithDetails;
 import com.kalsym.product.service.model.store.StoreCommission;
+import com.kalsym.product.service.model.store.StoreTiming;
 import com.kalsym.product.service.model.store.Client;
 
 import com.kalsym.product.service.model.livechatgroup.StoreCreationResponse;
@@ -68,6 +69,9 @@ import java.util.List;
 import java.util.Optional;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.text.DateFormatSymbols;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -274,6 +278,13 @@ public class StoreController {
            
             Page<StoreWithDetails> fetchedPage = storeWithDetailsRepository.findAll(getStoreSpec(verticalCode, domain, storeExample), pageable);
 
+            //variable involve to calculate store timing 
+            String dayNames[] = new DateFormatSymbols().getWeekdays();  
+            Calendar date = Calendar.getInstance();  
+            SimpleDateFormat formatter = new SimpleDateFormat("HH:mm");  
+            Date curr = new Date();  
+            String currentTime = formatter.format(curr);
+
             //extract result to set default assets
             List<StoreWithDetails> storeList = fetchedPage.getContent();        
             StoreWithDetails[] storeWithDetailsList = new StoreWithDetails[storeList.size()];
@@ -289,6 +300,40 @@ public class StoreController {
                 storeWithDetails.setStoreAssets(storeAssetsList);
 
                 StoreSnooze st = new StoreSnooze();
+              
+                if(storeList.get(x).getStoreTiming().size()>0){
+                    
+                    StoreTiming optStoreTiming = storeList.get(x).getStoreTiming().stream()
+                    .filter((StoreTiming sti) -> sti.getDay().contains(dayNames[date.get(Calendar.DAY_OF_WEEK)].toUpperCase()))
+                    .map((StoreTiming stt)-> {
+                        if(stt.getIsOff()){
+                            storeWithDetails.setIsOpen(false); 
+                        }
+                        else{
+                            storeWithDetails.setIsOpen(true); 
+                            try {
+                                if(formatter.parse(currentTime).after(formatter.parse(stt.getOpenTime())) && formatter.parse(currentTime).before(formatter.parse(stt.getCloseTime())) )
+                                {
+                                    storeWithDetails.setIsOpen(true); 
+                                }else{
+                                    storeWithDetails.setIsOpen(false); 
+                                }
+                            } catch (ParseException e) {
+                                // TODO Auto-generated catch block
+                                e.printStackTrace();
+                            }
+                          
+                        }
+                        return stt;
+                    })
+                    .findFirst().get();
+                    
+                }
+                //let say it is ecommerce where merchant set 24 hours open then we set it as open
+                if (storeWithDetails.getIsAlwaysOpen()){
+                    storeWithDetails.setIsOpen(true); 
+
+                }
 
                 if (storeWithDetails.getSnoozeStartTime()!=null && storeWithDetails.getSnoozeEndTime()!=null) {
                     int resultSnooze = storeWithDetails.getSnoozeEndTime().compareTo(Calendar.getInstance().getTime());
@@ -468,6 +513,11 @@ public class StoreController {
             // set isDineIn to false
             if (bodyStore.getDineInConsolidatedOrder()==null) {
                 bodyStore.setDineInConsolidatedOrder(false);
+            }
+
+            // set isalwaysopen to false
+            if (bodyStore.getIsAlwaysOpen()==null) {
+                bodyStore.setIsAlwaysOpen(false);
             }
 
             // set default isdelivery for ecommerce =true, 

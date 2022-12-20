@@ -95,6 +95,8 @@ public class StoreWithDetails implements Serializable {
 
     private Boolean dineInConsolidatedOrder;
 
+    private Boolean isAlwaysOpen;
+
     private Boolean isDelivery;
 
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
@@ -151,6 +153,9 @@ public class StoreWithDetails implements Serializable {
     
     @Transient 
     private Integer completionPercentage;   
+
+    @Transient 
+    private Boolean isOpen;
     
     public void update(StoreWithDetails store) {
 
@@ -243,6 +248,10 @@ public class StoreWithDetails implements Serializable {
 
         if (null != store.getDineInConsolidatedOrder()) {
             dineInConsolidatedOrder = store.getDineInConsolidatedOrder();
+        }
+
+        if (null != store.getIsAlwaysOpen()) {
+            isAlwaysOpen = store.getIsAlwaysOpen();
         }
 
     }
