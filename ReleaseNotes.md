@@ -2,6 +2,10 @@
 # product-service-3.10.46| 20-December-2022
 ##################################################
 1. set isOpen store to check store timing
+##DB Changes
+ALTER TABLE symplified.store ADD isAlwaysOpen tinyint(1) DEFAULT 0 NULL;
+
+
 ##################################################
 # product-service-3.10.45| 14-December-2022
 ##################################################
