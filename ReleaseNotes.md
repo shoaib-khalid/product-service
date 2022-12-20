@@ -14,7 +14,7 @@ ALTER TABLE symplified.store ADD isAlwaysOpen tinyint(1) DEFAULT 0 NULL;
 ##DB Changes
 dineInConsolidatedOrder
 
-ALTER TABLE symplified.product_package_option_detail ADD dineInConsolidatedOrder tinyint(1) DEFAULT 0;
+ALTER TABLE symplified.store ADD dineInConsolidatedOrder tinyint(1) DEFAULT 0;
 
 ##################################################
 # product-service-3.10.44| 14-December-2022
