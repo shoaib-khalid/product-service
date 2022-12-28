@@ -277,14 +277,14 @@ public class StoreController {
                 pageable = PageRequest.of(page, pageSize, Sort.by(sortByCol).descending());
            
             Page<StoreWithDetails> fetchedPage = storeWithDetailsRepository.findAll(getStoreSpec(verticalCode, domain, storeExample), pageable);
-
+           
             //variable involve to calculate store timing 
             String dayNames[] = new DateFormatSymbols().getWeekdays();  
             Calendar date = Calendar.getInstance();  
             SimpleDateFormat formatter = new SimpleDateFormat("HH:mm");  
             Date curr = new Date();  
             String currentTime = formatter.format(curr);
-
+            int   currentDayInteger = date.get(Calendar.DAY_OF_WEEK);
             //extract result to set default assets
             List<StoreWithDetails> storeList = fetchedPage.getContent();        
             StoreWithDetails[] storeWithDetailsList = new StoreWithDetails[storeList.size()];
@@ -300,14 +300,70 @@ public class StoreController {
                 storeWithDetails.setStoreAssets(storeAssetsList);
 
                 StoreSnooze st = new StoreSnooze();
-              
+
+                int currentStoreData = x;
                 if(storeList.get(x).getStoreTiming().size()>0){
                     
                     StoreTiming optStoreTiming = storeList.get(x).getStoreTiming().stream()
                     .filter((StoreTiming sti) -> sti.getDay().contains(dayNames[date.get(Calendar.DAY_OF_WEEK)].toUpperCase()))
                     .map((StoreTiming stt)-> {
                         if(stt.getIsOff()){
-                            storeWithDetails.setIsOpen(false); 
+                            storeWithDetails.setIsOpen(false);
+                            
+                            //to handle outbound array of dayNames
+                            int tomorrowDay = currentDayInteger+1>7?1:currentDayInteger+1;
+
+                            StoreTiming optStoreTimingTomorrow =  storeList.get(currentStoreData).getStoreTiming().stream().filter((StoreTiming tomsti) -> tomsti.getDay().contains(dayNames[tomorrowDay].toUpperCase())).findFirst().get();
+
+                            Boolean isFoundOtherDay = false;
+                            String openDay = "";
+
+                            if(!optStoreTimingTomorrow.getIsOff()){
+                                storeWithDetails.setStoreTimingMessage("Please come back tomorrow at "+optStoreTimingTomorrow.getOpenTime());
+                    
+                            } else{
+                    
+                                int g = tomorrowDay;
+
+                                while (g < dayNames.length && isFoundOtherDay==false ) {
+                                    
+                                    String daysThisWeek = dayNames[g];
+                                    StoreTiming optStoreTimingOtherDay =  storeList.get(currentStoreData).getStoreTiming().stream().filter((StoreTiming otherDayStore) -> otherDayStore.getDay().contains(daysThisWeek.toUpperCase())).findFirst().get();
+
+                                    if(!optStoreTimingOtherDay.getIsOff()){
+                                     isFoundOtherDay = true;
+                                     openDay = dayNames[g];
+                                     storeWithDetails.setStoreTimingMessage("Please come back on "+openDay+" "+optStoreTimingOtherDay.getOpenTime());
+
+                                    }
+
+                    
+                                  g++;
+                                }
+                                
+                                if(openDay==""){
+                    
+                                    int m = 1;
+                    
+                                   while (m < currentDayInteger && isFoundOtherDay==false ) {
+                                    String daysNextWeek = dayNames[m];
+
+                                    StoreTiming optStoreTimeOtherDay =  storeList.get(currentStoreData).getStoreTiming().stream().filter((StoreTiming otherDayStore) -> otherDayStore.getDay().contains(daysNextWeek.toUpperCase())).findFirst().get();
+
+                                        if(!optStoreTimeOtherDay.getIsOff()){
+                                        isFoundOtherDay = true;
+                                        openDay = dayNames[m];
+                                        storeWithDetails.setStoreTimingMessage("Please come back on "+openDay+" "+optStoreTimeOtherDay.getOpenTime());
+
+                                       }
+                        
+                                      m++;
+                                    }
+                                }
+                                                    
+                            }
+
+                            
                         }
                         else{
                             storeWithDetails.setIsOpen(true); 
@@ -315,8 +371,11 @@ public class StoreController {
                                 if(formatter.parse(currentTime).after(formatter.parse(stt.getOpenTime())) && formatter.parse(currentTime).before(formatter.parse(stt.getCloseTime())) )
                                 {
                                     storeWithDetails.setIsOpen(true); 
+                                    
                                 }else{
+                                    //open today but the store timing not yet open 
                                     storeWithDetails.setIsOpen(false); 
+                                    storeWithDetails.setStoreTimingMessage("Please come back at "+stt.getOpenTime());
                                 }
                             } catch (ParseException e) {
                                 // TODO Auto-generated catch block
@@ -327,8 +386,9 @@ public class StoreController {
                         return stt;
                     })
                     .findFirst().get();
-                    
                 }
+                //to set store close desciprtion
+
                 //let say it is ecommerce where merchant set 24 hours open then we set it as open
                 if (storeWithDetails.getIsAlwaysOpen()){
                     storeWithDetails.setIsOpen(true); 

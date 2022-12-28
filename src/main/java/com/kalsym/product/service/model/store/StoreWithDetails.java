@@ -157,6 +157,9 @@ public class StoreWithDetails implements Serializable {
     @Transient 
     private Boolean isOpen;
     
+    @Transient 
+    private String storeTimingMessage;
+    
     public void update(StoreWithDetails store) {
 
         if (null != store.getCity()) {
