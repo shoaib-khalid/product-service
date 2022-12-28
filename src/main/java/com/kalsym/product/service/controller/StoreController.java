@@ -360,6 +360,11 @@ public class StoreController {
                                       m++;
                                     }
                                 }
+                                // condition all day closed
+                                if(!isFoundOtherDay){
+                                    storeWithDetails.setStoreTimingMessage("Temporarily closed");
+
+                                }
                                                     
                             }
 
