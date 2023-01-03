@@ -363,7 +363,8 @@ public class StoreProductAssetController {
             } 
             //create a new item code of image
             else {
-                generatedUrl = itemCode + fileStorageService.generateRandomName();
+                //
+                generatedUrl = productId + fileStorageService.generateRandomName();
                 storagePath = fileStorageService.saveProductAsset(file, generatedUrl);            
             }
 
