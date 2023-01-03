@@ -289,12 +289,12 @@ public class StoreController {
             SimpleDateFormat formatter = new SimpleDateFormat("HH:mm"); 
 
             //make it as default
-            String timeZone = "UTC";
+            String timeZone = "Asia/KualaLumpur";
             //to set the timezone
-            Optional<RegionCountry> regionCountrySearch = regionCountriesRepository.findById(regionCountryId);
-            if (regionCountrySearch.isPresent()) {
-                timeZone = regionCountrySearch.get().getTimezone();
-            }
+            // Optional<RegionCountry> regionCountrySearch = regionCountriesRepository.findById(regionCountryId);
+            // if (regionCountrySearch.isPresent()) {
+            //     timeZone = regionCountrySearch.get().getTimezone();
+            // }
             formatter.setTimeZone(TimeZone.getTimeZone(timeZone));
          
             Date curr = new Date();  
