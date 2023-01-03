@@ -11,6 +11,7 @@ import com.kalsym.product.service.model.ReserveDomain;
 import com.kalsym.product.service.model.StoreSnooze;
 import com.kalsym.product.service.model.store.StoreCategory;
 import com.kalsym.product.service.repository.ProductRepository;
+import com.kalsym.product.service.repository.RegionCountriesRepository;
 import com.kalsym.product.service.repository.StoreRepository;
 import com.kalsym.product.service.utility.DateTimeUtil;
 import com.kalsym.product.service.utility.HttpResponse;
@@ -67,6 +68,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
+import java.util.TimeZone;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.text.DateFormatSymbols;
@@ -156,6 +158,9 @@ public class StoreController {
     
     @Autowired
     DeliveryService deliveryService;
+
+    @Autowired
+    RegionCountriesRepository regionCountriesRepository;
             
     @Value("${storeCommission.minChargeAmount:1.5}")
     private Double minChargeAmount;
@@ -281,7 +286,17 @@ public class StoreController {
             //variable involve to calculate store timing 
             String dayNames[] = new DateFormatSymbols().getWeekdays();  
             Calendar date = Calendar.getInstance();  
-            SimpleDateFormat formatter = new SimpleDateFormat("HH:mm");  
+            SimpleDateFormat formatter = new SimpleDateFormat("HH:mm"); 
+
+            //make it as default
+            String timeZone = "UTC";
+            //to set the timezone
+            Optional<RegionCountry> regionCountrySearch = regionCountriesRepository.findById(regionCountryId);
+            if (regionCountrySearch.isPresent()) {
+                timeZone = regionCountrySearch.get().getTimezone();
+            }
+            formatter.setTimeZone(TimeZone.getTimeZone(timeZone));
+         
             Date curr = new Date();  
             String currentTime = formatter.format(curr);
             int   currentDayInteger = date.get(Calendar.DAY_OF_WEEK);
