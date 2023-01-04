@@ -120,6 +120,8 @@ public class StoreWithDetails implements Serializable {
     private String latitude;
     
     private String longitude;
+
+    private String storePrefix;
     
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
@@ -255,6 +257,10 @@ public class StoreWithDetails implements Serializable {
 
         if (null != store.getIsAlwaysOpen()) {
             isAlwaysOpen = store.getIsAlwaysOpen();
+        }
+
+        if (null != store.getStorePrefix()) {
+            storePrefix = store.getStorePrefix();
         }
 
     }

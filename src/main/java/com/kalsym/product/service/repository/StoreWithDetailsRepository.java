@@ -24,5 +24,7 @@ public interface StoreWithDetailsRepository extends PagingAndSortingRepository<S
    
    Optional<StoreWithDetails> findByName(@Param("name") String name);
    
+   Optional<StoreWithDetails> findByStorePrefix(@Param("name") String storePrefix);
+
 
 }

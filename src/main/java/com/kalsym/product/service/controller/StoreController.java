@@ -1080,6 +1080,36 @@ public class StoreController {
         
         
     }
+
+    @GetMapping(path = {"/checkprefix"}, name = "stores-check-name-availability", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('stores-check-name-availability', 'all')")
+    public ResponseEntity<HttpResponse> checkPrefixAvailability(HttpServletRequest request,
+            @RequestParam(required = true) String storePrefix
+    ) {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " id: " + storePrefix, "");
+
+        if(storePrefix.length() != 4){
+            response.setStatus(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+
+        Optional<StoreWithDetails> optStore = storeWithDetailsRepository.findByStorePrefix(storePrefix);
+
+        if (!optStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " Name: " + storePrefix+" IS available");
+            response.setStatus(HttpStatus.OK);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        } else {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " Name: " + storePrefix+" NOT available");
+            response.setStatus(HttpStatus.CONFLICT);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+       
+        
+    }
     
     public Specification<StoreWithDetails> getStoreSpec(
             String[] verticalCodeList, String domain, Example<StoreWithDetails> example) {
