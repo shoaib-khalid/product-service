@@ -289,21 +289,35 @@ public class StoreController {
             SimpleDateFormat formatter = new SimpleDateFormat("HH:mm"); 
 
             //make it as default
-            String timeZone = "Asia/KualaLumpur";
+            String timeZone = "UTC";
             //to set the timezone
-            // Optional<RegionCountry> regionCountrySearch = regionCountriesRepository.findById(regionCountryId);
-            // if (regionCountrySearch.isPresent()) {
-            //     timeZone = regionCountrySearch.get().getTimezone();
-            // }
-            formatter.setTimeZone(TimeZone.getTimeZone(timeZone));
+            if(regionCountryId!= null){
+                Optional<RegionCountry> regionCountrySearch = regionCountriesRepository.findById(regionCountryId);
+                if (regionCountrySearch.isPresent()) {
+                    timeZone = regionCountrySearch.get().getTimezone();
+                }
+                formatter.setTimeZone(TimeZone.getTimeZone(timeZone));
+
+            }
          
             Date curr = new Date();  
-            String currentTime = formatter.format(curr);
             int   currentDayInteger = date.get(Calendar.DAY_OF_WEEK);
             //extract result to set default assets
             List<StoreWithDetails> storeList = fetchedPage.getContent();        
             StoreWithDetails[] storeWithDetailsList = new StoreWithDetails[storeList.size()];
             for (int x=0;x<storeList.size();x++) {
+
+                if(timeZone.equals("UTC")){
+                    Optional<RegionCountry> getRegiounContry = regionCountriesRepository.findById(storeList.get(x).getRegionCountryId());
+                    if (getRegiounContry.isPresent()) {
+                        timeZone = getRegiounContry.get().getTimezone();
+                    }
+                    formatter.setTimeZone(TimeZone.getTimeZone(timeZone));
+                }
+
+                //format date from UTC to timeZone with format HH:mm
+                String currentTime = formatter.format(curr);
+
                 //check for item discount in hashmap
                 StoreWithDetails storeWithDetails = storeList.get(x);
                 List<StoreAssets> storeAssetsList = storeAssetsRepository.findByStoreId(storeWithDetails.getId());

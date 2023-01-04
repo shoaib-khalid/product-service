@@ -49,9 +49,12 @@ public class ProductPackageOption implements Serializable {
 
     private Integer totalAllow;
 
+    private Integer minAllow;
+
+    private Boolean allowSameItem;
+
     private Integer sequenceNumber;
 
-     
     @OneToMany(cascade = CascadeType.ALL,
             fetch = FetchType.LAZY)
     @JoinColumn(name = "productPackageOptionId", insertable = false, updatable = false, nullable = true)
@@ -69,6 +72,14 @@ public class ProductPackageOption implements Serializable {
 
         if (null != productPackageOption.getSequenceNumber()) {
             sequenceNumber = productPackageOption.getSequenceNumber();
+        }
+
+        if (null != productPackageOption.getMinAllow()) {
+            minAllow = productPackageOption.getMinAllow();
+        }
+
+        if (null != productPackageOption.getAllowSameItem()) {
+            allowSameItem = productPackageOption.getAllowSameItem();
         }
       
     }

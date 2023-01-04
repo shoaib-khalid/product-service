@@ -402,6 +402,8 @@ public class CloneProductService {
                     ProductPackageOption ppoData = new ProductPackageOption();
                     ppoData.setTitle(ppo.getTitle());
                     ppoData.setTotalAllow(ppo.getTotalAllow());
+                    ppoData.setMinAllow(ppo.getMinAllow());
+                    ppoData.setAllowSameItem(ppo.getAllowSameItem());
                     ppoData.setPackageId(branchProductId);
                     ppoData.setSequenceNumber(ppo.getSequenceNumber());
 

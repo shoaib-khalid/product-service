@@ -1,10 +1,20 @@
 ##################################################
+# product-service-3.10.47| 04-January-2023
+##################################################
+1. Enhancement for combo features
+
+##DB Changes
+
+ALTER TABLE symplified.product_package_option ADD minAllow int DEFAULT 0 NULL;
+
+UPDATE symplified.product_package_option SET  minAllow=totalAllow;
+##################################################
 # product-service-3.10.46| 20-December-2022
 ##################################################
 1. set isOpen store to check store timing
+2. bug fix null string in asset url
 ##DB Changes
 ALTER TABLE symplified.store ADD isAlwaysOpen tinyint(1) DEFAULT 0 NULL;
-
 
 ##################################################
 # product-service-3.10.45| 14-December-2022
