@@ -6,6 +6,7 @@
 ##DB Changes
 
 ALTER TABLE symplified.product_package_option ADD minAllow int DEFAULT 0 NULL;
+ALTER TABLE symplified.product_package_option ADD allowSameItem tinyint(1) DEFAULT 0;
 
 UPDATE symplified.product_package_option SET  minAllow=totalAllow;
 ##################################################
