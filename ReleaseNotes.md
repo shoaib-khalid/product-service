@@ -1,4 +1,12 @@
 ##################################################
+# product-service-3.10.48| 04-January-2023
+##################################################
+1. Check store prefix availibility
+##DB Changes
+
+ALTER TABLE symplified.store ADD storePrefix varchar(10) NULL;
+
+##################################################
 # product-service-3.10.47| 04-January-2023
 ##################################################
 1. Enhancement for combo features
