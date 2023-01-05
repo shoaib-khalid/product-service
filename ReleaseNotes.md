@@ -1,3 +1,12 @@
+
+##################################################
+# product-service-3.10.49| 05-January-2023
+##################################################
+1. Set sequenceNumber in product
+##DB Changes
+
+ALTER TABLE symplified.product ADD sequenceNumber int DEFAULT 0 NULL;
+
 ##################################################
 # product-service-3.10.48| 04-January-2023
 ##################################################

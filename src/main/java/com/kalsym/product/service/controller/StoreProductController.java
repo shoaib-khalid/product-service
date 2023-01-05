@@ -73,7 +73,10 @@ import com.kalsym.product.service.repository.StoreDiscountRepository;
 import com.kalsym.product.service.repository.StoreDiscountProductRepository;
 import com.kalsym.product.service.utility.ProductDiscount;
 import com.kalsym.product.service.worker.BulkDeleteProduct;
+import com.kalsym.product.service.worker.BulkEditSequenceProduct;
 import com.kalsym.product.service.worker.CloneSelectedProduct;
+
+import io.swagger.annotations.ApiOperation;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -933,6 +936,27 @@ public class StoreProductController {
 
         response.setStatus(HttpStatus.OK);
         response.setData("Success Deleted");
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @ApiOperation(value = "Bulk edit for sequence of product", notes = "Note: Please include the id and sequence number only in the request body.")
+    @PostMapping(path = {"/bulk-edit-sequence"},  name = "store-products-post")
+    @PreAuthorize("hasAnyAuthority('store-products-post', 'all')  and @customOwnerVerifier.VerifyStore(#storeId)")
+    public ResponseEntity<HttpResponse> postBulkEditSequenceNumber(
+        HttpServletRequest request,
+        @RequestParam() String storeId, 
+        @RequestBody List<Product> storeProduct) {
+
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+        String logprefix = request.getRequestURI();
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "", "");
+
+        //create thread
+        BulkEditSequenceProduct threadBulkEditProduct = new BulkEditSequenceProduct(storeProduct,cloneProductService);
+        threadBulkEditProduct.start();
+
+        response.setStatus(HttpStatus.OK);
+        response.setData("Success Updated");
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 

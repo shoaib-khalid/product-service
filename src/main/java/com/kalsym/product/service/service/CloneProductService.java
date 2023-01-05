@@ -607,6 +607,16 @@ public class CloneProductService {
         }
     }
 
+    public void bulkEditProductSequence(List<Product> products){
+
+        for(Product p:products){
+            Optional<Product> optPrdocut = productRepository.findById(p.getId());
+            optPrdocut.get().setSequenceNumber(p.getSequenceNumber());
+            productRepository.save(optPrdocut.get());
+
+        }
+    }
+
     //use this for scenario existing store (branch) wants to copy products from HQ , 
     //the only difference we will query each of related data of products branch and owner , 
     //and merge data by making comparison , 

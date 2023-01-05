@@ -77,6 +77,8 @@ public class Product implements Serializable {
     private String customNote;
 
     private Boolean hasAddOn;
+
+    private Integer sequenceNumber;
     
     @CreationTimestamp
     private Date created;
@@ -152,6 +154,10 @@ public class Product implements Serializable {
 
         if (null != product.getHasAddOn()) {
             hasAddOn = product.getHasAddOn();            
+        }
+
+        if (null != product.getSequenceNumber()) {
+            sequenceNumber = product.getSequenceNumber();            
         }
         
         customNote = product.getCustomNote();
