@@ -102,6 +102,9 @@ public class Store implements Serializable {
 
     private Boolean isAlwaysOpen;
 
+    private String storePrefix;
+
+
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
@@ -214,6 +217,10 @@ public class Store implements Serializable {
 
         if (null != store.getIsAlwaysOpen()) {
             isAlwaysOpen = store.getIsAlwaysOpen();
+        }
+
+        if (null != store.getStorePrefix()) {
+            storePrefix = store.getStorePrefix();
         }
 
 
