@@ -101,6 +101,8 @@ public class ProductWithDetails implements Serializable {
     private Boolean hasAddOn;
 
     private String customNote;
+
+    private Integer sequenceNumber;
      
     @CreationTimestamp
     private Date created;
