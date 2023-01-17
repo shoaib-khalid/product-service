@@ -52,6 +52,9 @@ import org.springframework.data.domain.ExampleMatcher;
 import com.kalsym.product.service.utility.DateTimeUtil;
 
 import java.util.stream.Collectors;
+
+import javax.persistence.EntityManager;
+
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -114,6 +117,9 @@ public class CloneProductService {
     @Autowired
     ProductAddOnService productAddOnService;
 
+    @Autowired
+    EntityManager entityManager;
+
     // use this for scenario when newly merchant (branch) wants to create products based on HQ PRODUCTS
     public void cloneProducts (String storeId, String storeOwnerId,Optional<Store> optStore){
 
@@ -148,12 +154,13 @@ public class CloneProductService {
         List<CompareProductAddonGroup> compareStoreOwnerProductAddonGroup = new ArrayList<>();
     
         mapNewTemplateGroup = storeOwnerTemplateGroup.stream()
-        .map(addontemplategroup->{
+        .map((AddOnTemplateGroup addontemplategroup)->{
 
-            AddOnTemplateGroup bodyAddOnTemplateGroup = new AddOnTemplateGroup();
-            bodyAddOnTemplateGroup.setTitle(addontemplategroup.getTitle());
+            //Entities which previously referenced ,the detached entity will continue to reference it.
+            entityManager.detach(addontemplategroup);
+            //since we already detach the entity then we will proceed to set the data that belongs to that storeId
+            AddOnTemplateGroup bodyAddOnTemplateGroup = addontemplategroup;
             bodyAddOnTemplateGroup.setStoreId(storeId);
-            bodyAddOnTemplateGroup.setStatus(addontemplategroup.getStatus());
             
             //saving the data for branch
             AddOnTemplateGroup saveAddOnTemplateGroup = addOnTemplateGroupRepository.save(bodyAddOnTemplateGroup);
@@ -170,14 +177,13 @@ public class CloneProductService {
             compareData.setBranchTemplateGroupId(saveAddOnTemplateGroup.getId());
 
             templateItemStoreOwner.stream()
-            .map(addontemplateitem->{
+            .map((AddOnTemplateItem addontemplateitem)->{
 
-                AddOnTemplateItem bodyAddonTemplateItem = new AddOnTemplateItem();
-                bodyAddonTemplateItem.setStatus(addontemplateitem.getStatus());
+                //Entities which previously referenced ,the detached entity will continue to reference it.
+                entityManager.detach(addontemplateitem);
+                //since we already detach the entity then we will assign data accordingly
+                AddOnTemplateItem bodyAddonTemplateItem = addontemplateitem;
                 bodyAddonTemplateItem.setGroupId(saveAddOnTemplateGroup.getId());
-                bodyAddonTemplateItem.setName(addontemplateitem.getName());
-                bodyAddonTemplateItem.setPrice(addontemplateitem.getPrice());
-                bodyAddonTemplateItem.setDineInPrice(addontemplateitem.getDineInPrice());
 
                 //saving the data for branch
                 AddOnTemplateItem saveAddOnTemplateItem = addOnTemplateItemRepository.save(bodyAddonTemplateItem);
@@ -204,14 +210,12 @@ public class CloneProductService {
 
         //save the newly store category in branch
         mapNewStoreCategory = storeOwnerCategory.stream()
-        .map(x->{
+        .map((StoreCategory x)->{
 
-            StoreCategory bodyStoreCategory = new StoreCategory();
-            bodyStoreCategory.setName(x.getName());
-            bodyStoreCategory.setParentCategoryId(x.getParentCategoryId());
+            //Entities which previously referenced ,the detached entity will continue to reference it. Detch x--StoreCategory
+            entityManager.detach(x);
+            StoreCategory bodyStoreCategory = x;
             bodyStoreCategory.setStoreId(storeId);
-            bodyStoreCategory.setThumbnailUrl(x.getThumbnailUrl());
-            bodyStoreCategory.setSequenceNumber(x.getSequenceNumber());
 
             StoreCategory saveStoreCategory = storeCategoryRepository.save(bodyStoreCategory);
 
@@ -229,33 +233,20 @@ public class CloneProductService {
         .collect(Collectors.toList());
 
         mapNewProducts = storeOwnerProducts.stream()
-        .map(x->{
+        .map((Product x)->{
 
             //to find category owner id then we will use the the branch id for creating branch products
             CompareStoreCategory filterCategoryOwner = compareStoreOwnerCategory.stream()
             .filter(category -> category.getStoreOwnerCategoryId().equals(x.getCategoryId()))
             .findFirst().get();
 
+            //Entities which previously referenced ,the detached entity will continue to reference it. Detch x--StoreCategory
+            entityManager.detach(x);
             //to be add data
-            Product data = new Product();
-            data.setName(x.getName());
-            data.setDescription(x.getDescription());
+            Product data = x;
             data.setStoreId(storeId);
             data.setCategoryId(filterCategoryOwner.getBranchCategoryId());
-            data.setStatus(x.getStatus());
-            data.setThumbnailUrl(x.getThumbnailUrl());
-            data.setSeoUrl(subProductUrlDomain+x.getSeoName());
-            data.setSeoName(x.getSeoName());
-            data.setTrackQuantity(x.getTrackQuantity());
-            data.setAllowOutOfStockPurchases(x.getAllowOutOfStockPurchases());
-            data.setMinQuantityForAlarm(x.getMinQuantityForAlarm());
-            data.setPackingSize(x.getPackingSize());
-            data.setIsPackage(x.getIsPackage());
-            data.setIsNoteOptional(x.getIsNoteOptional());
-            data.setCustomNote(x.getCustomNote());
-            data.setVehicleType(x.getVehicleType());
-            data.setHasAddOn(x.getHasAddOn());
-            
+         
             //after we save branch product, then we will use the product id of branch
             Product newlyProductData = productRepository.save(data);
             String branchProductId = newlyProductData.getId();
@@ -266,11 +257,10 @@ public class CloneProductService {
             if(productAssets.size() != 0){
                 for(ProductAsset pa : productAssets){
 
-                    ProductAsset productAsseData = new ProductAsset();
-                    productAsseData.setName(pa.getName());
-                    productAsseData.setUrl(pa.getUrl());
+                    //Entities which previously referenced ,the detached entity will continue to reference it. Detch x--StoreCategory
+                    entityManager.detach(pa);
+                    ProductAsset productAsseData = pa;
                     productAsseData.setProductId(branchProductId);
-                    productAsseData.setIsThumbnail(pa.getIsThumbnail());
 
                     if(pa.getItemCode() != null){
 
@@ -290,15 +280,11 @@ public class CloneProductService {
 
                 for(ProductInventory pi :ownerProductInventory){
 
-                    ProductInventory productInventoryData = new ProductInventory();
+                    //Entities which previously referenced ,the detached entity will continue to reference it. Detch x--StoreCategory
+                    entityManager.detach(pi);
+                    ProductInventory productInventoryData = pi;
                     productInventoryData.setItemCode(pi.getItemCode().replaceAll(x.getId(), branchProductId));
-                    productInventoryData.setPrice(pi.getPrice());
-                    productInventoryData.setDineInPrice(pi.getDineInPrice());
-                    productInventoryData.setCompareAtprice(pi.getCompareAtprice());
-                    productInventoryData.setSKU(pi.getSKU());
-                    productInventoryData.setQuantity(pi.getQuantity());
                     productInventoryData.setProductId(branchProductId);
-                    productInventoryData.setStatus(pi.getStatus());
 
                     productInventoryMainRepository.save(productInventoryData);
 
@@ -316,11 +302,10 @@ public class CloneProductService {
 
                 for(ProductVariant pv : ownerProductVariant){
 
-                    ProductVariant productVariantData = new ProductVariant();
-                    productVariantData.setName(pv.getName());
-                    productVariantData.setDescription(pv.getDescription());
+                    //Entities which previously referenced ,the detached entity will continue to reference it. Detch x--StoreCategory
+                    entityManager.detach(pv);
+                    ProductVariant productVariantData = pv;
                     productVariantData.setProduct(newlyProductData);
-                    productVariantData.setSequenceNumber(pv.getSequenceNumber());
 
                     ProductVariant productVariantSave = productVariantRepository.save(productVariantData);
 
@@ -344,18 +329,18 @@ public class CloneProductService {
             if(ownerProductVariantAvailable.size() != 0){
 
                 for (ProductVariantAvailable pva :ownerProductVariantAvailable){
-
+       
                     //to find category owner id then we will use the the branch id for creating branch products
                     CompareVariantIdOwnerAndBranch filterCompareVariantIdOwnerAndBranch = compareVariantIdOwnerAndBranch.stream()
                     .filter(variant -> variant.getOwnerVariantId().equals(pva.getProductVariantId()))
                     .findFirst().get();
-                                    
-                    ProductVariantAvailable productVariantAvailableData = new ProductVariantAvailable();
+                             
+                    //Entities which previously referenced ,the detached entity will continue to reference it. Detch x--StoreCategory
+                    entityManager.detach(pva);
+                    ProductVariantAvailable productVariantAvailableData = pva;
                     productVariantAvailableData.setProductId(branchProductId);
                     productVariantAvailableData.setProductVariantId(filterCompareVariantIdOwnerAndBranch.getBranchVariantId());
-                    productVariantAvailableData.setSequenceNumber(pva.getSequenceNumber());
-                    productVariantAvailableData.setValue(pva.getValue());
-
+              
                     ProductVariantAvailable saveProductVariantAvailable = productVariantAvailableRepository.save(productVariantAvailableData);
 
                     //add list of 
@@ -379,12 +364,13 @@ public class CloneProductService {
                     .filter(variantavailable -> variantavailable.getOwnerVariantAvailableId().equals(pii.getProductVariantAvailableId()))
                     .findFirst().get(); 
 
-                    ProductInventoryItemMain piiData = new ProductInventoryItemMain();
+                    //Entities which previously referenced ,the detached entity will continue to reference it. Detch x--StoreCategory
+                    entityManager.detach(pii);
+                    ProductInventoryItemMain piiData = pii;
 
                     piiData.setItemCode(pii.getItemCode().replaceAll(x.getId(), branchProductId));
                     piiData.setProductVariantAvailableId(filterCompareVariantAvailableIdOwnerAndBranch.getBranchVariantAvailableId());
                     piiData.setProductId(branchProductId);
-                    piiData.setSequenceNumber(piiData.getSequenceNumber());
 
                     ProductInventoryItemMain saveProductInventoryItemMain = productInventoryItemMainRepository.save(piiData);
 
@@ -399,13 +385,10 @@ public class CloneProductService {
 
                 for(ProductPackageOption ppo :ownerProductPackageOption){
 
-                    ProductPackageOption ppoData = new ProductPackageOption();
-                    ppoData.setTitle(ppo.getTitle());
-                    ppoData.setTotalAllow(ppo.getTotalAllow());
-                    ppoData.setMinAllow(ppo.getMinAllow());
-                    ppoData.setAllowSameItem(ppo.getAllowSameItem());
+                    //Entities which previously referenced ,the detached entity will continue to reference it. Detch x--StoreCategory
+                    entityManager.detach(ppo);
+                    ProductPackageOption ppoData =ppo;
                     ppoData.setPackageId(branchProductId);
-                    ppoData.setSequenceNumber(ppo.getSequenceNumber());
 
                     ProductPackageOption saveProductPackageOption= productPackageOptionRepository.save(ppoData);
 
@@ -430,13 +413,12 @@ public class CloneProductService {
                     .filter(temp -> temp.getStoreTemplateGroupId().equals(prodAddonGroup.getAddonTemplateGroupId()))
                     .findFirst().get();
 
-                    ProductAddOnGroup prodAddonGroupData = new ProductAddOnGroup();
+                    //Entities which previously referenced ,the detached entity will continue to reference it. Detch x--StoreCategory
+                    entityManager.detach(prodAddonGroup);
+
+                    ProductAddOnGroup prodAddonGroupData = prodAddonGroup;
                     prodAddonGroupData.setAddonTemplateGroupId(filterTemplateGroupOwner.getBranchTemplateGroupId());
-                    prodAddonGroupData.setMinAllowed(prodAddonGroup.getMinAllowed());
-                    prodAddonGroupData.setMaxAllowed(prodAddonGroup.getMaxAllowed());
-                    prodAddonGroupData.setSequenceNumber(prodAddonGroup.getSequenceNumber());
                     prodAddonGroupData.setProductId(branchProductId);
-                    prodAddonGroupData.setStatus(prodAddonGroup.getStatus());
 
                     ProductAddOnGroup saveProductAddonGroup = productAddOnGroupRepository.save(prodAddonGroupData);
 
@@ -482,13 +464,12 @@ public class CloneProductService {
                     })
                     .findFirst().get();
 
+                    //Entities which previously referenced ,the detached entity will continue to reference it. Detch x--StoreCategory
+                    entityManager.detach(prodAddon);
+
                     //set new product add on for branch
-                    ProductAddOn prodAddonData = new ProductAddOn();
+                    ProductAddOn prodAddonData = prodAddon;
                     prodAddonData.setProductId(branchProductId);
-                    prodAddonData.setPrice(prodAddon.getPrice());
-                    prodAddonData.setDineInPrice(prodAddon.getDineInPrice());
-                    prodAddonData.setStatus(prodAddon.getStatus());
-                    prodAddonData.setSequenceNumber(prodAddon.getSequenceNumber());
                     prodAddonData.setProductAddonGroupId(filterProductAddonGroupOwner.getBranchProductAddonGroupId());
                     prodAddonData.setAddonTemplateItemId(filterDataTemplateGroup.getCompareTemplateItem().get(0).getBranchTemplateItem());
 
@@ -520,12 +501,13 @@ public class CloneProductService {
                     .filter(product -> product.getOwnerProductId().equals(ppd.getProductId()))
                     .findFirst().get();
 
-                    ProductPackageOptionDetail packageOptionDetailData = new ProductPackageOptionDetail();
+                    //Entities which previously referenced ,the detached entity will continue to reference it. Detch x--StoreCategory
+                    entityManager.detach(ppd);
+
+                    ProductPackageOptionDetail packageOptionDetailData = ppd;
                     packageOptionDetailData.setProductId(filterProductOwnerAndBranch.getBranchProductId());
                     packageOptionDetailData.setProductPackageOptionId(y.getBranchProductPackageOptionId());
-                    packageOptionDetailData.setIsDefault(ppd.getIsDefault());
-                    packageOptionDetailData.setSequenceNumber(ppd.getSequenceNumber());
-
+                 
                     productPackageOptionDetailRepository.save(packageOptionDetailData);
                 }
 
@@ -732,10 +714,10 @@ public class CloneProductService {
                 .filter(category -> category.getStoreOwnerCategoryId().equals(dataOptProduct.getCategoryId()))
                 .findFirst().get();
 
+                //Entities which previously referenced ,the detached entity will continue to reference it. Detch x--StoreCategory
+                entityManager.detach(dataOptProduct);
                 //to be add data
-                Product data = new Product();
-                data.setName(dataOptProduct.getName());
-                data.setDescription(dataOptProduct.getDescription());
+                Product data = dataOptProduct;
                 data.setStoreId(storeBranchId);
 
                 //if null branchcategoryId then we save it in database
@@ -743,13 +725,12 @@ public class CloneProductService {
 
                     Optional<StoreCategory> ownerCategory = storeCategoryRepository.findById(filterCategoryOwner.getStoreOwnerCategoryId());
 
-                    StoreCategory bodyStoreCategory = new StoreCategory();
-                    bodyStoreCategory.setName(ownerCategory.get().getName());
-                    bodyStoreCategory.setParentCategoryId(ownerCategory.get().getParentCategoryId());
-                    bodyStoreCategory.setStoreId(storeBranchId);
-                    bodyStoreCategory.setThumbnailUrl(ownerCategory.get().getThumbnailUrl());
-                    bodyStoreCategory.setSequenceNumber(ownerCategory.get().getSequenceNumber());
+                    //Entities which previously referenced ,the detached entity will continue to reference it. Detch x--StoreCategory
+                    entityManager.detach(ownerCategory.get());
 
+                    StoreCategory bodyStoreCategory = ownerCategory.get();
+                    bodyStoreCategory.setStoreId(storeBranchId);
+                 
                     StoreCategory saveStoreCategory = storeCategoryRepository.save(bodyStoreCategory);
                 
                     for(CompareStoreCategory csoc:compareStoreOwnerCategory){
@@ -764,20 +745,8 @@ public class CloneProductService {
 
                 }
                 
-                data.setStatus(dataOptProduct.getStatus());
-                data.setThumbnailUrl(dataOptProduct.getThumbnailUrl());
                 data.setSeoUrl(subProductUrlDomain+dataOptProduct.getSeoName());
-                data.setSeoName(dataOptProduct.getSeoName());
-                data.setTrackQuantity(dataOptProduct.getTrackQuantity());
-                data.setAllowOutOfStockPurchases(dataOptProduct.getAllowOutOfStockPurchases());
-                data.setMinQuantityForAlarm(dataOptProduct.getMinQuantityForAlarm());
-                data.setPackingSize(dataOptProduct.getPackingSize());
-                data.setIsPackage(dataOptProduct.getIsPackage());
-                data.setIsNoteOptional(dataOptProduct.getIsNoteOptional());
-                data.setCustomNote(dataOptProduct.getCustomNote());
-                data.setVehicleType(dataOptProduct.getVehicleType());
-                data.setHasAddOn(dataOptProduct.getHasAddOn());
-                
+             
                 //after we save branch product, then we will use the product id of branch
                 Product newlyProductData = productRepository.save(data);
                 String branchProductId = newlyProductData.getId();
@@ -787,12 +756,12 @@ public class CloneProductService {
                 
                 if(productAssets.size() != 0){
                     for(ProductAsset pa : productAssets){
+                        
+                        //Entities which previously referenced ,the detached entity will continue to reference it. Detch x--StoreCategory
+                        entityManager.detach(pa);
 
-                        ProductAsset productAsseData = new ProductAsset();
-                        productAsseData.setName(pa.getName());
-                        productAsseData.setUrl(pa.getUrl());
+                        ProductAsset productAsseData = pa;
                         productAsseData.setProductId(branchProductId);
-                        productAsseData.setIsThumbnail(pa.getIsThumbnail());
 
                         if(pa.getItemCode() != null){
 
@@ -812,15 +781,12 @@ public class CloneProductService {
 
                     for(ProductInventory pi :ownerProductInventory){
 
-                        ProductInventory productInventoryData = new ProductInventory();
+                        //Entities which previously referenced ,the detached entity will continue to reference it. Detch x--StoreCategory
+                        entityManager.detach(pi);
+
+                        ProductInventory productInventoryData = pi;
                         productInventoryData.setItemCode(pi.getItemCode().replaceAll(dataOptProduct.getId(), branchProductId));
-                        productInventoryData.setPrice(pi.getPrice());
-                        productInventoryData.setDineInPrice(pi.getDineInPrice());
-                        productInventoryData.setCompareAtprice(pi.getCompareAtprice());
-                        productInventoryData.setSKU(pi.getSKU());
-                        productInventoryData.setQuantity(pi.getQuantity());
                         productInventoryData.setProductId(branchProductId);
-                        productInventoryData.setStatus(pi.getStatus());
 
                         productInventoryMainRepository.save(productInventoryData);
 
@@ -838,11 +804,10 @@ public class CloneProductService {
 
                     for(ProductVariant pv : ownerProductVariant){
 
-                        ProductVariant productVariantData = new ProductVariant();
-                        productVariantData.setName(pv.getName());
-                        productVariantData.setDescription(pv.getDescription());
+                        //Entities which previously referenced ,the detached entity will continue to reference it. Detch x--StoreCategory
+                        entityManager.detach(pv);
+                        ProductVariant productVariantData = pv;
                         productVariantData.setProduct(newlyProductData);
-                        productVariantData.setSequenceNumber(pv.getSequenceNumber());
 
                         ProductVariant productVariantSave = productVariantRepository.save(productVariantData);
 
@@ -871,12 +836,12 @@ public class CloneProductService {
                         CompareVariantIdOwnerAndBranch filterCompareVariantIdOwnerAndBranch = compareVariantIdOwnerAndBranch.stream()
                         .filter(variant -> variant.getOwnerVariantId().equals(pva.getProductVariantId()))
                         .findFirst().get();
-                                        
-                        ProductVariantAvailable productVariantAvailableData = new ProductVariantAvailable();
+                        
+                        //Entities which previously referenced ,the detached entity will continue to reference it. Detch x--StoreCategory
+                        entityManager.detach(pva);
+                        ProductVariantAvailable productVariantAvailableData = pva;
                         productVariantAvailableData.setProductId(branchProductId);
                         productVariantAvailableData.setProductVariantId(filterCompareVariantIdOwnerAndBranch.getBranchVariantId());
-                        productVariantAvailableData.setSequenceNumber(pva.getSequenceNumber());
-                        productVariantAvailableData.setValue(pva.getValue());
 
                         ProductVariantAvailable saveProductVariantAvailable = productVariantAvailableRepository.save(productVariantAvailableData);
 
@@ -901,12 +866,14 @@ public class CloneProductService {
                         .filter(variantavailable -> variantavailable.getOwnerVariantAvailableId().equals(pii.getProductVariantAvailableId()))
                         .findFirst().get(); 
 
-                        ProductInventoryItemMain piiData = new ProductInventoryItemMain();
+                        //Entities which previously referenced ,the detached entity will continue to reference it. Detch x--StoreCategory
+                        entityManager.detach(pii);
+
+                        ProductInventoryItemMain piiData = pii;
 
                         piiData.setItemCode(pii.getItemCode().replaceAll(dataOptProduct.getId(), branchProductId));
                         piiData.setProductVariantAvailableId(filterCompareVariantAvailableIdOwnerAndBranch.getBranchVariantAvailableId());
                         piiData.setProductId(branchProductId);
-                        piiData.setSequenceNumber(piiData.getSequenceNumber());
 
                         ProductInventoryItemMain saveProductInventoryItemMain = productInventoryItemMainRepository.save(piiData);
 
@@ -921,11 +888,10 @@ public class CloneProductService {
 
                     for(ProductPackageOption ppo :ownerProductPackageOption){
 
-                        ProductPackageOption ppoData = new ProductPackageOption();
-                        ppoData.setTitle(ppo.getTitle());
-                        ppoData.setTotalAllow(ppo.getTotalAllow());
+                        //Entities which previously referenced ,the detached entity will continue to reference it. Detch x--StoreCategory
+                        entityManager.detach(ppo);
+                        ProductPackageOption ppoData = ppo;
                         ppoData.setPackageId(branchProductId);
-                        ppoData.setSequenceNumber(ppo.getSequenceNumber());
 
                         ProductPackageOption saveProductPackageOption= productPackageOptionRepository.save(ppoData);
 
@@ -950,16 +916,19 @@ public class CloneProductService {
                         .filter(temp -> temp.getStoreTemplateGroupId().equals(prodAddonGroup.getAddonTemplateGroupId()))
                         .findFirst().get();
 
-                        ProductAddOnGroup prodAddonGroupData = new ProductAddOnGroup();
+                        
+                        //Entities which previously referenced ,the detached entity will continue to reference it. Detch x--StoreCategory
+                        entityManager.detach(prodAddonGroup);
+                        ProductAddOnGroup prodAddonGroupData = prodAddonGroup;
 
                         //we only save template group for store branch if selected product has addon related to the template group
                         if(filterTemplateGroupOwner.getBranchTemplateGroupId() == null){
 
                             AddOnTemplateGroup getDetailsOfStoreOwnerAddonTemplateGroup = addOnTemplateGroupRepository.findById(filterTemplateGroupOwner.getStoreTemplateGroupId()).get();
-                            AddOnTemplateGroup bodyAddOnTemplateGroup = new AddOnTemplateGroup();
-                            bodyAddOnTemplateGroup.setTitle(getDetailsOfStoreOwnerAddonTemplateGroup.getTitle());
+                            //Entities which previously referenced ,the detached entity will continue to reference it. Detch x--StoreCategory
+                            entityManager.detach(getDetailsOfStoreOwnerAddonTemplateGroup);
+                            AddOnTemplateGroup bodyAddOnTemplateGroup = getDetailsOfStoreOwnerAddonTemplateGroup;
                             bodyAddOnTemplateGroup.setStoreId(storeBranchId);
-                            bodyAddOnTemplateGroup.setStatus(getDetailsOfStoreOwnerAddonTemplateGroup.getStatus());
                             
                             AddOnTemplateGroup saveAddOnTemplateGroup = addOnTemplateGroupRepository.save(bodyAddOnTemplateGroup);
 
@@ -979,11 +948,7 @@ public class CloneProductService {
 
                         }
 
-                        prodAddonGroupData.setMinAllowed(prodAddonGroup.getMinAllowed());
-                        prodAddonGroupData.setMaxAllowed(prodAddonGroup.getMaxAllowed());
-                        prodAddonGroupData.setSequenceNumber(prodAddonGroup.getSequenceNumber());
                         prodAddonGroupData.setProductId(branchProductId);
-                        prodAddonGroupData.setStatus(prodAddonGroup.getStatus());
 
                         ProductAddOnGroup saveProductAddonGroup = productAddOnGroupRepository.save(prodAddonGroupData);
 
@@ -1029,13 +994,12 @@ public class CloneProductService {
                     })
                     .findFirst().get();
 
+                    //Entities which previously referenced ,the detached entity will continue to reference it. Detch x--StoreCategory
+                    entityManager.detach(prodAddon);
+
                     //set new product add on for branch
-                    ProductAddOn prodAddonData = new ProductAddOn();
+                    ProductAddOn prodAddonData = prodAddon;
                     prodAddonData.setProductId(branchProductId);
-                    prodAddonData.setPrice(prodAddon.getPrice());
-                    prodAddonData.setDineInPrice(prodAddon.getDineInPrice());
-                    prodAddonData.setStatus(prodAddon.getStatus());
-                    prodAddonData.setSequenceNumber(prodAddon.getSequenceNumber());
                     prodAddonData.setProductAddonGroupId(filterProductAddonGroupOwner.getBranchProductAddonGroupId());
 
                     //if null then create template item 
@@ -1043,11 +1007,9 @@ public class CloneProductService {
 
                         //create first by getting detail of owner
                         AddOnTemplateItem getDetailsOfStoreOwnerAddonTemplateItem = addOnTemplateItemRepository.findById(filterDataTemplateGroup.getCompareTemplateItem().get(0).getStoreTemplateItem()).get();
-                        AddOnTemplateItem bodyAddonTemplateItem = new AddOnTemplateItem();
-                        bodyAddonTemplateItem.setStatus(getDetailsOfStoreOwnerAddonTemplateItem.getStatus());
-                        bodyAddonTemplateItem.setName(getDetailsOfStoreOwnerAddonTemplateItem.getName());
-                        bodyAddonTemplateItem.setPrice(getDetailsOfStoreOwnerAddonTemplateItem.getPrice());
-                        bodyAddonTemplateItem.setDineInPrice(getDetailsOfStoreOwnerAddonTemplateItem.getDineInPrice());
+                        //Entities which previously referenced ,the detached entity will continue to reference it. Detch x--StoreCategory
+                        entityManager.detach(prodAddon);
+                        AddOnTemplateItem bodyAddonTemplateItem = getDetailsOfStoreOwnerAddonTemplateItem;
                         bodyAddonTemplateItem.setGroupId(filterDataTemplateGroup.getBranchTemplateGroupId());
                 
                         //saving the data for branch
@@ -1108,7 +1070,10 @@ public class CloneProductService {
                         .filter((Product product) -> product.getName().contains(optOwnerProd.get().getName()))
                         .findFirst();
     
-                        ProductPackageOptionDetail packageOptionDetailData = new ProductPackageOptionDetail();
+                        
+                        entityManager.detach(ppd);
+
+                        ProductPackageOptionDetail packageOptionDetailData = ppd;
     
     
                         //we will create the product first if not exist in branch
@@ -1120,22 +1085,20 @@ public class CloneProductService {
                             .findFirst().get();
             
                             //to be add data
-                            Product data = new Product();
-                            data.setName(ownerProduct.getName());
-                            data.setDescription(ownerProduct.getDescription());
+                            //Entities which previously referenced ,the detached entity will continue to reference it. Detch x--StoreCategory
+                            entityManager.detach(ownerProduct);
+                            Product data = ownerProduct;
+                    
                             data.setStoreId(storeBranchId);
             
                             //if null branchcategoryId then we save it in database
                             if(filterCategoryOwner.getBranchCategoryId() == null){
             
                                 Optional<StoreCategory> ownerCategory = storeCategoryRepository.findById(filterCategoryOwner.getStoreOwnerCategoryId());
-            
-                                StoreCategory bodyStoreCategory = new StoreCategory();
-                                bodyStoreCategory.setName(ownerCategory.get().getName());
-                                bodyStoreCategory.setParentCategoryId(ownerCategory.get().getParentCategoryId());
+                                //Entities which previously referenced ,the detached entity will continue to reference it. Detch x--StoreCategory
+                                entityManager.detach(ownerCategory.get());
+                                StoreCategory bodyStoreCategory = ownerCategory.get();         
                                 bodyStoreCategory.setStoreId(storeBranchId);
-                                bodyStoreCategory.setThumbnailUrl(ownerCategory.get().getThumbnailUrl());
-                                bodyStoreCategory.setSequenceNumber(ownerCategory.get().getSequenceNumber());
 
                                 StoreCategory saveStoreCategory = storeCategoryRepository.save(bodyStoreCategory);
                             
@@ -1151,19 +1114,8 @@ public class CloneProductService {
             
                             }
                             
-                            data.setStatus(ownerProduct.getStatus());
-                            data.setThumbnailUrl(ownerProduct.getThumbnailUrl());
+                        
                             data.setSeoUrl(subProductUrlDomain+ownerProduct.getSeoName());
-                            data.setSeoName(ownerProduct.getSeoName());
-                            data.setTrackQuantity(ownerProduct.getTrackQuantity());
-                            data.setAllowOutOfStockPurchases(ownerProduct.getAllowOutOfStockPurchases());
-                            data.setMinQuantityForAlarm(ownerProduct.getMinQuantityForAlarm());
-                            data.setPackingSize(ownerProduct.getPackingSize());
-                            data.setIsPackage(ownerProduct.getIsPackage());
-                            data.setIsNoteOptional(ownerProduct.getIsNoteOptional());
-                            data.setCustomNote(ownerProduct.getCustomNote());
-                            data.setVehicleType(ownerProduct.getVehicleType());
-                            data.setHasAddOn(ownerProduct.getHasAddOn());
                             
                             //after we save branch product, then we will use the product id of branch
                             Product newlyProductData = productRepository.save(data);
@@ -1174,12 +1126,11 @@ public class CloneProductService {
                             
                             if(productAssets.size() != 0){
                                 for(ProductAsset pa : productAssets){
-            
-                                    ProductAsset productAsseData = new ProductAsset();
-                                    productAsseData.setName(pa.getName());
-                                    productAsseData.setUrl(pa.getUrl());
+                                    
+                                    entityManager.detach(pa);
+
+                                    ProductAsset productAsseData = pa;
                                     productAsseData.setProductId(branchProductId);
-                                    productAsseData.setIsThumbnail(pa.getIsThumbnail());
             
                                     if(pa.getItemCode() != null){
             
@@ -1198,16 +1149,12 @@ public class CloneProductService {
                             if(ownerProductInventory.size() != 0){
             
                                 for(ProductInventory pi :ownerProductInventory){
-            
-                                    ProductInventory productInventoryData = new ProductInventory();
+                                    
+                                    entityManager.detach(pi);
+
+                                    ProductInventory productInventoryData = pi;
                                     productInventoryData.setItemCode(pi.getItemCode().replaceAll(ownerProduct.getId(), branchProductId));
-                                    productInventoryData.setPrice(pi.getPrice());
-                                    productInventoryData.setDineInPrice(pi.getDineInPrice());
-                                    productInventoryData.setCompareAtprice(pi.getCompareAtprice());
-                                    productInventoryData.setSKU(pi.getSKU());
-                                    productInventoryData.setQuantity(pi.getQuantity());
                                     productInventoryData.setProductId(branchProductId);
-                                    productInventoryData.setStatus(pi.getStatus());
             
                                     productInventoryMainRepository.save(productInventoryData);
             
@@ -1224,8 +1171,6 @@ public class CloneProductService {
                         }
                         
                         packageOptionDetailData.setProductPackageOptionId(cppo.getBranchProductPackageOptionId());
-                        packageOptionDetailData.setIsDefault(ppd.getIsDefault());
-                        packageOptionDetailData.setSequenceNumber(ppd.getSequenceNumber());
     
                         productPackageOptionDetailRepository.save(packageOptionDetailData);
                     }
