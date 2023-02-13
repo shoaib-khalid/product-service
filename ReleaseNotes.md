@@ -1,5 +1,11 @@
 
 ##################################################
+# product-service-3.10.49| 13-February-2023
+##################################################
+ALTER TABLE symplified.store MODIFY COLUMN dineInPaymentType enum('COD','ONLINEPAYMENT') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT 'COD' NULL;
+
+
+##################################################
 # product-service-3.10.49| 05-January-2023
 ##################################################
 1. Set sequenceNumber in product
