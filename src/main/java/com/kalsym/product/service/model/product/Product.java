@@ -78,6 +78,8 @@ public class Product implements Serializable {
 
     private Boolean hasAddOn;
 
+    private Boolean isCustomPrice;
+
     private Integer sequenceNumber;
     
     @CreationTimestamp
@@ -154,6 +156,10 @@ public class Product implements Serializable {
 
         if (null != product.getHasAddOn()) {
             hasAddOn = product.getHasAddOn();            
+        }
+
+        if (null != product.getIsCustomPrice()) {
+            isCustomPrice = product.getIsCustomPrice();            
         }
 
         if (null != product.getSequenceNumber()) {

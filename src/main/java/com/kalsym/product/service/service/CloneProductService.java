@@ -255,7 +255,7 @@ public class CloneProductService {
             data.setCustomNote(x.getCustomNote());
             data.setVehicleType(x.getVehicleType());
             data.setHasAddOn(x.getHasAddOn());
-            
+            data.setIsCustomPrice(x.getIsCustomPrice());
             //after we save branch product, then we will use the product id of branch
             Product newlyProductData = productRepository.save(data);
             String branchProductId = newlyProductData.getId();
@@ -777,7 +777,8 @@ public class CloneProductService {
                 data.setCustomNote(dataOptProduct.getCustomNote());
                 data.setVehicleType(dataOptProduct.getVehicleType());
                 data.setHasAddOn(dataOptProduct.getHasAddOn());
-                
+                data.setIsCustomPrice(dataOptProduct.getIsCustomPrice());
+
                 //after we save branch product, then we will use the product id of branch
                 Product newlyProductData = productRepository.save(data);
                 String branchProductId = newlyProductData.getId();
@@ -1164,7 +1165,8 @@ public class CloneProductService {
                             data.setCustomNote(ownerProduct.getCustomNote());
                             data.setVehicleType(ownerProduct.getVehicleType());
                             data.setHasAddOn(ownerProduct.getHasAddOn());
-                            
+                            data.setIsCustomPrice(ownerProduct.getIsCustomPrice());
+
                             //after we save branch product, then we will use the product id of branch
                             Product newlyProductData = productRepository.save(data);
                             String branchProductId = newlyProductData.getId();

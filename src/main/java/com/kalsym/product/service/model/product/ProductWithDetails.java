@@ -100,6 +100,8 @@ public class ProductWithDetails implements Serializable {
     
     private Boolean hasAddOn;
 
+    private Boolean isCustomPrice;
+
     private String customNote;
 
     private Integer sequenceNumber;

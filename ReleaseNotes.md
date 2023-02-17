@@ -1,3 +1,7 @@
+##################################################
+# product-service-3.10.50| 17-February-2023
+##################################################
+1. isCustomPrice for merchant APP to handle input price
 
 ##################################################
 # product-service-3.10.49| 13-February-2023

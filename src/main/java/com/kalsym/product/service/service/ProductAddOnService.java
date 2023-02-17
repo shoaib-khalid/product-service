@@ -135,7 +135,7 @@ public class ProductAddOnService {
         //extract details of product add on first
         List<ProductAddOnItemDetails> result = 
         showData.stream()
-        .map(mapper->{
+        .map((ProductAddOn mapper)->{
             // ProductAddOnItemDetails productAddOnItemDetails = mapper.getProductAddOnItemDetails();
             ProductAddOnItemDetails productAddOnItemDetails = new ProductAddOnItemDetails();
             productAddOnItemDetails.setId(mapper.getId());
@@ -161,7 +161,7 @@ public class ProductAddOnService {
 
         //extract info on addon_template_group  
         List<ProductAddOnGroupDetails> result2 = showData.stream()
-        .map(mapper->{
+        .map((ProductAddOn mapper)->{
             ProductAddOnGroupDetails productAddOnGroupDetails = mapper.getProductAddOnItemDetails().getProductAddOnGroupDetails();
             productAddOnGroupDetails.setGroupId(productId);
             return productAddOnGroupDetails;
@@ -172,7 +172,7 @@ public class ProductAddOnService {
 
         //merge the info into one collection
         List<ProductAddOnGroupDetails> result3 = result2.stream()
-        .map(mapper->{
+        .map((ProductAddOnGroupDetails mapper)->{
 
             List<ProductAddOnItemDetails> filterByGroupId =result.stream()
             .filter(x -> x.getGroupId().equals(mapper.getId()))
@@ -195,7 +195,7 @@ public class ProductAddOnService {
         //nested sort
         List<ProductAddOnGroupDetails> sortedList = result3.stream()
         .sorted(Comparator.comparingInt(ProductAddOnGroupDetails::getSequenceNumber))
-        .map(mapper -> {
+        .map((ProductAddOnGroupDetails mapper) -> {
             List<ProductAddOnItemDetails> packageOptDetails = mapper.getProductAddOnItemDetail().stream()
             .sorted(Comparator.comparingInt(ProductAddOnItemDetails::getSequenceNumber))
             .collect(Collectors.toList());
