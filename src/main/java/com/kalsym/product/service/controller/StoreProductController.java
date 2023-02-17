@@ -181,6 +181,7 @@ public class StoreProductController {
             @RequestParam(required = false, defaultValue = "name") String sortByCol,
             @RequestParam(required = false, defaultValue = "ASC") Sort.Direction sortingOrder,
             @RequestParam(required = false) Boolean showAllPrice,
+            @RequestParam(required = false) Boolean isCustomPrice,
             @RequestParam(required = false) String platformType,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int pageSize) {
@@ -192,6 +193,10 @@ public class StoreProductController {
         //to hide the product that 0 price
         if(showAllPrice == null ){
             showAllPrice = false;
+        }
+
+        if(isCustomPrice == null ){
+            isCustomPrice = false;
         }
 
         //to handle price 0 according to platform , by default we set it marketplace
@@ -270,7 +275,7 @@ public class StoreProductController {
         //     productWithPage = productWithDetailsRepository.findByNameOrSeoNameOrCategoryIdAscendingOrderByPrice(storeId, name, seoName, status, categoryId, shortId, pageable);        
         // else
         //     productWithPage = productWithDetailsRepository.findByNameOrSeoNameAscendingOrderByPrice(storeId, name, seoName, status, shortId, pageable);        
-        Page<ProductWithDetails> productWithPage = productWithDetailsRepository.findAll(getStoreProductSpec(name, seoName, categoryId,storeId,shortId, status,showAllPrice, platformType,productExample,sortByCol,sortingOrder), pageable);
+        Page<ProductWithDetails> productWithPage = productWithDetailsRepository.findAll(getStoreProductSpec(name, seoName, categoryId,storeId,shortId, status,showAllPrice, platformType,productExample,isCustomPrice,sortByCol,sortingOrder), pageable);
         List<ProductWithDetails> productList = productWithPage.getContent();
         
         ProductWithDetails[] productWithDetailsList = new ProductWithDetails[productList.size()];
@@ -709,6 +714,7 @@ public class StoreProductController {
             String name, String seoName, String categoryId, 
             String storeId, Integer shortId,
             List<String> statusList,Boolean showAllPrice, String platformType, Example<ProductWithDetails> example,
+            Boolean isCustomPrice,
             String sortByCol, Sort.Direction sortingOrder) {
 
         return (Specification<ProductWithDetails>) (root, query, builder) -> {
@@ -802,6 +808,9 @@ public class StoreProductController {
                 }
 
             }
+
+            predicates.add(builder.equal(root.get("isCustomPrice"), isCustomPrice));
+           
 
             query.orderBy(orderList);
             query.distinct(true);
