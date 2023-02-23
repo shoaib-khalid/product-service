@@ -1,4 +1,10 @@
 ##################################################
+# product-service-3.10.51| 23-February-2023
+##################################################
+
+1. code refactoring for cloning product
+
+##################################################
 # product-service-3.10.50| 17-February-2023
 ##################################################
 1. isCustomPrice for merchant APP to handle input price
