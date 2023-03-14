@@ -1111,6 +1111,39 @@ public class StoreController {
         
     }
     
+    @PostMapping(path = {"/generateprefix"}, name = "stores-check-name-availability", produces = "application/json")
+    @PreAuthorize("hasAnyAuthority('stores-check-name-availability', 'all')")
+    public ResponseEntity<HttpResponse> generatePrefix(HttpServletRequest request,
+            @Valid @RequestBody Store store) throws Exception {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " storename: " + store.getName(), "");
+        
+        String storePrefix = getNameAbreviation(store.getName());
+        
+        boolean isDuplicate=true;
+        int sequence=1;
+        while (isDuplicate) {
+            Optional<StoreWithDetails> optStore = storeWithDetailsRepository.findByStorePrefix(storePrefix);
+            if (!optStore.isPresent()) {
+                isDuplicate=false;
+            } else {
+                String sequenceStr = String.valueOf(sequence);
+                if (sequence<10)
+                    sequenceStr="0" + sequence;
+                storePrefix=storePrefix+sequenceStr;
+                sequence++;
+            }
+        }
+        
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " Store Prefix generated:" + storePrefix);
+        response.setData(storePrefix);
+        response.setStatus(HttpStatus.OK);
+        return ResponseEntity.status(response.getStatus()).body(response);
+
+    }
+    
     public Specification<StoreWithDetails> getStoreSpec(
             String[] verticalCodeList, String domain, Example<StoreWithDetails> example) {
 
@@ -1190,6 +1223,31 @@ public class StoreController {
 
     }
     
+    
+    public String getNameAbreviation(String storeName) {
+        String abbreviation = "";
+
+        if (storeName.length() <= 2) {
+            abbreviation = storeName;
+        } else {
+            String[] myName = storeName.split(" ");
+            
+            if (myName.length<2 && storeName.length()>=2) {
+                abbreviation = storeName.substring(0, 2);
+            } else {            
+                for (int i = 0; i < myName.length; i++) {
+                    String s = myName[i];
+                    abbreviation = abbreviation + s.charAt(0);
+
+                    if (abbreviation.length() == 2) {
+                        break;
+                    }
+                }
+            }
+        }
+        return abbreviation;
+    }
+     
     /*
     //not used anymore, will be removed
     @GetMapping(path = {"/qrcode/{storeId}"}, name = "stores-get", produces = "image/png")
