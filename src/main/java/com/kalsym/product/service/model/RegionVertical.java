@@ -46,6 +46,7 @@ public class RegionVertical implements Serializable {
     private String senderEmailAdress;
     private String senderEmailName; 
     private String defaultLogoUrl;
+    private String businessType;
     
     public void update(RegionVertical regionVertical) {
         if (null != regionVertical.getName()) {

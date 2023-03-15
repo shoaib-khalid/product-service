@@ -1,4 +1,12 @@
 ##################################################
+# product-service-3.11.1| 15-March-2023
+##################################################
+Add new field in region_vertical
+
+ALTER TABLE region_vertical ADD businessType ENUM('FNB','ECOMMERCE') DEFAULT 'FNB';
+
+
+##################################################
 # product-service-3.11.0| 14-March-2023
 ##################################################
 New function : /store/generateprefix
