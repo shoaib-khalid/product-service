@@ -7,6 +7,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.util.Date;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import lombok.Getter;
@@ -15,6 +18,8 @@ import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import com.kalsym.product.service.model.RegionVertical;
 
 /**
  *
@@ -104,6 +109,9 @@ public class Store implements Serializable {
 
     private String storePrefix;
 
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "verticalCode", insertable = false, updatable = false, nullable = true)
+    private RegionVertical regionVertical;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)

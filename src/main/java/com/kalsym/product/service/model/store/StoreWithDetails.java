@@ -2,6 +2,7 @@ package com.kalsym.product.service.model.store;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.kalsym.product.service.model.RegionCountry;
+import com.kalsym.product.service.model.RegionVertical;
 import com.kalsym.product.service.model.StoreSnooze;
 
 import java.io.Serializable;
@@ -152,6 +153,10 @@ public class StoreWithDetails implements Serializable {
             fetch = FetchType.LAZY)
     @JoinColumn(name = "storeId", insertable = false, updatable = false, nullable = true)
     private List<StoreAssets> storeAssets;
+    
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "verticalCode", insertable = false, updatable = false, nullable = true)
+    private RegionVertical regionVertical;
     
     @Transient 
     private Integer completionPercentage;   
