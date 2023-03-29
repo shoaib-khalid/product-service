@@ -405,6 +405,7 @@ public class StoreProductInventoryController {
                     previousData.setQuantity(productInventoryList.get(i).getQuantity());
                     previousData.setSKU(productInventoryList.get(i).getSKU());
                     previousData.setStatus(productInventoryList.get(i).getStatus());
+                    previousData.setBarcode(productInventoryList.get(i).getBarcode());
                     
                     Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "ProductInventory["+i+"] price:"+productInventoryList.get(i).getPrice()+" dineInPrice:"+productInventoryList.get(i).getDineInPrice());
                     Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "ProductInventory["+i+"] PrevPrice:"+previousData.getPrice()+" PrevDineInPrice:"+previousData.getDineInPrice());
