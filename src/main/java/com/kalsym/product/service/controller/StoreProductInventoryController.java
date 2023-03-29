@@ -405,18 +405,23 @@ public class StoreProductInventoryController {
                     previousData.setQuantity(productInventoryList.get(i).getQuantity());
                     previousData.setSKU(productInventoryList.get(i).getSKU());
                     previousData.setStatus(productInventoryList.get(i).getStatus());
-
+                    
+                    Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "ProductInventory["+i+"] price:"+productInventoryList.get(i).getPrice()+" dineInPrice:"+productInventoryList.get(i).getDineInPrice());
+                    Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "ProductInventory["+i+"] PrevPrice:"+previousData.getPrice()+" PrevDineInPrice:"+previousData.getDineInPrice());
+                    
                          // if delivery, we auto set the dine in price 15%
-                         if (previousData.getDineInPrice()==null && productInventoryList.get(i).getDineInPrice()==null) {
+                        if (previousData.getDineInPrice()==null) {
+                            previousData.setDineInPrice(productInventoryList.get(i).getPrice()*0.85);
+                        } else if (productInventoryList.get(i).getDineInPrice() == null) {
                             previousData.setDineInPrice(productInventoryList.get(i).getPrice()*0.85);
                         } else{
-
                             previousData.setDineInPrice(productInventoryList.get(i).getDineInPrice());
-
                         }
     
                         // if dinein we auto set for delivery price  Increase 17.5%
-                        if (previousData.getPrice()==null && productInventoryList.get(i).getPrice()==null) {
+                        if (previousData.getPrice()==null) {
+                            previousData.setPrice(productInventoryList.get(i).getDineInPrice()*1.175);
+                        } else if (productInventoryList.get(i).getPrice()==null) {
                             previousData.setPrice(productInventoryList.get(i).getDineInPrice()*1.175);
                         } else{
                             previousData.setPrice(productInventoryList.get(i).getPrice());
