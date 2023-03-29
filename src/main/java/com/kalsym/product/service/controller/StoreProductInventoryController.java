@@ -375,8 +375,10 @@ public class StoreProductInventoryController {
                 
                 //then create new one
                 for (int i=0; i<productInventoryList.size(); i++) {
-        
+                    
                     ProductInventory pi = productInventoryList.get(i);
+                    Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "ProductInventory["+i+"]:"+pi.toString());
+                    
                     // if delivery, we auto set the dine in price 15%
                     if (pi.getDineInPrice()==null) {
                         pi.setDineInPrice(pi.getPrice()*0.85);
@@ -444,6 +446,7 @@ public class StoreProductInventoryController {
             for (int i=0; i<productInventoryList.size(); i++) {
         
                 ProductInventory pi = productInventoryList.get(i);
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "ProductInventory["+i+"]:"+pi.toString());
                 
                 // if delivery, we auto set the dine in price 15%
                 if (pi.getDineInPrice()==null) {
