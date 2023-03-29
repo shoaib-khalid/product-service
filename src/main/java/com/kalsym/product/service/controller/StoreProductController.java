@@ -447,6 +447,7 @@ public class StoreProductController {
         
         for (int i=0;i<productDetails.getProductInventories().size();i++) {
             ProductInventoryWithDetails productInventory = productDetails.getProductInventories().get(i);
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "productInventory["+i+"] = "+productInventory.toString());
             //ItemDiscount discountDetails = discountedItemMap.get(productInventory.getItemCode());
             ItemDiscount discountDetails = ProductDiscount.getItemDiscount(storeDiscountRepository, storeId, productInventory.getItemCode(), regionCountry);
             if (discountDetails!=null) {

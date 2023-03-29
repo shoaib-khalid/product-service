@@ -68,6 +68,10 @@ public class ProductInventory implements Serializable {
         if (null != pi.getSKU()) {
             SKU = pi.getSKU();
         }
+        
+        if (null != pi.getBarcode()) {
+            barcode = pi.getBarcode();
+        }
 
         if (null != pi.getQuantity()) {
             quantity = pi.getQuantity();
