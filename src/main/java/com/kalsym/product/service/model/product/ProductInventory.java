@@ -36,25 +36,25 @@ import org.hibernate.annotations.OnDeleteAction;
 public class ProductInventory implements Serializable {
 
     @Id
-    private String itemCode;
+    public String itemCode;
 
-    private Double price;
+    public Double price;
 
-    private Double compareAtprice;
+    public Double compareAtprice;
 
     // @JsonProperty("SKU")
-    private String SKU;
+    public String SKU;
 
     //public String name;
-    private Integer quantity;
+    public Integer quantity;
 
-    private String productId;
+    public String productId;
     
-    private String status;
+    public String status;
 
-    private Double dineInPrice;
+    public Double dineInPrice;
     
-    private String barcode;
+    public String barcode;
     
     public void update(ProductInventory pi) {
         if (null != pi.getPrice()) {
