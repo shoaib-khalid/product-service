@@ -44,6 +44,8 @@ public class ProductInventoryWithProductDetails implements Serializable {
 
     private String SKU;
 
+    private String barcode;
+    
     //private String name;
     private Integer quantity;
 

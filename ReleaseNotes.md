@@ -1,4 +1,12 @@
 ##################################################
+# product-service-3.11.2| 29-March-2023
+##################################################
+Add new field in product-inventory
+
+ALTER TABLE product_inventory ADD barcode VARCHAR(100);
+
+
+##################################################
 # product-service-3.11.1| 15-March-2023
 ##################################################
 Add new field in region_vertical
