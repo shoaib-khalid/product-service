@@ -2,7 +2,5 @@
 /.mvn
 mvnw
 mvnw.cmd
-.idea
-*.iws
-*.iml
-*.ipr
+
+/.idea/libraries/
