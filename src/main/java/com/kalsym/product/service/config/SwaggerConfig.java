@@ -57,7 +57,7 @@ public class SwaggerConfig {
                 .description("Used to manage users, roles, authorities for clients.")
                 .termsOfServiceUrl("not added yet")
                 .license("not added yet")
-                .licenseUrl("").version("3.10.51").build();
+                .licenseUrl("").version("3.12.1").build();
     }
 
     public static final String DEFAULT_INCLUDE_PATTERN = "/.*";

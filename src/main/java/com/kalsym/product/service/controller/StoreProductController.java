@@ -298,12 +298,12 @@ public class StoreProductController {
             productDetails.setProductAssets(productAssets);
             //handle null
             if(productDetails.getThumbnailUrl() != null){
+                productDetails.setImageUrl(productDetails.getThumbnailUrl());
                 productDetails.setThumbnailUrl(assetServiceUrl+productDetails.getThumbnailUrl());
-
 
             } else{
                 productDetails.setThumbnailUrl(null);
-
+                productDetails.setImageUrl(null);
             }
             
             for (int i=0;i<productDetails.getProductInventories().size();i++) {
@@ -437,14 +437,14 @@ public class StoreProductController {
         productDetails.setProductAssets(productAssets);
         //handle null
         if(optProdcut.get().getThumbnailUrl() != null){
+            productDetails.setImageUrl(optProdcut.get().getThumbnailUrl());
             productDetails.setThumbnailUrl(assetServiceUrl+optProdcut.get().getThumbnailUrl());
-
 
         } else{
             productDetails.setThumbnailUrl(null);
-
+            productDetails.setImageUrl(null);
         }
-        
+
         for (int i=0;i<productDetails.getProductInventories().size();i++) {
             ProductInventoryWithDetails productInventory = productDetails.getProductInventories().get(i);
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "productInventory["+i+"] = "+productInventory.toString());

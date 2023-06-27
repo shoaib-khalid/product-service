@@ -1,6 +1,9 @@
 package com.kalsym.product.service.controller;
 
 import com.kalsym.product.service.ProductServiceApplication;
+import com.kalsym.product.service.model.product.ProductAsset;
+import com.kalsym.product.service.model.product.ProductInventoryWithDetails;
+import com.kalsym.product.service.model.store.StoreWithDetails;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.model.product.Product;
 import com.kalsym.product.service.model.product.ProductWithDetails;
@@ -17,14 +20,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.convert.QueryByExamplePredicateBuilder;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -99,10 +101,18 @@ public class ProductController {
             @RequestParam(required = false) String categoryId,
             @RequestParam(required = false, defaultValue = "true") boolean featured,
             @RequestParam(defaultValue = "0") int page,
+            @RequestParam(required = false) List<String> status,
             @RequestParam(defaultValue = "20") int pageSize) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "", "");
+
+        if (status == null) {
+            status = new ArrayList();
+            status.add("ACTIVE");
+            status.add("INACTIVE");
+            status.add("OUTOFSTOCK");
+        }
 
         ProductWithDetails productMatch = new ProductWithDetails();
         
@@ -115,9 +125,43 @@ public class ProductController {
                 .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
         Example<ProductWithDetails> example = Example.of(productMatch, matcher);
 
+        Page<ProductWithDetails> fetchedPage = productWithDetailsRepository.findAll(getProductSpec(categoryId, storeId, status, example), pageable);
+
         response.setStatus(HttpStatus.OK);
-        response.setData(productWithDetailsRepository.findAll(example, pageable));
+        response.setData(fetchedPage);
         return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    public Specification<ProductWithDetails> getProductSpec(
+            String categoryId, String storeId,
+            List<String> statusList, Example<ProductWithDetails> example) {
+
+        return (Specification<ProductWithDetails>) (root, query, builder) -> {
+            final List<Predicate> predicates = new ArrayList<>();
+            Join<ProductWithDetails, ProductInventoryWithDetails> productInventories = root.join("productInventories", JoinType.INNER);
+
+            if (categoryId != null) {
+                predicates.add(builder.equal(root.get("categoryId"), categoryId));
+            }
+            if (storeId != null ){
+                predicates.add(builder.equal(root.get("storeId"), storeId));
+            }
+
+            if (statusList!=null) {
+                int statusCount = statusList.size();
+                List<Predicate> statusPredicatesList = new ArrayList<>();
+                for (int i=0;i<statusList.size();i++) {
+                    Predicate predicateForCompletionStatus = builder.equal(root.get("status"), statusList.get(i));
+                    statusPredicatesList.add(predicateForCompletionStatus);
+                }
+                Predicate finalPredicate = builder.or(statusPredicatesList.toArray(new Predicate[statusCount]));
+                predicates.add(finalPredicate);
+            }
+
+            predicates.add(QueryByExamplePredicateBuilder.getPredicate(root, builder, example));
+
+            return builder.and(predicates.toArray(new Predicate[predicates.size()]));
+        };
     }
 
     @GetMapping(path = {"/{id}"}, name = "products-get-by-id", produces = "application/json")
@@ -138,7 +182,7 @@ public class ProductController {
             response.setStatus(HttpStatus.NOT_FOUND);
             return ResponseEntity.status(response.getStatus()).body(response);
         }
-        
+
         response.setStatus(HttpStatus.OK);
         response.setData(optProduct.get());
         return ResponseEntity.status(response.getStatus()).body(response);

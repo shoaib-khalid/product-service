@@ -2,13 +2,9 @@ package com.kalsym.product.service.model.product;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
+
+import com.kalsym.product.service.ProductServiceApplication;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -41,6 +37,15 @@ public class ProductAsset implements Serializable {
     private String productId;
 
     private Boolean isThumbnail;
+
+    @Transient
+    String imageUrl;
+
+    public String getImageUrl() {
+
+        return ProductServiceApplication.ASSETURL + url;
+    }
+
 
     public void update(ProductAsset product) {
         if (null != product.getName()) {
