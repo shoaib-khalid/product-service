@@ -157,7 +157,7 @@ public class ProductController {
                 Predicate finalPredicate = builder.or(statusPredicatesList.toArray(new Predicate[statusCount]));
                 predicates.add(finalPredicate);
             }
-
+            query.distinct(true);
             predicates.add(QueryByExamplePredicateBuilder.getPredicate(root, builder, example));
 
             return builder.and(predicates.toArray(new Predicate[predicates.size()]));
