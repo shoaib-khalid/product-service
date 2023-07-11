@@ -59,6 +59,8 @@ public class ProductInventory implements Serializable {
     public Double dineInPrice;
     
     public String barcode;
+
+    public Double costPrice;
     
     public void update(ProductInventory pi) {
         if (null != pi.getPrice()) {
@@ -91,6 +93,10 @@ public class ProductInventory implements Serializable {
                
         if (null != pi.getDineInPrice()) {
             dineInPrice = pi.getDineInPrice();
+        }
+
+        if (null != pi.getCostPrice()) {
+            costPrice = pi.getCostPrice();
         }
 
     }

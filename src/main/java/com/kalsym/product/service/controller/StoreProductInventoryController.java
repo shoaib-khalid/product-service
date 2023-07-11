@@ -366,11 +366,8 @@ public class StoreProductInventoryController {
             if(existingProductInventory.size() == 1){
 
                 //delete it first
-                for (int i=0; i<existingProductInventory.size(); i++) {
-                
-                    ProductInventory pi = existingProductInventory.get(i);
+                for (ProductInventory pi : existingProductInventory) {
                     productInventoryRepository.delete(pi);
-        
                 }
                 
                 //then create new one
@@ -406,6 +403,7 @@ public class StoreProductInventoryController {
                     previousData.setSKU(productInventoryList.get(i).getSKU());
                     previousData.setStatus(productInventoryList.get(i).getStatus());
                     previousData.setBarcode(productInventoryList.get(i).getBarcode());
+                    previousData.setCostPrice((productInventoryList.get(i).getCostPrice()));
                     
                     Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "ProductInventory["+i+"] price:"+productInventoryList.get(i).getPrice()+" dineInPrice:"+productInventoryList.get(i).getDineInPrice());
                     Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "ProductInventory["+i+"] PrevPrice:"+previousData.getPrice()+" PrevDineInPrice:"+previousData.getDineInPrice());

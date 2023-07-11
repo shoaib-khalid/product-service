@@ -1,30 +1,33 @@
 package com.kalsym.product.service.controller;
 
 import com.kalsym.product.service.ProductServiceApplication;
+import com.kalsym.product.service.enums.DiscountCalculationType;
+import com.kalsym.product.service.model.ItemDiscount;
+import com.kalsym.product.service.model.RegionCountry;
 import com.kalsym.product.service.model.product.ProductAsset;
 import com.kalsym.product.service.model.product.ProductInventoryWithDetails;
+import com.kalsym.product.service.model.store.Store;
+import com.kalsym.product.service.model.store.StoreDiscountProduct;
 import com.kalsym.product.service.model.store.StoreWithDetails;
+import com.kalsym.product.service.model.store.object.CustomPageable;
+import com.kalsym.product.service.repository.*;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.model.product.Product;
 import com.kalsym.product.service.model.product.ProductWithDetails;
-import com.kalsym.product.service.repository.ProductAssetRepository;
-import com.kalsym.product.service.repository.ProductInventoryItemRepository;
-import com.kalsym.product.service.repository.StoreRepository;
-import com.kalsym.product.service.repository.ProductRepository;
-import com.kalsym.product.service.repository.ProductVariantRepository;
-import com.kalsym.product.service.repository.ProductVariantAvailableRepository;
-import com.kalsym.product.service.repository.ProductReviewRepository;
-import com.kalsym.product.service.repository.ProductWithDetailsRepository;
 import com.kalsym.product.service.utility.Logger;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.servlet.http.HttpServletRequest;
+
+import com.kalsym.product.service.utility.ProductDiscount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.convert.QueryByExamplePredicateBuilder;
@@ -40,7 +43,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.kalsym.product.service.repository.ProductInventoryWithDetailsRepository;
 import com.kalsym.product.service.utility.Validation;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -79,6 +81,15 @@ public class ProductController {
     @Autowired
     StoreRepository storeRepository;
 
+    @Autowired
+    StoreDiscountProductRepository storeDiscountProductRepository;
+
+    @Autowired
+    StoreDiscountRepository storeDiscountRepository;
+
+    @Autowired
+    RegionCountriesRepository regionCountriesRepository;
+
     @Value("${asset.service.url}")
     private String assetServiceUrl;
 
@@ -98,10 +109,13 @@ public class ProductController {
     @PreAuthorize("hasAnyAuthority('products-get', 'all')")
     public ResponseEntity<HttpResponse> getProduct(HttpServletRequest request,
             @RequestParam(required = false) String storeId,
+            @RequestParam(required = false) String name,
             @RequestParam(required = false) String categoryId,
             @RequestParam(required = false, defaultValue = "true") boolean featured,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(required = false) List<String> status,
+            @RequestParam(required = false, defaultValue = "name") String sortByCol,
+            @RequestParam(required = false, defaultValue = "ASC") Sort.Direction sortingOrder,
             @RequestParam(defaultValue = "20") int pageSize) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
@@ -125,16 +139,132 @@ public class ProductController {
                 .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
         Example<ProductWithDetails> example = Example.of(productMatch, matcher);
 
-        Page<ProductWithDetails> fetchedPage = productWithDetailsRepository.findAll(getProductSpec(categoryId, storeId, status, example), pageable);
+        Page<ProductWithDetails> fetchedPage = productWithDetailsRepository.findAll(getProductSpec(categoryId, storeId, status, name, sortByCol,sortingOrder, example), pageable);
+        List<ProductWithDetails> productList = fetchedPage.getContent();
+
+        ProductWithDetails[] productWithDetailsList = new ProductWithDetails[productList.size()];
+        for (int x=0;x<productList.size();x++) {
+            //check for item discount in hashmap
+            ProductWithDetails productDetails = productList.get(x);
+
+            if (storeId == null) {
+                storeId = productDetails.getStoreId();
+            }
+
+            Optional<Store> optStore = storeRepository.findById(storeId);
+
+            if (!optStore.isPresent()) {
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
+                response.setStatus(HttpStatus.NOT_FOUND);
+                response.setError("store not found");
+                return ResponseEntity.status(response.getStatus()).body(response);
+            }
+
+            //get reqion country for store
+            RegionCountry regionCountry = null;
+            Optional<RegionCountry> optRegion = regionCountriesRepository.findById(optStore.get().getRegionCountryId());
+            if (optRegion.isPresent()) {
+                regionCountry = optRegion.get();
+            }
+
+            //set asset url for List of products asset and thumnailurl
+            List<ProductAsset> productAssets = productDetails.getProductAssets();
+            for(ProductAsset pa : productAssets){
+                //handle null
+                if(pa.getUrl() != null){
+                    pa.setUrl(assetServiceUrl+pa.getUrl());
+
+                } else{
+                    pa.setUrl(null);
+
+                }
+            }
+            productDetails.setProductAssets(productAssets);
+            //handle null
+            if(productDetails.getThumbnailUrl() != null){
+                productDetails.setImageUrl(productDetails.getThumbnailUrl());
+                productDetails.setThumbnailUrl(assetServiceUrl+productDetails.getThumbnailUrl());
+
+            } else{
+                productDetails.setThumbnailUrl(null);
+                productDetails.setImageUrl(null);
+            }
+
+            for (int i=0;i<productDetails.getProductInventories().size();i++) {
+                ProductInventoryWithDetails productInventory = productDetails.getProductInventories().get(i);
+                //ItemDiscount discountDetails = discountedItemMap.get(productInventory.getItemCode());
+                /*ItemDiscount discountDetails = hashmapLoader.GetDiscountedItemMap(storeId, productInventory.getItemCode());*/
+                ItemDiscount discountDetails = ProductDiscount.getItemDiscount(storeDiscountRepository, productDetails.getStoreId(), productInventory.getItemCode(), regionCountry);
+                if (discountDetails != null) {
+                    double discountedPrice = productInventory.getPrice();
+                    double dineInDiscountedPrice = productInventory.getDineInPrice();
+                    if (discountDetails.calculationType.equals(DiscountCalculationType.FIX)) {
+                        discountedPrice = productInventory.getPrice() - discountDetails.discountAmount;
+                    } else if (discountDetails.calculationType.equals(DiscountCalculationType.PERCENT)) {
+                        discountedPrice = productInventory.getPrice() - (discountDetails.discountAmount / 100 * productInventory.getPrice());
+                    }
+
+
+                    if(discountDetails.dineInCalculationType!=null && discountDetails.dineInCalculationType.equals(DiscountCalculationType.FIX)){
+                        dineInDiscountedPrice = productInventory.getDineInPrice() - discountDetails.dineInDiscountAmount;
+
+                    }
+                    else if (discountDetails.dineInCalculationType!=null && discountDetails.dineInCalculationType.equals(DiscountCalculationType.PERCENT)) {
+                        dineInDiscountedPrice = productInventory.getDineInPrice() - (discountDetails.dineInDiscountAmount / 100 * productInventory.getDineInPrice());
+                    }
+
+                    discountDetails.discountedPrice = discountedPrice;
+                    discountDetails.normalPrice = productInventory.getPrice();
+
+                    discountDetails.dineInDiscountedPrice= dineInDiscountedPrice;
+                    discountDetails.dineInNormalPrice = productInventory.getDineInPrice();
+
+                    productInventory.setItemDiscount(discountDetails);
+                } else {
+                    //get inactive discount if any
+                    List<StoreDiscountProduct> discountList = storeDiscountProductRepository.findByItemCode(productInventory.getItemCode());
+                    if (!discountList.isEmpty()) {
+                        StoreDiscountProduct storeDiscountProduct = discountList.get(0);
+                        ItemDiscount inactiveDiscount = new ItemDiscount();
+                        inactiveDiscount.discountId = storeDiscountProduct.getStoreDiscountId();
+                        productInventory.setItemDiscountInactive(inactiveDiscount);
+                    }
+                }
+            }
+
+            //sort the product inventories by price acsending
+            List<ProductInventoryWithDetails> sortProductInventories = productDetails.getProductInventories().stream()
+                    .sorted(Comparator.comparingDouble(ProductInventoryWithDetails::getPrice))
+                    .collect(Collectors.toList());
+
+            //set the product inventories data for sort price ascending
+            productDetails.setProductInventories(sortProductInventories);
+
+            productWithDetailsList[x]=productDetails;
+        }
+
+        //create custom pageable object with modified content
+        CustomPageable customPageable = new CustomPageable();
+        customPageable.content = productWithDetailsList;
+        customPageable.pageable = fetchedPage.getPageable();
+        customPageable.totalPages = fetchedPage.getTotalPages();
+        customPageable.totalElements = fetchedPage.getTotalElements();
+        customPageable.last = fetchedPage.isLast();
+        customPageable.size = fetchedPage.getSize();
+        customPageable.number = fetchedPage.getNumber();
+        customPageable.sort = fetchedPage.getSort();
+        customPageable.numberOfElements = fetchedPage.getNumberOfElements();
+        customPageable.first  = fetchedPage.isFirst();
+        customPageable.empty = fetchedPage.isEmpty();
 
         response.setStatus(HttpStatus.OK);
-        response.setData(fetchedPage);
+        response.setData(customPageable);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     public Specification<ProductWithDetails> getProductSpec(
             String categoryId, String storeId,
-            List<String> statusList, Example<ProductWithDetails> example) {
+            List<String> statusList, String name, String sortByCol, Sort.Direction sortingOrder, Example<ProductWithDetails> example) {
 
         return (Specification<ProductWithDetails>) (root, query, builder) -> {
             final List<Predicate> predicates = new ArrayList<>();
@@ -157,6 +287,46 @@ public class ProductController {
                 Predicate finalPredicate = builder.or(statusPredicatesList.toArray(new Predicate[statusCount]));
                 predicates.add(finalPredicate);
             }
+
+            if (name != null) {
+                predicates.add(builder.like(root.get("name"), "%"+name+"%"));
+            }
+
+            List<Order> orderList = new ArrayList<Order>();
+
+            if (sortingOrder==Sort.Direction.ASC){
+                if(sortByCol.equals("price")){
+
+                    orderList.add(builder.asc(productInventories.get(sortByCol)));
+
+                } else if(sortByCol.equals("dineInPrice")){
+                    orderList.add(builder.asc(productInventories.get(sortByCol)));
+
+                }
+                else{
+                    orderList.add(builder.asc(root.get(sortByCol)));
+
+                }
+
+            }else{
+
+                if(sortByCol.equals("price")){
+
+                    orderList.add(builder.desc(productInventories.get(sortByCol)));
+
+
+                }else if(sortByCol.equals("dineInPrice")){
+                    orderList.add(builder.desc(productInventories.get(sortByCol)));
+
+                }
+                else{
+                    orderList.add(builder.desc(root.get(sortByCol)));
+
+                }
+
+
+            }
+            query.orderBy(orderList);
             query.distinct(true);
             predicates.add(QueryByExamplePredicateBuilder.getPredicate(root, builder, example));
 

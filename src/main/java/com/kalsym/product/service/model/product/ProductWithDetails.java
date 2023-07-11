@@ -160,7 +160,13 @@ public class ProductWithDetails implements Serializable {
 
     public String getImageUrl() {
 
-        return ProductServiceApplication.ASSETURL + thumbnailUrl;
+        if (thumbnailUrl.startsWith(ProductServiceApplication.ASSETURL)) {
+            // 'url' already has 'ProductServiceApplication.ASSETURL' appended
+            return thumbnailUrl;
+        } else {
+            // Append 'ProductServiceApplication.ASSETURL' to 'url'
+            return ProductServiceApplication.ASSETURL + thumbnailUrl;
+        }
     }
 
     public void update(ProductWithDetails product) {
