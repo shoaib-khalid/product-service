@@ -43,12 +43,16 @@ public class ProductAsset implements Serializable {
 
     public String getImageUrl() {
 
-        if (url.startsWith(ProductServiceApplication.ASSETURL)) {
-            // 'url' already has 'ProductServiceApplication.ASSETURL' appended
-            return url;
+        if (url != null) {
+            if (url.startsWith(ProductServiceApplication.ASSETURL)) {
+                // 'url' already has 'ProductServiceApplication.ASSETURL' appended
+                return url;
+            } else {
+                // Append 'ProductServiceApplication.ASSETURL' to 'url'
+                return ProductServiceApplication.ASSETURL + url;
+            }
         } else {
-            // Append 'ProductServiceApplication.ASSETURL' to 'url'
-            return ProductServiceApplication.ASSETURL + url;
+            return null;
         }
     }
 
