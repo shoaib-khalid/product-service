@@ -318,6 +318,10 @@ public class StoreProductInventoryController {
             productInventory.setPrice(productInventory.getDineInPrice()*1.175);
         }
 
+        if (productInventory.getCostPrice()==null) {
+            productInventory.setCostPrice(0.00);
+        }
+
         //productInventory.setProduct(optProdcut.get());
         response.setStatus(HttpStatus.OK);
         response.setData(productInventoryRepository.save(productInventory));
@@ -386,6 +390,10 @@ public class StoreProductInventoryController {
                         pi.setPrice(pi.getDineInPrice()*1.175);
                     }
 
+                    if (pi.getCostPrice()==null) {
+                        pi.setCostPrice(0.00);
+                    }
+
                     productInventoryRepository.save(pi);
               
                 }
@@ -426,13 +434,18 @@ public class StoreProductInventoryController {
                             previousData.setPrice(productInventoryList.get(i).getPrice());
 
                         }
+
+                        if (previousData.getCostPrice()==null) {
+                            previousData.setCostPrice(0.00);
+                        } else if (productInventoryList.get(i).getCostPrice()==null) {
+                            previousData.setCostPrice(0.00);
+                        } else {
+                            previousData.setCostPrice(productInventoryList.get(i).getCostPrice());
+                        }
                     productInventoryRepository.save(previousData);
                 }
 
             }
-
-
-
 
         } else{
 
@@ -461,6 +474,11 @@ public class StoreProductInventoryController {
                 if (pi.getPrice()==null) {
                     pi.setPrice(pi.getDineInPrice()*1.175);
                 }
+
+                if (pi.getCostPrice()==null) {
+                    pi.setCostPrice(0.00);
+                }
+
                 productInventoryRepository.save(pi);
           
             }
@@ -525,6 +543,10 @@ public class StoreProductInventoryController {
         // if dinein we auto set for delivery price  Increase 17.5%
         if (bodyProductInventory.getPrice()==null) {
             bodyProductInventory.setPrice(bodyProductInventory.getDineInPrice()*1.175);
+        }
+
+        if (bodyProductInventory.getCostPrice()==null) {
+            bodyProductInventory.setCostPrice(0.00);
         }
 
         ProductInventory pi = optProductInventory.get();
