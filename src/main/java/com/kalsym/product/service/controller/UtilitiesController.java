@@ -21,12 +21,11 @@ import java.util.List;
 @RequestMapping("/utilities")
 public class UtilitiesController {
 
-    @PostMapping(path = {"/convertImageToBase64"}, name = "store-assets-post", produces = "application/json")
+    @PostMapping(path = {"/images/base64-conversion"}, name = "store-assets-post", produces = "application/json")
     @PreAuthorize("hasAnyAuthority('store-assets-post', 'all')")
     public ResponseEntity<HttpResponse> convertImageToBase64(HttpServletRequest request,
-                                                     @RequestBody(required = true) List<String> imageUrls) throws IOException {
+     @RequestBody(required = true) List<String> imageUrls) throws IOException {
         HttpResponse response = new HttpResponse(request.getRequestURI());
-
 
         List<String> convertedImages = new ArrayList<>();
         try {
