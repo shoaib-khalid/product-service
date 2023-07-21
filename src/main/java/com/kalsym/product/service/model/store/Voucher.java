@@ -14,6 +14,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.GenericGenerator;
+
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.FetchType;
@@ -89,4 +91,79 @@ public class Voucher implements Serializable {
     @JoinColumn(name = "voucherId", insertable = false, updatable = false, nullable = true)
     private List<VoucherStore> voucherStoreList;
 
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "voucherId", insertable = false, updatable = false, nullable = true)
+    private List<VoucherServiceType> voucherServiceTypeList;
+
+
+    // Implement the getter method for voucherServiceTypeList
+    public List<VoucherServiceType> getVoucherServiceTypeList() {
+        return voucherServiceTypeList;
+    }
+
+
+    public void update(Voucher bodyVoucher) {
+        if (bodyVoucher == null) {
+            return;
+        }
+
+        // Update fields only if they are not null in the bodyVoucher
+        if (bodyVoucher.getStoreId() != null) {
+            this.setStoreId(bodyVoucher.getStoreId());
+        }
+        if (bodyVoucher.getName() != null) {
+            this.setName(bodyVoucher.getName());
+        }
+        if (bodyVoucher.getDiscountValue() != null) {
+            this.setDiscountValue(bodyVoucher.getDiscountValue());
+        }
+        if (bodyVoucher.getMaxDiscountAmount() != null) {
+            this.setMaxDiscountAmount(bodyVoucher.getMaxDiscountAmount());
+        }
+        if (bodyVoucher.getVoucherCode() != null) {
+            this.setVoucherCode(bodyVoucher.getVoucherCode());
+        }
+        if (bodyVoucher.getTotalQuantity() != null) {
+            this.setTotalQuantity(bodyVoucher.getTotalQuantity());
+        }
+        if (bodyVoucher.getTotalRedeem() != null) {
+            this.setTotalRedeem(bodyVoucher.getTotalRedeem());
+        }
+        if (bodyVoucher.getCurrencyLabel() != null) {
+            this.setCurrencyLabel(bodyVoucher.getCurrencyLabel());
+        }
+        if (bodyVoucher.getIsNewUserVoucher() != null) {
+            this.setIsNewUserVoucher(bodyVoucher.getIsNewUserVoucher());
+        }
+        if (bodyVoucher.getCheckTotalRedeem() != null) {
+            this.setCheckTotalRedeem(bodyVoucher.getCheckTotalRedeem());
+        }
+        if (bodyVoucher.getMinimumSpend() != null) {
+            this.setMinimumSpend(bodyVoucher.getMinimumSpend());
+        }
+        if (bodyVoucher.getAllowDoubleDiscount() != null) {
+            this.setAllowDoubleDiscount(bodyVoucher.getAllowDoubleDiscount());
+        }
+        if (bodyVoucher.getRequireToClaim() != null) {
+            this.setRequireToClaim(bodyVoucher.getRequireToClaim());
+        }
+        if (bodyVoucher.getStatus() != null) {
+            this.setStatus(bodyVoucher.getStatus());
+        }
+        if (bodyVoucher.getVoucherType() != null) {
+            this.setVoucherType(bodyVoucher.getVoucherType());
+        }
+        if (bodyVoucher.getDiscountType() != null) {
+            this.setDiscountType(bodyVoucher.getDiscountType());
+        }
+        if (bodyVoucher.getCalculationType() != null) {
+            this.setCalculationType(bodyVoucher.getCalculationType());
+        }
+        if (bodyVoucher.getStartDate() != null) {
+            this.setStartDate(bodyVoucher.getStartDate());
+        }
+        if (bodyVoucher.getEndDate() != null) {
+            this.setEndDate(bodyVoucher.getEndDate());
+        }
+    }
 }

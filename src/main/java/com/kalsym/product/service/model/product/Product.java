@@ -81,6 +81,8 @@ public class Product implements Serializable {
     private Boolean isCustomPrice;
 
     private Integer sequenceNumber;
+
+    private String voucherId;
     
     @CreationTimestamp
     private Date created;
@@ -165,6 +167,10 @@ public class Product implements Serializable {
         if (null != product.getSequenceNumber()) {
             sequenceNumber = product.getSequenceNumber();            
         }
+
+        if( null != product.getVoucherId()) {
+            voucherId = product.getVoucherId();
+        }
         
         customNote = product.getCustomNote();
         
@@ -182,4 +188,11 @@ public class Product implements Serializable {
         return Objects.equals(this.id, other.getId());
     }
 
+    public void setCustomPrice(boolean isCustomPrice) {
+        this.isCustomPrice = isCustomPrice;
+    }
+
+    public void setVoucherId(String voucherId) {
+        this.voucherId = voucherId;
+    }
 }
