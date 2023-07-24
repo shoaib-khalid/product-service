@@ -292,33 +292,32 @@ public class StoreProductVoucherController {
 
         if (!voucherOptional.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND voucher with ID: " + id);
-//            response.setErrorStatus(HttpStatus.NOT_FOUND);
             response.setError("Voucher not found");
             return ResponseEntity.status(response.getStatus()).body(response);
         }
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " FOUND voucher with ID: " + id);
 
         Voucher voucher = voucherOptional.get();
-
-        VoucherType oriVoucherType = voucher.getVoucherType();
-
+        // Update voucher details based on the request body
         voucher.update(bodyVoucher);
         Voucher updatedVoucher = voucherRepository.save(voucher);
 
-        // Check voucher type, delete data if change type from STORE to PLATFORM
-        if (oriVoucherType.equals(VoucherType.STORE) && bodyVoucher.getVoucherType().equals(VoucherType.PLATFORM) ) {
-            // Delete data from DB
-            voucherStoreRepository.deleteByVoucherId(updatedVoucher.getId());
+        voucher.setStoreId(voucher.getStoreId());
 
+        // Check if the voucher type has changed from STORE to PLATFORM
+        if (bodyVoucher.getVoucherType() == VoucherType.PLATFORM) {
+            // Delete voucher_store data from the database if the type changed to PLATFORM
+            voucherStoreRepository.deleteByVoucherId(updatedVoucher.getId());
         }
-        // If body - voucher store list exist
-        if (!bodyVoucher.getVoucherStoreList().isEmpty() && bodyVoucher.getVoucherType().equals(VoucherType.STORE)) {
-            // Delete data from DB
+
+        // Update or save data in voucher_store table based on the request
+        if (bodyVoucher.getVoucherType() == VoucherType.STORE) {
+            // Delete existing voucher_store data from the database
             voucherStoreRepository.deleteByVoucherId(updatedVoucher.getId());
 
-            for (VoucherStore voucherStore: bodyVoucher.getVoucherStoreList()) {
-                voucherStore.setVoucherId((updatedVoucher.getId()));
-
+            // Save the new voucher_store data from the request body
+            List<VoucherStore> voucherStoreList = bodyVoucher.getVoucherStoreList();
+            for (VoucherStore voucherStore : voucherStoreList) {
+                voucherStore.setVoucherId(updatedVoucher.getId());
                 voucherStoreRepository.save(voucherStore);
             }
         }
