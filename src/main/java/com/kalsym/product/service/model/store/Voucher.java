@@ -1,9 +1,6 @@
 package com.kalsym.product.service.model.store;
 
-import com.kalsym.product.service.enums.VoucherDiscountType;
-import com.kalsym.product.service.enums.DiscountCalculationType;
-import com.kalsym.product.service.enums.VoucherStatus;
-import com.kalsym.product.service.enums.VoucherType;
+import com.kalsym.product.service.enums.*;
 import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -69,6 +66,9 @@ public class Voucher implements Serializable {
     private VoucherDiscountType discountType;
 
     @Enumerated(EnumType.STRING)
+    private VoucherGroupType groupType;
+
+    @Enumerated(EnumType.STRING)
     private DiscountCalculationType calculationType;
 
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
@@ -94,6 +94,10 @@ public class Voucher implements Serializable {
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "voucherId", insertable = false, updatable = false, nullable = true)
     private List<VoucherServiceType> voucherServiceTypeList;
+
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "voucherId", insertable = false, updatable = false, nullable = true)
+    private List<VoucherSerialNumber> voucherSerialNumber;
 
 
     // Implement the getter method for voucherServiceTypeList
