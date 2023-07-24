@@ -2,6 +2,7 @@ package com.kalsym.product.service.controller;
 
 //Importing Models
 import com.kalsym.product.service.ProductServiceApplication;
+import com.kalsym.product.service.enums.VoucherCurrentStatus;
 import com.kalsym.product.service.model.product.Product;
 import com.kalsym.product.service.model.product.ProductInventory;
 import com.kalsym.product.service.model.store.*;
@@ -240,7 +241,6 @@ public class StoreProductVoucherController {
             for (VoucherStore voucherStore: voucherBody.getVoucherStoreList()) {
                 voucherStore.setVoucherId((savedVoucher.getId()));
                 voucherStore.setStoreId(storeId);
-
                 voucherStoreRepository.save(voucherStore);
             }
         }
@@ -248,7 +248,6 @@ public class StoreProductVoucherController {
         if (!voucherBody.getVoucherServiceTypeList().isEmpty()) {
             for (VoucherServiceType voucherServiceType: voucherBody.getVoucherServiceTypeList()) {
                 voucherServiceType.setVoucherId(savedVoucher.getId());
-
                 voucherServiceTypeRepository.save(voucherServiceType);
             }
         }
@@ -257,7 +256,6 @@ public class StoreProductVoucherController {
         if (!voucherBody.getVoucherTerms().isEmpty()) {
             for (VoucherTerms voucherTerms: voucherBody.getVoucherTerms()) {
                 voucherTerms.setVoucherId(savedVoucher.getId());
-
                 voucherTermsRepository.save(voucherTerms);
             }
         }
@@ -275,8 +273,18 @@ public class StoreProductVoucherController {
             // Delete data from DB
             voucherSerialNumberRepository.deleteByVoucherId(savedVoucher.getId());
             // Save to voucher_vertical table
-            for (VoucherSerialNumber voucherSerialNumber: voucherBody.getVoucherSerialNumber()) {
+            int totalQuantity = voucherBody.getTotalQuantity();
+
+            for (int i = 0; i < totalQuantity; i++) {
+                VoucherSerialNumber voucherSerialNumber = new VoucherSerialNumber(); // Create a new instance inside the loop
+
                 voucherSerialNumber.setVoucherId(savedVoucher.getId());
+                voucherSerialNumber.setExpiryDate(savedVoucher.getEndDate());
+                voucherSerialNumber.setIsUsed(false);
+                voucherSerialNumber.setCurrentStatus(VoucherCurrentStatus.NEW);
+                voucherSerialNumber.setVoucherRedeemCode(VoucherSerialNumber.generateUniqueRedeemCode());
+                voucherSerialNumber.setSerialNumber(VoucherSerialNumber.generateUniqueSerialNumber());
+
                 voucherSerialNumberRepository.save(voucherSerialNumber);
             }
         }
