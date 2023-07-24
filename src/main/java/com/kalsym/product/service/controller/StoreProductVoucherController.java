@@ -3,6 +3,7 @@ package com.kalsym.product.service.controller;
 //Importing Models
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.model.product.Product;
+import com.kalsym.product.service.model.product.ProductInventory;
 import com.kalsym.product.service.model.store.*;
 //Importing Enums
 import com.kalsym.product.service.enums.VoucherStatus;
@@ -14,6 +15,7 @@ import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.utility.Logger;
 
 //Importing Java Utils
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -59,6 +61,9 @@ public class StoreProductVoucherController {
     StoreRepository storeRepository;
 
     @Autowired
+    StoreCategoryRepository storeCategoryRepository;
+
+    @Autowired
     ProductRepository productRepository;
 
     @Autowired
@@ -66,6 +71,9 @@ public class StoreProductVoucherController {
 
     @Autowired
     StoreDiscountProductRepository storeDiscountProductRepository;
+
+    @Autowired
+    ProductInventoryRepository productInventoryRepository;
 
 
     @GetMapping(path = {"/available"})
@@ -186,15 +194,13 @@ public class StoreProductVoucherController {
     @PostMapping(path = {"/create"}, name = "voucher-post")
     @PreAuthorize("hasAnyAuthority('voucher-post', 'all')")
     public ResponseEntity<HttpResponse> postVoucher(HttpServletRequest request,
-                                                    @RequestParam(required = false) String storeId,
+                                                    @RequestParam() String storeId,
+                                                    @RequestParam() String categoryId,
                                                     @Valid @RequestBody Voucher voucherBody) {
-
+        System.out.println(storeId + " " + categoryId);
         String logprefix = "postVoucher()";
         HttpResponse response = new HttpResponse(request.getRequestURI());
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "bodyProduct: " + voucherBody.toString());
-
-        // Set voucher type to PLATFORM as default
-        voucherBody.setVoucherType(VoucherType.PLATFORM);
 
         // Set total redeem to 0
         voucherBody.setTotalRedeem(0);
@@ -210,13 +216,27 @@ public class StoreProductVoucherController {
             }
             // Set voucher type to STORE whenever has storeId
             voucherBody.setVoucherType(VoucherType.STORE);
+            voucherBody.setStoreId(storeId);
         }
+        if (categoryId != null) {
+            Optional<StoreCategory> optionalStore = storeCategoryRepository.findById(categoryId);
+
+            if (!optionalStore.isPresent()) {
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
+//                response.setErrorStatus(HttpStatus.NOT_FOUND);
+                response.setError("Category not found");
+                return ResponseEntity.status(response.getStatus()).body(response);
+            }
+        }
+
         Voucher savedVoucher = voucherRepository.save(voucherBody);
 
         // If type is STORE, save to voucher_store table
         if (savedVoucher.getVoucherType().equals(VoucherType.STORE) && !voucherBody.getVoucherStoreList().isEmpty()) {
+
             for (VoucherStore voucherStore: voucherBody.getVoucherStoreList()) {
                 voucherStore.setVoucherId((savedVoucher.getId()));
+                voucherStore.setStoreId(storeId);
 
                 voucherStoreRepository.save(voucherStore);
             }
@@ -248,14 +268,33 @@ public class StoreProductVoucherController {
             }
         }
 
-
-        // Create a new Product entity based on the voucher information
+        // Create a new Product and Product Inventory entity based on the voucher information
         Product productForVoucher = new Product();
+        ProductInventory productForInventory  = new ProductInventory();
 
+
+        // Product table update--------------------------
         // Set the product name based on the voucher name
         productForVoucher.setName(voucherBody.getName());
+
+        List<Product> products = productRepository.findByStoreId(storeId);
+        List<String> errors = new ArrayList<>();
+
+        for (Product existingProduct : products) {
+            if (existingProduct.getName().equals(productForVoucher.getName()) && !"DELETED".equalsIgnoreCase(existingProduct.getStatus())) {
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "productName already exists", "");
+                response.setStatus(HttpStatus.CONFLICT);
+                errors.add("Product name already exists");
+                response.setData(errors);
+                return ResponseEntity.status(response.getStatus()).body(response);
+            }
+        }
         // Set the voucher id in the product table
         productForVoucher.setVoucherId(voucherBody.getId());
+        // Set the category id in the product table
+        productForVoucher.setCategoryId(categoryId);
+        // Set the voucher's storeId in Product table
+        productForVoucher.setStoreId(voucherBody.getStoreId());
         // Set the specific value for 'allowOutOfStockPurchases' to false
         productForVoucher.setAllowOutOfStockPurchases(false);
         // Set the custom price as false
@@ -267,12 +306,42 @@ public class StoreProductVoucherController {
         //set minimum quantity for alarm to 10
         productForVoucher.setMinQuantityForAlarm(10);
 
+        // bodyProduct.setSeoName(seoName);
+        if (productForVoucher.getIsPackage()==null) { productForVoucher.setIsPackage(Boolean.FALSE); }
 
+        //to handle backward compatibility since we implement new features for add on
+        if(productForVoucher.getHasAddOn()==null) { productForVoucher.setHasAddOn(Boolean.FALSE);}
+
+        //Save in Repository
         Product savedProduct = productRepository.save(productForVoucher);
         Logger.application.info(ProductServiceApplication.VERSION, logprefix, "product added to store with storeId: {}, productId: {}" + storeId, savedProduct.getId());
 
+
+        // Product table update--------------------------
+        // set product id
+        productForInventory.setProductId(productForVoucher.getId());
+        productForInventory.setItemCode(productForVoucher.getId());
+        // set quantity from voucher body
+        productForInventory.setQuantity(voucherBody.getTotalQuantity());
+
+        if (productForInventory.getCostPrice()==null) {
+            productForInventory.setCostPrice(0.00);
+        }
+        // if new client for delivery, we auto set the dine in price reduce 15%
+        if (productForInventory.getDineInPrice()==null) {
+            productForInventory.setDineInPrice(productForInventory.getCostPrice()*0.85);
+        }
+//
+//        // if new client for dinein we auto set for delivery price  Increase 17.5%
+//        if (productForInventory.getPrice()==null) {
+//            productForInventory.setPrice(productForInventory.getDineInPrice()*1.175);
+//        }
+
+        //Save in Repository
+        productInventoryRepository.save(productForInventory);
+
         response.setStatus(HttpStatus.CREATED);
-        response.setData(savedVoucher + "  " + savedProduct);
+        response.setData(savedVoucher);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -364,127 +433,51 @@ public class StoreProductVoucherController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @GetMapping(path = {"/verify/{customerEmail}/{voucherCode}/{storeId}"}, name = "voucher-post")
-    @PreAuthorize("hasAnyAuthority('voucher-post', 'all')")
-    public ResponseEntity<HttpResponse> postGuestClaimVoucher(HttpServletRequest request,
-                                                              @PathVariable() String customerEmail,
-                                                              @PathVariable() String voucherCode,
-                                                              @PathVariable(required = false) String storeId
-    ) {
-        String logprefix = request.getRequestURI();
-        HttpResponse response = new HttpResponse(request.getRequestURI());
 
-        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "customerEmail: " + customerEmail + " voucherCode:" + voucherCode);
-
-//        List<Customer> optCustomer = null;
-//        if (storeId!=null) {
-//            optCustomer = customerRepository.findByEmailAndStoreId(customerEmail, storeId);
+//    @PostMapping(path = {"/claim/{customerId}/{voucherCode}"}, name = "voucher-post")
+//    @PreAuthorize("hasAnyAuthority('voucher-post', 'all')")
+//    public ResponseEntity<HttpResponse> postCustomerClaimVoucher(HttpServletRequest request,
+//                                                                 @PathVariable() String customerId,
+//                                                                 @PathVariable() String voucherCode
+//    ) {
+//        String logprefix = request.getRequestURI();
+//        HttpResponse response = new HttpResponse(request.getRequestURI());
+//
+//        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "customerId: " + customerId + " voucherCode:" + voucherCode);
+//
+//
+//        //check promo code
+//        Voucher voucher = voucherRepository.findByVoucherCode(voucherCode);
+//        if (voucher == null) {
+//            Logger.application.warn(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND customerId: " + customerId);
+//            response.setStatus(HttpStatus.NOT_FOUND);
+//            response.setError("Voucher not found");
+//            response.setMessage("Voucher not found");
+//            return ResponseEntity.status(response.getStatus()).body(response);
 //        } else {
-//            optCustomer = customerRepository.findByEmail(customerEmail);
+//            //check status
+//            if (voucher.getStatus() != VoucherStatus.ACTIVE) {
+//                response.setStatus(HttpStatus.EXPECTATION_FAILED);
+//                response.setError("Voucher not active");
+//                response.setMessage("Voucher not active");
+//                return ResponseEntity.status(response.getStatus()).body(response);
+//            }
+//            //check total redeem
+//            if (voucher.getTotalRedeem() >= voucher.getTotalQuantity()) {
+//                response.setStatus(HttpStatus.EXPECTATION_FAILED);
+//                response.setError("Voucher fully redeemed");
+//                response.setMessage("Sorry, voucher is fully redeemed");
+//                return ResponseEntity.status(response.getStatus()).body(response);
+//            }
+//            //check expiry date
+//            Date currentDate = new Date();
+//            if (currentDate.compareTo(voucher.getStartDate()) < 0 || currentDate.compareTo(voucher.getEndDate()) > 0) {
+//                response.setStatus(HttpStatus.EXPECTATION_FAILED);
+//                response.setError("Voucher is expired");
+//                response.setMessage("Voucher is expired");
+//                return ResponseEntity.status(response.getStatus()).body(response);
+//            }
 //        }
-
-        //check promo code
-        Voucher voucher = voucherRepository.findByVoucherCode(voucherCode);
-        if (voucher == null) {
-            Logger.application.warn(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND voucherCode: " + voucherCode);
-            response.setStatus(HttpStatus.NOT_FOUND);
-            response.setError("Voucher not found");
-            response.setMessage("Voucher not found");
-            return ResponseEntity.status(response.getStatus()).body(response);
-        } else {
-            //check status
-            if (voucher.getStatus() != VoucherStatus.ACTIVE) {
-                response.setStatus(HttpStatus.EXPECTATION_FAILED);
-                response.setError("Voucher not active");
-                response.setMessage("Voucher not active");
-                return ResponseEntity.status(response.getStatus()).body(response);
-            }
-            //check total redeem
-            if (voucher.getTotalRedeem() >= voucher.getTotalQuantity()) {
-                response.setStatus(HttpStatus.EXPECTATION_FAILED);
-                response.setError("Voucher fully redeemed");
-                response.setMessage("Sorry, you have redeemed this voucher");
-                return ResponseEntity.status(response.getStatus()).body(response);
-            }
-            //check expiry date
-            Date currentDate = new Date();
-            if (currentDate.compareTo(voucher.getStartDate()) < 0 || currentDate.compareTo(voucher.getEndDate()) > 0) {
-                response.setStatus(HttpStatus.EXPECTATION_FAILED);
-                response.setError("Voucher is expired");
-                response.setMessage("Voucher is expired");
-                return ResponseEntity.status(response.getStatus()).body(response);
-            }
-        }
-
-        if (storeId != null && voucher.getVoucherType() == VoucherType.STORE) {
-            //check store id
-            boolean storeValid = false;
-            List<VoucherStore> storeList = voucher.getVoucherStoreList();
-            for (int x = 0; x < storeList.size(); x++) {
-                if (storeId.equals(((List<?>) storeList).get(x))) { //get Storeid was removed
-                    storeValid = true;
-                    break;
-                }
-            }
-            if (!storeValid) {
-                Logger.application.warn(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Voucher not valid for this store storeId: " + storeId + " voucherId:" + voucher.getId());
-                response.setStatus(HttpStatus.CONFLICT);
-                response.setError("Voucher not valid for this store");
-                response.setMessage("Sorry, voucher code cannot be used for this store");
-                return ResponseEntity.status(response.getStatus()).body(response);
-            }
-        }
-
-        response.setStatus(HttpStatus.OK);
-        response.setData(voucher);
-        return ResponseEntity.status(response.getStatus()).body(response);
-    }
-
-
-    @PostMapping(path = {"/claim/{customerId}/{voucherCode}"}, name = "voucher-post")
-    @PreAuthorize("hasAnyAuthority('voucher-post', 'all')")
-    public ResponseEntity<HttpResponse> postCustomerClaimVoucher(HttpServletRequest request,
-                                                                 @PathVariable() String customerId,
-                                                                 @PathVariable() String voucherCode
-    ) {
-        String logprefix = request.getRequestURI();
-        HttpResponse response = new HttpResponse(request.getRequestURI());
-
-        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "customerId: " + customerId + " voucherCode:" + voucherCode);
-
-
-        //check promo code
-        Voucher voucher = voucherRepository.findByVoucherCode(voucherCode);
-        if (voucher == null) {
-            Logger.application.warn(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND customerId: " + customerId);
-            response.setStatus(HttpStatus.NOT_FOUND);
-            response.setError("Voucher not found");
-            response.setMessage("Voucher not found");
-            return ResponseEntity.status(response.getStatus()).body(response);
-        } else {
-            //check status
-            if (voucher.getStatus() != VoucherStatus.ACTIVE) {
-                response.setStatus(HttpStatus.EXPECTATION_FAILED);
-                response.setError("Voucher not active");
-                response.setMessage("Voucher not active");
-                return ResponseEntity.status(response.getStatus()).body(response);
-            }
-            //check total redeem
-            if (voucher.getTotalRedeem() >= voucher.getTotalQuantity()) {
-                response.setStatus(HttpStatus.EXPECTATION_FAILED);
-                response.setError("Voucher fully redeemed");
-                response.setMessage("Sorry, voucher is fully redeemed");
-                return ResponseEntity.status(response.getStatus()).body(response);
-            }
-            //check expiry date
-            Date currentDate = new Date();
-            if (currentDate.compareTo(voucher.getStartDate()) < 0 || currentDate.compareTo(voucher.getEndDate()) > 0) {
-                response.setStatus(HttpStatus.EXPECTATION_FAILED);
-                response.setError("Voucher is expired");
-                response.setMessage("Voucher is expired");
-                return ResponseEntity.status(response.getStatus()).body(response);
-            }
-        }
-        return ResponseEntity.status(response.getStatus()).body(response);
-    }
+//        return ResponseEntity.status(response.getStatus()).body(response);
+//    }
 }
