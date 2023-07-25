@@ -2,6 +2,8 @@ package com.kalsym.product.service.repository;
 
 import com.kalsym.product.service.model.product.Product;
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -37,4 +39,5 @@ public interface ProductRepository extends PagingAndSortingRepository<Product, S
         " SELECT p FROM Product p WHERE storeId = :storeId AND status != :status")
     Page<Product> findPageableStoreAndStatus(@Param("storeId") String storeId, @Param("status") String status, Pageable pageable);
 
+    Optional<Product> findByVoucherId(String id);
 }

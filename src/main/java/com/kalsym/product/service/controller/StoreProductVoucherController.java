@@ -24,7 +24,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 //Importing Swagger
-
 //Importing Spring framework
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -201,7 +200,6 @@ public class StoreProductVoucherController {
                                                     @RequestParam() String storeId,
                                                     @RequestParam() String categoryId,
                                                     @Valid @RequestBody Voucher voucherBody) {
-        System.out.println(storeId + " " + categoryId);
         String logprefix = "postVoucher()";
         HttpResponse response = new HttpResponse(request.getRequestURI());
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "bodyProduct: " + voucherBody.toString());
@@ -264,7 +262,6 @@ public class StoreProductVoucherController {
         if (!voucherBody.getVoucherVerticalList().isEmpty()) {
             for (VoucherVertical voucherVertical: voucherBody.getVoucherVerticalList()) {
                 voucherVertical.setVoucherId(savedVoucher.getId());
-
                 voucherVerticalRepository.save(voucherVertical);
             }
         }
@@ -376,7 +373,6 @@ public class StoreProductVoucherController {
                                                    @RequestBody Voucher bodyVoucher) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
-
         Logger.application.info(ProductServiceApplication.VERSION, logprefix, "id: " + id);
 
         Optional<Voucher> voucherOptional = voucherRepository.findById(id);
@@ -387,7 +383,10 @@ public class StoreProductVoucherController {
             return ResponseEntity.status(response.getStatus()).body(response);
         }
 
+
         Voucher voucher = voucherOptional.get();
+        String oldName = voucher.getName();
+        int oldVoucherQuantity = voucher.getTotalQuantity();
         // Update voucher details based on the request body
         voucher.update(bodyVoucher);
         Voucher updatedVoucher = voucherRepository.save(voucher);
@@ -443,65 +442,68 @@ public class StoreProductVoucherController {
             }
         }
 
-        if (!bodyVoucher.getVoucherSerialNumber().isEmpty()) {
-            // Delete data from DB
-            voucherSerialNumberRepository.deleteByVoucherId(updatedVoucher.getId());
-            // Save to voucher_vertical table
-            for (VoucherSerialNumber voucherSerialNumber: bodyVoucher.getVoucherSerialNumber()) {
+        int newVoucherQuantity = bodyVoucher.getTotalQuantity();
+        if(newVoucherQuantity > oldVoucherQuantity){
+            int moreVoucherQuantity = newVoucherQuantity - oldVoucherQuantity;
+            for (int i = 0; i < moreVoucherQuantity; i++) {
+                VoucherSerialNumber voucherSerialNumber = new VoucherSerialNumber(); // Create a new instance inside the loop
+
                 voucherSerialNumber.setVoucherId(updatedVoucher.getId());
+                voucherSerialNumber.setExpiryDate(updatedVoucher.getEndDate());
+                voucherSerialNumber.setIsUsed(false);
+                voucherSerialNumber.setCurrentStatus(VoucherCurrentStatus.NEW);
+                voucherSerialNumber.setVoucherRedeemCode(VoucherSerialNumber.generateUniqueRedeemCode());
+                voucherSerialNumber.setSerialNumber(VoucherSerialNumber.generateUniqueSerialNumber());
+
                 voucherSerialNumberRepository.save(voucherSerialNumber);
             }
         }
 
-        // Create a new Product and Product Inventory entity based on the voucher information
-        Product productForVoucher = new Product();
-        ProductInventory productForInventory  = new ProductInventory();
+        if (!oldName.equals(updatedVoucher.getName())) {
 
-        // Product table update--------------------------
-        // Set the product name based on the voucher name
-        productForVoucher.setName(bodyVoucher.getName());
+            Optional<Product> productOptional = productRepository.findByVoucherId(id);
+            Optional<ProductInventory> productInventoryOptional = productInventoryRepository.findById(productOptional.get().getId());
 
-        // Get existing products with the same name and storeId
-        List<Product> existingProducts = productRepository.findByStoreIdAndName(bodyVoucher.getStoreId(), bodyVoucher.getName());
-
-        List<String> errors = new ArrayList<>();
-
-        for (Product existingProduct : existingProducts) {
-            if (!existingProduct.getId().equals(bodyVoucher.getId()) && !"DELETED".equalsIgnoreCase(existingProduct.getStatus())) {
-                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "productName already exists", "");
-                response.setStatus(HttpStatus.CONFLICT);
-                errors.add("Product name already exists");
-                response.setData(errors);
+            if (!productOptional.isPresent()) {
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION,
+                        logprefix, " NOT_FOUND voucher product with ID: " + id);
+                response.setError("Voucher Product not found");
                 return ResponseEntity.status(response.getStatus()).body(response);
             }
+            if (!productInventoryOptional.isPresent()) {
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION,
+                        logprefix, " NOT_FOUND voucher product inventory with ID: " + id);
+                response.setError("Voucher Product Inventory not found");
+                return ResponseEntity.status(response.getStatus()).body(response);
+            }
+
+            // Product table update--------------------------
+            // Create a new Product and Product Inventory entity based on the voucher information
+            Product productForVoucher = productOptional.get();
+            ProductInventory productForInventory = productInventoryOptional.get();
+
+            // Set the product name based on the voucher name
+            productForVoucher.setName(bodyVoucher.getName());
+
+            productForVoucher.update(productForVoucher);
+            productRepository.save(productForVoucher);
+
+            // Product Inventory table update--------------------------
+            // Set quantity from voucher body
+            productForInventory.setQuantity(bodyVoucher.getTotalQuantity());
+
+            if (productForInventory.getCostPrice() == null) {
+                productForInventory.setCostPrice(0.00);
+            }
+
+            // if new client for delivery, we auto set the dine in price reduce 15%
+            if (productForInventory.getDineInPrice() == null) {
+                productForInventory.setDineInPrice(productForInventory.getCostPrice() * 0.85);
+            }
+
+            // Save in Repository
+            productInventoryRepository.save(productForInventory);
         }
-
-        // Set the voucher id in the product table
-        productForVoucher.setVoucherId(bodyVoucher.getId());
-
-        // Delete existing product inventory data from the database
-//        productInventoryRepository.deleteByProductId(productForVoucher.getId());
-//
-        // Product table update--------------------------
-        // Set product id and item code from the voucher id
-        productForInventory.setProductId(productForVoucher.getId());
-        productForInventory.setItemCode(productForVoucher.getId());
-
-        // Set quantity from voucher body
-        productForInventory.setQuantity(bodyVoucher.getTotalQuantity());
-
-        if (productForInventory.getCostPrice() == null) {
-            productForInventory.setCostPrice(0.00);
-        }
-
-        // if new client for delivery, we auto set the dine in price reduce 15%
-        if (productForInventory.getDineInPrice() == null) {
-            productForInventory.setDineInPrice(productForInventory.getCostPrice() * 0.85);
-        }
-
-        // Save in Repository
-        productInventoryRepository.save(productForInventory);
-
         response.setData(voucherRepository.findById(id));
         response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);
