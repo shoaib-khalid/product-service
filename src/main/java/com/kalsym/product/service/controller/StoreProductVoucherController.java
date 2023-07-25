@@ -3,6 +3,7 @@ package com.kalsym.product.service.controller;
 //Importing Models
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.enums.VoucherCurrentStatus;
+import com.kalsym.product.service.enums.VoucherGroupType;
 import com.kalsym.product.service.model.product.Product;
 import com.kalsym.product.service.model.product.ProductInventory;
 import com.kalsym.product.service.model.store.*;
@@ -231,6 +232,7 @@ public class StoreProductVoucherController {
             }
         }
 
+        voucherBody.setGroupType(VoucherGroupType.CASH);
         Voucher savedVoucher = voucherRepository.save(voucherBody);
 
         // If type is STORE, save to voucher_store table
@@ -291,7 +293,6 @@ public class StoreProductVoucherController {
         Product productForVoucher = new Product();
         ProductInventory productForInventory  = new ProductInventory();
 
-
         // Product table update--------------------------
         // Set the product name based on the voucher name
         productForVoucher.setName(voucherBody.getName());
@@ -350,11 +351,6 @@ public class StoreProductVoucherController {
         if (productForInventory.getDineInPrice()==null) {
             productForInventory.setDineInPrice(productForInventory.getCostPrice()*0.85);
         }
-
-//        // if new client for dinein we auto set for delivery price  Increase 17.5%
-//        if (productForInventory.getPrice()==null) {
-//            productForInventory.setPrice(productForInventory.getDineInPrice()*1.175);
-//        }
 
         //Save in Repository
         productInventoryRepository.save(productForInventory);
