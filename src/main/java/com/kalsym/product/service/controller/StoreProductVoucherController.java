@@ -462,7 +462,6 @@ public class StoreProductVoucherController {
         if (!oldName.equals(updatedVoucher.getName())) {
 
             Optional<Product> productOptional = productRepository.findByVoucherId(id);
-            Optional<ProductInventory> productInventoryOptional = productInventoryRepository.findById(productOptional.get().getId());
 
             if (!productOptional.isPresent()) {
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION,
@@ -470,6 +469,7 @@ public class StoreProductVoucherController {
                 response.setError("Voucher Product not found");
                 return ResponseEntity.status(response.getStatus()).body(response);
             }
+            Optional<ProductInventory> productInventoryOptional = productInventoryRepository.findById(productOptional.get().getId());
             if (!productInventoryOptional.isPresent()) {
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION,
                         logprefix, " NOT_FOUND voucher product inventory with ID: " + id);
