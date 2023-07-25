@@ -12,7 +12,6 @@ import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.GenericGenerator;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.FetchType;

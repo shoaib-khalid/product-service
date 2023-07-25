@@ -281,9 +281,14 @@ public class StoreProductVoucherController {
                 voucherSerialNumber.setExpiryDate(savedVoucher.getEndDate());
                 voucherSerialNumber.setIsUsed(false);
                 voucherSerialNumber.setCurrentStatus(VoucherCurrentStatus.NEW);
-                voucherSerialNumber.setVoucherRedeemCode(VoucherSerialNumber.generateUniqueRedeemCode());
-                voucherSerialNumber.setSerialNumber(VoucherSerialNumber.generateUniqueSerialNumber());
 
+                VoucherSerialNumber savedVoucherSerialNumber =  voucherSerialNumberRepository.save(voucherSerialNumber);
+
+                voucherSerialNumber.setVoucherRedeemCode(VoucherSerialNumber.generateUniqueRedeemCode(voucherBody.getName(), voucherSerialNumber.getId()));
+                String voucherRedeemCode = savedVoucherSerialNumber.getVoucherRedeemCode();
+                savedVoucherSerialNumber.setSerialNumber(VoucherSerialNumber.generateUniqueSerialNumber(voucherRedeemCode));
+
+                voucherSerialNumber.update(savedVoucherSerialNumber);
                 voucherSerialNumberRepository.save(voucherSerialNumber);
             }
         }
@@ -448,9 +453,13 @@ public class StoreProductVoucherController {
                 voucherSerialNumber.setExpiryDate(updatedVoucher.getEndDate());
                 voucherSerialNumber.setIsUsed(false);
                 voucherSerialNumber.setCurrentStatus(VoucherCurrentStatus.NEW);
-                voucherSerialNumber.setVoucherRedeemCode(VoucherSerialNumber.generateUniqueRedeemCode());
-                voucherSerialNumber.setSerialNumber(VoucherSerialNumber.generateUniqueSerialNumber());
+                VoucherSerialNumber savedVoucherSerialNumber =  voucherSerialNumberRepository.save(voucherSerialNumber);
 
+                voucherSerialNumber.setVoucherRedeemCode(VoucherSerialNumber.generateUniqueRedeemCode(bodyVoucher.getName(), voucherSerialNumber.getId()));
+                String voucherRedeemCode = savedVoucherSerialNumber.getVoucherRedeemCode();
+                savedVoucherSerialNumber.setSerialNumber(VoucherSerialNumber.generateUniqueSerialNumber(voucherRedeemCode));
+
+                voucherSerialNumber.update(savedVoucherSerialNumber);
                 voucherSerialNumberRepository.save(voucherSerialNumber);
             }
         }

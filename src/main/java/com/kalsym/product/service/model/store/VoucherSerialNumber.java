@@ -6,12 +6,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.Random;
 
 
 /**
@@ -25,19 +23,15 @@ import java.util.Random;
 @Table(name = "voucher_serial_number")
 @NoArgsConstructor
 public class VoucherSerialNumber implements Serializable {
-    private static final long MIN_SERIAL_NUMBER = 100000L; // 6 digits (e.g., 100000)
-    private static final long MAX_SERIAL_NUMBER = 99999999999L; // 11 digits
-
     @Id
-    @GeneratedValue(generator = "uuid2")
-    @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private String voucherId;
     private Boolean isUsed;
 
     @Column(unique = true)
-    private long serialNumber;
+    private String serialNumber;
 
     @Column(unique = true)
     private String voucherRedeemCode;
@@ -49,38 +43,65 @@ public class VoucherSerialNumber implements Serializable {
     @Enumerated(EnumType.STRING)
     private VoucherCurrentStatus currentStatus;
 
+    public void update(VoucherSerialNumber bodyVoucherSerialNumber){
+        if(bodyVoucherSerialNumber == null){
+            return;
+        }
+
+        if(bodyVoucherSerialNumber.getSerialNumber() != null){
+            this.setSerialNumber(bodyVoucherSerialNumber.getSerialNumber());
+        }
+
+        if(bodyVoucherSerialNumber.getVoucherRedeemCode() != null){
+            this.setVoucherRedeemCode(bodyVoucherSerialNumber.getVoucherRedeemCode());
+        }
+
+
+    }
 
     // Generate a unique redeem code with the format 'ABC1234567ABC'
-    public static String generateUniqueRedeemCode() {
-        String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        String numbers = "0123456789";
-        Random random = new Random();
+    public static String generateUniqueRedeemCode(String name, Long id) {
+        StringBuilder extractedCharacters = new StringBuilder();
 
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 3; i++) {
-            sb.append(alphabet.charAt(random.nextInt(alphabet.length())));
-        }
-        for (int i = 0; i < 7; i++) {
-            sb.append(numbers.charAt(random.nextInt(numbers.length())));
-        }
-        for (int i = 0; i < 3; i++) {
-            sb.append(alphabet.charAt(random.nextInt(alphabet.length())));
+        //Extract the first character from each word in the voucher name
+        String[] words = name.split("\\s+");
+        for (String word : words) {
+            if (!word.isEmpty()) {
+                extractedCharacters.append(word.charAt(0));
+            }
         }
 
-        return sb.toString();
+        String serialNumber= id.toString();
+
+        //concatenate the extracted characters and the serial number to
+        //form the redeem code
+        String redeemCode = extractedCharacters.toString().toUpperCase() + serialNumber;
+
+        System.out.println(redeemCode);
+        return redeemCode;
     }
 
     // Generate a unique serial number not exceeding 11 digits
-    public static long generateUniqueSerialNumber() {
-        long serialNumber;
+    public static String generateUniqueSerialNumber(String generatedVoucherRedeemCode) {
+        StringBuilder serialNumber = new StringBuilder();
+        String redeemCode = generatedVoucherRedeemCode.toUpperCase();
 
-        // Generate a random serial number and ensure it has at least 6 digits
-        do {
-            serialNumber = MIN_SERIAL_NUMBER + new Random().nextInt() % (MAX_SERIAL_NUMBER - MIN_SERIAL_NUMBER + 1);
-        } while (serialNumber <= 0);
+        // Iterate through each character in the redeem code
+        for (int i = 0; i < redeemCode.length(); i++) {
+            char character = redeemCode.charAt(i);
+            // Check if the character is a letter or a digit
+            if (Character.isLetter(character)) {
+                // Append the ASCII value of the letter to the serial number
+                serialNumber.append((int) character);
+            } else if (Character.isDigit(character)) {
+                // Append the digit directly to the serial number
+                serialNumber.append(character);
+            }
+        }
 
-        return serialNumber;
+        return serialNumber.toString();
     }
+
 
 
 }
