@@ -56,6 +56,16 @@ public class VoucherSerialNumber implements Serializable {
             this.setVoucherRedeemCode(bodyVoucherSerialNumber.getVoucherRedeemCode());
         }
 
+        if(bodyVoucherSerialNumber.getIsUsed() != null){
+            this.setIsUsed(bodyVoucherSerialNumber.getIsUsed());
+        }
+
+        if(bodyVoucherSerialNumber.getCurrentStatus() != null){
+            this.setCurrentStatus(bodyVoucherSerialNumber.getCurrentStatus());
+        }
+
+
+
 
     }
 

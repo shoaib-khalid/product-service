@@ -244,8 +244,59 @@ public class StoreProductVoucherController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
+    @PutMapping(path = {"/redeem"}, name = "voucher-redeem")
+    @PreAuthorize("hasAnyAuthority('voucher-put', 'all')")
+    public ResponseEntity<HttpResponse> redeemVoucher(HttpServletRequest request,
+                                                      @RequestParam() String voucherRedeemCode)
+    {
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+        String logprefix = request.getRequestURI();
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Voucher Redeem Code:" + voucherRedeemCode);
 
-    @ApiOperation(value = "Create voucher", notes = "Note: Include storeId for STORE voucher type.")
+        VoucherSerialNumber voucherSerialNumber = voucherSerialNumberRepository.findByVoucherRedeemCode(voucherRedeemCode);
+
+        if (voucherSerialNumber == null) {
+            response.setMessage("Invalid voucher code.");
+            //response.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+
+        if (voucherSerialNumber.getCurrentStatus().equals(VoucherCurrentStatus.USED)) {
+            response.setMessage("The voucher have already been used, try different one.");
+            //response.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+
+        if (voucherSerialNumber.getCurrentStatus().equals(VoucherCurrentStatus.BOUGHT)) {
+            voucherSerialNumber.setCurrentStatus(VoucherCurrentStatus.USED);
+            voucherSerialNumber.setIsUsed(true);
+            voucherSerialNumber.update(voucherSerialNumber);
+            voucherSerialNumberRepository.save(voucherSerialNumber);
+        }
+
+        String voucherId = voucherSerialNumber.getVoucherId();
+        Optional<Voucher> voucherOptional = voucherRepository.findById(voucherId);
+
+        if (!voucherOptional.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND voucher with ID: " + voucherId);
+            response.setError("Voucher not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+
+        Voucher voucher = voucherOptional.get();
+        voucher.setTotalRedeem(voucher.getTotalRedeem()+1);
+        voucher.setTotalQuantity(voucher.getTotalQuantity()-1);
+
+        voucher.update(voucher);
+        voucherRepository.save(voucher);
+
+//        response.setData(voucherRepository.findById(id));
+        response.setStatus(HttpStatus.OK);
+        response.setMessage("Voucher was redeemed Successfully");
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+        @ApiOperation(value = "Create voucher", notes = "Note: Include storeId for STORE voucher type.")
     @PostMapping(path = {"/create"}, name = "voucher-post")
     @PreAuthorize("hasAnyAuthority('voucher-post', 'all')")
     public ResponseEntity<HttpResponse> postVoucher(HttpServletRequest request,
@@ -403,7 +454,7 @@ public class StoreProductVoucherController {
         if (productForInventory.getCostPrice()==null) {
             productForInventory.setCostPrice(0.00);
         }
-        // if new client for delivery, we auto set the dine in price reduce 15%
+        // if new client for delivery, we auto set dine in price reduce 15%
         if (productForInventory.getDineInPrice()==null) {
             productForInventory.setDineInPrice(productForInventory.getCostPrice()*0.85);
         }
@@ -552,7 +603,7 @@ public class StoreProductVoucherController {
                 productForInventory.setCostPrice(0.00);
             }
 
-            // if new client for delivery, we auto set the dine in price reduce 15%
+            // if new client for delivery, we auto set dine in price reduce 15%
             if (productForInventory.getDineInPrice() == null) {
                 productForInventory.setDineInPrice(productForInventory.getCostPrice() * 0.85);
             }
