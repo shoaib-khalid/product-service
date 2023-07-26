@@ -169,7 +169,6 @@ public class StoreProductVoucherController {
         return null; // Return null if voucherStatus is null or invalid
     }
 
-
     @GetMapping(path = {"/all-vouchers/{id}"})
     public ResponseEntity<HttpResponse> getAllVouchersById(HttpServletRequest request,
                                                            @PathVariable String id) {
@@ -193,6 +192,58 @@ public class StoreProductVoucherController {
 
         return ResponseEntity.status(response.getStatus()).body(response);
     }
+
+    @GetMapping(path = {"/check-voucher-code"})
+    public ResponseEntity<HttpResponse> checkVoucherCode(HttpServletRequest request,
+                                                         @RequestParam() String voucherRedeemCode
+    ) {
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+        String logprefix = request.getRequestURI();
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Voucher Redeem Code:" + voucherRedeemCode);
+
+        VoucherSerialNumber voucherSerialNumber = voucherSerialNumberRepository.findByVoucherRedeemCode(voucherRedeemCode);
+
+        if (voucherSerialNumber == null) {
+            response.setMessage("Invalid voucher code.");
+            //response.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+
+        if (!voucherSerialNumber.getCurrentStatus().equals(VoucherCurrentStatus.NEW)) {
+            response.setMessage("Voucher is not in NEW status.");
+            //response.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+
+        if ( voucherSerialNumber.getExpiryDate().before(new Date())) {
+            response.setMessage("Voucher is expired and cannot be redeemed.");
+            //response.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+
+        String voucherId = voucherSerialNumber.getVoucherId();
+        Optional<Voucher> voucherOptional = voucherRepository.findById(voucherId);
+
+        if (!voucherOptional.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND voucher with ID: " + voucherId);
+            response.setError("Voucher not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+
+        Voucher voucher = voucherOptional.get();
+
+        if (voucher.getTotalRedeem() > 0) {
+            response.setMessage("Voucher is not valid for redemption.");
+           // response.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+        // For successful validation
+        response.setStatus(HttpStatus.OK);
+        response.setMessage("Voucher code is valid and can be redeemed.");
+
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
 
     @ApiOperation(value = "Create voucher", notes = "Note: Include storeId for STORE voucher type.")
     @PostMapping(path = {"/create"}, name = "voucher-post")

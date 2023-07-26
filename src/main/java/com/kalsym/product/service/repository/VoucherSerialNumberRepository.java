@@ -21,4 +21,5 @@ public interface VoucherSerialNumberRepository extends PagingAndSortingRepositor
     @Query("DELETE FROM VoucherSerialNumber vt WHERE vt.voucherId = :voucherId")
     void deleteByVoucherId(@Param("voucherId") String voucherId);
 
+    VoucherSerialNumber findByVoucherRedeemCode(String voucherRedeemCode);
 }
