@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 
 @Repository
-public interface VoucherRepository extends PagingAndSortingRepository<Voucher, String>, JpaRepository<Voucher, String>, JpaSpecificationExecutor<Voucher> {
+public interface VoucherRepository extends PagingAndSortingRepository<Voucher, String>, JpaRepository<Voucher, String>, JpaSpecificationExecutor<Voucher>, CustomRepository<Voucher, String> {
 
     @Query("SELECT m FROM Voucher m WHERE "
             + "m.voucherCode = :voucherCode "

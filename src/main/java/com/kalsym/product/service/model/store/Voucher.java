@@ -78,6 +78,14 @@ public class Voucher implements Serializable {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private Date endDate;
 
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date created_at;
+
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date updated_at;
+
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "voucherId", insertable = false, updatable = false, nullable = true)
     private List<VoucherTerms> voucherTerms;

@@ -4,12 +4,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Date;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Objects;
+
+import com.kalsym.product.service.model.store.Voucher;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -20,8 +18,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import com.kalsym.product.service.enums.VehicleType;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 
 /**
  *
@@ -83,6 +79,10 @@ public class Product implements Serializable {
     private Integer sequenceNumber;
 
     private String voucherId;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "voucherId", insertable = false, updatable = false)
+    private Voucher voucher;
     
     @CreationTimestamp
     private Date created;
@@ -194,5 +194,28 @@ public class Product implements Serializable {
 
     public void setVoucherId(String voucherId) {
         this.voucherId = voucherId;
+    }
+
+    public static String generateSku(String productName) {
+        if (productName == null) {
+            return null;
+        }
+
+        // Remove leading and trailing white spaces
+        productName = productName.trim();
+
+        // Convert the entire string to lowercase
+        productName = productName.toLowerCase();
+
+        // Replace spaces with dashes ("-")
+        productName = productName.replace(" ", "-");
+
+        // Replace multiple consecutive dashes with a single dash
+        productName = productName.replaceAll("-+", "-");
+
+        // Remove all characters that are not alphanumeric or dashes
+        productName = productName.replaceAll("[^\\w-]", "");
+
+        return productName;
     }
 }

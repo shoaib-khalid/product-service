@@ -1,5 +1,6 @@
 package com.kalsym.product.service.model.product;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.enums.VehicleType;
 import com.kalsym.product.service.model.store.StoreCategoryMain;
@@ -25,6 +26,8 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+
+import com.kalsym.product.service.model.store.Voucher;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -43,6 +46,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Entity
 @Table(name = "product")
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProductWithDetails implements Serializable {
 
     @Id
@@ -142,6 +146,11 @@ public class ProductWithDetails implements Serializable {
             fetch = FetchType.LAZY)
     @JoinColumn(name = "id", referencedColumnName = "productId", insertable = false, updatable = false, nullable = true)
     private ProductDeliveryDetail productDeliveryDetail;
+    private String voucherId;
+
+    @OneToOne()
+    @JoinColumn(name = "voucherId", referencedColumnName="id", insertable = false, updatable = false)
+    private Voucher voucher;
 
     public String getSeoUrlMarketPlace() {
 

@@ -1,15 +1,18 @@
 package com.kalsym.product.service.controller;
 
 //Importing Models
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kalsym.product.service.ProductServiceApplication;
-import com.kalsym.product.service.enums.VoucherCurrentStatus;
-import com.kalsym.product.service.enums.VoucherGroupType;
+import com.kalsym.product.service.enums.*;
+import com.kalsym.product.service.model.Auth;
 import com.kalsym.product.service.model.product.Product;
 import com.kalsym.product.service.model.product.ProductInventory;
+import com.kalsym.product.service.model.product.ProductVoucherResponse;
+import com.kalsym.product.service.model.request.ProductVoucherRequest;
+import com.kalsym.product.service.model.request.ProductVoucherTermsRequest;
 import com.kalsym.product.service.model.store.*;
 //Importing Enums
-import com.kalsym.product.service.enums.VoucherStatus;
-import com.kalsym.product.service.enums.VoucherType;
 //Importing Repositories
 import com.kalsym.product.service.repository.*;
 //Importing Utilities
@@ -21,6 +24,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.Temporal;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
@@ -79,6 +85,11 @@ public class StoreProductVoucherController {
     @Autowired
     ProductInventoryRepository productInventoryRepository;
 
+    @Autowired
+    StoreProductController storeProductController;
+
+    @Autowired
+    StoreProductInventoryController storeProductInventoryController;
 
     @GetMapping(path = {"/available"})
     public ResponseEntity<HttpResponse> getAvailableVoucher(
@@ -245,7 +256,6 @@ public class StoreProductVoucherController {
     }
 
     @PutMapping(path = {"/redeem"}, name = "voucher-redeem")
-    @PreAuthorize("hasAnyAuthority('voucher-put', 'all')")
     public ResponseEntity<HttpResponse> redeemVoucher(HttpServletRequest request,
                                                       @RequestParam() String voucherRedeemCode)
     {
@@ -296,105 +306,127 @@ public class StoreProductVoucherController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-        @ApiOperation(value = "Create voucher", notes = "Note: Include storeId for STORE voucher type.")
-    @PostMapping(path = {"/create"}, name = "voucher-post")
-    @PreAuthorize("hasAnyAuthority('voucher-post', 'all')")
+    @ApiOperation(value = "Create voucher", notes = "Note: Include storeId for STORE voucher type.")
+    @PostMapping(path = {"/create"}, name = "product-voucher-post")
+    @PreAuthorize("hasAnyAuthority('product-voucher-post', 'all')")
     public ResponseEntity<HttpResponse> postVoucher(HttpServletRequest request,
                                                     @RequestParam() String storeId,
                                                     @RequestParam() String categoryId,
-                                                    @Valid @RequestBody Voucher voucherBody) {
+                                                    @Valid @RequestBody ProductVoucherRequest voucherBody) {
         String logprefix = "postVoucher()";
         HttpResponse response = new HttpResponse(request.getRequestURI());
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "bodyProduct: " + voucherBody.toString());
 
-        // Set total redeem to 0
-        voucherBody.setTotalRedeem(0);
+//        Auth auth = null;
+//        ObjectMapper mapper = new ObjectMapper();
+//        auth = mapper.convertValue(authResponse.getBody().getData(), Auth.class);
+//        System.out.println("USER_ROLE=" + );
 
-        if (storeId != null) {
-            Optional<Store> optionalStore = storeRepository.findById(storeId);
+        Optional<Store> optionalStore = storeRepository.findById(storeId);
 
-            if (!optionalStore.isPresent()) {
-                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
-//                response.setErrorStatus(HttpStatus.NOT_FOUND);
-                response.setError("Store not found");
-                return ResponseEntity.status(response.getStatus()).body(response);
-            }
-            // Set voucher type to STORE whenever has storeId
-            voucherBody.setVoucherType(VoucherType.STORE);
-            voucherBody.setStoreId(storeId);
+        if (!optionalStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
+            response.setError("Store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
-        if (categoryId != null) {
-            Optional<StoreCategory> optionalStore = storeCategoryRepository.findById(categoryId);
+        Optional<StoreCategory> optionalStoreCategory = storeCategoryRepository.findById(categoryId);
 
-            if (!optionalStore.isPresent()) {
-                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
-//                response.setErrorStatus(HttpStatus.NOT_FOUND);
-                response.setError("Category not found");
-                return ResponseEntity.status(response.getStatus()).body(response);
-            }
+        if (!optionalStoreCategory.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND categoryId: " + categoryId);
+            response.setError("Category not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
+        // Save to voucher table
+        Voucher voucherToSave = new Voucher();
 
-        voucherBody.setGroupType(VoucherGroupType.CASH);
-        Voucher savedVoucher = voucherRepository.save(voucherBody);
+        voucherToSave.setVoucherType(VoucherType.STORE);
+        voucherToSave.setStoreId(storeId);
+        voucherToSave.setName(voucherBody.getName());
+        voucherToSave.setDiscountValue(voucherBody.getVoucherValue());
+        voucherToSave.setMaxDiscountAmount(voucherBody.getVoucherValue());
+        voucherToSave.setVoucherCode(voucherBody.getVoucherCode());
+        voucherToSave.setTotalQuantity(voucherBody.getTotalQuantity());
+        voucherToSave.setTotalRedeem(0);
+        voucherToSave.setCurrencyLabel(voucherBody.getCurrencyLabel());
+        voucherToSave.setIsNewUserVoucher(true);
+        voucherToSave.setCheckTotalRedeem(true);
+        voucherToSave.setMinimumSpend(1.0);
+        voucherToSave.setAllowDoubleDiscount(true);
+        voucherToSave.setRequireToClaim(false);
+        voucherToSave.setStatus(VoucherStatus.ACTIVE);
+        voucherToSave.setVoucherType(VoucherType.STORE);
+        voucherToSave.setDiscountType(VoucherDiscountType.TOTALSALES);
+        voucherToSave.setGroupType(VoucherGroupType.CASH);
+        voucherToSave.setCalculationType(DiscountCalculationType.FIX);
+        voucherToSave.setStartDate(voucherBody.getStartDate());
+        voucherToSave.setEndDate(voucherBody.getEndDate());
+        voucherToSave.setCreated_at(new Date());
+        voucherToSave.setUpdated_at(new Date());
 
-        // If type is STORE, save to voucher_store table
-        if (savedVoucher.getVoucherType().equals(VoucherType.STORE) && !voucherBody.getVoucherStoreList().isEmpty()) {
+        Voucher savedVoucher = voucherRepository.save(voucherToSave);
 
-            for (VoucherStore voucherStore: voucherBody.getVoucherStoreList()) {
-                voucherStore.setVoucherId((savedVoucher.getId()));
-                voucherStore.setStoreId(storeId);
-                voucherStoreRepository.save(voucherStore);
-            }
-        }
+        // Save to voucher_store table
+        VoucherStore voucherStoreToSave = new VoucherStore();
+
+        voucherStoreToSave.setVoucherId((savedVoucher.getId()));
+        voucherStoreToSave.setStoreId(storeId);
+        voucherStoreRepository.save(voucherStoreToSave);
+
+
         // Save to voucher_service_type table
-        if (!voucherBody.getVoucherServiceTypeList().isEmpty()) {
-            for (VoucherServiceType voucherServiceType: voucherBody.getVoucherServiceTypeList()) {
-                voucherServiceType.setVoucherId(savedVoucher.getId());
-                voucherServiceTypeRepository.save(voucherServiceType);
-            }
-        }
+        // Create and save the DINEIN VoucherServiceType
+        VoucherServiceType dineInServiceType = new VoucherServiceType();
+        dineInServiceType.setVoucherId(savedVoucher.getId());
+        dineInServiceType.setServiceType("DINEIN");
+        voucherServiceTypeRepository.save(dineInServiceType);
+
+        // Create and save the DELIVERIN VoucherServiceType
+        VoucherServiceType deliverInServiceType = new VoucherServiceType();
+        deliverInServiceType.setVoucherId(savedVoucher.getId());
+        deliverInServiceType.setServiceType("DELIVERIN");
+        voucherServiceTypeRepository.save(deliverInServiceType);
+
 
         // Save to voucher_terms table
         if (!voucherBody.getVoucherTerms().isEmpty()) {
-            for (VoucherTerms voucherTerms: voucherBody.getVoucherTerms()) {
+            for (ProductVoucherTermsRequest voucherTermsRequest: voucherBody.getVoucherTerms()) {
+                VoucherTerms voucherTerms = new VoucherTerms();
+
                 voucherTerms.setVoucherId(savedVoucher.getId());
+                voucherTerms.setTerms(voucherTermsRequest.getTerms());
                 voucherTermsRepository.save(voucherTerms);
             }
         }
 
         // Save to voucher_vertical table
-        if (!voucherBody.getVoucherVerticalList().isEmpty()) {
-            for (VoucherVertical voucherVertical: voucherBody.getVoucherVerticalList()) {
-                voucherVertical.setVoucherId(savedVoucher.getId());
-                voucherVerticalRepository.save(voucherVertical);
-            }
+        VoucherVertical voucherVerticalToSave = new VoucherVertical();
+
+        voucherVerticalToSave.setVoucherId(savedVoucher.getId());
+        voucherVerticalToSave.setVerticalCode(voucherBody.getVerticalCode());
+        voucherVerticalRepository.save(voucherVerticalToSave);
+
+        // Delete data from DB
+        voucherSerialNumberRepository.deleteByVoucherId(savedVoucher.getId());
+        // Save to voucher_vertical table
+        int totalQuantity = voucherBody.getTotalQuantity();
+
+        for (int i = 0; i < totalQuantity; i++) {
+            VoucherSerialNumber voucherSerialNumber = new VoucherSerialNumber(); // Create a new instance inside the loop
+
+            voucherSerialNumber.setVoucherId(savedVoucher.getId());
+            voucherSerialNumber.setExpiryDate(savedVoucher.getEndDate());
+            voucherSerialNumber.setIsUsed(false);
+            voucherSerialNumber.setCurrentStatus(VoucherCurrentStatus.NEW);
+
+            VoucherSerialNumber savedVoucherSerialNumber =  voucherSerialNumberRepository.save(voucherSerialNumber);
+
+            voucherSerialNumber.setVoucherRedeemCode(VoucherSerialNumber.generateUniqueRedeemCode(voucherBody.getName(), voucherSerialNumber.getId()));
+            String voucherRedeemCode = savedVoucherSerialNumber.getVoucherRedeemCode();
+            savedVoucherSerialNumber.setSerialNumber(VoucherSerialNumber.generateUniqueSerialNumber(voucherRedeemCode));
+
+            voucherSerialNumber.update(savedVoucherSerialNumber);
+            voucherSerialNumberRepository.save(voucherSerialNumber);
         }
-
-        if (!voucherBody.getVoucherSerialNumber().isEmpty()) {
-            // Delete data from DB
-            voucherSerialNumberRepository.deleteByVoucherId(savedVoucher.getId());
-            // Save to voucher_vertical table
-            int totalQuantity = voucherBody.getTotalQuantity();
-
-            for (int i = 0; i < totalQuantity; i++) {
-                VoucherSerialNumber voucherSerialNumber = new VoucherSerialNumber(); // Create a new instance inside the loop
-
-                voucherSerialNumber.setVoucherId(savedVoucher.getId());
-                voucherSerialNumber.setExpiryDate(savedVoucher.getEndDate());
-                voucherSerialNumber.setIsUsed(false);
-                voucherSerialNumber.setCurrentStatus(VoucherCurrentStatus.NEW);
-
-                VoucherSerialNumber savedVoucherSerialNumber =  voucherSerialNumberRepository.save(voucherSerialNumber);
-
-                voucherSerialNumber.setVoucherRedeemCode(VoucherSerialNumber.generateUniqueRedeemCode(voucherBody.getName(), voucherSerialNumber.getId()));
-                String voucherRedeemCode = savedVoucherSerialNumber.getVoucherRedeemCode();
-                savedVoucherSerialNumber.setSerialNumber(VoucherSerialNumber.generateUniqueSerialNumber(voucherRedeemCode));
-
-                voucherSerialNumber.update(savedVoucherSerialNumber);
-                voucherSerialNumberRepository.save(voucherSerialNumber);
-            }
-        }
-
 
         // Create a new Product and Product Inventory entity based on the voucher information
         Product productForVoucher = new Product();
@@ -410,70 +442,149 @@ public class StoreProductVoucherController {
         for (Product existingProduct : products) {
             if (existingProduct.getName().equals(productForVoucher.getName()) && !"DELETED".equalsIgnoreCase(existingProduct.getStatus())) {
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "productName already exists", "");
+                // DELETE voucher
+                voucherRepository.deleteById(savedVoucher.getId());
                 response.setStatus(HttpStatus.CONFLICT);
                 errors.add("Product name already exists");
                 response.setData(errors);
                 return ResponseEntity.status(response.getStatus()).body(response);
             }
         }
+
+        String SkuGenerated = Product.generateSku(voucherBody.getName());
+
+        productForVoucher.setDescription(voucherBody.getDescription());
         // Set the voucher id in the product table
-        productForVoucher.setVoucherId(voucherBody.getId());
+        productForVoucher.setVoucherId(savedVoucher.getId());
         // Set the category id in the product table
         productForVoucher.setCategoryId(categoryId);
         // Set the voucher's storeId in Product table
-        productForVoucher.setStoreId(voucherBody.getStoreId());
+        productForVoucher.setStoreId(storeId);
         // Set the specific value for 'allowOutOfStockPurchases' to false
         productForVoucher.setAllowOutOfStockPurchases(false);
         // Set the custom price as false
         productForVoucher.setCustomPrice(false);
-        // Set track quantity as false
-        productForVoucher.setTrackQuantity(false);
+        // Set track quantity as true
+        productForVoucher.setTrackQuantity(true);
         // set allow out of stock option as false
         productForVoucher.setAllowOutOfStockPurchases(false);
-        //set minimum quantity for alarm to 10
-        productForVoucher.setMinQuantityForAlarm(10);
+        // set minimum quantity for alarm to -1
+        productForVoucher.setMinQuantityForAlarm(-1);
+        productForVoucher.setPackingSize("S");
+        productForVoucher.setVehicleType(VehicleType.MOTORCYCLE);
+        productForVoucher.setStatus(voucherBody.getStatus().toString());
+        productForVoucher.setIsPackage(false);
+        productForVoucher.setIsNoteOptional(true);
+        productForVoucher.setCustomNote("");
+        productForVoucher.setHasAddOn(false);
+        productForVoucher.setSeoName(SkuGenerated);
+        productForVoucher.setSeoUrl("");
 
-        // bodyProduct.setSeoName(seoName);
-        if (productForVoucher.getIsPackage()==null) { productForVoucher.setIsPackage(Boolean.FALSE); }
+        Product createdProduct = new Product();
 
-        //to handle backward compatibility since we implement new features for add on
-        if(productForVoucher.getHasAddOn()==null) { productForVoucher.setHasAddOn(Boolean.FALSE);}
+        try {
+            // Make the web service call and get the ResponseEntity
+            ResponseEntity<HttpResponse> responseEntity = storeProductController.postStoreProduct(request, storeId, productForVoucher);
 
-        //Save in Repository
-        Product savedProduct = productRepository.save(productForVoucher);
-        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "product added to store with storeId: {}, productId: {}" + storeId, savedProduct.getId());
+            // Check the HTTP status code of the response
+            HttpStatus statusCode = responseEntity.getStatusCode();
 
+            if (statusCode.is2xxSuccessful()) {
+                // Successful response, get the created product from the response body
+                createdProduct = (Product) responseEntity.getBody().getData();
+                Logger.application.info(ProductServiceApplication.VERSION, logprefix, "product created: " + createdProduct);
 
-        // Product table update--------------------------
+                // Further processing with the savedProduct
+            } else if (statusCode.is4xxClientError() || statusCode.is5xxServerError()) {
+                // Handle client or server errors, e.g., validation errors or internal server errors
+
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Error while creating Product", "");
+                // DELETE voucher
+                voucherRepository.deleteById(savedVoucher.getId());
+                response.setStatus(HttpStatus.BAD_REQUEST);
+                errors.add("Error while creating Product");
+                response.setData(errors);
+                return ResponseEntity.status(response.getStatus()).body(response);
+            }
+        } catch (Exception e) {
+            // Handle general exceptions that might occur during the web service call
+            // For example, network issues, timeouts, or any unexpected exceptions
+
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Exception_prod==" + e.getMessage());
+            // DELETE voucher
+            voucherRepository.deleteById(savedVoucher.getId());
+            response.setStatus(HttpStatus.BAD_REQUEST);
+            errors.add("Error while creating Product");
+            response.setData(errors);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+
+        ProductInventory createdProductInventory = new ProductInventory();
+        productForInventory.setProductId(createdProduct.getId());
+        // Product inventory table update--------------------------
         // set product id
-        productForInventory.setProductId(productForVoucher.getId());
-        productForInventory.setItemCode(productForVoucher.getId());
+        productForInventory.setProductId(createdProduct.getId());
+        productForInventory.setItemCode(createdProduct.getId()+ "aa");
         // set quantity from voucher body
         productForInventory.setQuantity(voucherBody.getTotalQuantity());
+        productForInventory.setPrice(voucherBody.getSellingPrice());
+        productForInventory.setDineInPrice(voucherBody.getSellingPrice());
+        productForInventory.setCompareAtprice(0.0);
+        productForInventory.setSKU(SkuGenerated);
+        productForInventory.setStatus("NOTAVAILABLE");
 
-        if (productForInventory.getCostPrice()==null) {
-            productForInventory.setCostPrice(0.00);
-        }
-        // if new client for delivery, we auto set dine in price reduce 15%
-        if (productForInventory.getDineInPrice()==null) {
-            productForInventory.setDineInPrice(productForInventory.getCostPrice()*0.85);
-        }
+        try {
+            // Make the web service call and get the ResponseEntity
+            ResponseEntity<HttpResponse> responseEntity = storeProductInventoryController.postStoreProductInventorys(request, storeId, productForInventory.getProductId(), productForInventory);
 
-        //Save in Repository
-        productInventoryRepository.save(productForInventory);
+            // Check the HTTP status code of the response
+            HttpStatus statusCode = responseEntity.getStatusCode();
+
+            if (statusCode.is2xxSuccessful()) {
+                // Successful response, get the created product inventory from the response body
+                createdProductInventory = (ProductInventory) responseEntity.getBody().getData();
+                Logger.application.info(ProductServiceApplication.VERSION, logprefix, "product inventory created: " + createdProductInventory);
+
+            } else if (statusCode.is4xxClientError() || statusCode.is5xxServerError()) {
+                // Handle client or server errors, e.g., validation errors or internal server errors
+
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Error while creating Product Inventory", "");
+                // DELETE voucher
+                voucherRepository.deleteById(savedVoucher.getId());
+                response.setStatus(HttpStatus.BAD_REQUEST);
+                errors.add("Error while creating Product Inventory");
+                response.setData(errors);
+                return ResponseEntity.status(response.getStatus()).body(response);
+            }
+        } catch (Exception e) {
+            // Handle general exceptions that might occur during the web service call
+            // For example, network issues, timeouts, or any unexpected exceptions
+
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Exception_prodInv==" + e.getMessage());
+            // DELETE voucher
+            voucherRepository.deleteById(savedVoucher.getId());
+            response.setStatus(HttpStatus.BAD_REQUEST);
+            errors.add("Error while creating Product Inventory");
+            response.setData(errors);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        // Refresh repositories to get the latest data
+        voucherRepository.refresh(savedVoucher);
+        productRepository.refresh(createdProduct);
+        Optional<Product> optionalProduct = productRepository.findById(createdProduct.getId());
 
         response.setStatus(HttpStatus.CREATED);
-        response.setData(savedVoucher);
+        response.setData(optionalProduct.get());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
 
 
-    @PutMapping(path = {"/edit/{id}"}, name = "voucher-put")
-    @PreAuthorize("hasAnyAuthority('voucher-put', 'all')")
+    @PutMapping(path = {"/edit/{id}"}, name = "product-voucher-put")
+    @PreAuthorize("hasAnyAuthority('product-voucher-put', 'all')")
     public ResponseEntity<HttpResponse> putVoucher(HttpServletRequest request,
                                                    @PathVariable String id,
-                                                   @RequestBody Voucher bodyVoucher) {
+                                                   @RequestBody ProductVoucherRequest voucherBody) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
         Logger.application.info(ProductServiceApplication.VERSION, logprefix, "id: " + id);
@@ -486,67 +597,84 @@ public class StoreProductVoucherController {
             return ResponseEntity.status(response.getStatus()).body(response);
         }
 
-
         Voucher voucher = voucherOptional.get();
         String oldName = voucher.getName();
         int oldVoucherQuantity = voucher.getTotalQuantity();
         // Update voucher details based on the request body
-        voucher.update(bodyVoucher);
+        // Save to voucher table
+        voucher.setName(voucherBody.getName());
+        voucher.setDiscountValue(voucherBody.getVoucherValue());
+        voucher.setMaxDiscountAmount(voucherBody.getVoucherValue());
+        voucher.setVoucherCode(voucherBody.getVoucherCode());
+        voucher.setTotalQuantity(voucherBody.getTotalQuantity());
+        voucher.setCurrencyLabel(voucherBody.getCurrencyLabel());
+        voucher.setStartDate(voucherBody.getStartDate());
+        voucher.setEndDate(voucherBody.getEndDate());
+        voucher.setUpdated_at(new Date());
+
+//        voucher.update(voucher);
         Voucher updatedVoucher = voucherRepository.save(voucher);
 
         voucher.setStoreId(voucher.getStoreId());
 
-        // Check if the voucher type has changed from STORE to PLATFORM
-        if (bodyVoucher.getVoucherType() == VoucherType.PLATFORM) {
-            // Delete voucher_store data from the database if the type changed to PLATFORM
-            voucherStoreRepository.deleteByVoucherId(updatedVoucher.getId());
-        }
+//        // Check if the voucher type has changed from STORE to PLATFORM
+//        if (voucherBody.getVoucherType() == VoucherType.PLATFORM) {
+//            // Delete voucher_store data from the database if the type changed to PLATFORM
+//            voucherStoreRepository.deleteByVoucherId(updatedVoucher.getId());
+//        }
+//
+//        // Update or save data in voucher_store table based on the request
+//        if (bodyVoucher.getVoucherType() == VoucherType.STORE) {
+//            // Delete existing voucher_store data from the database
+//            voucherStoreRepository.deleteByVoucherId(updatedVoucher.getId());
+//            // Save the new voucher_store data from the request body
+//            List<VoucherStore> voucherStoreList = bodyVoucher.getVoucherStoreList();
+//            for (VoucherStore voucherStore : voucherStoreList) {
+//                voucherStore.setVoucherId(updatedVoucher.getId());
+//                voucherStoreRepository.save(voucherStore);
+//            }
+//        }
 
-        // Update or save data in voucher_store table based on the request
-        if (bodyVoucher.getVoucherType() == VoucherType.STORE) {
-            // Delete existing voucher_store data from the database
-            voucherStoreRepository.deleteByVoucherId(updatedVoucher.getId());
-            // Save the new voucher_store data from the request body
-            List<VoucherStore> voucherStoreList = bodyVoucher.getVoucherStoreList();
-            for (VoucherStore voucherStore : voucherStoreList) {
-                voucherStore.setVoucherId(updatedVoucher.getId());
-                voucherStoreRepository.save(voucherStore);
-            }
-        }
+        // Delete data from DB
+        voucherServiceTypeRepository.deleteByVoucherId(updatedVoucher.getId());
 
-        // If exist
-        if (!bodyVoucher.getVoucherServiceTypeList().isEmpty()) {
-            // Delete data from DB
-            voucherServiceTypeRepository.deleteByVoucherId(updatedVoucher.getId());
-            // Save to voucher_service_type table
-            for (VoucherServiceType voucherServiceType: bodyVoucher.getVoucherServiceTypeList()) {
-                voucherServiceType.setVoucherId(updatedVoucher.getId());
-                voucherServiceTypeRepository.save(voucherServiceType);
-            }
-        }
+        // Save to voucher_service_type table
+        // Create and save the DINEIN VoucherServiceType
+        VoucherServiceType dineInServiceType = new VoucherServiceType();
+        dineInServiceType.setVoucherId(id);
+        dineInServiceType.setServiceType("DINEIN");
+        voucherServiceTypeRepository.save(dineInServiceType);
 
-        if (!bodyVoucher.getVoucherTerms().isEmpty()) {
+        // Create and save the DELIVERIN VoucherServiceType
+        VoucherServiceType deliverInServiceType = new VoucherServiceType();
+        deliverInServiceType.setVoucherId(id);
+        deliverInServiceType.setServiceType("DELIVERIN");
+        voucherServiceTypeRepository.save(deliverInServiceType);
+
+        if (!voucherBody.getVoucherTerms().isEmpty()) {
             // Delete data from DB
             voucherTermsRepository.deleteByVoucherId(updatedVoucher.getId());
             // Save to voucher_terms table
-            for (VoucherTerms voucherTerms: bodyVoucher.getVoucherTerms()) {
-                voucherTerms.setVoucherId(updatedVoucher.getId());
+            for (ProductVoucherTermsRequest voucherTermsRequest: voucherBody.getVoucherTerms()) {
+                VoucherTerms voucherTerms = new VoucherTerms();
+
+                voucherTerms.setVoucherId(id);
+                voucherTerms.setTerms(voucherTermsRequest.getTerms());
                 voucherTermsRepository.save(voucherTerms);
             }
         }
 
-        if (!bodyVoucher.getVoucherVerticalList().isEmpty()) {
-            // Delete data from DB
-            voucherVerticalRepository.deleteByVoucherId(updatedVoucher.getId());
-            // Save to voucher_vertical table
-            for (VoucherVertical voucherVertical: bodyVoucher.getVoucherVerticalList()) {
-                voucherVertical.setVoucherId(updatedVoucher.getId());
-                voucherVerticalRepository.save(voucherVertical);
-            }
-        }
+        // Delete data from DB
+        voucherVerticalRepository.deleteByVoucherId(updatedVoucher.getId());
+        // Save to voucher_vertical table
+        VoucherVertical voucherVerticalToSave = new VoucherVertical();
 
-        int newVoucherQuantity = bodyVoucher.getTotalQuantity();
-        if(newVoucherQuantity > oldVoucherQuantity){
+        voucherVerticalToSave.setVoucherId(id);
+        voucherVerticalToSave.setVerticalCode(voucherBody.getVerticalCode());
+        voucherVerticalRepository.save(voucherVerticalToSave);
+
+        int newVoucherQuantity = voucherBody.getTotalQuantity();
+        if (newVoucherQuantity > oldVoucherQuantity){
             int moreVoucherQuantity = newVoucherQuantity - oldVoucherQuantity;
             for (int i = 0; i < moreVoucherQuantity; i++) {
                 VoucherSerialNumber voucherSerialNumber = new VoucherSerialNumber(); // Create a new instance inside the loop
@@ -557,7 +685,7 @@ public class StoreProductVoucherController {
                 voucherSerialNumber.setCurrentStatus(VoucherCurrentStatus.NEW);
                 VoucherSerialNumber savedVoucherSerialNumber =  voucherSerialNumberRepository.save(voucherSerialNumber);
 
-                voucherSerialNumber.setVoucherRedeemCode(VoucherSerialNumber.generateUniqueRedeemCode(bodyVoucher.getName(), voucherSerialNumber.getId()));
+                voucherSerialNumber.setVoucherRedeemCode(VoucherSerialNumber.generateUniqueRedeemCode(voucherBody.getName(), voucherSerialNumber.getId()));
                 String voucherRedeemCode = savedVoucherSerialNumber.getVoucherRedeemCode();
                 savedVoucherSerialNumber.setSerialNumber(VoucherSerialNumber.generateUniqueSerialNumber(voucherRedeemCode));
 
@@ -566,52 +694,49 @@ public class StoreProductVoucherController {
             }
         }
 
-        if (!oldName.equals(updatedVoucher.getName())) {
+        Optional<Product> productOptional = productRepository.findByVoucherId(id);
 
-            Optional<Product> productOptional = productRepository.findByVoucherId(id);
-
-            if (!productOptional.isPresent()) {
-                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION,
-                        logprefix, " NOT_FOUND voucher product with ID: " + id);
-                response.setError("Voucher Product not found");
-                return ResponseEntity.status(response.getStatus()).body(response);
-            }
-            Optional<ProductInventory> productInventoryOptional = productInventoryRepository.findById(productOptional.get().getId());
-            if (!productInventoryOptional.isPresent()) {
-                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION,
-                        logprefix, " NOT_FOUND voucher product inventory with ID: " + id);
-                response.setError("Voucher Product Inventory not found");
-                return ResponseEntity.status(response.getStatus()).body(response);
-            }
-
-            // Product table update--------------------------
-            // Create a new Product and Product Inventory entity based on the voucher information
-            Product productForVoucher = productOptional.get();
-            ProductInventory productForInventory = productInventoryOptional.get();
-
-            // Set the product name based on the voucher name
-            productForVoucher.setName(bodyVoucher.getName());
-
-            productForVoucher.update(productForVoucher);
-            productRepository.save(productForVoucher);
-
-            // Product Inventory table update--------------------------
-            // Set quantity from voucher body
-            productForInventory.setQuantity(bodyVoucher.getTotalQuantity());
-
-            if (productForInventory.getCostPrice() == null) {
-                productForInventory.setCostPrice(0.00);
-            }
-
-            // if new client for delivery, we auto set dine in price reduce 15%
-            if (productForInventory.getDineInPrice() == null) {
-                productForInventory.setDineInPrice(productForInventory.getCostPrice() * 0.85);
-            }
-
-            // Save in Repository
-            productInventoryRepository.save(productForInventory);
+        if (!productOptional.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION,
+                    logprefix, " NOT_FOUND voucher product with ID: " + id);
+            response.setError("Voucher Product not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
-        response.setData(voucherRepository.findById(id));
+        List<ProductInventory> productInventoryOptional = productInventoryRepository.findByProductId(productOptional.get().getId());
+
+        if (productInventoryOptional.size() == 0){
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND voucher product inventory with ID: " + id);
+            response.setError("Voucher Product Inventory not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+        String SkuGenerated = Product.generateSku(voucherBody.getName());
+
+        // Product table update--------------------------
+        // Create a new Product and Product Inventory entity based on the voucher information
+        Product productForVoucher = productOptional.get();
+
+        // Set the product name based on the voucher name
+        productForVoucher.setName(voucherBody.getName());
+        productForVoucher.setSeoName(SkuGenerated);
+        productForVoucher.update(productForVoucher);
+        Product savedProduct = productRepository.save(productForVoucher);
+
+        // Product Inventory table update--------------------------
+        for (ProductInventory pi :productInventoryOptional){
+
+            pi.setPrice(voucherBody.getSellingPrice());
+            pi.setDineInPrice(voucherBody.getSellingPrice());
+            pi.setSKU(SkuGenerated);
+            pi.setQuantity(voucherBody.getTotalQuantity());
+            productInventoryRepository.save(pi);
+
+        }
+        // Refresh repositories to get the latest data
+        voucherRepository.refresh(updatedVoucher);
+        productRepository.refresh(savedProduct);
+        Optional<Product> optionalProduct = productRepository.findById(savedProduct.getId());
+
+        response.setData(optionalProduct.get());
         response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);
     }

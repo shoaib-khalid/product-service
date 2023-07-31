@@ -4,6 +4,7 @@ import com.kalsym.product.service.model.product.Product;
 import java.util.List;
 import java.util.Optional;
 
+import com.kalsym.product.service.model.store.Voucher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,7 +22,7 @@ import org.springframework.stereotype.Repository;
 // CRUD refers Create, Read, Update, Delete
 //@RepositoryRestResource(collectionResourceRel = "products", path = "products")
 @Repository
-public interface ProductRepository extends PagingAndSortingRepository<Product, String>, JpaRepository<Product, String>,JpaSpecificationExecutor<Product>{
+public interface ProductRepository extends PagingAndSortingRepository<Product, String>, JpaRepository<Product, String>,JpaSpecificationExecutor<Product>, CustomRepository<Product, String>{
 
     List<Product> findByName(@Param("name") String name);
     

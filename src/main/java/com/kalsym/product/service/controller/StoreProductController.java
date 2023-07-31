@@ -183,6 +183,7 @@ public class StoreProductController {
             @RequestParam(required = false) Boolean showAllPrice,
             @RequestParam(required = false) Boolean isCustomPrice,
             @RequestParam(required = false) String platformType,
+            @RequestParam(required = false, defaultValue = "false") Boolean includeVoucher,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int pageSize) {
         String logprefix = request.getRequestURI();
@@ -275,7 +276,7 @@ public class StoreProductController {
         //     productWithPage = productWithDetailsRepository.findByNameOrSeoNameOrCategoryIdAscendingOrderByPrice(storeId, name, seoName, status, categoryId, shortId, pageable);        
         // else
         //     productWithPage = productWithDetailsRepository.findByNameOrSeoNameAscendingOrderByPrice(storeId, name, seoName, status, shortId, pageable);        
-        Page<ProductWithDetails> productWithPage = productWithDetailsRepository.findAll(getStoreProductSpec(name, seoName, categoryId,storeId,shortId, status,showAllPrice, platformType,productExample,isCustomPrice,sortByCol,sortingOrder), pageable);
+        Page<ProductWithDetails> productWithPage = productWithDetailsRepository.findAll(getStoreProductSpec(name, seoName, categoryId,storeId,shortId, status,showAllPrice, platformType,productExample,isCustomPrice,sortByCol,sortingOrder, includeVoucher), pageable);
         List<ProductWithDetails> productList = productWithPage.getContent();
         
         ProductWithDetails[] productWithDetailsList = new ProductWithDetails[productList.size()];
@@ -614,7 +615,7 @@ public class StoreProductController {
     @PreAuthorize("hasAnyAuthority('store-products-post', 'all')  and @customOwnerVerifier.VerifyStore(#storeId)")
     public ResponseEntity<HttpResponse> postStoreProduct(HttpServletRequest request,
             @PathVariable String storeId,
-            @Valid @RequestBody Product bodyProduct) throws Exception {
+            @Valid @RequestBody Product bodyProduct) {
         String logprefix = request.getRequestURI();
         HttpResponse response = new HttpResponse(request.getRequestURI());
 
@@ -716,7 +717,7 @@ public class StoreProductController {
             String storeId, Integer shortId,
             List<String> statusList,Boolean showAllPrice, String platformType, Example<ProductWithDetails> example,
             Boolean isCustomPrice,
-            String sortByCol, Sort.Direction sortingOrder) {
+            String sortByCol, Sort.Direction sortingOrder, Boolean includeVoucher) {
 
         return (Specification<ProductWithDetails>) (root, query, builder) -> {
             final List<Predicate> predicates = new ArrayList<>();
@@ -808,6 +809,10 @@ public class StoreProductController {
 
                 }
 
+            }
+
+            if (!includeVoucher) {
+                predicates.add(builder.isNull(root.get("voucherId")));
             }
 
             predicates.add(builder.equal(root.get("isCustomPrice"), isCustomPrice));
