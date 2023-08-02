@@ -49,8 +49,7 @@ public class StoreAssetsUtility {
             String assetServiceUrl
             ) {
         
-        System.out.println("CHECKING THE ASSET URL"+assetServiceUrl);
-        //to set the url asset for existing data  
+        //to set the url asset for existing data
         for(StoreAssets s:storeAssetsList ){
             //handle null
             if(s.getAssetUrl() != null){

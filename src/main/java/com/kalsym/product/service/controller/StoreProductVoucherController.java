@@ -158,7 +158,7 @@ public class StoreProductVoucherController {
                 .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
         Example<Voucher> example = Example.of(voucherMatch, matcher);
 
-        Specification<Voucher> voucherSpec = VoucherSearchSpecs.getSpecWithDatesBetween(new Date(), voucherType, storeId, verticalCode, voucherCode, parseVoucherStatus(voucherStatus), example);
+        Specification<Voucher> voucherSpec = VoucherSearchSpecs.getSpecWithDatesBetween(null, voucherType, storeId, verticalCode, voucherCode, parseVoucherStatus(voucherStatus), example);
         Page<Voucher> voucherWithPage = voucherRepository.findAll(voucherSpec, pageable);
 
         response.setStatus(HttpStatus.OK);
