@@ -80,7 +80,7 @@ public class Product implements Serializable {
 
     private String voucherId;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "voucherId", insertable = false, updatable = false)
     private Voucher voucher;
     
