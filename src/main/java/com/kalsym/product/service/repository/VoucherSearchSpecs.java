@@ -2,14 +2,19 @@ package com.kalsym.product.service.repository;
 
 import com.kalsym.product.service.enums.VoucherStatus;
 import com.kalsym.product.service.enums.VoucherType;
+import com.kalsym.product.service.model.product.ProductInventoryWithDetails;
+import com.kalsym.product.service.model.product.ProductWithDetails;
 import com.kalsym.product.service.model.store.VoucherVertical;
 import com.kalsym.product.service.model.store.Voucher;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.convert.QueryByExamplePredicateBuilder;
 
@@ -80,6 +85,84 @@ public class VoucherSearchSpecs {
             predicates.add(QueryByExamplePredicateBuilder.getPredicate(root, builder, example));
 
             return builder.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+    public static Specification<ProductWithDetails> getProductVoucherSpec(
+            String name, String storeId,
+            List<String> statusList, Example<ProductWithDetails> example,
+            String sortByCol, Sort.Direction sortingOrder) {
+
+        return (Specification<ProductWithDetails>) (root, query, builder) -> {
+            final List<Predicate> predicates = new ArrayList<>();
+            Join<ProductWithDetails, ProductInventoryWithDetails> productInventories = root.join("productInventories", JoinType.INNER);
+//            Join<ProductWithDetails, Voucher> voucherJoin = root.join("voucherId");
+
+            if (name != null) {
+                // predicates.add(builder.equal(root.get("name"), name));
+                predicates.add(builder.like(root.get("name"), "%"+name+"%"));
+
+            }
+
+            if (storeId != null ){
+                predicates.add(builder.equal(root.get("storeId"), storeId));
+            }
+
+            if (statusList!=null) {
+                int statusCount = statusList.size();
+                List<Predicate> statusPredicatesList = new ArrayList<>();
+                for (int i=0;i<statusList.size();i++) {
+                    Predicate predicateForCompletionStatus = builder.equal(root.get("status"), statusList.get(i));
+                    statusPredicatesList.add(predicateForCompletionStatus);
+                }
+                Predicate finalPredicate = builder.or(statusPredicatesList.toArray(new Predicate[statusCount]));
+                predicates.add(finalPredicate);
+            }
+
+            List<Order> orderList = new ArrayList<Order>();
+
+            if (sortingOrder==Sort.Direction.ASC){
+                if(sortByCol.equals("price")){
+
+                    orderList.add(builder.asc(productInventories.get(sortByCol)));
+
+                } else if(sortByCol.equals("dineInPrice")){
+                    orderList.add(builder.asc(productInventories.get(sortByCol)));
+
+                }
+                else{
+                    orderList.add(builder.asc(root.get(sortByCol)));
+
+                }
+
+            }else{
+
+                if(sortByCol.equals("price")){
+
+                    orderList.add(builder.desc(productInventories.get(sortByCol)));
+
+
+                }else if(sortByCol.equals("dineInPrice")){
+                    orderList.add(builder.desc(productInventories.get(sortByCol)));
+
+                }
+                else{
+                    orderList.add(builder.desc(root.get(sortByCol)));
+
+                }
+
+
+            }
+
+            predicates.add(builder.isNotNull(root.get("voucherId")));
+
+            query.orderBy(orderList);
+            query.distinct(true);
+
+
+            predicates.add(QueryByExamplePredicateBuilder.getPredicate(root, builder, example));
+
+            return builder.and(predicates.toArray(new Predicate[predicates.size()]));
         };
     }
 

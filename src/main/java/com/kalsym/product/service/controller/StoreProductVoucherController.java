@@ -1,45 +1,34 @@
 package com.kalsym.product.service.controller;
 
 //Importing Models
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.enums.*;
-import com.kalsym.product.service.model.Auth;
-import com.kalsym.product.service.model.product.Product;
-import com.kalsym.product.service.model.product.ProductInventory;
-import com.kalsym.product.service.model.product.ProductVoucherResponse;
+import com.kalsym.product.service.model.ItemDiscount;
+import com.kalsym.product.service.model.RegionCountry;
+import com.kalsym.product.service.model.product.*;
 import com.kalsym.product.service.model.request.ProductVoucherRequest;
 import com.kalsym.product.service.model.request.ProductVoucherTermsRequest;
 import com.kalsym.product.service.model.store.*;
-//Importing Enums
-//Importing Repositories
+import com.kalsym.product.service.model.store.object.CustomPageable;
 import com.kalsym.product.service.repository.*;
-//Importing Utilities
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.utility.Logger;
-
-//Importing Java Utils
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Temporal;
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-
-//Importing Swagger
-//Importing Spring framework
+import com.kalsym.product.service.utility.ProductDiscount;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -91,6 +80,15 @@ public class StoreProductVoucherController {
     @Autowired
     StoreProductInventoryController storeProductInventoryController;
 
+    @Autowired
+    ProductWithDetailsRepository productWithDetailsRepository;
+
+    @Autowired
+    RegionCountriesRepository regionCountriesRepository;
+
+    @Value("${asset.service.url}")
+    String assetServiceUrl;
+
     @GetMapping(path = {"/available"})
     public ResponseEntity<HttpResponse> getAvailableVoucher(
             HttpServletRequest request,
@@ -136,33 +134,158 @@ public class StoreProductVoucherController {
 
     @GetMapping(path = {"/all-vouchers"})
     public ResponseEntity<HttpResponse> getAllVouchers(HttpServletRequest request,
-                                                       @RequestParam(required = false) VoucherType voucherType,
-                                                       @RequestParam(required = false) String verticalCode,
+                                                       @RequestParam(required = false) String name,
                                                        @RequestParam(required = false) String voucherCode,
-                                                       @RequestParam(required = false) String storeId,
-                                                       @RequestParam(required = false) String voucherStatus,
+                                                       @RequestParam String storeId,
+                                                       @RequestParam(required = false) List<String> voucherStatus,
                                                        @RequestParam(defaultValue = "0") int page,
-                                                       @RequestParam(defaultValue = "20") int pageSize
+                                                       @RequestParam(defaultValue = "20") int pageSize,
+                                                       @RequestParam(required = false, defaultValue = "name") String sortByCol,
+                                                       @RequestParam(required = false, defaultValue = "ASC") Sort.Direction sortingOrder
     ) {
 
         HttpResponse response = new HttpResponse(request.getRequestURI());
         String logprefix = request.getRequestURI();
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "voucherType:" + voucherType + " storeId:" + storeId);
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " storeId:" + storeId);
 
-        Voucher voucherMatch = new Voucher();
+//        Voucher voucherMatch = new Voucher();
+//
+//        Pageable pageable = PageRequest.of(page, pageSize);
+//        ExampleMatcher matcher = ExampleMatcher
+//                .matchingAll()
+//                .withIgnoreCase()
+//                .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
+//        Example<Voucher> example = Example.of(voucherMatch, matcher);
+
+//        Specification<Voucher> voucherSpec = VoucherSearchSpecs.getSpecWithDatesBetween(null, voucherType, storeId, verticalCode, voucherCode, parseVoucherStatus(voucherStatus), example);
+//        Page<Voucher> voucherWithPage = voucherRepository.findAll(voucherSpec, pageable);
+
+        Optional<Store> optStore = storeRepository.findById(storeId);
+
+        if (!optStore.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("store not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+
+        // Get reqion country for store
+        RegionCountry regionCountry = null;
+        Optional<RegionCountry> optRegion = regionCountriesRepository.findById(optStore.get().getRegionCountryId());
+        if (optRegion.isPresent()) {
+            regionCountry = optRegion.get();
+        }
 
         Pageable pageable = PageRequest.of(page, pageSize);
+        ProductWithDetails productMatch = new ProductWithDetails();
         ExampleMatcher matcher = ExampleMatcher
                 .matchingAll()
                 .withIgnoreCase()
+                .withIgnoreNullValues()
                 .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
-        Example<Voucher> example = Example.of(voucherMatch, matcher);
+        Example<ProductWithDetails> productExample = Example.of(productMatch, matcher);
 
-        Specification<Voucher> voucherSpec = VoucherSearchSpecs.getSpecWithDatesBetween(null, voucherType, storeId, verticalCode, voucherCode, parseVoucherStatus(voucherStatus), example);
-        Page<Voucher> voucherWithPage = voucherRepository.findAll(voucherSpec, pageable);
+        Specification<ProductWithDetails> productWithDetailsSpec = VoucherSearchSpecs.getProductVoucherSpec(name, storeId, voucherStatus, productExample, sortByCol, sortingOrder);
+        Page<ProductWithDetails> productWithPage = productWithDetailsRepository.findAll(productWithDetailsSpec, pageable);
+        List<ProductWithDetails> productList = productWithPage.getContent();
+
+        ProductWithDetails[] productWithDetailsList = new ProductWithDetails[productList.size()];
+        for (int x=0;x<productList.size();x++) {
+            //check for item discount in hashmap
+            ProductWithDetails productDetails = productList.get(x);
+
+            //set asset url for List of products asset and thumnailurl
+            List<ProductAsset> productAssets = productDetails.getProductAssets();
+            for(ProductAsset pa : productAssets){
+                //handle null
+                if(pa.getUrl() != null){
+                    pa.setUrl(assetServiceUrl+pa.getUrl());
+
+                } else{
+                    pa.setUrl(null);
+
+                }
+            }
+            productDetails.setProductAssets(productAssets);
+            //handle null
+            if(productDetails.getThumbnailUrl() != null){
+                productDetails.setImageUrl(productDetails.getThumbnailUrl());
+                productDetails.setThumbnailUrl(assetServiceUrl+productDetails.getThumbnailUrl());
+
+            } else{
+                productDetails.setThumbnailUrl(null);
+                productDetails.setImageUrl(null);
+            }
+
+            for (int i=0;i<productDetails.getProductInventories().size();i++) {
+                ProductInventoryWithDetails productInventory = productDetails.getProductInventories().get(i);
+                //ItemDiscount discountDetails = discountedItemMap.get(productInventory.getItemCode());
+                /*ItemDiscount discountDetails = hashmapLoader.GetDiscountedItemMap(storeId, productInventory.getItemCode());*/
+                ItemDiscount discountDetails = ProductDiscount.getItemDiscount(storeDiscountRepository, storeId, productInventory.getItemCode(), regionCountry);
+                if (discountDetails != null) {
+                    double discountedPrice = productInventory.getPrice();
+                    double dineInDiscountedPrice = productInventory.getDineInPrice();
+                    if (discountDetails.calculationType.equals(DiscountCalculationType.FIX)) {
+                        discountedPrice = productInventory.getPrice() - discountDetails.discountAmount;
+                    } else if (discountDetails.calculationType.equals(DiscountCalculationType.PERCENT)) {
+                        discountedPrice = productInventory.getPrice() - (discountDetails.discountAmount / 100 * productInventory.getPrice());
+                    }
+
+
+                    if(discountDetails.dineInCalculationType!=null && discountDetails.dineInCalculationType.equals(DiscountCalculationType.FIX)){
+                        dineInDiscountedPrice = productInventory.getDineInPrice() - discountDetails.dineInDiscountAmount;
+
+                    }
+                    else if (discountDetails.dineInCalculationType!=null && discountDetails.dineInCalculationType.equals(DiscountCalculationType.PERCENT)) {
+                        dineInDiscountedPrice = productInventory.getDineInPrice() - (discountDetails.dineInDiscountAmount / 100 * productInventory.getDineInPrice());
+                    }
+
+                    discountDetails.discountedPrice = discountedPrice;
+                    discountDetails.normalPrice = productInventory.getPrice();
+
+                    discountDetails.dineInDiscountedPrice= dineInDiscountedPrice;
+                    discountDetails.dineInNormalPrice = productInventory.getDineInPrice();
+
+                    productInventory.setItemDiscount(discountDetails);
+                } else {
+                    //get inactive discount if any
+                    List<StoreDiscountProduct> discountList = storeDiscountProductRepository.findByItemCode(productInventory.getItemCode());
+                    if (!discountList.isEmpty()) {
+                        StoreDiscountProduct storeDiscountProduct = discountList.get(0);
+                        ItemDiscount inactiveDiscount = new ItemDiscount();
+                        inactiveDiscount.discountId = storeDiscountProduct.getStoreDiscountId();
+                        productInventory.setItemDiscountInactive(inactiveDiscount);
+                    }
+                }
+            }
+
+            //sort the product inventories by price acsending
+            List<ProductInventoryWithDetails> sortProductInventories = productDetails.getProductInventories().stream()
+                    .sorted(Comparator.comparingDouble(ProductInventoryWithDetails::getPrice))
+                    .collect(Collectors.toList());
+
+            //set the product inventories data for sort price ascending
+            productDetails.setProductInventories(sortProductInventories);
+
+            productWithDetailsList[x]=productDetails;
+        }
+
+        //create custom pageable object with modified content
+        CustomPageable customPageable = new CustomPageable();
+        customPageable.content = productWithDetailsList;
+        customPageable.pageable = productWithPage.getPageable();
+        customPageable.totalPages = productWithPage.getTotalPages();
+        customPageable.totalElements = productWithPage.getTotalElements();
+        customPageable.last = productWithPage.isLast();
+        customPageable.size = productWithPage.getSize();
+        customPageable.number = productWithPage.getNumber();
+        customPageable.sort = productWithPage.getSort();
+        customPageable.numberOfElements = productWithPage.getNumberOfElements();
+        customPageable.first  = productWithPage.isFirst();
+        customPageable.empty = productWithPage.isEmpty();
 
         response.setStatus(HttpStatus.OK);
-        response.setData(voucherWithPage);
+        response.setData(customPageable);
 
         return ResponseEntity.status(response.getStatus()).body(response);
     }
@@ -174,7 +297,6 @@ public class StoreProductVoucherController {
             } catch (IllegalArgumentException e) {
                 // To Do
                 // Handle the case when the input voucherStatus does not match any enum constant
-                System.out.println("Error in Voucher Status");
             }
         }
         return null; // Return null if voucherStatus is null or invalid
@@ -192,14 +314,24 @@ public class StoreProductVoucherController {
 
         if (!voucherOptional.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "voucher NOT_FOUND: " + id);
-//            response.setErrorStatus(HttpStatus.NOT_FOUND);
+
+            response.setStatus(HttpStatus.NOT_FOUND);
             response.setError("Voucher not found");
             return ResponseEntity.status(response.getStatus()).body(response);
 
         }
 
+        Optional<ProductWithDetails> productWithDetailsOptional = productWithDetailsRepository.findByVoucherId(voucherOptional.get().getId());
+
+        if (!productWithDetailsOptional.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "product voucher NOT_FOUND: " + voucherOptional.get().getId());
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("Product for this voucher not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+
+        }
         response.setStatus(HttpStatus.OK);
-        response.setData(voucherOptional.get());
+        response.setData(productWithDetailsOptional.get());
 
         return ResponseEntity.status(response.getStatus()).body(response);
     }
@@ -216,20 +348,20 @@ public class StoreProductVoucherController {
 
         if (voucherSerialNumber == null) {
             response.setMessage("Invalid voucher code.");
-            //response.setStatusCode(HttpStatus.BAD_REQUEST.value());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            response.setStatus(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
 
         if (!voucherSerialNumber.getCurrentStatus().equals(VoucherCurrentStatus.NEW)) {
             response.setMessage("Voucher is not in NEW status.");
-            //response.setStatusCode(HttpStatus.BAD_REQUEST.value());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            response.setStatus(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
 
         if ( voucherSerialNumber.getExpiryDate().before(new Date())) {
             response.setMessage("Voucher is expired and cannot be redeemed.");
-            //response.setStatusCode(HttpStatus.BAD_REQUEST.value());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            response.setStatus(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
 
         String voucherId = voucherSerialNumber.getVoucherId();
@@ -245,8 +377,8 @@ public class StoreProductVoucherController {
 
         if (voucher.getTotalRedeem() > 0) {
             response.setMessage("Voucher is not valid for redemption.");
-           // response.setStatusCode(HttpStatus.BAD_REQUEST.value());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            response.setStatus(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
         // For successful validation
         response.setStatus(HttpStatus.OK);
@@ -267,14 +399,14 @@ public class StoreProductVoucherController {
 
         if (voucherSerialNumber == null) {
             response.setMessage("Invalid voucher code.");
-            //response.setStatusCode(HttpStatus.BAD_REQUEST.value());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            response.setStatus(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
 
         if (voucherSerialNumber.getCurrentStatus().equals(VoucherCurrentStatus.USED)) {
             response.setMessage("The voucher have already been used, try different one.");
-            //response.setStatusCode(HttpStatus.BAD_REQUEST.value());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            response.setStatus(HttpStatus.CONFLICT);
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
 
         if (voucherSerialNumber.getCurrentStatus().equals(VoucherCurrentStatus.BOUGHT)) {
@@ -289,7 +421,9 @@ public class StoreProductVoucherController {
 
         if (!voucherOptional.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND voucher with ID: " + voucherId);
+
             response.setError("Voucher not found");
+            response.setStatus(HttpStatus.NOT_FOUND);
             return ResponseEntity.status(response.getStatus()).body(response);
         }
 
@@ -327,6 +461,7 @@ public class StoreProductVoucherController {
         if (!optionalStore.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND storeId: " + storeId);
             response.setError("Store not found");
+            response.setStatus(HttpStatus.NOT_FOUND);
             return ResponseEntity.status(response.getStatus()).body(response);
         }
         Optional<StoreCategory> optionalStoreCategory = storeCategoryRepository.findById(categoryId);
@@ -334,6 +469,7 @@ public class StoreProductVoucherController {
         if (!optionalStoreCategory.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND categoryId: " + categoryId);
             response.setError("Category not found");
+            response.setStatus(HttpStatus.NOT_FOUND);
             return ResponseEntity.status(response.getStatus()).body(response);
         }
         // Save to voucher table

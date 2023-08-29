@@ -1,7 +1,10 @@
 package com.kalsym.product.service.repository;
 
+import com.kalsym.product.service.model.product.Product;
 import com.kalsym.product.service.model.product.ProductWithDetails;
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -71,4 +74,6 @@ public interface ProductWithDetailsRepository extends PagingAndSortingRepository
             @Param("shortId") Integer shortId,
             Pageable pageable
     );
+
+    Optional<ProductWithDetails> findByVoucherId(@Param("id") String id);
 }
