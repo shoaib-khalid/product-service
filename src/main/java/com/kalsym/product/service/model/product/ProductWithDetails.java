@@ -2,6 +2,7 @@ package com.kalsym.product.service.model.product;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.kalsym.product.service.ProductServiceApplication;
+import com.kalsym.product.service.enums.ProductType;
 import com.kalsym.product.service.enums.VehicleType;
 import com.kalsym.product.service.model.store.StoreCategoryMain;
 
@@ -151,6 +152,9 @@ public class ProductWithDetails implements Serializable {
     @OneToOne()
     @JoinColumn(name = "voucherId", referencedColumnName="id", insertable = false, updatable = false)
     private Voucher voucher;
+
+    @Enumerated(EnumType.STRING)
+    private ProductType productType;
 
     public String getSeoUrlMarketPlace() {
 

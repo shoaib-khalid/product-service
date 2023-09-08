@@ -2,6 +2,7 @@ package com.kalsym.product.service.controller;
 
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.HashmapLoader;
+import com.kalsym.product.service.enums.ProductType;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.model.product.CompareProductOwnerAndBranch;
 import com.kalsym.product.service.model.product.CompareProductPackageOption;
@@ -662,6 +663,11 @@ public class StoreProductController {
 
         //to handle backward compatibility since we implement new features for add on 
         if(bodyProduct.getHasAddOn()==null) { bodyProduct.setHasAddOn(Boolean.FALSE);}
+
+        // set product type to physical if not set
+        if (bodyProduct.getProductType() == null) {
+            bodyProduct.setProductType(ProductType.PHYSICAL);
+        }
 
         Product savedProduct = productRepository.save(bodyProduct);
         Logger.application.info(ProductServiceApplication.VERSION, logprefix, "product added to store with storeId: {}, productId: {}" + storeId, savedProduct.getId());

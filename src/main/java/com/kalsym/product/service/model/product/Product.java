@@ -7,6 +7,7 @@ import java.util.Date;
 import javax.persistence.*;
 import java.util.Objects;
 
+import com.kalsym.product.service.enums.ProductType;
 import com.kalsym.product.service.model.store.Voucher;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,8 +16,6 @@ import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import com.kalsym.product.service.enums.VehicleType;
 
 /**
@@ -92,6 +91,9 @@ public class Product implements Serializable {
     
     @Enumerated(EnumType.STRING)
     private VehicleType vehicleType;
+
+    @Enumerated(EnumType.STRING)
+    private ProductType productType;
      
     public void update(Product product) {
         if (null != product.getName()) {

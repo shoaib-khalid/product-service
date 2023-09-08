@@ -606,7 +606,7 @@ public class StoreProductVoucherController {
         productForVoucher.setAllowOutOfStockPurchases(false);
         // set minimum quantity for alarm to -1
         productForVoucher.setMinQuantityForAlarm(-1);
-        productForVoucher.setPackingSize("S");
+        productForVoucher.setPackingSize(null);
         productForVoucher.setVehicleType(VehicleType.MOTORCYCLE);
         productForVoucher.setStatus(voucherBody.getStatus().toString());
         productForVoucher.setIsPackage(false);
@@ -615,6 +615,8 @@ public class StoreProductVoucherController {
         productForVoucher.setHasAddOn(false);
         productForVoucher.setSeoName(SkuGenerated);
         productForVoucher.setSeoUrl("");
+        // Set product type as DIGITAL
+        productForVoucher.setProductType(ProductType.DIGITAL);
 
         Product createdProduct = new Product();
 
@@ -665,9 +667,10 @@ public class StoreProductVoucherController {
         productForInventory.setQuantity(voucherBody.getTotalQuantity());
         productForInventory.setPrice(voucherBody.getSellingPrice());
         productForInventory.setDineInPrice(voucherBody.getSellingPrice());
+        productForInventory.setCostPrice(voucherBody.getSellingPrice());
         productForInventory.setCompareAtprice(0.0);
         productForInventory.setSKU(SkuGenerated);
-        productForInventory.setStatus("NOTAVAILABLE");
+        productForInventory.setStatus("AVAILABLE");
 
         try {
             // Make the web service call and get the ResponseEntity
