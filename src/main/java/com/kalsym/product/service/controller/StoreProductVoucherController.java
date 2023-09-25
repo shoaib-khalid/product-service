@@ -387,18 +387,32 @@ public class StoreProductVoucherController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
+    // TODO:
+    //  Add the logic to check if the voucher is valid for redemption
     @PutMapping(path = {"/redeem"}, name = "voucher-redeem")
     public ResponseEntity<HttpResponse> redeemVoucher(HttpServletRequest request,
-                                                      @RequestParam() String voucherRedeemCode)
+                                                      @RequestParam() String voucherRedeemCode,
+                                                      @RequestParam() String phoneNumber
+    )
     {
         HttpResponse response = new HttpResponse(request.getRequestURI());
         String logprefix = request.getRequestURI();
-        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Voucher Redeem Code:" + voucherRedeemCode);
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION,
+                logprefix, "Voucher Redeem Code:" + voucherRedeemCode);
 
-        VoucherSerialNumber voucherSerialNumber = voucherSerialNumberRepository.findByVoucherRedeemCode(voucherRedeemCode);
+        VoucherSerialNumber voucherSerialNumber = voucherSerialNumberRepository.
+                findByVoucherRedeemCode(voucherRedeemCode);
 
+        // Check if the voucherRedeemCode is valid
         if (voucherSerialNumber == null) {
             response.setMessage("Invalid voucher code.");
+            response.setStatus(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+
+        // Check if the voucher is not in NEW status
+        if (voucherSerialNumber.getCurrentStatus().equals(VoucherCurrentStatus.NEW)){
+            response.setMessage("Voucher isin NEW status.");
             response.setStatus(HttpStatus.BAD_REQUEST);
             return ResponseEntity.status(response.getStatus()).body(response);
         }
@@ -409,11 +423,11 @@ public class StoreProductVoucherController {
             return ResponseEntity.status(response.getStatus()).body(response);
         }
 
-        if (voucherSerialNumber.getCurrentStatus().equals(VoucherCurrentStatus.BOUGHT)) {
-            voucherSerialNumber.setCurrentStatus(VoucherCurrentStatus.USED);
-            voucherSerialNumber.setIsUsed(true);
-            voucherSerialNumber.update(voucherSerialNumber);
-            voucherSerialNumberRepository.save(voucherSerialNumber);
+        // Check if the voucher has not expired
+        if (new Date().after(voucherSerialNumber.getExpiryDate())) {
+            response.setMessage("The voucher have expired, try different one.");
+            response.setStatus(HttpStatus.CONFLICT);
+            return ResponseEntity.status(response.getStatus()).body(response);
         }
 
         String voucherId = voucherSerialNumber.getVoucherId();
@@ -427,14 +441,28 @@ public class StoreProductVoucherController {
             return ResponseEntity.status(response.getStatus()).body(response);
         }
 
-        Voucher voucher = voucherOptional.get();
-        voucher.setTotalRedeem(voucher.getTotalRedeem()+1);
-        voucher.setTotalQuantity(voucher.getTotalQuantity()-1);
+//        Voucher voucher = voucherOptional.get();
+//        voucher.setTotalRedeem(voucher.getTotalRedeem()+1);
+//        voucher.setTotalQuantity(voucher.getTotalQuantity()-1);
 
-        voucher.update(voucher);
-        voucherRepository.save(voucher);
+        if (phoneNumber.equals(voucherSerialNumber.getCustomer())
+                && voucherSerialNumber.getCurrentStatus().equals(VoucherCurrentStatus.BOUGHT)) {
+            // Update the voucherRedeemCode
+            voucherSerialNumber.setCurrentStatus(VoucherCurrentStatus.USED);
+            voucherSerialNumber.setIsUsed(true);
+            voucherSerialNumber.update(voucherSerialNumber);
+            voucherSerialNumberRepository.save(voucherSerialNumber);
 
-//        response.setData(voucherRepository.findById(id));
+        } else {
+            response.setMessage("The voucher phone number is wrong, try a different one.");
+            response.setStatus(HttpStatus.CONFLICT);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+
+//
+//        voucher.update(voucher);
+//        voucherRepository.save(voucher);
+
         response.setStatus(HttpStatus.OK);
         response.setMessage("Voucher was redeemed Successfully");
         return ResponseEntity.status(response.getStatus()).body(response);

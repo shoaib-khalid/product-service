@@ -43,6 +43,8 @@ public class VoucherSerialNumber implements Serializable {
     @Enumerated(EnumType.STRING)
     private VoucherCurrentStatus currentStatus;
 
+    private String customer;
+
     public void update(VoucherSerialNumber bodyVoucherSerialNumber){
         if(bodyVoucherSerialNumber == null){
             return;
