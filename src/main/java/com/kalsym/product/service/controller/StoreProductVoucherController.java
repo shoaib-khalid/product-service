@@ -345,6 +345,8 @@ public class StoreProductVoucherController {
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Voucher Redeem Code:" + voucherRedeemCode);
 
         VoucherSerialNumber voucherSerialNumber = voucherSerialNumberRepository.findByVoucherRedeemCode(voucherRedeemCode);
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION,
+                logprefix, "Voucher Serial Number:" + voucherSerialNumber);
 
         if (voucherSerialNumber == null) {
             response.setMessage("Invalid voucher code.");
@@ -384,6 +386,32 @@ public class StoreProductVoucherController {
         response.setStatus(HttpStatus.OK);
         response.setMessage("Voucher code is valid and can be redeemed.");
 
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @GetMapping(path = {"/get-voucher-status"})
+    public ResponseEntity<HttpResponse> getVoucherStatus(HttpServletRequest request,
+                                                         @RequestParam() String voucherRedeemCode
+    ) {
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+        String logprefix = request.getRequestURI();
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION,
+                logprefix, "Voucher Redeem Code:" + voucherRedeemCode);
+
+        VoucherSerialNumber voucherSerialNumber = voucherSerialNumberRepository.
+                findByVoucherRedeemCode(voucherRedeemCode);
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION,
+                logprefix, "Voucher Serial Number:" + voucherSerialNumber);
+
+        if (voucherSerialNumber == null) {
+            response.setMessage("Invalid voucher code.");
+            response.setStatus(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+
+        // For successful validation
+        response.setStatus(HttpStatus.OK);
+        response.setData(voucherSerialNumber.getCurrentStatus());
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
