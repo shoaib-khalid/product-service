@@ -45,6 +45,10 @@ public class VoucherSerialNumber implements Serializable {
 
     private String customer;
 
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date redeemDate;
+
     public void update(VoucherSerialNumber bodyVoucherSerialNumber){
         if(bodyVoucherSerialNumber == null){
             return;

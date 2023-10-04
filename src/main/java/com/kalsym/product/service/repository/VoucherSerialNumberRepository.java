@@ -1,5 +1,6 @@
 package com.kalsym.product.service.repository;
 
+import com.kalsym.product.service.enums.VoucherCurrentStatus;
 import com.kalsym.product.service.model.store.VoucherSerialNumber;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;

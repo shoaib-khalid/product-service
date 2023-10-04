@@ -1,9 +1,12 @@
 package com.kalsym.product.service.repository;
 
+import com.kalsym.product.service.enums.VoucherCurrentStatus;
 import com.kalsym.product.service.model.store.Voucher;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
+import com.kalsym.product.service.model.store.VoucherRedeemDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -35,10 +38,6 @@ public interface VoucherRepository extends PagingAndSortingRepository<Voucher, S
 
     Voucher findByVoucherCode(@Param("voucherCode") String voucherCode);
 
-    /**
-     * clear cart item
-     * @param voucherId
-     */
     @Transactional
     @Modifying
     @Query("UPDATE Voucher m SET m.totalRedeem = m.totalRedeem+1 WHERE m.id = :voucherId")
@@ -46,10 +45,7 @@ public interface VoucherRepository extends PagingAndSortingRepository<Voucher, S
             @Param("voucherId") String voucherId
     );
 
-    /**
-     * clear cart item
-     * @param voucherId
-     */
+
     @Transactional
     @Modifying
     @Query("UPDATE Voucher m SET m.totalRedeem = m.totalRedeem-1 WHERE m.id = :voucherId")
@@ -65,5 +61,17 @@ public interface VoucherRepository extends PagingAndSortingRepository<Voucher, S
             @Param("currentDate") Date currentDate
     );
 
+    @Query("SELECT v.id, v.name, v.discountValue, v.voucherCode, v.currencyLabel, "
+            + "vsn.id, vsn.currentStatus, vsn.serialNumber, "
+            + "vsn.voucherRedeemCode, vsn.redeemDate "
+            + "FROM Voucher v "
+            + "INNER JOIN VoucherSerialNumber vsn ON v.id = vsn.voucherId "
+            + "WHERE v.storeId = :storeId "
+            + "AND vsn.currentStatus = :currentStatus "
+            + "AND v.status = 'ACTIVE'"
+            )
+    List<Object[]> findByStoreIdAndCurrentStatus(
+            @Param("storeId") String storeId,
+            @Param("currentStatus") VoucherCurrentStatus currentStatus);
 
 }

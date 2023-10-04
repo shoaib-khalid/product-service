@@ -389,6 +389,37 @@ public class StoreProductVoucherController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
+    @GetMapping(path = {"/get-redeemed-voucher"})
+    public ResponseEntity<HttpResponse> getRedeemedVoucher(HttpServletRequest request,
+                                           @RequestParam() String storeId,
+                                           @RequestParam() VoucherCurrentStatus status
+    ){
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+        String logprefix = request.getRequestURI();
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION,
+                logprefix, "Store ID:" + storeId + " Status:" + status);
+
+
+        List<Object[]> voucher = voucherRepository.findByStoreIdAndCurrentStatus(storeId, status);
+        List<VoucherRedeemDTO> voucherRedeemDTOs = new ArrayList<>();
+
+        for (Object[] result : voucher) {
+            voucherRedeemDTOs.add(new VoucherRedeemDTO((String) result[0],
+                    (String) result[1], (Double) result[2], (String) result[3],
+                    (String) result[4],(Long) result[5],
+                    (VoucherCurrentStatus) result[6],
+                    (String) result[7], (String) result[8],
+                    (Date) result[9]
+            ));
+        }
+        // For successful validation
+        response.setStatus(HttpStatus.OK);
+        response.setData(voucherRedeemDTOs);
+        return ResponseEntity.status(response.getStatus()).body(response);
+
+    }
+
+
     @GetMapping(path = {"/get-voucher-status"})
     public ResponseEntity<HttpResponse> getVoucherStatus(HttpServletRequest request,
                                                          @RequestParam() String voucherRedeemCode
@@ -415,8 +446,7 @@ public class StoreProductVoucherController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    // TODO:
-    //  Add the logic to check if the voucher is valid for redemption
+
     @PutMapping(path = {"/redeem"}, name = "voucher-redeem")
     public ResponseEntity<HttpResponse> redeemVoucher(HttpServletRequest request,
                                                       @RequestParam() String voucherRedeemCode,
@@ -498,6 +528,7 @@ public class StoreProductVoucherController {
             // Update the voucherRedeemCode
             voucherSerialNumber.setCurrentStatus(VoucherCurrentStatus.USED);
             voucherSerialNumber.setIsUsed(true);
+            voucherSerialNumber.setRedeemDate(new Date());
             voucherSerialNumber.update(voucherSerialNumber);
             voucherSerialNumberRepository.save(voucherSerialNumber);
 
