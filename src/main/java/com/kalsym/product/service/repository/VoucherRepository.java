@@ -63,9 +63,10 @@ public interface VoucherRepository extends PagingAndSortingRepository<Voucher, S
 
     @Query("SELECT v.id, v.name, v.discountValue, v.voucherCode, v.currencyLabel, "
             + "vsn.id, vsn.currentStatus, vsn.serialNumber, "
-            + "vsn.voucherRedeemCode, vsn.redeemDate "
+            + "vsn.voucherRedeemCode, vsn.redeemDate, p.thumbnailUrl "
             + "FROM Voucher v "
             + "INNER JOIN VoucherSerialNumber vsn ON v.id = vsn.voucherId "
+            + "INNER JOIN Product p ON p.voucherId = v.id "
             + "WHERE v.storeId = :storeId "
             + "AND vsn.currentStatus = :currentStatus "
             + "AND v.status = 'ACTIVE'"

@@ -409,7 +409,7 @@ public class StoreProductVoucherController {
                     (String) result[4],(Long) result[5],
                     (VoucherCurrentStatus) result[6],
                     (String) result[7], (String) result[8],
-                    (Date) result[9]
+                    (Date) result[9], (String) result[10]
             ));
         }
         // For successful validation
