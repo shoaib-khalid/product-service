@@ -10,6 +10,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  *
  * @author ayaan
@@ -21,4 +23,5 @@ public interface VoucherStoreRepository extends PagingAndSortingRepository<Vouch
     @Query("DELETE FROM VoucherStore vt WHERE vt.voucherId = :voucherId")
     void deleteByVoucherId(@Param("voucherId") String voucherId);
 
+    List<VoucherStore> findByVoucherId(String voucherId);
 }

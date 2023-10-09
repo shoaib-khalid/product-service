@@ -1,4 +1,4 @@
-package com.kalsym.product.service.model.store;
+package com.kalsym.product.service.model.store.object;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.kalsym.product.service.enums.VoucherCurrentStatus;

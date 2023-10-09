@@ -4,9 +4,7 @@ import com.kalsym.product.service.enums.VoucherCurrentStatus;
 import com.kalsym.product.service.model.store.Voucher;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
-import com.kalsym.product.service.model.store.VoucherRedeemDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;

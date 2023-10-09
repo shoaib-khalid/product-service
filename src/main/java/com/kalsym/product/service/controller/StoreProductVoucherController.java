@@ -11,6 +11,8 @@ import com.kalsym.product.service.model.request.ProductVoucherRequest;
 import com.kalsym.product.service.model.request.ProductVoucherTermsRequest;
 import com.kalsym.product.service.model.store.*;
 import com.kalsym.product.service.model.store.object.CustomPageable;
+import com.kalsym.product.service.model.store.object.MultipleStoreId;
+import com.kalsym.product.service.model.store.object.VoucherRedeemDTO;
 import com.kalsym.product.service.repository.*;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.utility.Logger;
@@ -451,7 +453,8 @@ public class StoreProductVoucherController {
     public ResponseEntity<HttpResponse> redeemVoucher(HttpServletRequest request,
                                                       @RequestParam() String voucherRedeemCode,
                                                       @RequestParam() String phoneNumber,
-                                                      @RequestParam() String storeId
+                                                      @RequestParam(required= false) String storeId,
+                                                      @RequestBody(required= false) List<MultipleStoreId> multipleStoreId
     )
     {
         HttpResponse response = new HttpResponse(request.getRequestURI());
@@ -472,6 +475,55 @@ public class StoreProductVoucherController {
                     logprefix, "Voucher Serial Number:" + voucherSerialNumber);
         }
 
+        String voucherId = voucherSerialNumber.getVoucherId();
+        Optional<Voucher> voucherOptional = voucherRepository.findById(voucherId);
+
+        if (!voucherOptional.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION,
+                    logprefix, "NOT_FOUND voucher with ID: " + voucherId);
+            response.setError("Voucher not found");
+            response.setStatus(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+
+        // Check if the voucher is from same store as store id passed
+        Voucher voucher = voucherOptional.get();
+        String ScannedStoreId = null;
+        if(!voucher.getStoreId().equals(storeId) && !(storeId == null)){
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION,
+                    logprefix, "Voucher is not of this store");
+            response.setMessage("The voucher is not from the same store, try different one.");
+            response.setStatus(HttpStatus.CONFLICT);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }else{
+            ScannedStoreId = voucher.getStoreId();
+        }
+
+        //TODO:
+        // Check if the voucher is from multiple stores as store id passed
+        // Check if the global voucher is from assigned store as store id passed
+        if(multipleStoreId != null && !multipleStoreId.isEmpty()){
+            List<VoucherStore> voucherStores = voucherStoreRepository.findByVoucherId(voucherId);
+            boolean flag = false;
+            for(VoucherStore voucherStore: voucherStores){
+                for(MultipleStoreId store : multipleStoreId){
+                    if(voucherStore.getStoreId().equals(store.getStoreId())){
+                       flag =true;
+                       ScannedStoreId = store.getStoreId();
+                    }
+                }
+            }
+            if(!flag){
+                Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION,
+                        logprefix, "Voucher is not of any store from the body");
+                response.setMessage("The voucher is not from the any passed store, try different one.");
+                response.setStatus(HttpStatus.CONFLICT);
+                return ResponseEntity.status(response.getStatus()).body(response);
+            }
+
+        }
+
+
         // Check if the voucher is not in NEW status
         if (voucherSerialNumber.getCurrentStatus().equals(VoucherCurrentStatus.NEW)){
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION,
@@ -485,7 +537,7 @@ public class StoreProductVoucherController {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION,
                     logprefix, "Voucher is Used already");
             response.setMessage("The voucher have already been used, try different one.");
-            response.setStatus(HttpStatus.CONFLICT);
+            response.setStatus(HttpStatus.IM_USED);
             return ResponseEntity.status(response.getStatus()).body(response);
         }
 
@@ -498,26 +550,7 @@ public class StoreProductVoucherController {
             return ResponseEntity.status(response.getStatus()).body(response);
         }
 
-        String voucherId = voucherSerialNumber.getVoucherId();
-        Optional<Voucher> voucherOptional = voucherRepository.findById(voucherId);
 
-        if (!voucherOptional.isPresent()) {
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION,
-                    logprefix, " NOT_FOUND voucher with ID: " + voucherId);
-            response.setError("Voucher not found");
-            response.setStatus(HttpStatus.NOT_FOUND);
-            return ResponseEntity.status(response.getStatus()).body(response);
-        }
-
-        // Check if the voucher is from same store as store id passed
-        Voucher voucher = voucherOptional.get();
-        if(!voucher.getStoreId().equals(storeId)){
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION,
-                    logprefix, "Voucher is not of this store");
-            response.setMessage("The voucher is not from the same store, try different one.");
-            response.setStatus(HttpStatus.CONFLICT);
-            return ResponseEntity.status(response.getStatus()).body(response);
-        }
 
 //        Voucher voucher = voucherOptional.get();
 //        voucher.setTotalRedeem(voucher.getTotalRedeem()+1);
