@@ -44,7 +44,11 @@ public class StoreCategoryMain implements Serializable {
 
     @OneToOne()
     @JoinColumn(name = "parentCategoryId",referencedColumnName="id", insertable = false, updatable = false, nullable = true)
-    private ParentCategory parentCategory;   
+    private ParentCategory parentCategory;
+
+    @OneToOne()
+    @JoinColumn(name = "id",referencedColumnName="parentCategoryId", insertable = false, updatable = false, nullable = true)
+    private ChildCategory childCategory;
 
     public String getThumbnailUrl() {
         if (thumbnailUrl==null)

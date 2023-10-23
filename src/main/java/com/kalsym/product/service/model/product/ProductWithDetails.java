@@ -66,6 +66,8 @@ public class ProductWithDetails implements Serializable {
     @Column(name = "categoryId")
     private String categoryId;
 
+
+
     @OneToOne()
     @JoinColumn(name = "categoryId",referencedColumnName="id", insertable = false, updatable = false, nullable = true)
     private StoreCategoryMain storeCategory;  
