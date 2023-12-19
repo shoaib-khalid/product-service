@@ -229,7 +229,7 @@ public class StoreController {
         storeBannerEcommerceDefaultPath = assetServiceUrl+ "/store-assets/banner-ecomm.jpeg";
         storeBannerFnbDefaultPath = assetServiceUrl+"/store-assets/banner-fnb.png";
         storeFavIconEasydukanPath = assetServiceUrl+"/store-assets/fav-icon-easydukan.png";
-        storeFavIconDeliverinPath = assetServiceUrl+"/store-assets/fav-icon-deliverin.png";
+        storeFavIconDeliverinPath = assetServiceUrl+"/store-assets/e-kedai-favicon-32x32.png";
         storeFavIconSymplifiedPath = assetServiceUrl+"/store-assets/fav-icon-symplified.png";
 
     }
