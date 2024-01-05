@@ -96,7 +96,7 @@ public class VoucherSearchSpecs {
         return (Specification<ProductWithDetails>) (root, query, builder) -> {
             final List<Predicate> predicates = new ArrayList<>();
             Join<ProductWithDetails, ProductInventoryWithDetails> productInventories = root.join("productInventories", JoinType.INNER);
-//            Join<ProductWithDetails, Voucher> voucherJoin = root.join("voucherId");
+            Join<ProductWithDetails, Voucher> voucherJoin = root.join("voucher", JoinType.LEFT);
 
             if (name != null) {
                 // predicates.add(builder.equal(root.get("name"), name));
@@ -121,45 +121,32 @@ public class VoucherSearchSpecs {
 
             List<Order> orderList = new ArrayList<Order>();
 
-            if (sortingOrder==Sort.Direction.ASC){
-                if(sortByCol.equals("price")){
-
-                    orderList.add(builder.asc(productInventories.get(sortByCol)));
-
-                } else if(sortByCol.equals("dineInPrice")){
-                    orderList.add(builder.asc(productInventories.get(sortByCol)));
-
-                }
-                else{
+            if (sortingOrder == Sort.Direction.ASC) {
+                // Add your sorting logic for columns from the Voucher entity
+                if (sortByCol.equals("endDate")) {
+                    orderList.add(builder.asc(voucherJoin.get("endDate")));
+                } else if (sortByCol.equals("startDate")) {
+                    orderList.add(builder.asc(voucherJoin.get("startDate")));
+                } else {
                     orderList.add(builder.asc(root.get(sortByCol)));
-
                 }
-
-            }else{
-
-                if(sortByCol.equals("price")){
-
-                    orderList.add(builder.desc(productInventories.get(sortByCol)));
-
-
-                }else if(sortByCol.equals("dineInPrice")){
-                    orderList.add(builder.desc(productInventories.get(sortByCol)));
-
-                }
-                else{
+            } else {
+                // Add your sorting logic for columns from the Voucher entity
+                if (sortByCol.equals("endDate")) {
+                    orderList.add(builder.desc(voucherJoin.get("endDate")));
+                } else if (sortByCol.equals("startDate")) {
+                    orderList.add(builder.desc(voucherJoin.get("startDate")));
+                } else {
                     orderList.add(builder.desc(root.get(sortByCol)));
-
                 }
-
-
             }
 
             predicates.add(builder.isNotNull(root.get("voucherId")));
 
-            query.orderBy(orderList);
+            query.orderBy(orderList.toArray(new Order[0]));
             query.distinct(true);
 
-
+            predicates.add(builder.isNotNull(root.get("voucherId")));
             predicates.add(QueryByExamplePredicateBuilder.getPredicate(root, builder, example));
 
             return builder.and(predicates.toArray(new Predicate[predicates.size()]));

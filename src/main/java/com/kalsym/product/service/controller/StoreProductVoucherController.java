@@ -137,30 +137,17 @@ public class StoreProductVoucherController {
     @GetMapping(path = {"/all-vouchers"})
     public ResponseEntity<HttpResponse> getAllVouchers(HttpServletRequest request,
                                                        @RequestParam(required = false) String name,
-                                                       @RequestParam(required = false) String voucherCode,
                                                        @RequestParam String storeId,
                                                        @RequestParam(required = false) List<String> voucherStatus,
                                                        @RequestParam(defaultValue = "0") int page,
                                                        @RequestParam(defaultValue = "20") int pageSize,
-                                                       @RequestParam(required = false, defaultValue = "name") String sortByCol,
-                                                       @RequestParam(required = false, defaultValue = "ASC") Sort.Direction sortingOrder
+                                                       @RequestParam(required = false, defaultValue = "created") String sortByCol,
+                                                       @RequestParam(required = false, defaultValue = "DESC") Sort.Direction sortingOrder
     ) {
 
         HttpResponse response = new HttpResponse(request.getRequestURI());
         String logprefix = request.getRequestURI();
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " storeId:" + storeId);
-
-//        Voucher voucherMatch = new Voucher();
-//
-//        Pageable pageable = PageRequest.of(page, pageSize);
-//        ExampleMatcher matcher = ExampleMatcher
-//                .matchingAll()
-//                .withIgnoreCase()
-//                .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
-//        Example<Voucher> example = Example.of(voucherMatch, matcher);
-
-//        Specification<Voucher> voucherSpec = VoucherSearchSpecs.getSpecWithDatesBetween(null, voucherType, storeId, verticalCode, voucherCode, parseVoucherStatus(voucherStatus), example);
-//        Page<Voucher> voucherWithPage = voucherRepository.findAll(voucherSpec, pageable);
 
         Optional<Store> optStore = storeRepository.findById(storeId);
 
@@ -855,6 +842,51 @@ public class StoreProductVoucherController {
         response.setStatus(HttpStatus.CREATED);
         response.setData(optionalProduct.get());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+
+    @PutMapping(path = {"/update-status/{id}"}, name = "product-voucher-update-status")
+    @PreAuthorize("hasAnyAuthority('product-voucher-put', 'all')")
+    public ResponseEntity<HttpResponse> updateVoucherStatus(HttpServletRequest request,
+                                                            @PathVariable String id,
+                                                            @RequestParam VoucherStatus status) {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+        Logger.application.info(ProductServiceApplication.VERSION, logprefix, "id: " + id);
+
+        Optional<Voucher> voucherOptional = voucherRepository.findById(id);
+        if (!voucherOptional.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND voucher with ID: " + id);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("Voucher not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+
+        Optional<Product> productOptional = productRepository.findByVoucherId(id);
+        if (!productOptional.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " NOT_FOUND product with voucher ID: " + id);
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("Product voucher not found");
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+
+        Voucher voucher = voucherOptional.get();
+        voucher.setStatus(status);
+        Voucher savedVoucher = voucherRepository.save(voucher);
+
+        Product product = productOptional.get();
+        product.setStatus(String.valueOf(status));
+        Product savedProduct = productRepository.save(product);
+
+        // Refresh repositories to get the latest data
+        voucherRepository.refresh(savedVoucher);
+        productRepository.refresh(savedProduct);
+        Optional<Product> optionalProduct = productRepository.findById(savedProduct.getId());
+
+        response.setStatus(HttpStatus.OK);
+        response.setData(optionalProduct.get());
+        return ResponseEntity.status(response.getStatus()).body(response);
+
     }
 
 
