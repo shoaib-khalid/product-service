@@ -476,13 +476,14 @@ public class StoreProductVoucherController {
         // Check if the voucher is from same store as store id passed
         Voucher voucher = voucherOptional.get();
         String ScannedStoreId = null;
-        if(!voucher.getStoreId().equals(storeId) && !(storeId == null)){
-            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION,
-                    logprefix, "Voucher is not of this store");
-            response.setMessage("The voucher is not from the same store, try different one.");
+
+        if (storeId != null && !voucher.getIsGlobalStore() && !voucher.getStoreId().equals(storeId)) {
+            // Voucher is not of this store
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Voucher is not of this store");
+            response.setMessage("The voucher is not from the same store, try a different one.");
             response.setStatus(HttpStatus.CONFLICT);
             return ResponseEntity.status(response.getStatus()).body(response);
-        }else{
+        } else {
             ScannedStoreId = voucher.getStoreId();
         }
 
@@ -625,6 +626,7 @@ public class StoreProductVoucherController {
         voucherToSave.setEndDate(voucherBody.getEndDate());
         voucherToSave.setCreated_at(new Date());
         voucherToSave.setUpdated_at(new Date());
+        voucherToSave.setIsGlobalStore(voucherBody.getIsGlobalStore());
 
         Voucher savedVoucher = voucherRepository.save(voucherToSave);
 

@@ -26,6 +26,7 @@ public class ProductVoucherRequest {
     private String description;
     @Enumerated(EnumType.STRING)
     private ProductStatus status;
+    private Boolean isGlobalStore;
 
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")

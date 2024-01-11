@@ -54,6 +54,7 @@ public class Voucher implements Serializable {
     private Double minimumSpend;
     private Boolean allowDoubleDiscount;
     private Boolean requireToClaim;
+    private Boolean isGlobalStore;
 
     @Enumerated(EnumType.STRING)
     private VoucherStatus status;
