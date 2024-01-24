@@ -2,6 +2,9 @@ package com.kalsym.product.service.repository;
 
 import com.kalsym.product.service.enums.VoucherCurrentStatus;
 import com.kalsym.product.service.model.store.VoucherSerialNumber;
+
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -23,4 +26,7 @@ public interface VoucherSerialNumberRepository extends PagingAndSortingRepositor
     void deleteByVoucherId(@Param("voucherId") String voucherId);
 
     VoucherSerialNumber findByVoucherRedeemCode(String voucherRedeemCode);
+
+    @Query("SELECT vt FROM VoucherSerialNumber vt WHERE vt.voucherId = :voucherId AND vt.currentStatus IN ('USED', 'BOUGHT')")
+    List<VoucherSerialNumber> findByVoucherToExport(@Param("voucherId") String voucherId);
 }

@@ -1,9 +1,13 @@
 package com.kalsym.product.service.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+
 //Importing Models
 
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.enums.*;
+import com.kalsym.product.service.model.Customer;
 import com.kalsym.product.service.model.ItemDiscount;
 import com.kalsym.product.service.model.RegionCountry;
 import com.kalsym.product.service.model.product.*;
@@ -18,17 +22,34 @@ import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.utility.Logger;
 import com.kalsym.product.service.utility.ProductDiscount;
 import io.swagger.annotations.ApiOperation;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -88,8 +109,157 @@ public class StoreProductVoucherController {
     @Autowired
     RegionCountriesRepository regionCountriesRepository;
 
+    @Autowired
+    CustomerRepository customerRepository;
+
     @Value("${asset.service.url}")
     String assetServiceUrl;
+
+    @ApiOperation(value = "Export voucher report", notes = "Note: Export voucher report by voucherID.")
+    @PostMapping(path = {"/export"}, name = "product-voucher-export")
+    public ResponseEntity<byte[]> exportVoucherReport(HttpServletRequest request, @RequestParam (required = true) String voucherId) {
+        String logprefix = request.getRequestURI();
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION,
+                logprefix, "Voucher ID to export:" + voucherId );
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
+
+            List<VoucherSerialNumber> voucherList = voucherSerialNumberRepository.findByVoucherToExport(voucherId);
+
+            if(!voucherList.isEmpty()) {
+                Optional<Voucher> voucherDetails = voucherRepository.findById(voucherId);
+                try (Workbook workbook = new XSSFWorkbook()) {
+                    Sheet sheet = workbook.createSheet("Voucher Report");
+
+                    // Create a style with text wrapping
+                    CellStyle wrapTextStyle = workbook.createCellStyle();
+                    wrapTextStyle.setWrapText(true);
+                    wrapTextStyle.setAlignment(HorizontalAlignment.LEFT);
+                    wrapTextStyle.setVerticalAlignment(VerticalAlignment.TOP);
+
+                    // Create the merged cell for voucher details
+                    Row voucherName = sheet.createRow(0);
+                    Row voucherCode = sheet.createRow(1);
+                    Row voucherDuration = sheet.createRow(2);
+
+                    CellRangeAddress mergedVName = new CellRangeAddress(0, 0, 0, 7);
+                    sheet.addMergedRegion(mergedVName);
+                    CellRangeAddress mergedVCode = new CellRangeAddress(1, 1, 0, 7);
+                    sheet.addMergedRegion(mergedVCode);
+                    CellRangeAddress mergedVDuration = new CellRangeAddress(2, 2, 0, 7);
+                    sheet.addMergedRegion(mergedVDuration);
+                    
+                    Cell cellVoucher = voucherName.createCell(0);
+                    cellVoucher.setCellValue("Voucher Name: "+voucherDetails.get().getName());
+
+                    Cell cellCode = voucherCode.createCell(0);
+                    cellCode.setCellValue("Voucher Code: "+voucherDetails.get().getVoucherCode());
+
+                    String startDate = dateFormat.format(voucherDetails.get().getStartDate());
+                    String endDate =  dateFormat.format(voucherDetails.get().getEndDate());
+                    Cell cellDuration = voucherDuration.createCell(0);
+                    cellDuration.setCellValue("Voucher Validity: "+startDate+" - "+endDate);
+
+                     // Create headers
+                    Row headerRow = sheet.createRow(3);
+                    headerRow.createCell(0).setCellValue("No.");
+                    headerRow.createCell(1).setCellValue("Redeem Code");
+                    headerRow.createCell(2).setCellValue("Status");
+                    headerRow.createCell(3).setCellValue("Customer Name");
+                    headerRow.createCell(4).setCellValue("Customer Phone Number");
+                    headerRow.createCell(5).setCellValue("Redeem Date");
+                    headerRow.createCell(6).setCellValue("Store Name");
+                    headerRow.createCell(7).setCellValue("Store Phone Number");
+
+                    // Apply the text wrapping style to cells 
+                    for (int colIndex = 0; colIndex <= 7; colIndex++) {
+                        Cell cell = headerRow.getCell(colIndex);
+                        cell.setCellStyle(wrapTextStyle);
+                    }
+
+                    // Set data into the col/rows
+                    int rowNum = 4;
+                    for (VoucherSerialNumber voucher : voucherList) {
+                        Row row = sheet.createRow(rowNum++);
+                        row.createCell(0).setCellValue(rowNum-4);
+                        row.createCell(1).setCellValue(voucher.getVoucherRedeemCode());
+                        row.createCell(2).setCellValue(voucher.getCurrentStatus().toString());
+                        if (voucher.getCustomer() != null) {
+                            if (voucher.getCustomer().startsWith("601")) {
+                                row.createCell(3).setCellValue("N/A");
+                                row.createCell(4).setCellValue(voucher.getCustomer());
+                            } else {
+                                Optional<Customer> customer = customerRepository.findById(voucher.getCustomer());
+                                if (customer.isPresent()) {
+                                    row.createCell(3).setCellValue(customer.get().getName());
+                                    row.createCell(4).setCellValue(customer.get().getPhoneNumber());
+                                }
+                            }
+                        }
+                        String redeemDate = "";
+                        if (voucher.getRedeemDate() != null) {
+                            redeemDate = dateFormat.format(voucher.getRedeemDate());
+                        } else {
+                            redeemDate = "N/A";
+                        }
+                        row.createCell(5).setCellValue(redeemDate);
+
+                        String storeName = "";
+                        String storePhone = "";
+                        if(voucher.getStoreDetails() != null) {
+                            storeName = voucher.storeDetails(voucher.getStoreDetails(), "storeName");
+                            storePhone = voucher.storeDetails(voucher.getStoreDetails(), "storePhone");
+                        } else {
+                            storeName = "N/A";
+                            storePhone = "N/A";
+                        }
+                        row.createCell(6).setCellValue(storeName);
+                        row.createCell(7).setCellValue(storePhone);
+
+                        // Apply the text wrapping style to cells 
+                        for (int colIndex = 0; colIndex <= 7; colIndex++) {
+                            Cell cell = row.getCell(colIndex);
+                            cell.setCellStyle(wrapTextStyle);
+                        }
+                    }
+
+                    // Set response headers for file download
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+                    headers.setContentDispositionFormData("attachment", "Voucher Report.xlsx");
+
+                    // Convert workbook to byte array
+                    byte[] excelBytes;
+                    try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
+                        workbook.write(byteArrayOutputStream);
+                        excelBytes = byteArrayOutputStream.toByteArray();
+                    }
+
+                    if (excelBytes != null) {
+                        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION,
+                        logprefix, "Voucher exported successfully!");
+
+                        return ResponseEntity.status(HttpStatus.OK).headers(headers).body(excelBytes);
+                    } else {
+                        Logger.application.error(Logger.pattern, ProductServiceApplication.VERSION,
+                        logprefix, "Voucher failed to export...");
+
+                        return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(null);
+                    }
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Logger.application.error(Logger.pattern, ProductServiceApplication.VERSION,
+                    logprefix, "Try_catch has caught an error: "+e);
+                    return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(null);
+                }
+            } else {
+                Logger.application.error(Logger.pattern, ProductServiceApplication.VERSION,
+                logprefix, "There is no data to export");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+
+    }
 
     @GetMapping(path = {"/available"})
     public ResponseEntity<HttpResponse> getAvailableVoucher(
@@ -132,7 +302,6 @@ public class StoreProductVoucherController {
 
         return ResponseEntity.status(response.getStatus()).body(response);
     }
-
 
     @GetMapping(path = {"/all-vouchers"})
     public ResponseEntity<HttpResponse> getAllVouchers(HttpServletRequest request,
@@ -408,7 +577,6 @@ public class StoreProductVoucherController {
 
     }
 
-
     @GetMapping(path = {"/get-voucher-status"})
     public ResponseEntity<HttpResponse> getVoucherStatus(HttpServletRequest request,
                                                          @RequestParam() String voucherRedeemCode
@@ -434,7 +602,6 @@ public class StoreProductVoucherController {
         response.setData(voucherSerialNumber.getCurrentStatus());
         return ResponseEntity.status(response.getStatus()).body(response);
     }
-
 
     @PutMapping(path = {"/redeem"}, name = "voucher-redeem")
     public ResponseEntity<HttpResponse> redeemVoucher(HttpServletRequest request,
@@ -484,13 +651,14 @@ public class StoreProductVoucherController {
             response.setStatus(HttpStatus.CONFLICT);
             return ResponseEntity.status(response.getStatus()).body(response);
         } else {
-            ScannedStoreId = voucher.getStoreId();
+            //ScannedStoreId = voucher.getStoreId();
+            ScannedStoreId = storeId;
         }
 
         //TODO:
         // Check if the voucher is from multiple stores as store id passed
         // Check if the global voucher is from assigned store as store id passed
-        if(multipleStoreId != null && !multipleStoreId.isEmpty()){
+        if(!multipleStoreId.isEmpty() && multipleStoreId.size() > 1){
             List<VoucherStore> voucherStores = voucherStoreRepository.findByVoucherId(voucherId);
             boolean flag = false;
             for(VoucherStore voucherStore: voucherStores){
@@ -550,6 +718,15 @@ public class StoreProductVoucherController {
             voucherSerialNumber.setCurrentStatus(VoucherCurrentStatus.USED);
             voucherSerialNumber.setIsUsed(true);
             voucherSerialNumber.setRedeemDate(new Date());
+            
+            Optional<Store> optStoreDetails = storeRepository.findById(ScannedStoreId);
+            Map<String, Object> store = new HashMap<>();
+            store.put("storeName", optStoreDetails.get().getName());
+            store.put("storePhone", optStoreDetails.get().getPhoneNumber());
+            Gson gson = new Gson();
+            String storeDetails = gson.toJson(store);
+            voucherSerialNumber.setStoreDetails(storeDetails);
+
             voucherSerialNumber.update(voucherSerialNumber);
             voucherSerialNumberRepository.save(voucherSerialNumber);
 
@@ -617,7 +794,7 @@ public class StoreProductVoucherController {
         voucherToSave.setMinimumSpend(1.0);
         voucherToSave.setAllowDoubleDiscount(true);
         voucherToSave.setRequireToClaim(false);
-        voucherToSave.setStatus(VoucherStatus.ACTIVE);
+        voucherToSave.setStatus(VoucherStatus.INACTIVE);
         voucherToSave.setVoucherType(VoucherType.STORE);
         voucherToSave.setDiscountType(VoucherDiscountType.TOTALSALES);
         voucherToSave.setGroupType(VoucherGroupType.CASH);
