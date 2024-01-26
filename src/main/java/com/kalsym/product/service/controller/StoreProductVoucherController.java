@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 
 //Importing Models
 
+import com.google.gson.GsonBuilder;
 import com.kalsym.product.service.ProductServiceApplication;
 import com.kalsym.product.service.enums.*;
 import com.kalsym.product.service.model.Customer;
@@ -658,7 +659,7 @@ public class StoreProductVoucherController {
         //TODO:
         // Check if the voucher is from multiple stores as store id passed
         // Check if the global voucher is from assigned store as store id passed
-        if(!multipleStoreId.isEmpty() && multipleStoreId.size() > 1){
+        if(multipleStoreId != null && !multipleStoreId.isEmpty() && multipleStoreId.size() > 1){
             List<VoucherStore> voucherStores = voucherStoreRepository.findByVoucherId(voucherId);
             boolean flag = false;
             for(VoucherStore voucherStore: voucherStores){
@@ -720,10 +721,13 @@ public class StoreProductVoucherController {
             voucherSerialNumber.setRedeemDate(new Date());
             
             Optional<Store> optStoreDetails = storeRepository.findById(ScannedStoreId);
-            Map<String, Object> store = new HashMap<>();
+            Map<String, String> store = new HashMap<>();
             store.put("storeName", optStoreDetails.get().getName());
             store.put("storePhone", optStoreDetails.get().getPhoneNumber());
-            Gson gson = new Gson();
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Scanned by store: " + optStoreDetails.get().getName());
+
+            // To avoid the conversion of the apostrophe
+            Gson gson = new GsonBuilder().disableHtmlEscaping().create();
             String storeDetails = gson.toJson(store);
             voucherSerialNumber.setStoreDetails(storeDetails);
 
