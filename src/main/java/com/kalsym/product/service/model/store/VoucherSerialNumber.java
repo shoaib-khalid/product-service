@@ -15,6 +15,7 @@ import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Objects;
 
 
 /**
@@ -58,16 +59,14 @@ public class VoucherSerialNumber implements Serializable {
 
     private String qrDetails;
 
-    public String storeDetails(String json, String value) {
+    private String redeemStoreId;
+
+    public static String retrieveStoreDetail(String json, String key) {
         JSONObject jsonObject = new JSONObject(json);
         String data = null;
-
-        if (value == "storeName") {
-            data = jsonObject.getString("storeName");
-        } else if (value == "storePhone") {
-            data = jsonObject.getString("storePhone");
+        if ("storeName".equals(key) || "storePhone".equals(key)) {
+            data = jsonObject.optString(key);
         }
-
         return data;
     }
 

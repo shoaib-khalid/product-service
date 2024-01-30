@@ -32,13 +32,14 @@ public class VoucherRedeemDTO implements Serializable {
     private String serialNumber;
     private String voucherRedeemCode;
     private String thumbnailUrl;
+    private String storeName;
 
     public VoucherRedeemDTO (String voucherId, String voucherName,
                              Double discountValue, String voucherCode,
                              String currencyLabel, Long serialNumberId,
                              VoucherCurrentStatus currentStatus,
                              String serialNumber, String voucherRedeemCode,
-                             Date redeemDate, String thumbnailUrl) {
+                             Date redeemDate, String thumbnailUrl, String storeName) {
 
         this.voucherId = voucherId;
         this.voucherName = voucherName;
@@ -51,6 +52,7 @@ public class VoucherRedeemDTO implements Serializable {
         this.voucherRedeemCode = voucherRedeemCode;
         this.redeemDate = redeemDate;
         this.thumbnailUrl = thumbnailUrl;
+        this.storeName = storeName;
     }
 
 }

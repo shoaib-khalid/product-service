@@ -208,8 +208,8 @@ public class StoreProductVoucherController {
                         String storeName = "";
                         String storePhone = "";
                         if(voucher.getStoreDetails() != null) {
-                            storeName = voucher.storeDetails(voucher.getStoreDetails(), "storeName");
-                            storePhone = voucher.storeDetails(voucher.getStoreDetails(), "storePhone");
+                            storeName = VoucherSerialNumber.retrieveStoreDetail(voucher.getStoreDetails(), "storeName");
+                            storePhone = VoucherSerialNumber.retrieveStoreDetail(voucher.getStoreDetails(), "storePhone");
                         } else {
                             storeName = "N/A";
                             storePhone = "N/A";
@@ -558,17 +558,18 @@ public class StoreProductVoucherController {
         Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION,
                 logprefix, "Store ID:" + storeId + " Status:" + status);
 
-
-        List<Object[]> voucher = voucherRepository.findByStoreIdAndCurrentStatus(storeId, status);
+        List<Object[]> vouchers  = voucherRepository.findByStoreIdAndCurrentStatus(storeId, status);
         List<VoucherRedeemDTO> voucherRedeemDTOs = new ArrayList<>();
 
-        for (Object[] result : voucher) {
+        for (Object[] result : vouchers) {
+            // Get store name
+            String storeName = VoucherSerialNumber.retrieveStoreDetail((String) result[11], "storeName");
             voucherRedeemDTOs.add(new VoucherRedeemDTO((String) result[0],
                     (String) result[1], (Double) result[2], (String) result[3],
                     (String) result[4],(Long) result[5],
                     (VoucherCurrentStatus) result[6],
                     (String) result[7], (String) result[8],
-                    (Date) result[9], (String) result[10]
+                    (Date) result[9], (String) result[10], storeName
             ));
         }
         // For successful validation
@@ -716,6 +717,7 @@ public class StoreProductVoucherController {
         if (phoneNumber.equals(voucherSerialNumber.getCustomer())
                 && voucherSerialNumber.getCurrentStatus().equals(VoucherCurrentStatus.BOUGHT)) {
             // Update the voucherRedeemCode
+            voucherSerialNumber.setRedeemStoreId(ScannedStoreId);
             voucherSerialNumber.setCurrentStatus(VoucherCurrentStatus.USED);
             voucherSerialNumber.setIsUsed(true);
             voucherSerialNumber.setRedeemDate(new Date());
