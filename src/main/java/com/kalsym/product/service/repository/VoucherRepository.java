@@ -4,6 +4,7 @@ import com.kalsym.product.service.enums.VoucherCurrentStatus;
 import com.kalsym.product.service.model.store.Voucher;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -34,7 +35,7 @@ public interface VoucherRepository extends PagingAndSortingRepository<Voucher, S
     );
 
 
-    Voucher findByVoucherCode(@Param("voucherCode") String voucherCode);
+    Optional<Voucher> findByVoucherCode(@Param("voucherCode") String voucherCode);
 
     @Transactional
     @Modifying

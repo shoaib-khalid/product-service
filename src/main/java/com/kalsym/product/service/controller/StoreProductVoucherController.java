@@ -631,8 +631,9 @@ public class StoreProductVoucherController {
 
         // Check if the voucherRedeemCode is valid
         if (voucherSerialNumber == null) {
-            response.setMessage("Invalid voucher code.");
             response.setStatus(HttpStatus.BAD_REQUEST);
+            response.setError("Invalid voucher code");
+            response.setMessage("Please try a different one.");
             return ResponseEntity.status(response.getStatus()).body(response);
         } else{
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION,
@@ -645,8 +646,9 @@ public class StoreProductVoucherController {
         if (!voucherOptional.isPresent()) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION,
                     logprefix, "NOT_FOUND voucher with ID: " + voucherId);
-            response.setError("Voucher not found");
             response.setStatus(HttpStatus.NOT_FOUND);
+            response.setError("Voucher not found");
+            response.setMessage("Please try a different one.");
             return ResponseEntity.status(response.getStatus()).body(response);
         }
 
@@ -657,16 +659,18 @@ public class StoreProductVoucherController {
         if (voucher.getStatus().equals(VoucherStatus.INACTIVE)) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION,
                     logprefix, "Voucher is in INACTIVE");
-            response.setMessage("The voucher is inactive, try different one.");
             response.setStatus(HttpStatus.BAD_REQUEST);
+            response.setError("Voucher is Inactive");
+            response.setMessage("Please try a different one.");
             return ResponseEntity.status(response.getStatus()).body(response);
         }
 
         if (storeId != null && !voucher.getIsGlobalStore() && !voucher.getStoreId().equals(storeId)) {
             // Voucher is not of this store
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Voucher is not of this store");
-            response.setMessage("The voucher is not from the same store, try a different one.");
             response.setStatus(HttpStatus.CONFLICT);
+            response.setError("Invalid voucher code");
+            response.setMessage("The voucher is not from the same store, try a different one.");
             return ResponseEntity.status(response.getStatus()).body(response);
         } else {
             ScannedStoreId = storeId;
@@ -689,8 +693,8 @@ public class StoreProductVoucherController {
             if(!flag){
                 Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION,
                         logprefix, "Voucher is not of any store from the body");
-                response.setMessage("The voucher is not from the any passed store, try different one.");
                 response.setStatus(HttpStatus.CONFLICT);
+                response.setMessage("The voucher is not from the any passed store, try different one.");
                 return ResponseEntity.status(response.getStatus()).body(response);
             }
 
@@ -701,16 +705,18 @@ public class StoreProductVoucherController {
         if (voucherSerialNumber.getCurrentStatus().equals(VoucherCurrentStatus.NEW)){
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION,
                     logprefix, "Voucher is in New Status");
-            response.setMessage("Voucher is in NEW status.");
             response.setStatus(HttpStatus.BAD_REQUEST);
+            response.setError("Voucher is Inactive");
+            response.setMessage("Please try a different one.");
             return ResponseEntity.status(response.getStatus()).body(response);
         }
 
         if (voucherSerialNumber.getCurrentStatus().equals(VoucherCurrentStatus.USED)) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION,
                     logprefix, "Voucher is Used already");
-            response.setMessage("The voucher have already been used, try different one.");
             response.setStatus(HttpStatus.IM_USED);
+            response.setError("Voucher is Used");
+            response.setMessage("The voucher has already been redeemed, try a different one.");
             return ResponseEntity.status(response.getStatus()).body(response);
         }
 
@@ -718,8 +724,9 @@ public class StoreProductVoucherController {
         if (new Date().after(voucherSerialNumber.getExpiryDate())) {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION,
                     logprefix, "Voucher is in expired");
-            response.setMessage("The voucher have expired, try different one.");
             response.setStatus(HttpStatus.BAD_REQUEST);
+            response.setError("Voucher is Expired");
+            response.setMessage("Please try a different one.");
             return ResponseEntity.status(response.getStatus()).body(response);
         }
 
@@ -748,8 +755,9 @@ public class StoreProductVoucherController {
             voucherSerialNumberRepository.save(voucherSerialNumber);
 
         } else {
-            response.setMessage("The voucher phone number is wrong, try a different one.");
             response.setStatus(HttpStatus.CONFLICT);
+            response.setError("Wrong phone number");
+            response.setMessage("Please try a different one.");
             return ResponseEntity.status(response.getStatus()).body(response);
         }
         // Increase total redeem
@@ -1245,6 +1253,28 @@ public class StoreProductVoucherController {
         response.setData(optionalProduct.get());
         response.setStatus(HttpStatus.OK);
         return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @GetMapping(path = {"/checkcode"})
+    public ResponseEntity<HttpResponse> checkVoucherCodeAvailability(HttpServletRequest request,
+                                                              @RequestParam String voucherCode
+    ) {
+        String logprefix = request.getRequestURI();
+        HttpResponse response = new HttpResponse(request.getRequestURI());
+
+        Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Check voucher code: " + voucherCode, "");
+
+        Optional<Voucher> voucher = voucherRepository.findByVoucherCode(voucherCode);
+
+        if (!voucher.isPresent()) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " Voucher Code: " + voucherCode+" IS available");
+            response.setStatus(HttpStatus.OK);
+        } else {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, " Voucher Code: " + voucherCode+" NOT available");
+            response.setStatus(HttpStatus.CONFLICT);
+        }
+        return ResponseEntity.status(response.getStatus()).body(response);
+
     }
 
 
