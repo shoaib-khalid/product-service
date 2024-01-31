@@ -1,11 +1,11 @@
 package com.kalsym.product.service.model.store;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.kalsym.product.service.enums.*;
 import java.io.Serializable;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,14 +14,8 @@ import org.hibernate.annotations.GenericGenerator;
 
 import java.util.Date;
 import java.util.List;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
-import com.fasterxml.jackson.annotation.JsonFormat;
 
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Temporal;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 
 /**
@@ -34,6 +28,7 @@ import javax.persistence.Temporal;
 @Entity
 @Table(name = "voucher")
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Voucher implements Serializable {
 
     @Id
@@ -97,22 +92,21 @@ public class Voucher implements Serializable {
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "voucherId", insertable = false, updatable = false, nullable = true)
+    @JsonIgnore
     private List<VoucherStore> voucherStoreList;
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "voucherId", insertable = false, updatable = false, nullable = true)
+    @JsonIgnore
     private List<VoucherServiceType> voucherServiceTypeList;
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "voucherId", insertable = false, updatable = false, nullable = true)
+    @JsonIgnore
     private List<VoucherSerialNumber> voucherSerialNumber;
 
-
-    // Implement the getter method for voucherServiceTypeList
-    public List<VoucherServiceType> getVoucherServiceTypeList() {
-        return voucherServiceTypeList;
-    }
-
+    @Transient
+    private Boolean isQrGenerated;
 
     public void update(Voucher bodyVoucher) {
         if (bodyVoucher == null) {

@@ -22,6 +22,7 @@ import com.kalsym.product.service.repository.*;
 import com.kalsym.product.service.utility.HttpResponse;
 import com.kalsym.product.service.utility.Logger;
 import com.kalsym.product.service.utility.ProductDiscount;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import io.swagger.annotations.ApiOperation;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -189,6 +190,9 @@ public class StoreProductVoucherController {
                             if (voucher.getCustomer().startsWith("601")) {
                                 row.createCell(3).setCellValue("N/A");
                                 row.createCell(4).setCellValue(voucher.getCustomer());
+                            } else if ("guest".equalsIgnoreCase(voucher.getCustomer())) {
+                                row.createCell(3).setCellValue(voucher.getCustomer());
+                                row.createCell(4).setCellValue("N/A");
                             } else {
                                 Optional<Customer> customer = customerRepository.findById(voucher.getCustomer());
                                 if (customer.isPresent()) {
@@ -205,14 +209,11 @@ public class StoreProductVoucherController {
                         }
                         row.createCell(5).setCellValue(redeemDate);
 
-                        String storeName = "";
-                        String storePhone = "";
-                        if(voucher.getStoreDetails() != null) {
+                        String storeName = "N/A";
+                        String storePhone = "N/A";
+                        if (voucher.getStoreDetails() != null) {
                             storeName = VoucherSerialNumber.retrieveStoreDetail(voucher.getStoreDetails(), "storeName");
                             storePhone = VoucherSerialNumber.retrieveStoreDetail(voucher.getStoreDetails(), "storePhone");
-                        } else {
-                            storeName = "N/A";
-                            storePhone = "N/A";
                         }
                         row.createCell(6).setCellValue(storeName);
                         row.createCell(7).setCellValue(storePhone);
@@ -425,6 +426,13 @@ public class StoreProductVoucherController {
 
             //set the product inventories data for sort price ascending
             productDetails.setProductInventories(sortProductInventories);
+
+            // Check if qr code already generated
+            Boolean isVoucherQrGenerated = productDetails.getVoucher().getVoucherSerialNumber() != null &&
+                    productDetails.getVoucher().getVoucherSerialNumber().stream()
+                            .allMatch(voucher -> voucher.getQrDetails() != null);
+
+            productDetails.getVoucher().setIsQrGenerated(isVoucherQrGenerated);
 
             productWithDetailsList[x]=productDetails;
         }
@@ -646,6 +654,14 @@ public class StoreProductVoucherController {
         Voucher voucher = voucherOptional.get();
         String ScannedStoreId = null;
 
+        if (voucher.getStatus().equals(VoucherStatus.INACTIVE)) {
+            Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION,
+                    logprefix, "Voucher is in INACTIVE");
+            response.setMessage("The voucher is inactive, try different one.");
+            response.setStatus(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(response.getStatus()).body(response);
+        }
+
         if (storeId != null && !voucher.getIsGlobalStore() && !voucher.getStoreId().equals(storeId)) {
             // Voucher is not of this store
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION, logprefix, "Voucher is not of this store");
@@ -653,7 +669,6 @@ public class StoreProductVoucherController {
             response.setStatus(HttpStatus.CONFLICT);
             return ResponseEntity.status(response.getStatus()).body(response);
         } else {
-            //ScannedStoreId = voucher.getStoreId();
             ScannedStoreId = storeId;
         }
 
@@ -704,14 +719,10 @@ public class StoreProductVoucherController {
             Logger.application.info(Logger.pattern, ProductServiceApplication.VERSION,
                     logprefix, "Voucher is in expired");
             response.setMessage("The voucher have expired, try different one.");
-            response.setStatus(HttpStatus.CONFLICT);
+            response.setStatus(HttpStatus.BAD_REQUEST);
             return ResponseEntity.status(response.getStatus()).body(response);
         }
 
-
-
-//        Voucher voucher = voucherOptional.get();
-//        voucher.setTotalRedeem(voucher.getTotalRedeem()+1);
 //        voucher.setTotalQuantity(voucher.getTotalQuantity()-1);
 
         if (phoneNumber.equals(voucherSerialNumber.getCustomer())
@@ -741,10 +752,9 @@ public class StoreProductVoucherController {
             response.setStatus(HttpStatus.CONFLICT);
             return ResponseEntity.status(response.getStatus()).body(response);
         }
-
-//
-//        voucher.update(voucher);
-//        voucherRepository.save(voucher);
+        // Increase total redeem
+        voucher.setTotalRedeem(voucher.getTotalRedeem()+1);
+        voucherRepository.save(voucher);
 
         response.setStatus(HttpStatus.OK);
         response.setMessage("Voucher was redeemed Successfully");
